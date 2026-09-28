@@ -55,9 +55,7 @@ describe('built-in presets', () => {
         generationSettings: {
           ...DEFAULT_GENERATION_SETTINGS,
           seed: 123456,
-          ...(preset.id === 'enterprise'
-            ? { maxSessionsPerSubjectPerDay: 1, maxLabSessionsPerSectionPerDay: 1 }
-            : {}),
+          ...(preset.generationSettings ?? {}),
         },
       };
 
