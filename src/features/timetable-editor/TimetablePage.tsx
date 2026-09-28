@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Badge, Button, Card, Select } from '@/components/ui/primitives';
+import { Badge, Button, Card, PageHeader, Select } from '@/components/ui/primitives';
 import { useEditorStore, popUndoCommand, popRedoCommand } from '@/state/stores/editor-store';
 import {
   selectCurrentFaculty,
@@ -58,17 +58,19 @@ export function TimetablePage() {
   const editService = useMemo(() => (config ? new TimetableEditService(config) : null), [config]);
 
   if (!department || !config || !editService) {
-    return <p className="text-sm text-slate-500">Select a department first.</p>;
+    return <p className="text-sm text-body-gray">Select a department first.</p>;
   }
 
   if (!timetable) {
     return (
-      <div className="space-y-4">
-        <h1 className="text-xl font-bold">Timetable — {department.code}</h1>
-        <p className="text-sm text-slate-500">No timetable generated yet.</p>
-        <Link className="text-blue-600 underline" to={`/departments/${departmentId}/generate`}>
-          Go to generation →
-        </Link>
+      <div className="space-y-6">
+        <PageHeader eyebrow="Weekly schedule" title={`Timetable — ${department.code}`} />
+        <Card>
+          <p className="text-sm text-body-gray">No timetable generated yet.</p>
+          <Link to={`/departments/${departmentId}/generate`}>
+            <Button size="sm" className="mt-3">Go to generation →</Button>
+          </Link>
+        </Card>
       </div>
     );
   }
@@ -302,40 +304,43 @@ export function TimetablePage() {
     conflictsForSection.find((c) => c.id === focusConflictId) ?? null;
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-xl font-bold">Timetable — {department.code}</h1>
-        <div className="flex items-center gap-2">
-          <Badge tone={isStale ? 'amber' : timetable.validationSummary?.isValid ? 'green' : 'red'}>
-            {isStale ? 'STALE' : timetable.status}
-          </Badge>
-          <Button variant="secondary" onClick={handleUndo} disabled={editor.undoStack.length === 0}>
-            Undo
-          </Button>
-          <Button variant="secondary" onClick={handleRedo} disabled={editor.redoStack.length === 0}>
-            Redo
-          </Button>
-          <Link className="text-sm text-blue-600 underline" to={`/departments/${departmentId}/generate`}>
-            Regenerate
-          </Link>
-          <Button variant="secondary" onClick={doExportPdf}>Export PDF</Button>
-          <Button variant="secondary" onClick={doExportExcel}>Export Excel</Button>
-        </div>
-      </div>
+    <div className="space-y-8">
+      <PageHeader
+        eyebrow="Weekly schedule"
+        title={`Timetable — ${department.code}`}
+        actions={
+          <>
+            <Badge tone={isStale ? 'amber' : timetable.validationSummary?.isValid ? 'green' : 'red'}>
+              {isStale ? 'STALE' : timetable.status}
+            </Badge>
+            <Button variant="secondary" size="sm" onClick={handleUndo} disabled={editor.undoStack.length === 0}>
+              Undo
+            </Button>
+            <Button variant="secondary" size="sm" onClick={handleRedo} disabled={editor.redoStack.length === 0}>
+              Redo
+            </Button>
+            <Button variant="secondary" size="sm" onClick={doExportPdf}>Export PDF</Button>
+            <Button variant="secondary" size="sm" onClick={doExportExcel}>Export Excel</Button>
+            <Link to={`/departments/${departmentId}/generate`}>
+              <Button size="sm">Regenerate</Button>
+            </Link>
+          </>
+        }
+      />
 
       {isStale && (
-        <div role="status" className="rounded border border-amber-300 bg-amber-50 p-3 text-sm text-amber-800">
+        <div role="status" className="rounded-card bg-warning-bg p-3 text-sm text-warning">
           The configuration has changed since this timetable was generated. Regenerate to reconcile.
         </div>
       )}
 
-      <div className="flex items-center gap-3">
-        <label className="text-sm font-medium">
-          Section:{' '}
+      <div className="flex flex-wrap items-center gap-3">
+        <label className="flex items-center gap-2 text-sm font-medium text-ink">
+          Section:
           <Select
             value={activeSectionId ?? ''}
             onChange={(e) => setSelectedSectionId(e.target.value)}
-            className="ml-1 w-48"
+            className="w-48"
             aria-label="Select section"
           >
             {sections.map((s) => (
@@ -344,11 +349,11 @@ export function TimetablePage() {
           </Select>
         </label>
         {editor.selectedEntryId && (
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-slate-500">
-              Selected entry — click a slot below to move, or use swap/clear:
+          <div className="flex flex-wrap items-center gap-2 rounded-full bg-info-bg px-3 py-1.5">
+            <span className="text-xs font-medium text-info">
+              Entry selected — click a slot to move, right-click to swap
             </span>
-            <Button variant="secondary" onClick={clearSelected}>Clear</Button>
+            <Button variant="secondary" size="sm" onClick={clearSelected}>Clear</Button>
             <Select
               className="w-44"
               aria-label="Change faculty for selected entry"
@@ -368,14 +373,14 @@ export function TimetablePage() {
       </div>
 
       <Card title={`${activeSection?.name ?? 'Section'} — weekly grid`}>
-        <div className="overflow-x-auto">
-          <table className="min-w-full border-collapse text-sm">
+        <div className="overflow-x-auto pb-1">
+          <table className="min-w-full border-separate border-spacing-1 text-sm">
             <thead>
               <tr>
-                <th className="border border-slate-200 bg-slate-50 p-2 text-xs"></th>
+                <th className="p-1"></th>
                 {Array.from({ length: department.periodsPerDay }, (_, i) => (
-                  <th key={i} className="border border-slate-200 bg-slate-50 p-2 text-xs font-semibold">
-                    Period {i + 1}
+                  <th key={i} className="p-1 text-[11px] font-semibold uppercase tracking-wide text-body-gray">
+                    P{i + 1}
                   </th>
                 ))}
               </tr>
@@ -383,43 +388,43 @@ export function TimetablePage() {
             <tbody>
               {cells.map((row, dayIndex) => (
                 <tr key={dayIndex}>
-                  <th className="border border-slate-200 bg-slate-50 p-2 text-xs font-semibold">
-                    {department.workingDays[dayIndex]}
+                  <th className="whitespace-nowrap rounded-lg bg-surface-2 px-2.5 text-[11px] font-semibold text-ink">
+                    {department.workingDays[dayIndex].slice(0, 3)}
                   </th>
                   {row.map((cell) => {
                     const occupied = cell.entryId !== null;
                     const isConflict = conflictCells.has(`${cell.dayIndex}:${cell.periodIndex}`);
                     const isSelected = cell.entryId !== null && cell.entryId === editor.selectedEntryId;
                     const bg = !occupied
-                      ? 'bg-white hover:bg-slate-50'
+                      ? 'bg-surface-1 hover:bg-surface-2'
                       : isConflict
-                        ? 'bg-red-100 border-red-400'
+                        ? 'bg-danger-bg'
                         : cell.type === 'LAB'
-                          ? 'bg-indigo-100'
-                          : 'bg-blue-50';
+                          ? 'bg-[#e7e0fd]'
+                          : 'bg-[#dce4fd]';
                     return (
                       <td
                         key={cell.periodIndex}
-                        className={`border p-1 align-top ${bg} ${isSelected ? 'ring-2 ring-blue-600' : ''} ${cell.isContinuation ? 'text-[10px] italic text-slate-500' : ''}`}
-                        colSpan={cell.isStart && cell.type === 'LAB' && cells[dayIndex][cell.periodIndex + 1]?.entryId === cell.entryId ? 1 : 1}
+                        className={`rounded-lg p-1 align-top transition-shadow duration-150 ${bg} ${isSelected ? 'ring-2 ring-metric-blue' : ''}`}
+                        title={occupied && cell.isStart ? `${cell.subjectName} — ${cell.facultyName}` : undefined}
                       >
                         {occupied && cell.isStart ? (
                           <button
                             type="button"
-                            className="w-full text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-600"
+                            className="w-full cursor-pointer rounded-md p-1.5 text-left focus-visible:outline-2 focus-visible:outline-metric-blue"
                             onClick={() => onCellClick(cell)}
                             aria-label={`${cell.subjectCode} ${cell.facultyName} day ${cell.dayIndex + 1} period ${cell.periodIndex + 1}`}
                           >
-                            <span className="block text-xs font-semibold">{cell.subjectCode}</span>
-                            <span className="block text-[10px] text-slate-600">{cell.facultyName}</span>
-                            {cell.type === 'LAB' && <span className="block text-[10px] font-medium text-indigo-700">LAB (2p)</span>}
+                            <span className="block text-xs font-semibold text-ink">{cell.subjectCode}</span>
+                            <span className="block truncate text-[10px] text-body-gray">{cell.facultyName}</span>
+                            {cell.type === 'LAB' && <span className="block text-[10px] font-medium text-[#5b3fb8]">LAB (2p)</span>}
                           </button>
                         ) : occupied && cell.isContinuation ? (
-                          <span className="text-[10px] text-slate-400">↳ {cell.subjectCode}</span>
+                          <span className="block p-1.5 text-[10px] text-body-gray">↳ {cell.subjectCode}</span>
                         ) : (
                           <button
                             type="button"
-                            className="h-10 w-full text-left text-[10px] text-slate-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-600 hover:text-slate-500"
+                            className={`h-12 w-full cursor-pointer rounded-md text-left text-[10px] text-body-gray/50 transition-colors duration-150 hover:text-body-gray focus-visible:outline-2 focus-visible:outline-metric-blue ${editor.selectedEntryId ? 'p-1.5' : ''}`}
                             onClick={() => {
                               if (editor.selectedEntryId) moveSelectedTo(cell.dayIndex, cell.periodIndex);
                             }}
@@ -440,33 +445,36 @@ export function TimetablePage() {
             </tbody>
           </table>
         </div>
-        <p className="mt-2 text-xs text-slate-400">
+        <p className="mt-3 text-xs text-body-gray">
           Click an entry to select it. With a selection: click an empty slot to move, right-click to swap. Labs move as one 2-period block.
         </p>
       </Card>
 
       <Card title="Validation panel">
         {conflictsForSection.length === 0 ? (
-          <div className="text-sm text-green-700">
-            <p className="font-medium">Valid timetable</p>
-            <p className="text-xs">0 hard conflicts, 0 missing sessions, 0 duplicate sessions.</p>
+          <div className="flex items-center gap-2.5 rounded-xl bg-success-bg p-3">
+            <span className="h-2 w-2 rounded-full bg-success" aria-hidden="true" />
+            <div className="text-sm">
+              <p className="font-medium text-success">Valid timetable</p>
+              <p className="text-xs text-body-gray">0 hard conflicts, 0 missing sessions, 0 duplicate sessions.</p>
+            </div>
           </div>
         ) : (
           <ul className="space-y-2">
             {conflictsForSection.map((c) => (
-              <li key={c.id} className={`rounded border p-2 text-xs ${c.severity === 'ERROR' ? 'border-red-200 bg-red-50' : 'border-amber-200 bg-amber-50'}`}>
+              <li key={c.id} className={`rounded-xl p-3 text-xs ${c.severity === 'ERROR' ? 'bg-danger-bg text-danger' : 'bg-warning-bg text-warning'}`}>
                 <div className="flex items-center justify-between">
-                  <strong className={c.severity === 'ERROR' ? 'text-red-800' : 'text-amber-800'}>{c.type}</strong>
-                  <Button variant="secondary" onClick={() => setFocusConflictId(c.id)}>
+                  <strong>{c.type}</strong>
+                  <Button variant="ghost" size="sm" onClick={() => setFocusConflictId(c.id)}>
                     Inspect
                   </Button>
                 </div>
-                <p className="mt-1 text-slate-600">
+                <p className="mt-1 text-body-gray">
                   {c.dayIndex !== null ? `${department.workingDays[c.dayIndex]} ` : ''}
                   {c.periodIndex !== null ? `period ${c.periodIndex + 1}` : ''}
                 </p>
                 {c.resolutionHints.length > 0 && (
-                  <ul className="mt-1 list-disc pl-4 text-slate-500">
+                  <ul className="mt-1 list-disc pl-4 text-body-gray">
                     {c.resolutionHints.map((h, i) => <li key={i}>{h}</li>)}
                   </ul>
                 )}
@@ -475,7 +483,7 @@ export function TimetablePage() {
           </ul>
         )}
         {selectedConflict && (
-          <div className="mt-3 rounded border border-slate-300 bg-slate-50 p-3 text-xs">
+          <div className="mt-3 rounded-xl bg-surface-1 p-3 text-xs text-ink">
             <strong>{selectedConflict.type}</strong>
             <p className="mt-1">Entries: {selectedConflict.entryIds.join(', ') || '—'}</p>
             <p>Faculty: {selectedConflict.facultyIds.map((id) => facultyById.get(id)?.name ?? id).join(', ') || '—'}</p>

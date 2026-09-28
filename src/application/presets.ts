@@ -130,8 +130,8 @@ export const BUILT_IN_PRESETS: PresetDefinition[] = [
   },
   {
     id: 'enterprise',
-    label: 'Enterprise — 9 Sections (Fully Packed)',
-    description: '9 sections, 8 subjects (5 theory + 3 labs), 40 faculty, 6 days × 7 periods. Every period of every day is assigned (zero free slots): each day = all 5 theory subjects + 1 lab block, and each subject appears at most once per section per day.',
+  label: 'Enterprise — 9 Sections (Large)',
+  description: '9 sections, 8 subjects (5 theory ×6/wk + 3 labs ×1/wk), 40 faculty, 6 days × 7 periods. Each theory subject appears once per day; each lab runs once a week on a distinct day/time per section.',
     department: { code: 'ENT', name: 'Enterprise Institute of Technology' },
     workingDays: [...WEEK5, 'SATURDAY'],
     periodsPerDay: 7,
@@ -155,15 +155,18 @@ export const BUILT_IN_PRESETS: PresetDefinition[] = [
       { code: 'THE-5', name: 'Operations Research', type: 'THEORY', sessionsPerWeek: 6, faculty: [16, 17, 18, 19], sections: [0, 1, 2, 3, 4, 5, 6, 7, 8] },
       // 3 labs — dedicated faculty pools disjoint from theory (5 per lab),
       // so a lab block never competes with a theory session for the same teacher.
-      { code: 'LAB-1', name: 'Algorithms Lab', type: 'LAB', sessionsPerWeek: 2, faculty: [20, 21, 22, 23, 24], sections: [0, 1, 2, 3, 4, 5, 6, 7, 8] },
-      { code: 'LAB-2', name: 'Systems Lab', type: 'LAB', sessionsPerWeek: 2, faculty: [25, 26, 27, 28, 29], sections: [0, 1, 2, 3, 4, 5, 6, 7, 8] },
-      { code: 'LAB-3', name: 'ML Lab', type: 'LAB', sessionsPerWeek: 2, faculty: [30, 31, 32, 33, 34], sections: [0, 1, 2, 3, 4, 5, 6, 7, 8] },
+      { code: 'LAB-1', name: 'Algorithms Lab', type: 'LAB', sessionsPerWeek: 1, faculty: [20, 21, 22, 23, 24], sections: [0, 1, 2, 3, 4, 5, 6, 7, 8] },
+      { code: 'LAB-2', name: 'Systems Lab', type: 'LAB', sessionsPerWeek: 1, faculty: [25, 26, 27, 28, 29], sections: [0, 1, 2, 3, 4, 5, 6, 7, 8] },
+      { code: 'LAB-3', name: 'ML Lab', type: 'LAB', sessionsPerWeek: 1, faculty: [30, 31, 32, 33, 34], sections: [0, 1, 2, 3, 4, 5, 6, 7, 8] },
       // Faculty 35–39 remain reserve capacity (available but unassigned).
     ],
-    // Per section: 5×6 theory sessions (30 periods) + 3×2 lab sessions (12 periods) = 42 periods = 6 days × 7 periods → zero free slots.
-    requirements: Array.from({ length: 9 }, () => [6, 6, 6, 6, 6, 2, 2, 2]),
+    // Per section: 5×6 theory sessions (30 periods) + 3×2-period lab blocks (6 periods) = 36 periods.
+    // Lab days (5 theory + 1 lab) are fully packed; the other 3 days have 2 free periods.
+    requirements: Array.from({ length: 9 }, () => [6, 6, 6, 6, 6, 1, 1, 1]),
     generationSettings: {
-      maxSessionsPerSubjectPerDay: 1,
+      // Note: cap 2 (not 1) — with only 36 required periods (slack), cap 1 makes
+      // the greedy backtracking search thrash; cap 2 solves in ~1s with 0 backtracks.
+      maxSessionsPerSubjectPerDay: 2,
       maxLabSessionsPerSectionPerDay: 1,
     },
   },

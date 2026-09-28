@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Badge, Button, Card, Field, Input } from '@/components/ui/primitives';
+import { Badge, Button, Card, Field, Input, PageHeader } from '@/components/ui/primitives';
 import { useEditorStore } from '@/state/stores/editor-store';
 import { useGenerationStore } from '@/state/stores/generation-store';
 import {
@@ -11,8 +11,7 @@ import {
   useWorkspaceStore,
 } from '@/state/stores/workspace-store';
 import { GenerationService } from '@/application/generation-service';
-import { MainThreadSchedulerRunner as _Runner, ManualCancellationToken } from '@/scheduler-runtime/scheduler-runner';
-void _Runner;
+import { ManualCancellationToken } from '@/scheduler-runtime/scheduler-runner';
 import { buildConfigurationSnapshot } from '@/domain/configuration/normalize';
 import { DEFAULT_GENERATION_SETTINGS, DEFAULT_HARD_CONSTRAINTS, DEFAULT_SOFT_WEIGHTS } from '@/domain/policies';
 import type { TimetableConfiguration } from '@/domain/models';
@@ -42,6 +41,16 @@ export function GeneratePage() {
       ? String(overrides.maxLabSessionsPerSectionPerDay)
       : '',
   );
+  const [durationBudgetInput, setDurationBudgetInput] = useState(
+    overrides?.maxSearchDurationMs !== undefined && overrides?.maxSearchDurationMs !== null
+      ? String(overrides.maxSearchDurationMs)
+      : '',
+  );
+  const [nodeBudgetInput, setNodeBudgetInput] = useState(
+    overrides?.maxExploredNodes !== undefined && overrides?.maxExploredNodes !== null
+      ? String(overrides.maxExploredNodes)
+      : '',
+  );
 
   const department = state.departments.find((d) => d.id === departmentId);
   const config: TimetableConfiguration | null = useMemo(() => {
@@ -58,16 +67,21 @@ export function GeneratePage() {
       faculty,
       hardConstraints: DEFAULT_HARD_CONSTRAINTS,
       softWeights: DEFAULT_SOFT_WEIGHTS,
-      generationSettings: {
-        ...DEFAULT_GENERATION_SETTINGS,
-        seed: seedInput.trim() ? Number(seedInput) : null,
-        ...(state.generationSettingsOverrides[department.id] ?? {}),
-      },
+      generationSettings: (() => {
+        const o = state.generationSettingsOverrides[department.id] ?? {};
+        return {
+          ...DEFAULT_GENERATION_SETTINGS,
+          ...o,
+          seed: seedInput.trim() ? Number(seedInput) : null,
+          maxSearchDurationMs: o.maxSearchDurationMs ?? DEFAULT_GENERATION_SETTINGS.maxSearchDurationMs,
+          maxExploredNodes: o.maxExploredNodes ?? DEFAULT_GENERATION_SETTINGS.maxExploredNodes,
+        };
+      })(),
     };
   }, [department, sections, subjects, faculty, seedInput, state.generationSettingsOverrides]);
 
   if (!department || !config) {
-    return <p className="text-sm text-slate-500">Select a department first.</p>;
+    return <p className="text-sm text-body-gray">Select a department first.</p>;
   }
 
   const totalSessions = sections.reduce(
@@ -152,28 +166,30 @@ export function GeneratePage() {
   };
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-xl font-bold">Generate timetable — {department.code}</h1>
+    <div className="space-y-8">
+      <PageHeader eyebrow="Scheduling engine" title={`Generate timetable — ${department.code}`} />
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid items-start gap-4 lg:grid-cols-2">
         <Card title="Pre-generation summary">
-          <dl className="grid grid-cols-2 gap-2 text-sm">
-            <dt className="text-slate-500">Sections</dt><dd>{sections.length}</dd>
-            <dt className="text-slate-500">Working days</dt><dd>{department.workingDays.length}</dd>
-            <dt className="text-slate-500">Periods per day</dt><dd>{department.periodsPerDay}</dd>
-            <dt className="text-slate-500">Total required periods</dt><dd>{totalSessions}</dd>
-            <dt className="text-slate-500">Lab subjects</dt><dd>{totalLabBlocks}</dd>
-            <dt className="text-slate-500">Faculty</dt><dd>{faculty.length}</dd>
-            <dt className="text-slate-500">Feasibility</dt>
-            <dd>
+          <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+            <dt className="text-body-gray">Sections</dt><dd className="text-right font-medium text-ink">{sections.length}</dd>
+            <dt className="text-body-gray">Working days</dt><dd className="text-right font-medium text-ink">{department.workingDays.length}</dd>
+            <dt className="text-body-gray">Periods per day</dt><dd className="text-right font-medium text-ink">{department.periodsPerDay}</dd>
+            <dt className="text-body-gray">Required periods</dt><dd className="text-right font-medium text-ink">{totalSessions}</dd>
+            <dt className="text-body-gray">Lab subjects</dt><dd className="text-right font-medium text-ink">{totalLabBlocks}</dd>
+            <dt className="text-body-gray">Faculty</dt><dd className="text-right font-medium text-ink">{faculty.length}</dd>
+            <dt className="text-body-gray">Feasibility</dt>
+            <dd className="text-right">
               <Badge tone={preflight.verdict === 'READY' ? 'green' : 'red'}>{preflight.verdict}</Badge>
             </dd>
           </dl>
 
           {faculty.length > 0 && (
-            <div className="mt-4">
-              <h4 className="mb-1 text-xs font-semibold text-slate-600">Faculty workload (required periods / week)</h4>
-              <ul className="space-y-1 text-xs">
+            <details className="mt-4 rounded-xl bg-surface-1 p-3">
+              <summary className="cursor-pointer text-xs font-semibold text-ink">
+                Faculty workload ({faculty.filter((f) => f.active).length} active)
+              </summary>
+              <ul className="mt-2 max-h-48 space-y-1 overflow-y-auto text-xs">
                 {faculty
                   .filter((f) => f.active)
                   .map((f) => {
@@ -182,22 +198,23 @@ export function GeneratePage() {
                     const capacity = report?.weeklyCapacity ?? department.workingDays.length * department.periodsPerDay;
                     const over = required > capacity;
                     return (
-                      <li key={f.id} className="flex items-center justify-between rounded border border-slate-200 px-2 py-1">
-                        <span>{f.name}</span>
-                        <span className={over ? 'font-semibold text-red-600' : 'text-slate-600'}>
-                          {required} / {capacity}{over ? ' — over capacity' : ''}
+                      <li key={f.id} className="flex items-center justify-between gap-2 rounded-lg bg-white px-2 py-1">
+                        <span className="truncate text-ink">{f.name}</span>
+                        <span className={`shrink-0 tabular-nums ${over ? 'font-semibold text-danger' : 'text-body-gray'}`}>
+                          {required} / {capacity}{over ? ' ⚠' : ''}
                         </span>
                       </li>
                     );
                   })}
               </ul>
-            </div>
+            </details>
           )}
-          <div className="mt-3 grid gap-3 sm:grid-cols-3">
-            <Field label="Seed (optional)" hint="Same input + same seed = same schedule.">
+
+          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            <Field label="Seed" hint="Optional — same input + same seed = same schedule.">
               <Input value={seedInput} onChange={(e) => setSeedInput(e.target.value)} placeholder="e.g. 123456" aria-label="Generation seed" />
             </Field>
-            <Field label="Max sessions/subject/day" hint="Empty = no cap">
+            <Field label="Max sessions / subject / day" hint="Empty = no cap">
               <Input
                 type="number"
                 min={1}
@@ -212,7 +229,7 @@ export function GeneratePage() {
                 }}
               />
             </Field>
-            <Field label="Max labs/section/day" hint="Empty = no cap">
+            <Field label="Max labs / section / day" hint="Empty = no cap">
               <Input
                 type="number"
                 min={1}
@@ -227,10 +244,45 @@ export function GeneratePage() {
                 }}
               />
             </Field>
+            <Field label="Time budget (ms)" hint={`Default ${DEFAULT_GENERATION_SETTINGS.maxSearchDurationMs.toLocaleString()}.`}>
+              <Input
+                type="number"
+                min={1000}
+                step={1000}
+                value={durationBudgetInput}
+                placeholder="default"
+                aria-label="Search time budget in milliseconds"
+                onChange={(e) => {
+                  setDurationBudgetInput(e.target.value);
+                  state.setGenerationSettingsOverrides(department.id, {
+                    maxSearchDurationMs: e.target.value.trim() ? Number(e.target.value) : null,
+                  });
+                }}
+              />
+            </Field>
+            <div className="sm:col-span-2">
+              <Field label="Node budget" hint={`Default ${DEFAULT_GENERATION_SETTINGS.maxExploredNodes.toLocaleString()}.`}>
+              <Input
+                type="number"
+                min={1000}
+                step={100000}
+                value={nodeBudgetInput}
+                placeholder="default"
+                aria-label="Search node budget"
+                onChange={(e) => {
+                  setNodeBudgetInput(e.target.value);
+                  state.setGenerationSettingsOverrides(department.id, {
+                    maxExploredNodes: e.target.value.trim() ? Number(e.target.value) : null,
+                  });
+                }}
+              />
+              </Field>
+            </div>
           </div>
-          <div className="mt-4 flex gap-2">
-            <Button onClick={start} disabled={running || preflight.verdict !== 'READY'}>
-              {existingTimetable ? 'Regenerate timetable' : 'Generate timetable'}
+
+          <div className="mt-5 flex gap-2">
+            <Button onClick={start} disabled={running || preflight.verdict !== 'READY'} aria-busy={running}>
+              {running ? 'Generating…' : existingTimetable ? 'Regenerate timetable' : 'Generate timetable'}
             </Button>
             {running && (
               <Button
@@ -246,42 +298,50 @@ export function GeneratePage() {
         </Card>
 
         <Card title="Generation state">
-          {!running && gen.status === 'IDLE' && <p className="text-sm text-slate-500">Not running.</p>}
+          {!running && gen.status === 'IDLE' && <p className="text-sm text-body-gray">Not running.</p>}
           {running && (
-            <div aria-live="polite">
-              <p className="text-sm font-medium">{gen.stage ?? 'Starting…'}</p>
-              <p className="mt-1 text-xs text-slate-500">
-                Elapsed: {gen.startedAt ? Math.round((Date.now() - gen.startedAt) / 100) / 10 : 0}s
-              </p>
+            <div aria-live="polite" className="flex items-center gap-3">
+              <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-metric-blue" aria-hidden="true" />
+              <div>
+                <p className="text-sm font-medium text-ink">{gen.stage ?? 'Starting…'}</p>
+                <p className="mt-0.5 text-xs text-body-gray">
+                  Elapsed: {gen.startedAt ? Math.round((Date.now() - gen.startedAt) / 100) / 10 : 0}s
+                </p>
+              </div>
             </div>
           )}
           {gen.status === 'COMPLETED' && gen.metrics && (
             <div className="text-sm">
-              <p className="font-medium text-green-700">Generation completed.</p>
-              <ul className="mt-2 space-y-1 text-xs text-slate-600">
-                <li>Duration: {gen.metrics.durationMs} ms</li>
-                <li>Explored nodes: {gen.metrics.exploredNodes}</li>
-                <li>Backtracks: {gen.metrics.backtrackCount}</li>
-                <li>Sessions scheduled: {gen.metrics.sessionsScheduled}</li>
-                <li>Final score: {gen.metrics.finalScore}</li>
-              </ul>
-              <Link className="mt-3 inline-block text-blue-600 underline" to={`/departments/${departmentId}/timetable`}>
-                Open timetable →
+              <p className="font-medium text-success">Generation completed.</p>
+              <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
+                <dt className="text-body-gray">Duration</dt><dd className="text-right tabular-nums text-ink">{gen.metrics.durationMs} ms</dd>
+                <dt className="text-body-gray">Explored nodes</dt><dd className="text-right tabular-nums text-ink">{gen.metrics.exploredNodes.toLocaleString()}</dd>
+                <dt className="text-body-gray">Backtracks</dt><dd className="text-right tabular-nums text-ink">{gen.metrics.backtrackCount.toLocaleString()}</dd>
+                <dt className="text-body-gray">Sessions scheduled</dt><dd className="text-right tabular-nums text-ink">{gen.metrics.sessionsScheduled}</dd>
+                <dt className="text-body-gray">Final score</dt><dd className="text-right tabular-nums text-ink">{gen.metrics.finalScore}</dd>
+              </dl>
+              <Link to={`/departments/${departmentId}/timetable`}>
+                <Button variant="secondary" size="sm" className="mt-4">Open timetable →</Button>
               </Link>
             </div>
           )}
           {(gen.status === 'IMPOSSIBLE' || gen.status === 'FAILED' || gen.status === 'TIMEOUT') && (
             <div role="alert" className="text-sm">
-              <p className="font-medium text-red-700">
+              <p className="font-medium text-danger">
                 {gen.status === 'TIMEOUT' ? 'Search budget exhausted.' : 'Generation could not complete.'}
               </p>
+              {gen.status === 'TIMEOUT' && (
+                <p className="mt-1 text-xs text-body-gray">
+                  Tip: raise the time or node budget below the summary, then try again.
+                </p>
+              )}
               {gen.diagnostics.length > 0 && (
-                <ul className="mt-2 space-y-2">
+                <ul className="mt-3 space-y-2">
                   {gen.diagnostics.map((d, i) => (
-                    <li key={i} className="rounded border border-red-200 bg-red-50 p-2 text-xs">
+                    <li key={i} className="rounded-xl bg-danger-bg p-3 text-xs text-danger">
                       <strong>{d.code}</strong>: {d.message}
                       {d.suggestions.length > 0 && (
-                        <ul className="mt-1 list-disc pl-4 text-slate-600">
+                        <ul className="mt-1.5 list-disc pl-4 text-body-gray">
                           {d.suggestions.map((s, j) => <li key={j}>{s}</li>)}
                         </ul>
                       )}
@@ -291,7 +351,7 @@ export function GeneratePage() {
               )}
             </div>
           )}
-          {gen.status === 'CANCELLED' && <p className="text-sm text-amber-700">Generation cancelled.</p>}
+          {gen.status === 'CANCELLED' && <p className="text-sm text-warning">Generation cancelled.</p>}
         </Card>
       </div>
     </div>

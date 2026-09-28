@@ -1,6 +1,6 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useMemo, useState } from 'react';
-import { Badge, Button, Card, Field, Input } from '@/components/ui/primitives';
+import { Badge, Button, Card, Field, Input, PageHeader, StatTile } from '@/components/ui/primitives';
 import {
   selectActiveDepartment,
   useWorkspaceStore,
@@ -63,19 +63,32 @@ export function DashboardPage() {
     [state.departments, state.sections, state.subjects, state.faculty, state.timetables],
   );
 
+  const totals = useMemo(
+    () => ({
+      departments: state.departments.length,
+      sections: state.sections.length,
+      subjects: state.subjects.length,
+      faculty: state.faculty.length,
+    }),
+    [state.departments, state.sections, state.subjects, state.faculty],
+  );
+
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold">Dashboard</h1>
-        <Button onClick={() => setShowCreate((v) => !v)}>
-          {showCreate ? 'Cancel' : 'Create department'}
-        </Button>
-      </div>
+    <div className="space-y-8">
+      <PageHeader
+        eyebrow="Workspace overview"
+        title="Dashboard"
+        actions={
+          <Button onClick={() => setShowCreate((v) => !v)}>
+            {showCreate ? 'Cancel' : 'Create department'}
+          </Button>
+        }
+      />
 
       {showCreate && (
         <Card title="New department">
           <form
-            className="grid gap-3 sm:grid-cols-2"
+            className="grid gap-4 sm:grid-cols-2"
             onSubmit={(e) => {
               e.preventDefault();
               if (!code.trim() || !name.trim()) return;
@@ -95,11 +108,12 @@ export function DashboardPage() {
               <Input type="number" min={1} max={12} value={periods} onChange={(e) => setPeriods(Number(e.target.value))} aria-label="Periods per day" />
             </Field>
             <Field label="Working days">
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2 pt-1">
                 {WORKING_DAYS.map((day) => (
-                  <label key={day} className="flex items-center gap-1 text-xs">
+                  <label key={day} className="flex cursor-pointer items-center gap-1.5 rounded-full bg-surface-2 px-3 py-1.5 text-xs font-medium text-ink transition-colors duration-150 hover:bg-surface-3">
                     <input
                       type="checkbox"
+                      className="accent-metric-blue"
                       checked={days.includes(day)}
                       onChange={(e) =>
                         setDays((prev) => (e.target.checked ? [...prev, day] : prev.filter((x) => x !== day)))
@@ -117,50 +131,87 @@ export function DashboardPage() {
         </Card>
       )}
 
+      {totals.departments > 0 && (
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <StatTile label="Departments" value={totals.departments} accent="blue" />
+          <StatTile label="Sections" value={totals.sections} accent="lilac" />
+          <StatTile label="Subjects" value={totals.subjects} accent="green" />
+          <StatTile label="Faculty" value={totals.faculty} accent="coral" />
+        </div>
+      )}
+
       {cards.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500">
-          No departments yet. Create one from scratch or start from a preset below.
+        <div className="rounded-card bg-white p-10 text-center shadow-panel">
+          <p className="text-sm font-medium text-ink">No departments yet</p>
+          <p className="mx-auto mt-1 max-w-sm text-sm text-body-gray">
+            Create one from scratch, or start from a preset below — presets wire up sections, subjects, faculty and requirements in one click.
+          </p>
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {cards.map(({ department, sections, subjects, faculty, timetable, status }) => (
-            <Card key={department.id} title={`${department.code} — ${department.name}`}>
-              <div className="mb-3 flex items-center gap-2">
+          {cards.map(({ department, sections, subjects, faculty, status }) => (
+            <Card key={department.id}>
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <p className="text-sm font-semibold text-ink">{department.name}</p>
+                  <p className="text-xs text-body-gray">{department.code}</p>
+                </div>
                 <Badge tone={statusTone[status]}>{status}</Badge>
-                {timetable?.status === 'STALE' ? <Badge tone="amber">STALE</Badge> : null}
               </div>
-              <dl className="mb-4 grid grid-cols-3 gap-2 text-center text-xs">
-                <div><dt className="text-slate-500">Sections</dt><dd className="font-semibold">{sections}</dd></div>
-                <div><dt className="text-slate-500">Subjects</dt><dd className="font-semibold">{subjects}</dd></div>
-                <div><dt className="text-slate-500">Faculty</dt><dd className="font-semibold">{faculty}</dd></div>
+              <dl className="mt-4 grid grid-cols-3 gap-2 rounded-xl bg-surface-1 px-3 py-2.5 text-center">
+                <div>
+                  <dt className="text-[11px] text-body-gray">Sections</dt>
+                  <dd className="text-sm font-semibold text-ink">{sections}</dd>
+                </div>
+                <div>
+                  <dt className="text-[11px] text-body-gray">Subjects</dt>
+                  <dd className="text-sm font-semibold text-ink">{subjects}</dd>
+                </div>
+                <div>
+                  <dt className="text-[11px] text-body-gray">Faculty</dt>
+                  <dd className="text-sm font-semibold text-ink">{faculty}</dd>
+                </div>
               </dl>
-              <div className="flex flex-wrap gap-2">
+              <div className="mt-4 grid grid-cols-2 gap-2">
                 <Button
                   variant="secondary"
+                  size="sm"
                   onClick={() => {
                     state.setActiveDepartment(department.id);
-                    window.location.hash = '';
+                    navigate(`/departments/${department.id}/configuration`);
                   }}
                 >
-                  <Link to={`/departments/${department.id}/configuration`}>Configure</Link>
+                  Configure
                 </Button>
                 <Button
                   variant="secondary"
-                  onClick={() => state.setActiveDepartment(department.id)}
+                  size="sm"
+                  onClick={() => {
+                    state.setActiveDepartment(department.id);
+                    navigate(`/departments/${department.id}/subjects`);
+                  }}
                 >
-                  <Link to={`/departments/${department.id}/subjects`}>Subjects</Link>
+                  Subjects
                 </Button>
                 <Button
                   variant="secondary"
-                  onClick={() => state.setActiveDepartment(department.id)}
+                  size="sm"
+                  onClick={() => {
+                    state.setActiveDepartment(department.id);
+                    navigate(`/departments/${department.id}/generate`);
+                  }}
                 >
-                  <Link to={`/departments/${department.id}/generate`}>Generate</Link>
+                  Generate
                 </Button>
                 <Button
                   variant="secondary"
-                  onClick={() => state.setActiveDepartment(department.id)}
+                  size="sm"
+                  onClick={() => {
+                    state.setActiveDepartment(department.id);
+                    navigate(`/departments/${department.id}/timetable`);
+                  }}
                 >
-                  <Link to={`/departments/${department.id}/timetable`}>Timetable</Link>
+                  Timetable
                 </Button>
               </div>
             </Card>
@@ -168,17 +219,20 @@ export function DashboardPage() {
         </div>
       )}
       {activeDepartment ? (
-        <p className="text-xs text-slate-500">Active department: {activeDepartment.code}</p>
+        <p className="text-xs text-body-gray">Active department: {activeDepartment.code}</p>
       ) : null}
 
-      <Card title="Built-in presets" actions={<span className="text-xs text-slate-400">One click sets up department, sections, subjects, faculty & assignments</span>}>
+      <Card
+        title="Built-in presets"
+        actions={<span className="text-xs text-body-gray">One click sets up everything</span>}
+      >
         <div className="grid gap-3 sm:grid-cols-2">
           {BUILT_IN_PRESETS.map((preset) => (
-            <div key={preset.id} className="rounded border border-slate-200 p-3">
-              <div className="flex items-center justify-between gap-2">
-                <h3 className="text-sm font-semibold">{preset.label}</h3>
+            <div key={preset.id} className="flex flex-col rounded-xl bg-surface-1 p-4">
+              <div className="flex items-start justify-between gap-2">
+                <h3 className="text-sm font-semibold text-ink">{preset.label}</h3>
                 <Button
-                  variant="secondary"
+                  size="sm"
                   onClick={() => {
                     const deptId = applyPreset(preset, useWorkspaceStore.getState());
                     flushPersistence();
@@ -189,8 +243,8 @@ export function DashboardPage() {
                   Apply
                 </Button>
               </div>
-              <p className="mt-1 text-xs text-slate-500">{preset.description}</p>
-              <p className="mt-2 text-[11px] text-slate-400">
+              <p className="mt-1.5 text-xs leading-relaxed text-body-gray">{preset.description}</p>
+              <p className="mt-3 text-[11px] text-body-gray/80">
                 {preset.sections.length} section(s) · {preset.subjects.length} subjects · {preset.faculty.length} faculty · {preset.workingDays.length} days × {preset.periodsPerDay} periods
               </p>
             </div>
