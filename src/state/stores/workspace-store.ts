@@ -13,6 +13,10 @@ import type { WorkingDay } from '@/domain/enums';
 export interface GenerationSettingsOverrides {
   maxSessionsPerSubjectPerDay: number | null;
   maxLabSessionsPerSectionPerDay: number | null;
+  /** Search duration budget in ms (overrides the default). */
+  maxSearchDurationMs: number | null;
+  /** Search node budget (overrides the default). */
+  maxExploredNodes: number | null;
 }
 
 export interface WorkspaceState {
