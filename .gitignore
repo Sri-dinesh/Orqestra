@@ -32,3 +32,4 @@ tmp/
 
 # project-specific
 plans/
+.agents/
