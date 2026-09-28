@@ -14,12 +14,18 @@ export function Toast() {
   if (!toast) return null;
   const styles =
     toast.kind === 'success'
-      ? 'border-green-300 bg-green-50 text-green-800'
+      ? 'bg-success-bg text-success'
       : toast.kind === 'error'
-        ? 'border-red-300 bg-red-50 text-red-800'
-        : 'border-amber-300 bg-amber-50 text-amber-800';
+        ? 'bg-danger-bg text-danger'
+        : 'bg-warning-bg text-warning';
+  const dot =
+    toast.kind === 'success' ? 'bg-success' : toast.kind === 'error' ? 'bg-danger' : 'bg-warning';
   return (
-    <div role="status" className={`fixed bottom-4 right-4 z-50 rounded-lg border px-4 py-3 text-sm shadow-lg ${styles}`}>
+    <div
+      role="status"
+      className={`fixed bottom-4 right-4 z-50 flex max-w-sm items-center gap-2.5 rounded-card px-4 py-3 text-sm font-medium shadow-raised ${styles}`}
+    >
+      <span className={`h-2 w-2 shrink-0 rounded-full ${dot}`} aria-hidden="true" />
       {toast.message}
     </div>
   );

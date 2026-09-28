@@ -19,7 +19,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    console.error(`[WTS:${this.props.area}]`, error, info.componentStack);
+    console.error(`[Orqestra:${this.props.area}]`, error, info.componentStack);
   }
 
   render() {
@@ -33,14 +33,14 @@ export class ErrorBoundary extends Component<Props, State> {
           <div className="mt-4 flex gap-3">
             <button
               type="button"
-              className="rounded bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700"
+              className="rounded-full bg-charcoal px-3 py-1.5 text-sm font-medium text-cloud-card hover:bg-ink"
               onClick={() => this.setState({ error: null })}
             >
               Retry
             </button>
             <button
               type="button"
-              className="rounded border border-red-300 px-3 py-1.5 text-sm text-red-700 hover:bg-red-100"
+              className="rounded-full border border-[#f3c2ba] bg-white px-3 py-1.5 text-sm text-[#a33223] hover:bg-[#fdf1ee]"
               onClick={() => window.location.reload()}
             >
               Reload application

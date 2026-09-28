@@ -1,1 +1,71 @@
 @import "tailwindcss";
+
+@theme {
+  /* Bevel brand palette */
+  --color-paper-white: #ffffff;
+  --color-charcoal: #1f2025;
+  --color-ink: #222326;
+  --color-cloud-card: #ebf0f8;
+  --color-body-gray: #747679;
+  --color-signal-gold: #ffca00;
+  --color-coral-signal: #ffab94;
+  --color-recovery-green: #31ce01;
+  --color-metric-blue: #415eee;
+  --color-sleep-lilac: #b9a6ff;
+
+  /* Semantic surface scale (cloud tints derived from Cloud Card) */
+  --color-surface-0: #ffffff;
+  --color-surface-1: #f4f7fc;
+  --color-surface-2: #ebf0f8;
+  --color-surface-3: #dde5f2;
+  --color-hairline: #d8e0ee;
+
+  /* Semantic accents */
+  --color-success: #1d6b0a;
+  --color-success-bg: #e2f6d9;
+  --color-danger: #a33223;
+  --color-danger-bg: #fde4de;
+  --color-warning: #8a6200;
+  --color-warning-bg: #fdf0cf;
+  --color-info: #2c3fb8;
+  --color-info-bg: #dce4fd;
+
+  /* Radii */
+  --radius-xl2: 16px;
+  --radius-card: 20px;
+  --radius-xl3: 24px;
+  --radius-shell: 32px;
+
+  /* Shadows */
+  --shadow-lift: rgba(0, 0, 0, 0.25) 0px 0px 16px -8px;
+  --shadow-raised: rgba(0, 0, 0, 0.15) 0px 2px 16px 0px;
+  --shadow-panel: 0 1px 2px rgba(31, 32, 37, 0.05), 0 4px 16px -8px rgba(31, 32, 37, 0.12);
+}
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  background-color: var(--color-surface-1);
+  color: var(--color-ink);
+  font-family: -apple-system, BlinkMacSystemFont, Inter, "Segoe UI", sans-serif,
+    ui-sans-serif, system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2 {
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+
+/* Respect reduced motion (skill checklist) */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
