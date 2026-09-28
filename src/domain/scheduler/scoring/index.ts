@@ -182,10 +182,12 @@ export function scoreCandidatePlacement(
   existing: TimetableEntry[],
   periodsPerDay: number,
 ): number {
-  // Prefer earlier days/periods slightly and avoid gaps next to existing entries.
+  // Prefer earlier days slightly and avoid gaps next to existing entries.
+  // NOTE: no per-period bias here — an early-period preference packs every
+  // session into the first periods of the day and leaves the last period
+  // empty across the whole timetable. Period balancing happens in the solver.
   let score = 0;
   score -= entry.dayIndex * 0.1;
-  score -= entry.startPeriod * 0.05;
   const neighborBefore = existing.some(
     (e) =>
       e.sectionId === entry.sectionId &&
@@ -198,7 +200,7 @@ export function scoreCandidatePlacement(
       e.dayIndex === entry.dayIndex &&
       entry.startPeriod + entry.durationPeriods === e.startPeriod,
   );
-  if (neighborBefore || neighborAfter) score += 1;
+  if (neighborBefore || neighborAfter) score += 0.4;
   if (entry.startPeriod + entry.durationPeriods > periodsPerDay) score -= 10;
   return score;
 }

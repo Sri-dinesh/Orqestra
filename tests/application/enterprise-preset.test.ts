@@ -23,23 +23,23 @@ describe('enterprise preset', () => {
     });
   });
 
-  it('is registered and structured as 9 sections / 8 subjects / 40 faculty', () => {
+  it('is registered and structured as 9 sections / 9 subjects / 40 faculty', () => {
     const preset = getPresetById('enterprise');
     expect(preset).toBeDefined();
     expect(preset!.sections.length).toBe(9);
-    expect(preset!.subjects.length).toBe(8);
-    expect(preset!.subjects.filter((s) => s.type === 'THEORY').length).toBe(5);
+    expect(preset!.subjects.length).toBe(9);
+    expect(preset!.subjects.filter((s) => s.type === 'THEORY').length).toBe(6);
     expect(preset!.subjects.filter((s) => s.type === 'LAB').length).toBe(3);
     expect(preset!.faculty.length).toBe(40);
-    expect(preset!.requirements.every((r) => r.length === 8)).toBe(true);
+    expect(preset!.requirements.every((r) => r.length === 9)).toBe(true);
     // Labs run exactly once a week
     expect(preset!.subjects.filter((s) => s.type === 'LAB').every((s) => s.sessionsPerWeek === 1)).toBe(true);
-    // Required periods per section: 5 theory ×6 + 3 labs ×2 periods = 36 (< capacity 42)
+    // Full-packing invariant: 6 theory ×6 + 3 labs ×2 periods = 42 = 6 days × 7 periods
     const requiredPeriods = preset!.requirements[0].reduce(
       (acc, n, i) => acc + n * (preset!.subjects[i].type === 'LAB' ? 2 : 1),
       0,
     );
-    expect(requiredPeriods).toBe(36);
+    expect(requiredPeriods).toBe(preset!.workingDays.length * preset!.periodsPerDay);
   });
 
   it('applies to the workspace, passes preflight, and generates a VALID timetable', () => {
@@ -54,7 +54,7 @@ describe('enterprise preset', () => {
     const faculty = store.faculty.filter((f) => f.departmentId === deptId);
 
     expect(sections.length).toBe(9);
-    expect(subjects.length).toBe(8);
+    expect(subjects.length).toBe(9);
     expect(faculty.length).toBe(40);
 
     const config: TimetableConfiguration = {
@@ -121,11 +121,28 @@ describe('enterprise preset', () => {
         for (const n of subjectsToday.values()) expect(n).toBeLessThanOrEqual(2);
       }
       expect(labDays.size).toBe(3); // 3 labs on 3 distinct days
+      // Full packing: every period of every day is assigned.
+      const occupied = new Set<string>();
+      for (const e of sectionEntries) {
+        for (let p = e.startPeriod; p < e.startPeriod + e.durationPeriods; p++) occupied.add(`${e.dayIndex}:${p}`);
+      }
+      expect(occupied.size).toBe(dayCount * department.periodsPerDay);
       const totalPeriods = sectionEntries.reduce((acc, e) => acc + e.durationPeriods, 0);
-      expect(totalPeriods).toBe(36);
+      expect(totalPeriods).toBe(dayCount * department.periodsPerDay);
     }
     // Slot variety: lab blocks are not all at the same time of day.
     expect(allLabStarts.size).toBeGreaterThanOrEqual(2);
+    // Faculty fairness: every subject's faculty pool is used and balanced.
+    const loads = new Map<string, number>();
+    for (const f of faculty) loads.set(f.id, 0);
+    for (const e of result.timetable!.entries) {
+      loads.set(e.facultyId, (loads.get(e.facultyId) ?? 0) + e.durationPeriods);
+    }
+    for (const sub of subjects.filter((s) => s.type === 'THEORY')) {
+      const poolLoads = sub.eligibleFacultyIds.map((id) => loads.get(id) ?? 0);
+      expect(poolLoads.every((l) => l > 0)).toBe(true); // no idle faculty in a pool
+      expect(Math.max(...poolLoads) - Math.min(...poolLoads)).toBeLessThanOrEqual(1); // even split
+    }
   }, 60_000);
 });
 

@@ -128,6 +128,43 @@ export function solveSchedule(
   const rollbacks: Array<() => void> = [];
   const rng = createSeededRng(input.seed);
   void rng; // reserved for seeded tie-breaking
+
+  /**
+   * Global (day, startPeriod) usage counts across all sections. Drives the
+   * period-band balancing term in candidateScore so sessions spread evenly
+   * across the day instead of piling into the first periods.
+   */
+  const periodUsageByDay: number[][] = Array.from({ length: dayCount }, () =>
+    new Array<number>(Math.max(1, periodsPerDay)).fill(0),
+  );
+  function recordPeriodUsage(entry: TimetableEntry): void {
+    const row = periodUsageByDay[entry.dayIndex];
+    if (!row) return;
+    for (let p = entry.startPeriod; p < entry.startPeriod + entry.durationPeriods; p++) {
+      if (p >= 0 && p < row.length) row[p]++;
+    }
+  }
+  function unrecordPeriodUsage(entry: TimetableEntry): void {
+    const row = periodUsageByDay[entry.dayIndex];
+    if (!row) return;
+    for (let p = entry.startPeriod; p < entry.startPeriod + entry.durationPeriods; p++) {
+      if (p >= 0 && p < row.length) row[p] = Math.max(0, row[p] - 1);
+    }
+  }
+
+  /**
+   * Total periods currently assigned to each faculty member. Drives the
+   * load-balancing term in candidateScore so all eligible faculty share the
+   * workload fairly rather than a few teachers absorbing everything.
+   */
+  const facultyLoad = new Map<string, number>();
+  for (const f of input.faculty) facultyLoad.set(f.id, 0);
+  function recordFacultyLoad(entry: TimetableEntry): void {
+    facultyLoad.set(entry.facultyId, (facultyLoad.get(entry.facultyId) ?? 0) + entry.durationPeriods);
+  }
+  function unrecordFacultyLoad(entry: TimetableEntry): void {
+    facultyLoad.set(entry.facultyId, Math.max(0, (facultyLoad.get(entry.facultyId) ?? 0) - entry.durationPeriods));
+  }
   const deadline = start + input.maxDurationMs;
   let searchStart = 0;
 
@@ -235,10 +272,14 @@ export function solveSchedule(
       placed.push(entry);
       rollbacks.push(occupancy.apply(entry));
       recordLabUsage(entry);
+      recordPeriodUsage(entry);
+      recordFacultyLoad(entry);
 
       if (backtrack(index + 1)) return true;
 
       // Rollback
+      unrecordFacultyLoad(entry);
+      unrecordPeriodUsage(entry);
       unrecordLabUsage(entry);
       rollbacks.pop()!();
       placed.pop();
@@ -295,9 +336,16 @@ export function solveSchedule(
       revision: 0,
     };
     let score = scoreCandidatePlacement(pseudo, placed, periodsPerDay);
-    // Spread faculty load: prefer faculty with lower current load.
-    const load = placed.filter((e) => e.facultyId === c.facultyId).length;
-    score -= load * 0.2;
+    // Period-band balancing: strongly prefer periods with the fewest
+    // assignments across ALL sections. Without this the greedy search fills
+    // early periods first and leaves the last period of the day empty for
+    // every section (observed: P7 unused across the entire timetable).
+    const periodUsage = periodUsageByDay[c.dayIndex]?.[c.startPeriod] ?? 0;
+    score -= periodUsage * 1.2;
+    // Spread faculty load: strongly prefer the least-loaded eligible faculty
+    // so all teachers get a fair share instead of a few being overloaded.
+    const load = facultyLoad.get(c.facultyId) ?? 0;
+    score -= load * 2;
     // Prefer distributing same-subject sessions across days.
     const sameDayCount = placed.filter(
       (e) => e.sectionId === session.sectionId && e.subjectId === session.subjectId && e.dayIndex === c.dayIndex,
@@ -314,6 +362,11 @@ export function solveSchedule(
       }
     }
     score -= sectionDayLoad * 2;
+    // Day-completion bonus: prefer extending a day that is already partially
+    // filled rather than opening a new sparse day. Without this, leftover
+    // slack forms one identical hole at the same period on EVERY day; with
+    // it, free periods consolidate onto fewer days.
+    if (sectionDayLoad > 0) score += 1.5;
     // Lab time-slot variety: penalize lab start-periods that are already
     // commonly used by other sections, so labs don't all sit at the same time.
     if (session.durationPeriods >= 2) {
