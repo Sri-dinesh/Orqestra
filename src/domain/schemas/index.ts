@@ -224,6 +224,8 @@ export const persistedWorkspacePayloadSchema = z.object({
       z.object({
         maxSessionsPerSubjectPerDay: z.number().int().min(1).nullable().optional(),
         maxLabSessionsPerSectionPerDay: z.number().int().min(1).nullable().optional(),
+        maxSearchDurationMs: z.number().int().min(1000).nullable().optional(),
+        maxExploredNodes: z.number().int().min(1000).nullable().optional(),
       }),
     )
     .optional(),

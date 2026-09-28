@@ -28,8 +28,11 @@ export const DEFAULT_SOFT_WEIGHTS: SoftConstraintWeights = {
 
 export const DEFAULT_GENERATION_SETTINGS: GenerationSettings = {
   seed: null,
-  maxSearchDurationMs: 10_000,
-  maxExploredNodes: 2_000_000,
+  // Enterprise-scale headroom: large multi-section timetables (9 sections,
+  // 300+ sessions) can need tens of seconds and millions of nodes to prove
+  // feasibility. Defaults sized so typical large inputs finish without tuning.
+  maxSearchDurationMs: 60_000,
+  maxExploredNodes: 20_000_000,
   maxBacktrackDepth: null,
   maxSessionsPerSubjectPerDay: null,
   maxLabSessionsPerSectionPerDay: null,

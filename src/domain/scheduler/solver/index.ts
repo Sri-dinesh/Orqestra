@@ -234,10 +234,12 @@ export function solveSchedule(
       // Apply + propagate
       placed.push(entry);
       rollbacks.push(occupancy.apply(entry));
+      recordLabUsage(entry);
 
       if (backtrack(index + 1)) return true;
 
       // Rollback
+      unrecordLabUsage(entry);
       rollbacks.pop()!();
       placed.pop();
       metrics.backtrackCount++;
@@ -312,7 +314,34 @@ export function solveSchedule(
       }
     }
     score -= sectionDayLoad * 2;
+    // Lab time-slot variety: penalize lab start-periods that are already
+    // commonly used by other sections, so labs don't all sit at the same time.
+    if (session.durationPeriods >= 2) {
+      const usage = labStartPeriodUsage[c.dayIndex]?.[c.startPeriod] ?? 0;
+      score -= usage * 1.5;
+    }
     return score;
+  }
+
+  /**
+   * Per-(day, startPeriod) count of lab blocks currently placed across all
+   * sections. Used to bias later lab placements toward less-used time slots,
+   * giving lab start times visual variety across the grid.
+   */
+  const labStartPeriodUsage: number[][] = Array.from({ length: dayCount }, () =>
+    new Array<number>(Math.max(1, periodsPerDay)).fill(0),
+  );
+  function recordLabUsage(entry: TimetableEntry): void {
+    if (entry.durationPeriods < 2) return;
+    labStartPeriodUsage[entry.dayIndex][entry.startPeriod] =
+      (labStartPeriodUsage[entry.dayIndex]?.[entry.startPeriod] ?? 0) + 1;
+  }
+  function unrecordLabUsage(entry: TimetableEntry): void {
+    if (entry.durationPeriods < 2) return;
+    labStartPeriodUsage[entry.dayIndex][entry.startPeriod] = Math.max(
+      0,
+      (labStartPeriodUsage[entry.dayIndex]?.[entry.startPeriod] ?? 0) - 1,
+    );
   }
 
   /** Optional soft cap: max sessions of one subject for a section per day (§S1 made bounded). */
