@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { Badge, Button, Card, Field, Input, Select } from '@/components/ui/primitives';
+import { Badge, Button, Card, EditModal, Field, Input, PageHeader, Select } from '@/components/ui/primitives';
 import {
   selectCurrentSections,
   selectCurrentSubjects,
@@ -24,11 +24,22 @@ export function DepartmentConfigPage() {
   const [year, setYear] = useState(1);
   const [semester, setSemester] = useState(1);
   const [studentCount, setStudentCount] = useState(60);
+  const [editingSectionId, setEditingSectionId] = useState<string | null>(null);
+  const [sectionEditForm, setSectionEditForm] = useState({ name: '', year: 1, semester: 1, studentCount: 0 });
+  const [editingDepartment, setEditingDepartment] = useState(false);
+  const [departmentEditForm, setDepartmentEditForm] = useState({ code: '', name: '' });
 
   if (!department) {
     return (
-      <div className="text-sm text-slate-500">
-        No department selected. <Link className="text-blue-600 underline" to="/">Go to dashboard</Link>.
+      <div className="rounded-card bg-white p-10 text-center shadow-panel">
+        <p className="text-sm font-medium text-ink">No department selected</p>
+        <p className="mt-1 text-sm text-body-gray">
+          Pick one from the{' '}
+          <Link className="text-metric-blue underline" to="/">
+            dashboard
+          </Link>
+          .
+        </p>
       </div>
     );
   }
@@ -45,17 +56,29 @@ export function DepartmentConfigPage() {
     state.sections.find((s) => s.id === sectionId)?.subjectRequirements ?? [];
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold">
-          {department.code} — Configuration
-        </h1>
-        <Badge tone={department.status === 'READY' ? 'green' : 'amber'}>{department.status}</Badge>
-      </div>
+    <div className="space-y-8">
+      <PageHeader
+        eyebrow="Department setup"
+        title={`${department.code} — Configuration`}
+        actions={
+          <>
+            <Badge tone={department.status === 'READY' ? 'green' : 'amber'}>{department.status}</Badge>
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setDepartmentEditForm({ code: department.code, name: department.name });
+                setEditingDepartment(true);
+              }}
+            >
+              Edit details
+            </Button>
+          </>
+        }
+      />
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Card title="Academic period details">
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Periods per day">
               <Input
                 type="number"
@@ -82,12 +105,13 @@ export function DepartmentConfigPage() {
               </Select>
             </Field>
             <div className="sm:col-span-2">
-              <span className="mb-1 block text-xs font-medium text-slate-600">Working days</span>
-              <div className="flex flex-wrap gap-3">
+              <span className="mb-1.5 block text-xs font-medium text-body-gray">Working days</span>
+              <div className="flex flex-wrap gap-2">
                 {WORKING_DAYS.map((day) => (
-                  <label key={day} className="flex items-center gap-1 text-xs">
+                  <label key={day} className="flex cursor-pointer items-center gap-1.5 rounded-full bg-surface-2 px-3 py-1.5 text-xs font-medium text-ink transition-colors duration-150 has-checked:bg-info-bg hover:bg-surface-3">
                     <input
                       type="checkbox"
+                      className="accent-metric-blue"
                       checked={department.workingDays.includes(day)}
                       onChange={(e) => updateDays(day, e.target.checked)}
                     />
@@ -101,7 +125,7 @@ export function DepartmentConfigPage() {
 
         <Card title={`Sections (${sections.length})`}>
           <form
-            className="mb-4 grid gap-3 sm:grid-cols-4"
+            className="mb-5 grid gap-3 sm:grid-cols-2"
             onSubmit={(e) => {
               e.preventDefault();
               if (!sectionName.trim()) return;
@@ -117,43 +141,57 @@ export function DepartmentConfigPage() {
             }}
           >
             <Field label="Name"><Input value={sectionName} onChange={(e) => setSectionName(e.target.value)} required aria-label="Section name" /></Field>
-            <Field label="Year"><Input type="number" min={1} max={8} value={year} onChange={(e) => setYear(Number(e.target.value))} aria-label="Year" /></Field>
-            <Field label="Semester"><Input type="number" min={1} max={12} value={semester} onChange={(e) => setSemester(Number(e.target.value))} aria-label="Semester" /></Field>
-            <Field label="Students"><Input type="number" min={0} value={studentCount} onChange={(e) => setStudentCount(Number(e.target.value))} aria-label="Student count" /></Field>
-            <div className="sm:col-span-4"><Button type="submit">Add section</Button></div>
+            <div className="grid grid-cols-3 gap-3">
+              <Field label="Year"><Input type="number" min={1} max={8} value={year} onChange={(e) => setYear(Number(e.target.value))} aria-label="Year" /></Field>
+              <Field label="Sem"><Input type="number" min={1} max={12} value={semester} onChange={(e) => setSemester(Number(e.target.value))} aria-label="Semester" /></Field>
+              <Field label="Students"><Input type="number" min={0} value={studentCount} onChange={(e) => setStudentCount(Number(e.target.value))} aria-label="Student count" /></Field>
+            </div>
+            <div className="sm:col-span-2"><Button type="submit" size="sm">Add section</Button></div>
           </form>
-          <ul className="space-y-2 text-sm">
+          <ul className="space-y-2">
             {sections.map((s) => (
-              <li key={s.id} className="flex items-center justify-between rounded border border-slate-200 px-3 py-2">
-                <span>
-                  <strong>{s.name}</strong> · Y{s.year} S{s.semester} · {s.studentCount} students
+              <li key={s.id} className="flex items-center justify-between gap-2 rounded-xl bg-surface-1 px-3 py-2">
+                <span className="text-sm text-ink">
+                  <strong>{s.name}</strong>
+                  <span className="ml-2 text-xs text-body-gray">Y{s.year} S{s.semester} · {s.studentCount} students</span>
                 </span>
-                <Button variant="danger" onClick={() => state.removeSection(s.id)} aria-label={`Remove section ${s.name}`}>
-                  Remove
-                </Button>
+                <div className="flex shrink-0 gap-1.5">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setEditingSectionId(s.id);
+                      setSectionEditForm({ name: s.name, year: s.year, semester: s.semester, studentCount: s.studentCount });
+                    }}
+                  >
+                    Edit
+                  </Button>
+                  <Button variant="danger" size="sm" onClick={() => state.removeSection(s.id)} aria-label={`Remove section ${s.name}`}>
+                    Remove
+                  </Button>
+                </div>
               </li>
             ))}
-            {sections.length === 0 && <li className="text-xs text-slate-500">No sections yet.</li>}
+            {sections.length === 0 && <li className="text-xs text-body-gray">No sections yet.</li>}
           </ul>
         </Card>
       </div>
 
-      <Card title={`Section requirements (${subjects.length} subjects, ${faculty.length} faculty available)`}>
+      <Card title={`Section requirements — ${subjects.length} subjects, ${faculty.length} faculty available`}>
         {sections.length === 0 || subjects.length === 0 ? (
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-body-gray">
             Add sections and subjects first, then assign weekly requirements here.
           </p>
         ) : (
-          <div className="space-y-4">
+          <div className="grid gap-4 lg:grid-cols-2">
             {sections.map((section) => (
-              <div key={section.id} className="rounded border border-slate-200 p-3">
-                <h3 className="mb-2 text-sm font-semibold">{section.name}</h3>
+              <div key={section.id} className="rounded-xl bg-surface-1 p-4">
+                <h3 className="mb-2 text-sm font-semibold text-ink">{section.name}</h3>
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="text-left text-xs text-slate-500">
-                      <th className="py-1">Subject</th>
-                      <th className="py-1">Sessions / week</th>
-                      <th className="py-1"></th>
+                    <tr className="text-left text-[11px] uppercase tracking-wide text-body-gray">
+                      <th className="pb-1.5">Subject</th>
+                      <th className="pb-1.5">Sessions / wk</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -162,24 +200,25 @@ export function DepartmentConfigPage() {
                       const value = req?.sessionsPerWeek ?? 0;
                       const applicable = sub.eligibleSectionIds.includes(section.id);
                       return (
-                        <tr key={sub.id} className="border-t border-slate-100">
-                          <td className="py-1">
-                            {sub.code} — {sub.name}{' '}<span className="text-xs text-slate-400">({sub.type})</span>
+                        <tr key={sub.id} className="border-t border-white">
+                          <td className="py-1.5 pr-2">
+                            <span className="font-medium text-ink">{sub.code}</span>
+                            <span className="ml-1.5 text-xs text-body-gray">{sub.type === 'LAB' ? 'Lab' : 'Theory'}</span>
                             {!applicable && value > 0 && (
                               <button
                                 type="button"
-                                className="ml-2 text-[11px] text-blue-600 underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-600"
+                                className="ml-2 cursor-pointer text-[11px] text-metric-blue underline focus-visible:outline-2 focus-visible:outline-metric-blue"
                                 onClick={() =>
                                   state.updateSubject(sub.id, {
                                     eligibleSectionIds: [...sub.eligibleSectionIds, section.id],
                                   })
                                 }
                               >
-                                Mark applicable to {section.name}
+                                Mark applicable
                               </button>
                             )}
                           </td>
-                          <td className="py-1">
+                          <td className="py-1.5">
                             <Input
                               type="number"
                               min={0}
@@ -192,7 +231,6 @@ export function DepartmentConfigPage() {
                                 const reqs = requirementsForSection(section.id).filter((r) => r.subjectId !== sub.id);
                                 if (n > 0) {
                                   reqs.push({ id: `req_${section.id}_${sub.id}`, subjectId: sub.id, sessionsPerWeek: n });
-                                  // Auto-wire applicability when a requirement is entered
                                   if (!sub.eligibleSectionIds.includes(section.id)) {
                                     state.updateSubject(sub.id, {
                                       eligibleSectionIds: [...sub.eligibleSectionIds, section.id],
@@ -203,7 +241,6 @@ export function DepartmentConfigPage() {
                               }}
                             />
                           </td>
-                          <td></td>
                         </tr>
                       );
                     })}
@@ -215,11 +252,65 @@ export function DepartmentConfigPage() {
         )}
       </Card>
 
-      <div className="flex gap-2">
-        <Button onClick={() => navigate(`/departments/${department.id}/subjects`)}>Manage subjects</Button>
-        <Button onClick={() => navigate(`/departments/${department.id}/faculty`)}>Manage faculty</Button>
+      <div className="flex flex-wrap gap-2">
+        <Button variant="secondary" onClick={() => navigate(`/departments/${department.id}/subjects`)}>Manage subjects</Button>
+        <Button variant="secondary" onClick={() => navigate(`/departments/${department.id}/faculty`)}>Manage faculty</Button>
         <Button onClick={() => navigate(`/departments/${department.id}/generate`)}>Generate timetable</Button>
       </div>
+
+      {editingSectionId && (
+        <EditModal
+          title="Edit section"
+          onClose={() => setEditingSectionId(null)}
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (!sectionEditForm.name.trim()) return;
+            state.updateSection(editingSectionId, {
+              name: sectionEditForm.name.trim(),
+              year: Math.max(1, sectionEditForm.year),
+              semester: Math.max(1, sectionEditForm.semester),
+              studentCount: Math.max(0, sectionEditForm.studentCount),
+            });
+            setEditingSectionId(null);
+          }}
+        >
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Name"><Input value={sectionEditForm.name} onChange={(e) => setSectionEditForm({ ...sectionEditForm, name: e.target.value })} required aria-label="Edit section name" /></Field>
+            <Field label="Year"><Input type="number" min={1} max={8} value={sectionEditForm.year} onChange={(e) => setSectionEditForm({ ...sectionEditForm, year: Number(e.target.value) })} aria-label="Edit year" /></Field>
+            <Field label="Semester"><Input type="number" min={1} max={12} value={sectionEditForm.semester} onChange={(e) => setSectionEditForm({ ...sectionEditForm, semester: Number(e.target.value) })} aria-label="Edit semester" /></Field>
+            <Field label="Students"><Input type="number" min={0} value={sectionEditForm.studentCount} onChange={(e) => setSectionEditForm({ ...sectionEditForm, studentCount: Number(e.target.value) })} aria-label="Edit student count" /></Field>
+            <div className="flex gap-2 sm:col-span-2">
+              <Button type="submit">Save changes</Button>
+              <Button type="button" variant="secondary" onClick={() => setEditingSectionId(null)}>Cancel</Button>
+            </div>
+          </div>
+        </EditModal>
+      )}
+
+      {editingDepartment && (
+        <EditModal
+          title="Edit department details"
+          onClose={() => setEditingDepartment(false)}
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (!departmentEditForm.code.trim() || !departmentEditForm.name.trim()) return;
+            state.updateDepartment(department.id, {
+              code: departmentEditForm.code.trim(),
+              name: departmentEditForm.name.trim(),
+            });
+            setEditingDepartment(false);
+          }}
+        >
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Code"><Input value={departmentEditForm.code} onChange={(e) => setDepartmentEditForm({ ...departmentEditForm, code: e.target.value })} required aria-label="Edit department code" /></Field>
+            <Field label="Name"><Input value={departmentEditForm.name} onChange={(e) => setDepartmentEditForm({ ...departmentEditForm, name: e.target.value })} required aria-label="Edit department name" /></Field>
+            <div className="flex gap-2 sm:col-span-2">
+              <Button type="submit">Save changes</Button>
+              <Button type="button" variant="secondary" onClick={() => setEditingDepartment(false)}>Cancel</Button>
+            </div>
+          </div>
+        </EditModal>
+      )}
     </div>
   );
 }

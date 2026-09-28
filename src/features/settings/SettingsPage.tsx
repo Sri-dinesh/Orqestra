@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { Button, Card } from '@/components/ui/primitives';
+import { Button, Card, PageHeader } from '@/components/ui/primitives';
 import { getStorageService } from '@/hooks/usePersistence';
 import { useEditorStore } from '@/state/stores/editor-store';
 import { useWorkspaceStore } from '@/state/stores/workspace-store';
@@ -19,7 +19,7 @@ export function SettingsPage() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `wts-workspace-${new Date().toISOString().slice(0, 10)}.json`;
+      a.download = `orqestra-workspace-${new Date().toISOString().slice(0, 10)}.json`;
       a.click();
       URL.revokeObjectURL(url);
       showToast('success', 'Workspace exported.');
@@ -78,11 +78,14 @@ export function SettingsPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-xl font-bold">Settings</h1>
-      <div className="grid gap-4 lg:grid-cols-2">
+    <div className="space-y-8">
+      <PageHeader eyebrow="Workspace data" title="Settings" />
+      <div className="grid items-start gap-4 lg:grid-cols-2">
         <Card title="Export / Import">
           <div className="flex flex-col gap-3">
+            <p className="text-sm text-body-gray">
+              Download a full snapshot of your workspace as JSON, or restore one from a previous export.
+            </p>
             <Button onClick={exportWorkspace}>Export workspace (JSON)</Button>
             <div>
               <input
@@ -100,12 +103,12 @@ export function SettingsPage() {
               </Button>
             </div>
             {importSummary && (
-              <div className="rounded border border-amber-300 bg-amber-50 p-3 text-sm" role="alert">
+              <div className="rounded-xl bg-warning-bg p-3 text-sm text-warning" role="alert">
                 <p className="font-medium">Import preview</p>
                 <p className="mt-1 text-xs">{importSummary}</p>
-                <div className="mt-2 flex gap-2">
-                  <Button onClick={confirmImport}>Confirm import</Button>
-                  <Button variant="secondary" onClick={() => { setPendingImport(null); setImportSummary(null); }}>
+                <div className="mt-3 flex gap-2">
+                  <Button size="sm" onClick={confirmImport}>Confirm import</Button>
+                  <Button size="sm" variant="secondary" onClick={() => { setPendingImport(null); setImportSummary(null); }}>
                     Cancel
                   </Button>
                 </div>
@@ -114,8 +117,8 @@ export function SettingsPage() {
           </div>
         </Card>
         <Card title="Danger zone">
-          <p className="mb-3 text-sm text-slate-600">
-            Resetting clears all departments, timetables, and preferences stored in this browser.
+          <p className="mb-4 text-sm text-body-gray">
+            Resetting clears all departments, timetables, and preferences stored in this browser. This cannot be undone.
           </p>
           <Button variant="danger" onClick={resetWorkspace}>
             Reset workspace
