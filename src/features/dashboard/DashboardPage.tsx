@@ -149,7 +149,7 @@ export function DashboardPage() {
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {cards.map(({ department, sections, subjects, faculty, status }) => (
+          {cards.map(({ department, sections, subjects, faculty, timetable, status }) => (
             <Card key={department.id}>
               <div className="flex items-start justify-between gap-2">
                 <div>
@@ -158,7 +158,7 @@ export function DashboardPage() {
                 </div>
                 <Badge tone={statusTone[status]}>{status}</Badge>
               </div>
-              <dl className="mt-4 grid grid-cols-3 gap-2 rounded-xl bg-surface-1 px-3 py-2.5 text-center">
+              <dl className="mt-4 grid grid-cols-4 gap-2 rounded-xl bg-surface-1 px-3 py-2.5 text-center">
                 <div>
                   <dt className="text-[11px] text-body-gray">Sections</dt>
                   <dd className="text-sm font-semibold text-ink">{sections}</dd>
@@ -171,7 +171,18 @@ export function DashboardPage() {
                   <dt className="text-[11px] text-body-gray">Faculty</dt>
                   <dd className="text-sm font-semibold text-ink">{faculty}</dd>
                 </div>
+                <div>
+                  <dt className="text-[11px] text-body-gray">Version</dt>
+                  <dd className="text-sm font-semibold text-ink">
+                    {timetable ? `v${timetable.revision}` : '—'}
+                  </dd>
+                </div>
               </dl>
+              {timetable && (timetable.versionHistory?.length ?? 0) > 0 && (
+                <p className="mt-2 text-[11px] text-body-gray">
+                  {timetable.versionHistory!.length} saved version{timetable.versionHistory!.length === 1 ? '' : 's'} · latest: {timetable.versionHistory![timetable.versionHistory!.length - 1].label}
+                </p>
+              )}
               <div className="mt-4 grid grid-cols-2 gap-2">
                 <Button
                   variant="secondary"
