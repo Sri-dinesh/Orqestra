@@ -58,6 +58,7 @@ export function generateTimetable(request: SchedulerRequest): GenerationResult {
     status: 'EMPTY',
     validationSummary: null,
     generationMetadata: null,
+    versionHistory: [],
     revision: 0,
     createdAt: '',
     updatedAt: '',

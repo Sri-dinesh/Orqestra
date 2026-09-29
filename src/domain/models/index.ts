@@ -236,4 +236,26 @@ export interface Timetable {
   revision: number;
   createdAt: string;
   updatedAt: string;
+  /** Snapshot history, newest last. Empty/absent for timetables created before versioning. */
+  versionHistory?: TimetableVersion[];
+}
+
+/** Why a version snapshot was recorded. */
+export type TimetableVersionOrigin = 'GENERATED' | 'EDIT' | 'RESTORE';
+
+/**
+ * Immutable snapshot of a timetable state at a point in time.
+ * Entries are deep-copied so later edits never mutate history.
+ */
+export interface TimetableVersion {
+  /** Monotonic per-timetable version number (matches the timetable revision when recorded). */
+  version: number;
+  origin: TimetableVersionOrigin;
+  recordedAt: string;
+  entries: TimetableEntry[];
+  status: TimetableStatus;
+  validationSummary: ValidationResult | null;
+  generationMetadata: GenerationMetadata | null;
+  /** Human-readable note, e.g. what edit produced this version. */
+  label: string;
 }

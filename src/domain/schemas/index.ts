@@ -159,6 +159,17 @@ export const generationMetadataSchema = z.object({
   metrics: generationMetricsSchema,
 });
 
+export const timetableVersionSchema = z.object({
+  version: z.number().int().min(0),
+  origin: z.enum(['GENERATED', 'EDIT', 'RESTORE']),
+  recordedAt: isoString,
+  entries: z.array(timetableEntrySchema),
+  status: timetableStatusSchema,
+  validationSummary: validationResultSchema.nullable(),
+  generationMetadata: generationMetadataSchema.nullable(),
+  label: z.string(),
+});
+
 export const timetableSchema = z.object({
   id: z.string(),
   departmentId: z.string(),
@@ -170,6 +181,7 @@ export const timetableSchema = z.object({
   revision: z.number().int().min(0),
   createdAt: isoString,
   updatedAt: isoString,
+  versionHistory: z.array(timetableVersionSchema).optional(),
 });
 
 export const softConstraintWeightsSchema = z.object({

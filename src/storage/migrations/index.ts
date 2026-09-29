@@ -9,7 +9,20 @@ type MigrationFn = (data: Record<string, unknown>) => Record<string, unknown>;
  * Example future entry:
  *   2: (d) => ({ ...d, payload: { ...d.payload, terms: [] } }),
  */
-const MIGRATIONS: Record<number, MigrationFn> = {};
+const MIGRATIONS: Record<number, MigrationFn> = {
+  /** v1 → v2: add timetable versioning (versionHistory defaults to []). */
+  2: (d) => {
+    const payload = (d['payload'] ?? d) as Record<string, unknown>;
+    const timetables = Array.isArray(payload['timetables']) ? (payload['timetables'] as Record<string, unknown>[]) : [];
+    return {
+      ...d,
+      payload: {
+        ...payload,
+        timetables: timetables.map((t) => ({ ...t, versionHistory: t['versionHistory'] ?? [] })),
+      },
+    };
+  },
+};
 
 /** Run the migration chain old → current (§32). Returns null if unusable. */
 export function migrateWorkspace(raw: Record<string, unknown>): PersistedWorkspace | null {
