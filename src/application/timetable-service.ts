@@ -1,14 +1,37 @@
-import { validateEntryPlacement, validateTimetable } from '@/domain/validation/engine';
+import { validateTimetable } from '@/domain/validation/engine';
 import { buildConfigurationSnapshot } from '@/domain/configuration/normalize';
 import type { Conflict, Timetable, TimetableConfiguration, TimetableEntry } from '@/domain/models';
 import type { EditCommand } from './timetable-edit-commands';
 import { applyEditCommand } from './timetable-edit-commands';
+import { withVersion } from './timetable-versioning';
 
 export interface EditOutcome {
   status: 'COMMITTED' | 'REJECTED';
   timetable: Timetable | null;
   conflicts: Conflict[];
   error: string | null;
+}
+
+/** Human-readable label for a version snapshot recorded before a command runs. */
+function describeCommand(command: EditCommand): string {
+  const payload = command.payload as { entryId?: string } | undefined;
+  const at = payload?.entryId ? ` (entry ${payload.entryId.slice(-4)})` : '';
+  switch (command.operation) {
+    case 'MOVE_ENTRY':
+      return `Moved${at}`;
+    case 'CHANGE_FACULTY':
+      return `Faculty changed${at}`;
+    case 'SWAP_ENTRIES':
+      return 'Swapped entries';
+    case 'CLEAR_ENTRY':
+      return `Cleared${at}`;
+    case 'REMOVE_ENTRY':
+      return `Removed${at}`;
+    case 'ADD_ENTRY':
+      return 'Added entry';
+    default:
+      return command.operation;
+  }
 }
 
 /**
@@ -28,29 +51,26 @@ export class TimetableEditService {
       return { status: 'REJECTED', timetable: null, conflicts: [], error: applied.error };
     }
     draft.entries = applied.entries.map((e) => ({ ...e, revision: e.revision + 1 }));
+    draft.configurationSnapshot = timetable.configurationSnapshot;
 
-    // Targeted validation on affected entries first (cheap).
-    const targeted = validateEntryPlacement(
-      { ...draft, configurationSnapshot: timetable.configurationSnapshot },
-      this.config,
-      applied.affected,
-    );
-    if (!targeted.isValid) {
-      return { status: 'REJECTED', timetable: null, conflicts: targeted.conflicts, error: 'TARGETED_CONFLICT' };
+    // Full authoritative validation on the DRAFT, before anything commits.
+    // This guarantees an invalid timetable can never reach committed state,
+    // regardless of which rule the violation comes from.
+    const draftCheck = validateTimetable(draft, this.config);
+    if (!draftCheck.isValid) {
+      return { status: 'REJECTED', timetable: null, conflicts: draftCheck.conflicts, error: 'HARD_CONFLICT' };
     }
 
-    // Commit
+    // Commit — snapshot the pre-edit state into version history first.
     const committed: Timetable = {
+      ...withVersion(timetable, 'EDIT', describeCommand(command)),
       ...draft,
       status: timetable.status === 'STALE' ? 'STALE' : 'DRAFT',
       revision: timetable.revision + 1,
       updatedAt: new Date().toISOString(),
     };
-
-    // Full authoritative validation after commit.
-    const full = validateTimetable(committed, this.config);
-    committed.validationSummary = full;
-    committed.status = full.isValid && committed.status !== 'STALE' ? 'VALID' : committed.status === 'STALE' ? 'STALE' : 'INVALID';
+    committed.validationSummary = draftCheck;
+    committed.status = committed.status === 'STALE' ? 'STALE' : 'VALID';
 
     return { status: 'COMMITTED', timetable: committed, conflicts: [], error: null };
   }

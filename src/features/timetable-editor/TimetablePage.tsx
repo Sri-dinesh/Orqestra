@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Badge, Button, Card, PageHeader, Select } from '@/components/ui/primitives';
+import { Badge, Button, Card, EditModal, Field, PageHeader, Select } from '@/components/ui/primitives';
+import { ConflictModal } from '@/components/ui/ConflictModal';
+import type { Conflict } from '@/domain/models';
 import { useEditorStore, popUndoCommand, popRedoCommand } from '@/state/stores/editor-store';
 import {
   selectCurrentFaculty,
@@ -10,11 +12,12 @@ import {
   useWorkspaceStore,
 } from '@/state/stores/workspace-store';
 import { TimetableEditService } from '@/application/timetable-service';
+import { withVersion } from '@/application/timetable-versioning';
 import { exportTimetable } from '@/application/export-service';
 import type { EditCommand } from '@/application/timetable-edit-commands';
 import { buildConfigurationSnapshot } from '@/domain/configuration/normalize';
 import { DEFAULT_GENERATION_SETTINGS, DEFAULT_HARD_CONSTRAINTS, DEFAULT_SOFT_WEIGHTS } from '@/domain/policies';
-import type { Conflict, TimetableConfiguration } from '@/domain/models';
+import type { TimetableConfiguration } from '@/domain/models';
 
 interface CellVm {
   dayIndex: number;
@@ -38,6 +41,8 @@ export function TimetablePage() {
   const editor = useEditorStore();
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null);
   const [focusConflictId, setFocusConflictId] = useState<string | null>(null);
+  const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
+  const [blockedConflicts, setBlockedConflicts] = useState<Conflict[] | null>(null);
 
   const department = state.departments.find((d) => d.id === departmentId);
   const config: TimetableConfiguration | null = useMemo(() => {
@@ -130,12 +135,30 @@ export function TimetablePage() {
       editor.pushHistory(command);
       editor.showToast('success', 'Edit committed.');
     } else {
-      editor.showToast(
-        'error',
-        `Edit blocked: ${outcome.conflicts[0]?.type ?? outcome.error ?? 'hard-constraint violation'}`,
-      );
+      // Blocking modal — the user must acknowledge the conflict.
+      setBlockedConflicts(outcome.conflicts.length > 0 ? outcome.conflicts : [syntheticConflict(outcome.error ?? 'HARD_CONFLICT')]);
     }
   };
+
+  /** Fallback conflict for payload-level errors that carry no Conflict objects. */
+  const syntheticConflict = (error: string): Conflict => ({
+    id: `synthetic_${error}`,
+    type: error as Conflict['type'],
+    severity: 'ERROR',
+    messageKey: error,
+    messageParams: {},
+    dayIndex: null,
+    periodIndex: null,
+    entryIds: [],
+    facultyIds: [],
+    sectionIds: [],
+    subjectIds: [],
+    resolutionHints: [
+      error === 'DURATION_MISMATCH'
+        ? 'Only entries of the same length (e.g. two labs) can be swapped.'
+        : 'Try a different slot or resolve the existing conflict first.',
+    ],
+  });
 
   const inverseOf = (command: EditCommand): EditCommand | null => {
     // Build the inverse for undo where meaningful.
@@ -300,8 +323,88 @@ export function TimetablePage() {
     });
   };
 
+  const editingEntry = editingEntryId ? entryById.get(editingEntryId) ?? null : null;
+
+  /** Apply an arbitrary combination of subject/faculty/day/period changes to the entry being edited. */
+  const commitEntryEdit = (changes: { subjectId?: string; facultyId?: string; dayIndex?: number; startPeriod?: number }) => {
+    if (!editingEntry) return;
+    const ops: EditCommand[] = [];
+    const ts = new Date().toISOString();
+    if (changes.subjectId && changes.subjectId !== editingEntry.subjectId) {
+      ops.push({
+        operation: 'CHANGE_SUBJECT',
+        payload: { entryId: editingEntry.id, subjectId: changes.subjectId },
+        affectedEntryIds: [editingEntry.id],
+        timestamp: ts,
+      });
+    }
+    if (changes.facultyId && changes.facultyId !== editingEntry.facultyId) {
+      ops.push({
+        operation: 'CHANGE_FACULTY',
+        payload: { entryId: editingEntry.id, facultyId: changes.facultyId },
+        affectedEntryIds: [editingEntry.id],
+        timestamp: ts,
+      });
+    }
+    if (
+      (changes.dayIndex !== undefined && changes.dayIndex !== editingEntry.dayIndex) ||
+      (changes.startPeriod !== undefined && changes.startPeriod !== editingEntry.startPeriod)
+    ) {
+      ops.push({
+        operation: 'MOVE_ENTRY',
+        payload: {
+          entryId: editingEntry.id,
+          dayIndex: changes.dayIndex ?? editingEntry.dayIndex,
+          startPeriod: changes.startPeriod ?? editingEntry.startPeriod,
+        },
+        affectedEntryIds: [editingEntry.id],
+        timestamp: ts,
+      });
+    }
+    // Apply sequentially; stop at the first rejection (conflict) and report it.
+    let current = timetable;
+    for (const cmd of ops) {
+      const outcome = editService.executeCommand(current, cmd);
+      if (outcome.status === 'REJECTED' || !outcome.timetable) {
+        editor.showToast(
+          'error',
+          `Change blocked: ${outcome.conflicts[0]?.type ?? outcome.error ?? 'hard-constraint violation'}`,
+        );
+        state.upsertTimetable(current);
+        setEditingEntryId(null);
+        return;
+      }
+      current = outcome.timetable;
+    }
+    if (current !== timetable) {
+      state.upsertTimetable(current);
+      editor.showToast('success', 'Entry updated.');
+    }
+    setEditingEntryId(null);
+  };
+
   const selectedConflict: Conflict | null =
     conflictsForSection.find((c) => c.id === focusConflictId) ?? null;
+
+  const versionHistory = timetable.versionHistory ?? [];
+  const restoreVersion = (version: number) => {
+    const snap = versionHistory.find((v) => v.version === version);
+    if (!snap) return;
+    // Snapshot the current state before restoring, so restore is itself reversible.
+    const versioned = withVersion(timetable, 'RESTORE', `Restored version ${version}`);
+    const restored: typeof timetable = {
+      ...versioned,
+      entries: snap.entries.map((e) => ({ ...e })),
+      status: snap.status === 'STALE' ? 'STALE' : 'DRAFT',
+      revision: timetable.revision + 1,
+      updatedAt: new Date().toISOString(),
+    };
+    const full = editService.revalidate(restored);
+    restored.validationSummary = full.result;
+    restored.status = full.status;
+    state.upsertTimetable(restored);
+    editor.showToast('success', `Restored version ${version}.`);
+  };
 
   return (
     <div className="space-y-8">
@@ -353,6 +456,9 @@ export function TimetablePage() {
             <span className="text-xs font-medium text-info">
               Entry selected — click a slot to move, right-click to swap
             </span>
+            <Button variant="secondary" size="sm" onClick={() => setEditingEntryId(editor.selectedEntryId)}>
+              Edit…
+            </Button>
             <Button variant="secondary" size="sm" onClick={clearSelected}>Clear</Button>
             <Select
               className="w-44"
@@ -413,6 +519,7 @@ export function TimetablePage() {
                             type="button"
                             className="w-full cursor-pointer rounded-md p-1.5 text-left focus-visible:outline-2 focus-visible:outline-metric-blue"
                             onClick={() => onCellClick(cell)}
+                            onDoubleClick={() => setEditingEntryId(cell.entryId)}
                             aria-label={`${cell.subjectCode} ${cell.facultyName} day ${cell.dayIndex + 1} period ${cell.periodIndex + 1}`}
                           >
                             <span className="block text-xs font-semibold text-ink">{cell.subjectCode}</span>
@@ -446,7 +553,7 @@ export function TimetablePage() {
           </table>
         </div>
         <p className="mt-3 text-xs text-body-gray">
-          Click an entry to select it. With a selection: click an empty slot to move, right-click to swap. Labs move as one 2-period block.
+          Click an entry to select it. With a selection: click an empty slot to move, right-click to swap, or use Edit… to change subject, faculty, day or period. Double-click an entry to open the editor. Labs move as one 2-period block.
         </p>
       </Card>
 
@@ -489,6 +596,97 @@ export function TimetablePage() {
             <p>Faculty: {selectedConflict.facultyIds.map((id) => facultyById.get(id)?.name ?? id).join(', ') || '—'}</p>
             <p>Subject: {selectedConflict.subjectIds.map((id) => subjectById.get(id)?.code ?? id).join(', ') || '—'}</p>
           </div>
+        )}
+      </Card>
+
+      {editingEntry && (
+        <EditModal
+          title={`Edit entry — ${editingEntry.durationPeriods >= 2 ? 'Lab (2 periods)' : 'Theory'}`}
+          onClose={() => setEditingEntryId(null)}
+          onSubmit={(e) => {
+            e.preventDefault();
+            const form = new FormData(e.currentTarget as HTMLFormElement);
+            commitEntryEdit({
+              subjectId: String(form.get('subjectId') ?? ''),
+              facultyId: String(form.get('facultyId') ?? ''),
+              dayIndex: Number(form.get('dayIndex')),
+              startPeriod: Number(form.get('startPeriod')),
+            });
+          }}
+        >
+          <div className="grid gap-4">
+            <Field label="Subject">
+              <Select name="subjectId" defaultValue={editingEntry.subjectId} aria-label="Subject">
+                {subjects.filter((s) => s.active).map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.code} — {s.name}{s.type === 'LAB' ? ' (lab)' : ''}
+                  </option>
+                ))}
+              </Select>
+            </Field>
+            <Field label="Faculty">
+              <Select name="facultyId" defaultValue={editingEntry.facultyId} aria-label="Faculty">
+                {faculty.filter((f) => f.active).map((f) => (
+                  <option key={f.id} value={f.id}>{f.name}</option>
+                ))}
+              </Select>
+            </Field>
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="Day">
+                <Select name="dayIndex" defaultValue={String(editingEntry.dayIndex)} aria-label="Day">
+                  {department.workingDays.map((d, i) => (
+                    <option key={d} value={i}>{d}</option>
+                  ))}
+                </Select>
+              </Field>
+              <Field label="Start period">
+                <Select name="startPeriod" defaultValue={String(editingEntry.startPeriod)} aria-label="Start period">
+                  {Array.from({ length: department.periodsPerDay }, (_, i) => (
+                    <option key={i} value={i}>P{i + 1}</option>
+                  ))}
+                </Select>
+              </Field>
+            </div>
+            <p className="text-xs text-body-gray">
+              Changes that create hard conflicts (double-booked faculty, section collisions, lab overruns) are rejected.
+            </p>
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="secondary" size="sm" onClick={() => setEditingEntryId(null)}>
+                Cancel
+              </Button>
+              <Button type="submit" size="sm">Apply changes</Button>
+            </div>
+          </div>
+        </EditModal>
+      )}
+
+      <Card title={`Version history (${versionHistory.length})`}>
+        {versionHistory.length === 0 ? (
+          <p className="text-sm text-body-gray">
+            No versions recorded yet. Regenerating or editing the timetable creates restore points.
+          </p>
+        ) : (
+          <ul className="space-y-2">
+            {[...versionHistory].reverse().map((v) => (
+              <li key={`${v.version}-${v.recordedAt}`} className="flex items-center justify-between gap-3 rounded-xl bg-surface-1 px-3 py-2 text-xs">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-ink">v{v.version}</span>
+                    <Badge tone={v.origin === 'GENERATED' ? 'blue' : v.origin === 'RESTORE' ? 'amber' : 'slate'}>
+                      {v.origin}
+                    </Badge>
+                    <span className="truncate text-body-gray">{v.label}</span>
+                  </div>
+                  <div className="mt-0.5 text-body-gray">
+                    {new Date(v.recordedAt).toLocaleString()} · {v.entries.length} sessions
+                  </div>
+                </div>
+                <Button variant="secondary" size="sm" onClick={() => restoreVersion(v.version)}>
+                  Restore
+                </Button>
+              </li>
+            ))}
+          </ul>
         )}
       </Card>
     </div>
