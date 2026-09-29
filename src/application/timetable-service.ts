@@ -1,4 +1,4 @@
-import { validateTimetable } from '@/domain/validation/engine';
+import { validateEntryPlacement, validateTimetable } from '@/domain/validation/engine';
 import { buildConfigurationSnapshot } from '@/domain/configuration/normalize';
 import type { Conflict, Timetable, TimetableConfiguration, TimetableEntry } from '@/domain/models';
 import type { EditCommand } from './timetable-edit-commands';
@@ -54,11 +54,20 @@ export class TimetableEditService {
     draft.configurationSnapshot = timetable.configurationSnapshot;
 
     // Full authoritative validation on the DRAFT, before anything commits.
-    // This guarantees an invalid timetable can never reach committed state,
-    // regardless of which rule the violation comes from.
+    // This guarantees an integrity-invalid timetable (collisions, lab atomicity,
+    // structure/references) can never reach committed state. Requirement-count
+    // shortfalls are NOT blocking: removing a session (Clear) is an intentional
+    // edit whose consequence is an unmet requirement — the commit records it and
+    // the timetable is marked INVALID so the validation panel shows the gap.
     const draftCheck = validateTimetable(draft, this.config);
-    if (!draftCheck.isValid) {
-      return { status: 'REJECTED', timetable: null, conflicts: draftCheck.conflicts, error: 'HARD_CONFLICT' };
+    const blocking = draftCheck.conflicts.filter(
+      (c) =>
+        c.severity === 'ERROR' &&
+        c.type !== 'MISSING_REQUIRED_SESSION' &&
+        c.type !== 'EXCESS_REQUIRED_SESSION',
+    );
+    if (blocking.length > 0) {
+      return { status: 'REJECTED', timetable: null, conflicts: blocking, error: 'HARD_CONFLICT' };
     }
 
     // Commit — snapshot the pre-edit state into version history first.
@@ -70,7 +79,8 @@ export class TimetableEditService {
       updatedAt: new Date().toISOString(),
     };
     committed.validationSummary = draftCheck;
-    committed.status = committed.status === 'STALE' ? 'STALE' : 'VALID';
+    committed.status =
+      committed.status === 'STALE' ? 'STALE' : draftCheck.isValid ? 'VALID' : 'INVALID';
 
     return { status: 'COMMITTED', timetable: committed, conflicts: [], error: null };
   }

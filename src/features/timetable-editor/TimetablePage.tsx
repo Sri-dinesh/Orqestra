@@ -206,7 +206,7 @@ export function TimetablePage() {
       state.upsertTimetable(outcome.timetable);
       editor.showToast('success', 'Undo applied.');
     } else {
-      editor.showToast('error', 'Undo blocked: would create a hard conflict.');
+      setBlockedConflicts(outcome.conflicts.length > 0 ? outcome.conflicts : [syntheticConflict(outcome.error ?? 'HARD_CONFLICT')]);
     }
   };
 
@@ -218,7 +218,7 @@ export function TimetablePage() {
       state.upsertTimetable(outcome.timetable);
       editor.showToast('success', 'Redo applied.');
     } else {
-      editor.showToast('error', 'Redo blocked: would create a hard conflict.');
+      setBlockedConflicts(outcome.conflicts.length > 0 ? outcome.conflicts : [syntheticConflict(outcome.error ?? 'HARD_CONFLICT')]);
     }
   };
 
@@ -366,11 +366,7 @@ export function TimetablePage() {
     for (const cmd of ops) {
       const outcome = editService.executeCommand(current, cmd);
       if (outcome.status === 'REJECTED' || !outcome.timetable) {
-        editor.showToast(
-          'error',
-          `Change blocked: ${outcome.conflicts[0]?.type ?? outcome.error ?? 'hard-constraint violation'}`,
-        );
-        state.upsertTimetable(current);
+        setBlockedConflicts(outcome.conflicts.length > 0 ? outcome.conflicts : [syntheticConflict(outcome.error ?? 'HARD_CONFLICT')]);
         setEditingEntryId(null);
         return;
       }
@@ -437,43 +433,47 @@ export function TimetablePage() {
         </div>
       )}
 
-      <div className="flex flex-wrap items-center gap-3">
-        <label className="flex items-center gap-2 text-sm font-medium text-ink">
-          Section:
-          <Select
-            value={activeSectionId ?? ''}
-            onChange={(e) => setSelectedSectionId(e.target.value)}
-            className="w-48"
-            aria-label="Select section"
-          >
-            {sections.map((s) => (
-              <option key={s.id} value={s.id}>{s.name}</option>
-            ))}
-          </Select>
-        </label>
-        {editor.selectedEntryId && (
-          <div className="flex flex-wrap items-center gap-2 rounded-full bg-info-bg px-3 py-1.5">
-            <span className="text-xs font-medium text-info">
-              Entry selected — click a slot to move, right-click to swap
-            </span>
-            <Button variant="secondary" size="sm" onClick={() => setEditingEntryId(editor.selectedEntryId)}>
-              Edit…
-            </Button>
-            <Button variant="secondary" size="sm" onClick={clearSelected}>Clear</Button>
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center gap-3">
+          <label className="flex items-center gap-2 text-sm font-medium text-ink">
+            Section:
             <Select
-              className="w-44"
-              aria-label="Change faculty for selected entry"
-              onChange={(e) => {
-                if (e.target.value) changeFacultyForSelected(e.target.value);
-                e.target.value = '';
-              }}
-              defaultValue=""
+              value={activeSectionId ?? ''}
+              onChange={(e) => setSelectedSectionId(e.target.value)}
+              className="w-48"
+              aria-label="Select section"
             >
-              <option value="">Change faculty…</option>
-              {faculty.map((f) => (
-                <option key={f.id} value={f.id}>{f.name}</option>
+              {sections.map((s) => (
+                <option key={s.id} value={s.id}>{s.name}</option>
               ))}
             </Select>
+          </label>
+        </div>
+        {editor.selectedEntryId && (
+          <div className="flex flex-wrap items-center gap-2 rounded-xl bg-info-bg px-3 py-2">
+            <span className="text-xs font-medium text-info">
+              Entry selected — click an empty slot to move, right-click to swap, or use the actions below
+            </span>
+            <div className="ml-auto flex flex-wrap items-center gap-2">
+              <Button variant="secondary" size="sm" onClick={() => setEditingEntryId(editor.selectedEntryId)}>
+                Edit…
+              </Button>
+              <Button variant="secondary" size="sm" onClick={clearSelected}>Clear</Button>
+              <Select
+                className="w-44"
+                aria-label="Change faculty for selected entry"
+                onChange={(e) => {
+                  if (e.target.value) changeFacultyForSelected(e.target.value);
+                  e.target.value = '';
+                }}
+                defaultValue=""
+              >
+                <option value="">Change faculty…</option>
+                {faculty.filter((f) => f.active).map((f) => (
+                  <option key={f.id} value={f.id}>{f.name}</option>
+                ))}
+              </Select>
+            </div>
           </div>
         )}
       </div>
@@ -658,6 +658,10 @@ export function TimetablePage() {
             </div>
           </div>
         </EditModal>
+      )}
+
+      {blockedConflicts && (
+        <ConflictModal conflicts={blockedConflicts} onClose={() => setBlockedConflicts(null)} />
       )}
 
       <Card title={`Version history (${versionHistory.length})`}>
