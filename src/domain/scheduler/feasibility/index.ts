@@ -94,6 +94,9 @@ export function computeFacultyWorkload(
   return total;
 }
 
+/** Diagnostics that advise but do not make generation impossible. */
+const WARNING_CODES = new Set(['SECTION_CAPACITY_SLACK', 'FACULTY_UNASSIGNED']);
+
 /** Full preflight analysis. Returns structured diagnostics, never throws. */
 export function analyzeFeasibility(input: FeasibilityInput): FeasibilityResult {
   const { department, sections, subjects, faculty } = input;
@@ -172,6 +175,20 @@ export function analyzeFeasibility(input: FeasibilityInput): FeasibilityResult {
         suggestions: ['Remove stale requirements or recreate the subjects.'],
       });
     }
+    if (requiredPeriods < weeklyCapacity) {
+      const shortfall = weeklyCapacity - requiredPeriods;
+      diagnostics.push({
+        code: 'SECTION_CAPACITY_SLACK',
+        message: `Section "${section.name}" requires ${requiredPeriods} of ${weeklyCapacity} weekly periods — ${shortfall} period(s) will remain empty.`,
+        sectionIds: [section.id],
+        subjectIds: [],
+        facultyIds: [],
+        suggestions: [
+          `Add or raise weekly sessions so requirements sum to ${weeklyCapacity} periods (labs count as 2 periods each).`,
+          'Fully-packed timetables require demand to exactly match capacity.',
+        ],
+      });
+    }
   }
 
   const facultyReports: FacultyWorkloadReport[] = [];
@@ -186,6 +203,19 @@ export function analyzeFeasibility(input: FeasibilityInput): FeasibilityResult {
       dailyLimitsViolated: false,
     };
     facultyReports.push(report);
+
+    if (required === 0) {
+      diagnostics.push({
+        code: 'FACULTY_UNASSIGNED',
+        message: `Faculty "${f.name}" is not eligible for any subject and will receive no teaching sessions.`,
+        sectionIds: [],
+        subjectIds: [],
+        facultyIds: [f.id],
+        suggestions: [
+          'Assign this faculty member to a subject pool in the Faculty page.',
+        ],
+      });
+    }
 
     if (required > weeklyCap) {
       diagnostics.push({
@@ -204,6 +234,6 @@ export function analyzeFeasibility(input: FeasibilityInput): FeasibilityResult {
   }
 
   const verdict: FeasibilityResult['verdict'] =
-    diagnostics.length === 0 ? 'READY' : 'IMPOSSIBLE_OR_INVALID';
+    diagnostics.some((d) => !WARNING_CODES.has(d.code)) ? 'IMPOSSIBLE_OR_INVALID' : 'READY';
   return { verdict, configValidation, sectionReports, facultyReports, diagnostics };
 }

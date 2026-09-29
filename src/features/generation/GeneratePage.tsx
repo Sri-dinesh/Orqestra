@@ -11,6 +11,7 @@ import {
   useWorkspaceStore,
 } from '@/state/stores/workspace-store';
 import { GenerationService } from '@/application/generation-service';
+import { withVersion } from '@/application/timetable-versioning';
 import { ManualCancellationToken } from '@/scheduler-runtime/scheduler-runner';
 import { buildConfigurationSnapshot } from '@/domain/configuration/normalize';
 import { DEFAULT_GENERATION_SETTINGS, DEFAULT_HARD_CONSTRAINTS, DEFAULT_SOFT_WEIGHTS } from '@/domain/policies';
@@ -144,9 +145,34 @@ export function GeneratePage() {
       const snapshot = buildConfigurationSnapshot(config);
       const timetable = { ...result.timetable, configurationSnapshot: snapshot, departmentId: department.id };
       if (existingTimetable) {
-        state.upsertTimetable({ ...timetable, id: existingTimetable.id, revision: existingTimetable.revision + 1 });
+        // Versioning: snapshot the outgoing timetable before the regeneration replaces it.
+        const versioned = withVersion(
+          { ...existingTimetable, updatedAt: existingTimetable.updatedAt },
+          'GENERATED',
+          `Regenerated — replaced by seed ${result.metadata?.seed ?? 'auto'}`,
+        );
+        state.upsertTimetable({
+          ...timetable,
+          id: existingTimetable.id,
+          revision: existingTimetable.revision + 1,
+          versionHistory: [...(versioned.versionHistory ?? [])],
+        });
       } else {
-        state.upsertTimetable(timetable);
+        state.upsertTimetable({
+          ...timetable,
+          versionHistory: [
+            {
+              version: 0,
+              origin: 'GENERATED',
+              recordedAt: new Date().toISOString(),
+              entries: timetable.entries.map((e) => ({ ...e })),
+              status: timetable.status,
+              validationSummary: timetable.validationSummary,
+              generationMetadata: timetable.generationMetadata,
+              label: `Initial generation — seed ${result.metadata?.seed ?? 'auto'}`,
+            },
+          ],
+        });
       }
       gen.complete(result.metrics!);
       editor.showToast(
@@ -183,6 +209,43 @@ export function GeneratePage() {
               <Badge tone={preflight.verdict === 'READY' ? 'green' : 'red'}>{preflight.verdict}</Badge>
             </dd>
           </dl>
+
+          {preflight.diagnostics.length > 0 && preflight.verdict === 'READY' && (
+            <ul className="mt-4 space-y-2">
+              {preflight.diagnostics.map((d, i) => (
+                <li key={i} className="rounded-xl bg-warning-bg p-3 text-xs text-warning">
+                  <strong>{d.code}</strong>: {d.message}
+                  {d.suggestions.length > 0 && (
+                    <ul className="mt-1.5 list-disc pl-4 text-body-gray">
+                      {d.suggestions.map((s, j) => <li key={j}>{s}</li>)}
+                    </ul>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {preflight.sectionReports.length > 0 && (
+            <details className="mt-4 rounded-xl bg-surface-1 p-3">
+              <summary className="cursor-pointer text-xs font-semibold text-ink">
+                Section capacity (required vs weekly)
+              </summary>
+              <ul className="mt-2 max-h-48 space-y-1 overflow-y-auto text-xs">
+                {preflight.sectionReports.map((r) => {
+                  const section = sections.find((s) => s.id === r.sectionId);
+                  const slack = r.weeklyCapacity - r.requiredPeriods;
+                  return (
+                    <li key={r.sectionId} className="flex items-center justify-between gap-2 rounded-lg bg-white px-2 py-1">
+                      <span className="truncate text-ink">{section?.name ?? r.sectionId}</span>
+                      <span className={`shrink-0 tabular-nums ${slack > 0 ? 'font-semibold text-warning' : 'text-body-gray'}`}>
+                        {r.requiredPeriods} / {r.weeklyCapacity}{slack > 0 ? ` (${slack} empty)` : ' ✓'}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+            </details>
+          )}
 
           {faculty.length > 0 && (
             <details className="mt-4 rounded-xl bg-surface-1 p-3">
