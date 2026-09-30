@@ -2,6 +2,7 @@ import { CONSTRAINT_VERSION, SCHEDULER_VERSION } from '../policies';
 import { buildConfigurationSnapshot, hashString, stableStringify } from '../configuration/normalize';
 import { validateTimetable } from '../validation/engine';
 import { solveSchedule } from './solver';
+import { improveSchedule } from './post-pass';
 import { scoreSchedule } from './scoring';
 import { createDefaultSeed } from './seeded-rng';
 import type { CancellationToken } from './solver';
@@ -75,10 +76,27 @@ export function generateTimetable(request: SchedulerRequest): GenerationResult {
     };
   }
 
+  // Quality post-pass: hill-climb the soft score while keeping the solution
+  // hard-feasible. Bounded to a fraction of the search budget so it can never
+  // dominate generation time; every accepted move is re-verified by the
+  // independent validator below regardless.
+  const postPass = improveSchedule({
+    entries: solverResult.entries,
+    periodsPerDay: request.config.periodsPerDay,
+    workingDaysCount: request.config.workingDays.length,
+    weights: request.config.softWeights,
+    faculty: request.faculty,
+    maxDurationMs: Math.min(2_000, Math.max(250, request.maxDurationMs >> 5)),
+    maxEvaluations: 150_000,
+    seed,
+  });
+  solverResult.metrics.exploredNodes += postPass.evaluatedMoves;
+  solverResult.metrics.backtrackCount += postPass.acceptedMoves;
+
   const timetable: Timetable = {
     ...neverTimetable,
     id: generateId('tt'),
-    entries: solverResult.entries,
+    entries: postPass.entries,
     status: 'GENERATED',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),

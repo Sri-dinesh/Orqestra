@@ -69,3 +69,84 @@ h1, h2 {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ---------- Print styles (print-optimized timetable output) ----------
+   Print from the Timetable or Faculty timetable page: the app chrome is
+   hidden and the timetable grid prints full-width black-on-white with
+   solid hairline borders. Landscape keeps 7+ period grids legible. */
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 12mm;
+  }
+
+  /* Hide application chrome and everything not part of a timetable grid. */
+  header,
+  nav,
+  button,
+  select,
+  input,
+  details,
+  [role='alertdialog'],
+  [role='dialog'],
+  .print\:hidden {
+    display: none !important;
+  }
+
+  /* Neutralize the app shell. */
+  body {
+    background: #fff !important;
+  }
+  main {
+    max-width: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Flatten cards to plain content. */
+  main .rounded-card {
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+  }
+
+  /* Force any color to be printer-friendly; keep the grid readable. */
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Timetable grid: black on white with solid borders. */
+  table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    border-spacing: 0 !important;
+    font-size: 11px !important;
+  }
+  table th,
+  table td {
+    border: 1px solid #444 !important;
+    border-radius: 0 !important;
+    padding: 6px 4px !important;
+    background: #fff !important;
+    color: #111 !important;
+    break-inside: avoid;
+  }
+  table thead th {
+    font-weight: 700 !important;
+    border-bottom: 2px solid #111 !important;
+  }
+  table td span,
+  table td button,
+  table td div {
+    color: #111 !important;
+  }
+
+  /* Cards after the first (validation panel, version history) don't print
+     from the timetable pages — only the grid and its heading. */
+  main > div > .rounded-card:nth-of-type(n + 2) {
+    display: none !important;
+  }
+}

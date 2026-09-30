@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Button, Card, EditModal, Field, Input, PageHeader } from '@/components/ui/primitives';
+import { AvailabilityGrid } from '@/components/ui/AvailabilityGrid';
+import type { FacultyAvailability } from '@/domain/models';
 import { useEditorStore } from '@/state/stores/editor-store';
 import {
   selectCurrentSections,
@@ -35,6 +37,7 @@ export function FacultyPage() {
   const timetable = useWorkspaceStore(selectTimetableForActiveDepartment);
   const showToast = useEditorStore((s) => s.showToast);
   const members = state.faculty.filter((f) => f.departmentId === departmentId);
+  const department = state.departments.find((d) => d.id === departmentId);
 
   const [code, setCode] = useState('');
   const [name, setName] = useState('');
@@ -42,6 +45,8 @@ export function FacultyPage() {
   const [maxPerWeek, setMaxPerWeek] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<FacultyFormState | null>(null);
+  const [editAvailability, setEditAvailability] = useState<FacultyAvailability[]>([]);
+  const [editPreferred, setEditPreferred] = useState<FacultyAvailability[]>([]);
 
   const editing = editingId ? (members.find((f) => f.id === editingId) ?? null) : null;
 
@@ -118,6 +123,13 @@ export function FacultyPage() {
                         {capacity !== null ? (<> · Capacity {capacity}</>) : null}
                         {over && <span className="ml-1.5 font-semibold text-danger">Over capacity</span>}
                       </p>
+                      <p className="mt-0.5 text-[11px] text-body-gray">
+                        {f.availability.length === 0
+                          ? 'Availability: all slots'
+                          : `Availability: ${f.availability.reduce((a, w) => a + w.durationPeriods, 0)} periods/wk`}
+                        {f.preferredSlots.length > 0 &&
+                          ` · ${f.preferredSlots.reduce((a, w) => a + w.durationPeriods, 0)} preferred`}
+                      </p>
                       <div className="mt-1.5 flex flex-wrap gap-1.5">
                         {subjects
                           .filter((s) => f.subjectIds.includes(s.id) || s.eligibleFacultyIds.includes(f.id))
@@ -150,6 +162,8 @@ export function FacultyPage() {
                         onClick={() => {
                           setEditingId(f.id);
                           setEditForm(facultyFormFrom(f));
+                          setEditAvailability(f.availability);
+                          setEditPreferred(f.preferredSlots);
                         }}
                       >
                         Edit
@@ -201,6 +215,8 @@ export function FacultyPage() {
               name: editForm.name.trim(),
               maxPeriodsPerDay: editForm.maxPerDay ? Number(editForm.maxPerDay) : null,
               maxPeriodsPerWeek: editForm.maxPerWeek ? Number(editForm.maxPerWeek) : null,
+              availability: editAvailability,
+              preferredSlots: editPreferred,
             });
             showToast('success', `Faculty ${editForm.facultyCode} updated.`);
             setEditingId(null);
@@ -216,6 +232,20 @@ export function FacultyPage() {
             <Field label="Max periods/week" hint="Optional">
               <Input type="number" min={1} value={editForm.maxPerWeek} onChange={(e) => setEditForm({ ...editForm, maxPerWeek: e.target.value })} aria-label="Edit max periods per week" />
             </Field>
+            <div className="sm:col-span-2">
+              <Field label="Availability & preferred slots">
+                <AvailabilityGrid
+                  workingDays={department?.workingDays ?? ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY']}
+                  periodsPerDay={department?.periodsPerDay ?? 7}
+                  availability={editAvailability}
+                  preferredSlots={editPreferred}
+                  onChange={(a, p) => {
+                    setEditAvailability(a);
+                    setEditPreferred(p);
+                  }}
+                />
+              </Field>
+            </div>
             <div className="flex gap-2 sm:col-span-2">
               <Button type="submit">Save changes</Button>
               <Button

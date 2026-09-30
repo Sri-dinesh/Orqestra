@@ -7,6 +7,7 @@ import { SubjectsPage } from '@/features/subjects/SubjectsPage';
 import { FacultyPage } from '@/features/faculty/FacultyPage';
 import { GeneratePage } from '@/features/generation/GeneratePage';
 import { TimetablePage } from '@/features/timetable-editor/TimetablePage';
+import { FacultyTimetablePage } from '@/features/timetable-editor/FacultyTimetablePage';
 import { SettingsPage } from '@/features/settings/SettingsPage';
 import { usePersistence } from '@/hooks/usePersistence';
 import { Toast } from '@/components/ui/Toast';
@@ -61,6 +62,7 @@ export default function App() {
             <Route path="/departments/:departmentId/faculty" element={<FacultyPage />} />
             <Route path="/departments/:departmentId/generate" element={<GeneratePage />} />
             <Route path="/departments/:departmentId/timetable" element={<TimetablePage />} />
+            <Route path="/departments/:departmentId/faculty-timetable" element={<FacultyTimetablePage />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

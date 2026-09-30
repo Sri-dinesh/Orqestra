@@ -373,6 +373,18 @@ export function solveSchedule(
       const usage = labStartPeriodUsage[c.dayIndex]?.[c.startPeriod] ?? 0;
       score -= usage * 1.5;
     }
+    // Preferred-slot bonus: place sessions inside windows the faculty member
+    // explicitly marked as preferred, when they declared any.
+    const member = facultyById.get(c.facultyId);
+    if (member && member.preferredSlots.length > 0) {
+      const preferred = member.preferredSlots.some(
+        (w) =>
+          w.dayIndex === c.dayIndex &&
+          c.startPeriod >= w.startPeriod &&
+          c.startPeriod < w.startPeriod + w.durationPeriods,
+      );
+      if (preferred) score += 1.0;
+    }
     return score;
   }
 
@@ -436,6 +448,18 @@ export function solveSchedule(
   function facultyWithinLimits(entry: TimetableEntry): boolean {
     const f = facultyById.get(entry.facultyId);
     if (!f) return false;
+    // Declared availability windows are hard constraints during generation:
+    // every period the entry spans must fall inside an availability block of
+    // the matching day. Faculty with NO declared availability are unconstrained.
+    if (f.availability.length > 0) {
+      const dayWindows = f.availability.filter((w) => w.dayIndex === entry.dayIndex);
+      if (dayWindows.length === 0) return false;
+      for (let p = entry.startPeriod; p < entry.startPeriod + entry.durationPeriods; p++) {
+        if (!dayWindows.some((w) => p >= w.startPeriod && p < w.startPeriod + w.durationPeriods)) {
+          return false;
+        }
+      }
+    }
     if (f.maxPeriodsPerWeek !== null) {
       let load = 0;
       for (const e of placed) {

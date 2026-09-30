@@ -13,6 +13,7 @@ import {
 } from '@/state/stores/workspace-store';
 import { TimetableEditService } from '@/application/timetable-service';
 import { withVersion } from '@/application/timetable-versioning';
+import { computeSlotConflicts, type SlotConflict } from '@/application/timetable-slot-preview';
 import { exportTimetable } from '@/application/export-service';
 import type { EditCommand } from '@/application/timetable-edit-commands';
 import { buildConfigurationSnapshot } from '@/domain/configuration/normalize';
@@ -43,6 +44,7 @@ export function TimetablePage() {
   const [focusConflictId, setFocusConflictId] = useState<string | null>(null);
   const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
   const [blockedConflicts, setBlockedConflicts] = useState<Conflict[] | null>(null);
+  const [addSlot, setAddSlot] = useState<{ dayIndex: number; periodIndex: number } | null>(null);
 
   const department = state.departments.find((d) => d.id === departmentId);
   const config: TimetableConfiguration | null = useMemo(() => {
@@ -123,6 +125,17 @@ export function TimetablePage() {
   const conflictsForSection = (timetable.validationSummary?.conflicts ?? []).filter((c) =>
     activeSectionId ? c.sectionIds.length === 0 || c.sectionIds.includes(activeSectionId) : true,
   );
+
+  // Conflict preview: which target slots would REJECT a move/swap of the
+  // selected entry. Computed with the real edit service (draft-only, no
+  // mutation), memoized on selection + timetable so grid renders stay cheap.
+  // eslint-disable-next-line react-hooks/rules-of-hooks -- conditional return above guarantees timetable/editService exist here
+  const slotConflicts: Map<string, SlotConflict> = useMemo(
+    () => computeSlotConflicts(timetable, editService, config, editor.selectedEntryId),
+    [timetable, editService, config, editor.selectedEntryId],
+  );
+  const hasMovePreview = [...slotConflicts.values()].some((c) => c.kind === 'MOVE');
+  const hasSwapPreview = [...slotConflicts.values()].some((c) => c.kind === 'SWAP');
   const conflictCells = new Set<string>();
   for (const c of conflictsForSection) {
     if (c.dayIndex !== null && c.periodIndex !== null) conflictCells.add(`${c.dayIndex}:${c.periodIndex}`);
@@ -323,6 +336,48 @@ export function TimetablePage() {
     });
   };
 
+  const openAddSession = (dayIndex: number, periodIndex: number) => {
+    setAddSlot({ dayIndex, periodIndex });
+  };
+
+  /** Subjects that this section is actually required to have (sensible add defaults). */
+  const addableSubjects = useMemo(() => {
+    if (!activeSectionId) return [];
+    const section = sections.find((s) => s.id === activeSectionId);
+    const requiredIds = new Set(
+      (section?.subjectRequirements ?? []).filter((r) => r.sessionsPerWeek > 0).map((r) => r.subjectId),
+    );
+    return subjects.filter((s) => s.active && (requiredIds.has(s.id) || s.eligibleSectionIds.includes(activeSectionId)));
+  }, [activeSectionId, sections, subjects]);
+
+  /** Eligible faculty for a given subject in the add modal. */
+  const facultyForSubject = (subjectId: string) => {
+    const subject = subjects.find((s) => s.id === subjectId);
+    const eligible = new Set(subject?.eligibleFacultyIds ?? []);
+    return faculty.filter((f) => f.active && (eligible.size === 0 || eligible.has(f.id)));
+  };
+
+  const commitAddSession = (subjectId: string, facultyId: string) => {
+    if (!addSlot || !activeSectionId) return;
+    const subject = subjects.find((s) => s.id === subjectId);
+    runCommand({
+      operation: 'ADD_ENTRY',
+      payload: {
+        entry: {
+          sectionId: activeSectionId,
+          subjectId,
+          facultyId,
+          dayIndex: addSlot.dayIndex,
+          startPeriod: addSlot.periodIndex,
+          durationPeriods: subject?.type === 'LAB' ? 2 : 1,
+        },
+      },
+      affectedEntryIds: [],
+      timestamp: new Date().toISOString(),
+    });
+    setAddSlot(null);
+  };
+
   const editingEntry = editingEntryId ? entryById.get(editingEntryId) ?? null : null;
 
   /** Apply an arbitrary combination of subject/faculty/day/period changes to the entry being edited. */
@@ -420,6 +475,10 @@ export function TimetablePage() {
             </Button>
             <Button variant="secondary" size="sm" onClick={doExportPdf}>Export PDF</Button>
             <Button variant="secondary" size="sm" onClick={doExportExcel}>Export Excel</Button>
+            <Button variant="secondary" size="sm" onClick={() => window.print()}>Print</Button>
+            <Link to={`/departments/${departmentId}/faculty-timetable`}>
+              <Button variant="secondary" size="sm">Faculty view</Button>
+            </Link>
             <Link to={`/departments/${departmentId}/generate`}>
               <Button size="sm">Regenerate</Button>
             </Link>
@@ -501,18 +560,35 @@ export function TimetablePage() {
                     const occupied = cell.entryId !== null;
                     const isConflict = conflictCells.has(`${cell.dayIndex}:${cell.periodIndex}`);
                     const isSelected = cell.entryId !== null && cell.entryId === editor.selectedEntryId;
+                    const slotKey = `${cell.dayIndex}:${cell.periodIndex}`;
+                    const preview = slotConflicts.get(slotKey);
+                    const isOwnSlot = occupied && cell.entryId === editor.selectedEntryId;
                     const bg = !occupied
-                      ? 'bg-surface-1 hover:bg-surface-2'
+                      ? preview
+                        ? 'bg-danger-bg/60 hover:bg-danger-bg'
+                        : 'bg-surface-1 hover:bg-surface-2'
                       : isConflict
                         ? 'bg-danger-bg'
                         : cell.type === 'LAB'
                           ? 'bg-[#e7e0fd]'
                           : 'bg-[#dce4fd]';
+                    const previewRing =
+                      preview && !isOwnSlot
+                        ? preview.kind === 'MOVE'
+                          ? 'ring-2 ring-danger/60'
+                          : 'ring-2 ring-[#d9a13a]/60'
+                        : '';
                     return (
                       <td
                         key={cell.periodIndex}
-                        className={`rounded-lg p-1 align-top transition-shadow duration-150 ${bg} ${isSelected ? 'ring-2 ring-metric-blue' : ''}`}
-                        title={occupied && cell.isStart ? `${cell.subjectName} — ${cell.facultyName}` : undefined}
+                        className={`rounded-lg p-1 align-top transition-shadow duration-150 ${bg} ${isSelected ? 'ring-2 ring-metric-blue' : ''} ${previewRing}`}
+                        title={
+                          preview && !isOwnSlot
+                            ? `${preview.kind === 'MOVE' ? 'Move' : 'Swap'} blocked: ${preview.reason.replace(/_/g, ' ').toLowerCase()}`
+                            : occupied && cell.isStart
+                              ? `${cell.subjectName} — ${cell.facultyName}`
+                              : undefined
+                        }
                       >
                         {occupied && cell.isStart ? (
                           <button
@@ -531,9 +607,14 @@ export function TimetablePage() {
                         ) : (
                           <button
                             type="button"
-                            className={`h-12 w-full cursor-pointer rounded-md text-left text-[10px] text-body-gray/50 transition-colors duration-150 hover:text-body-gray focus-visible:outline-2 focus-visible:outline-metric-blue ${editor.selectedEntryId ? 'p-1.5' : ''}`}
+                            className={`h-12 w-full cursor-pointer rounded-md text-left text-[10px] transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-metric-blue ${
+                              preview
+                                ? 'cursor-not-allowed text-danger/70'
+                                : 'text-body-gray/50 hover:text-body-gray'
+                            } ${editor.selectedEntryId ? 'p-1.5' : ''}`}
                             onClick={() => {
                               if (editor.selectedEntryId) moveSelectedTo(cell.dayIndex, cell.periodIndex);
+                              else openAddSession(cell.dayIndex, cell.periodIndex);
                             }}
                             onContextMenu={(e) => {
                               e.preventDefault();
@@ -541,7 +622,7 @@ export function TimetablePage() {
                             }}
                             aria-label={`Empty slot day ${cell.dayIndex + 1} period ${cell.periodIndex + 1}`}
                           >
-                            {editor.selectedEntryId ? '+ move here' : ''}
+                            {preview ? '✕ blocked' : editor.selectedEntryId ? '+ move here' : '+ add session'}
                           </button>
                         )}
                       </td>
@@ -553,8 +634,14 @@ export function TimetablePage() {
           </table>
         </div>
         <p className="mt-3 text-xs text-body-gray">
-          Click an entry to select it. With a selection: click an empty slot to move, right-click to swap, or use Edit… to change subject, faculty, day or period. Double-click an entry to open the editor. Labs move as one 2-period block.
+          Click an entry to select it — blocked targets are tinted red (move) / amber (swap) before you click. With a selection: click an empty slot to move, right-click to swap, or use Edit… to change subject, faculty, day or period. Double-click an entry to open the editor. With nothing selected, click an empty slot to add a session. Labs move as one 2-period block.
         </p>
+        {editor.selectedEntryId && (hasMovePreview || hasSwapPreview) && (
+          <p className="mt-1 text-[11px] text-danger/80">
+            {hasMovePreview && <span>{hasSwapPreview ? 'Red' : 'Tinted'} slots: move would be rejected. </span>}
+            {hasSwapPreview && <span>Amber slots: swap would be rejected.</span>}
+          </p>
+        )}
       </Card>
 
       <Card title="Validation panel">
@@ -655,6 +742,59 @@ export function TimetablePage() {
                 Cancel
               </Button>
               <Button type="submit" size="sm">Apply changes</Button>
+            </div>
+          </div>
+        </EditModal>
+      )}
+
+      {addSlot && (
+        <EditModal
+          title={`Add session — ${department.workingDays[addSlot.dayIndex]} P${addSlot.periodIndex + 1}`}
+          onClose={() => setAddSlot(null)}
+          onSubmit={(e) => {
+            e.preventDefault();
+            const form = new FormData(e.currentTarget as HTMLFormElement);
+            const subjectId = String(form.get('subjectId') ?? '');
+            const facultyId = String(form.get('facultyId') ?? '');
+            if (subjectId && facultyId) commitAddSession(subjectId, facultyId);
+          }}
+        >
+          <div className="grid gap-4">
+            <Field label="Subject">
+              <Select name="subjectId" defaultValue={addableSubjects[0]?.id ?? ''} aria-label="Subject for new session">
+                {addableSubjects.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.code} — {s.name}{s.type === 'LAB' ? ' (lab, 2 periods)' : ''}
+                  </option>
+                ))}
+              </Select>
+            </Field>
+            <Field label="Faculty">
+              <Select
+                name="facultyId"
+                defaultValue={facultyForSubject(addableSubjects[0]?.id ?? '')[0]?.id ?? ''}
+                aria-label="Faculty for new session"
+              >
+                {facultyForSubject(addableSubjects[0]?.id ?? '').map((f) => (
+                  <option key={f.id} value={f.id}>{f.name}</option>
+                ))}
+              </Select>
+            </Field>
+            {addableSubjects.length === 0 && (
+              <p className="text-xs text-warning">
+                This section has no subject requirements configured. Add subjects in Configuration first.
+              </p>
+            )}
+            <p className="text-xs text-body-gray">
+              Placements that double-book the section or the faculty member are rejected. Labs occupy 2 consecutive periods.
+            </p>
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="secondary" size="sm" onClick={() => setAddSlot(null)}>
+                Cancel
+              </Button>
+              <Button type="submit" size="sm" disabled={addableSubjects.length === 0}>
+                Add session
+              </Button>
             </div>
           </div>
         </EditModal>
