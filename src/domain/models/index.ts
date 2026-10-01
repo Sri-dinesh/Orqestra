@@ -20,6 +20,39 @@ import type {
 
 /* ---------- Department / Section / Subject / Faculty ---------- */
 
+/**
+ * Workspace-level institution profile. Purely descriptive metadata — it does
+ * not participate in scheduling, validation, or the configuration fingerprint.
+ * All fields optional so an empty workspace stays unannotated.
+ */
+export interface CollegeDetails {
+  name: string;
+  code: string;
+  address: string;
+  city: string;
+  state: string;
+  pincode: string;
+  website: string;
+  contactEmail: string;
+  contactPhone: string;
+  academicYear: string;
+  logoDataUrl: string;
+}
+
+export const EMPTY_COLLEGE_DETAILS: CollegeDetails = {
+  name: '',
+  code: '',
+  address: '',
+  city: '',
+  state: '',
+  pincode: '',
+  website: '',
+  contactEmail: '',
+  contactPhone: '',
+  academicYear: '',
+  logoDataUrl: '',
+};
+
 export interface Department {
   id: DepartmentId;
   code: string;

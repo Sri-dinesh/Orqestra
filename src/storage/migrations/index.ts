@@ -22,6 +22,29 @@ const MIGRATIONS: Record<number, MigrationFn> = {
       },
     };
   },
+  /** v2 → v3: add the institution profile (collegeDetails, all-empty default). */
+  3: (d) => {
+    const payload = (d['payload'] ?? d) as Record<string, unknown>;
+    return {
+      ...d,
+      payload: {
+        ...payload,
+        collegeDetails: payload['collegeDetails'] ?? {
+          name: '',
+          code: '',
+          address: '',
+          city: '',
+          state: '',
+          pincode: '',
+          website: '',
+          contactEmail: '',
+          contactPhone: '',
+          academicYear: '',
+          logoDataUrl: '',
+        },
+      },
+    };
+  },
 };
 
 /** Run the migration chain old → current (§32). Returns null if unusable. */

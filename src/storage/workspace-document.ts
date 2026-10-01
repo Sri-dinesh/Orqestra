@@ -1,4 +1,5 @@
 import type {
+  CollegeDetails,
   Department,
   Faculty,
   Section,
@@ -13,6 +14,8 @@ export interface PersistedWorkspacePayload {
   faculty: Faculty[];
   timetables: Timetable[];
   activeDepartmentId: string | null;
+  /** Institution profile; absent in documents saved before it existed. */
+  collegeDetails?: CollegeDetails;
 }
 
 export interface PersistedWorkspace {

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { generateId } from '@/domain/models/ids';
 import type {
+  CollegeDetails,
   Department,
   Faculty,
   GenerationMetadata,
@@ -8,6 +9,7 @@ import type {
   Subject,
   Timetable,
 } from '@/domain/models';
+import { EMPTY_COLLEGE_DETAILS } from '@/domain/models';
 import type { WorkingDay } from '@/domain/enums';
 
 export interface GenerationSettingsOverrides {
@@ -29,6 +31,8 @@ export interface WorkspaceState {
   persistenceStatus: 'IDLE' | 'SAVING' | 'SAVED' | 'ERROR';
   /** Per-department generation settings overrides (keyed by department ID). */
   generationSettingsOverrides: Record<string, Partial<GenerationSettingsOverrides>>;
+  /** Institution profile (Settings). Descriptive metadata only. */
+  collegeDetails: CollegeDetails;
 
   setActiveDepartment: (id: string | null) => void;
   addDepartment: (input: { code: string; name: string; workingDays: WorkingDay[]; periodsPerDay: number }) => Department;
@@ -59,8 +63,10 @@ export interface WorkspaceState {
     timetables: Timetable[];
     activeDepartmentId: string | null;
     generationSettingsOverrides?: Record<string, Partial<GenerationSettingsOverrides>>;
+    collegeDetails?: CollegeDetails;
   }) => void;
   setPersistenceStatus: (status: WorkspaceState['persistenceStatus']) => void;
+  setCollegeDetails: (details: CollegeDetails) => void;
   setGenerationSettingsOverrides: (
     departmentId: string,
     overrides: Partial<GenerationSettingsOverrides>,
@@ -76,6 +82,7 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
   activeDepartmentId: null,
   persistenceStatus: 'IDLE',
   generationSettingsOverrides: {},
+  collegeDetails: EMPTY_COLLEGE_DETAILS,
 
   setActiveDepartment: (id) => set({ activeDepartmentId: id }),
 
@@ -185,8 +192,15 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
       ),
     })),
 
-  replaceAll: (payload) => set({ ...payload, persistenceStatus: 'IDLE' }),
+  replaceAll: (payload) =>
+    set({
+      ...payload,
+      collegeDetails: payload.collegeDetails ?? EMPTY_COLLEGE_DETAILS,
+      persistenceStatus: 'IDLE',
+    }),
   setPersistenceStatus: (persistenceStatus) => set({ persistenceStatus }),
+
+  setCollegeDetails: (collegeDetails) => set({ collegeDetails }),
 
   setGenerationSettingsOverrides: (departmentId, overrides) =>
     set((s) => ({

@@ -91,6 +91,23 @@ export const departmentSchema = z.object({
   updatedAt: isoString,
 });
 
+/* ---------- Institution profile (descriptive only) ---------- */
+
+/** Type intentionally lives in ./models; re-exported there and via domain/index. */
+export const collegeDetailsSchema = z.object({
+  name: z.string(),
+  code: z.string(),
+  address: z.string(),
+  city: z.string(),
+  state: z.string(),
+  pincode: z.string(),
+  website: z.string(),
+  contactEmail: z.string(),
+  contactPhone: z.string(),
+  academicYear: z.string(),
+  logoDataUrl: z.string(),
+});
+
 /* ---------- Timetable schemas ---------- */
 
 export const timetableEntrySchema = z.object({
@@ -231,6 +248,7 @@ export const persistedWorkspacePayloadSchema = z.object({
   faculty: z.array(facultySchema),
   timetables: z.array(timetableSchema),
   activeDepartmentId: z.string().nullable(),
+  collegeDetails: collegeDetailsSchema.optional(),
   generationSettingsOverrides: z
     .record(
       z.object({

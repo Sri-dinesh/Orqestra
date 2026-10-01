@@ -35,6 +35,7 @@ export function usePersistence(): LoadOutcome | null {
         faculty: outcome.workspace.payload.faculty,
         timetables: outcome.workspace.payload.timetables,
         activeDepartmentId: outcome.workspace.payload.activeDepartmentId,
+        collegeDetails: outcome.workspace.payload.collegeDetails,
       });
     }
   }, []);
@@ -56,6 +57,7 @@ export function usePersistence(): LoadOutcome | null {
             timetables: state.timetables,
             activeDepartmentId: state.activeDepartmentId,
             generationSettingsOverrides: state.generationSettingsOverrides,
+            collegeDetails: state.collegeDetails,
           } as never,
           (getStoredCreatedAt() as string | null) ?? undefined,
         );
@@ -67,7 +69,7 @@ export function usePersistence(): LoadOutcome | null {
     return () => {
       if (timer.current) clearTimeout(timer.current);
     };
-  }, [state.departments, state.sections, state.subjects, state.faculty, state.timetables, state.activeDepartmentId, state.generationSettingsOverrides, state.persistenceStatus]);
+  }, [state.departments, state.sections, state.subjects, state.faculty, state.timetables, state.activeDepartmentId, state.generationSettingsOverrides, state.collegeDetails, state.persistenceStatus]);
 
   return outcomeRef.current;
 }
@@ -99,6 +101,7 @@ export function flushPersistence(): void {
         timetables: state.timetables,
         activeDepartmentId: state.activeDepartmentId,
         generationSettingsOverrides: state.generationSettingsOverrides,
+        collegeDetails: state.collegeDetails,
       } as never,
       (getStoredCreatedAt() as string | null) ?? undefined,
     );
