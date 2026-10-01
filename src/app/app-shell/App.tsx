@@ -11,6 +11,7 @@ import { FacultyTimetablePage } from '@/features/timetable-editor/FacultyTimetab
 import { MasterTimetablePage } from '@/features/timetable-editor/MasterTimetablePage';
 import { SettingsPage } from '@/features/settings/SettingsPage';
 import { usePersistence } from '@/hooks/usePersistence';
+import { useWorkspaceStore } from '@/state/stores/workspace-store';
 import { Toast } from '@/components/ui/Toast';
 
 const navLinkCls = ({ isActive }: { isActive: boolean }) =>
@@ -21,6 +22,7 @@ const navLinkCls = ({ isActive }: { isActive: boolean }) =>
 export default function App() {
   usePersistence();
   const location = useLocation();
+  const collegeName = useWorkspaceStore((s) => s.collegeDetails.name);
 
   useEffect(() => {
     document.title = 'Orqestra';
@@ -38,6 +40,11 @@ export default function App() {
               O
             </span>
             Orqestra
+            {collegeName && (
+              <span className="ml-1 hidden border-l border-hairline pl-2 text-xs font-normal text-body-gray sm:inline">
+                {collegeName}
+              </span>
+            )}
           </Link>
           <nav aria-label="Main navigation" className="flex items-center gap-1">
             <NavLink className={navLinkCls} to="/" end>
