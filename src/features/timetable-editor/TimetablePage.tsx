@@ -45,6 +45,7 @@ export function TimetablePage() {
   const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
   const [blockedConflicts, setBlockedConflicts] = useState<Conflict[] | null>(null);
   const [addSlot, setAddSlot] = useState<{ dayIndex: number; periodIndex: number } | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   const department = state.departments.find((d) => d.id === departmentId);
   const config: TimetableConfiguration | null = useMemo(() => {
@@ -303,7 +304,7 @@ export function TimetablePage() {
     if (!sourceId) return;
     const a = entryById.get(sourceId);
     const b = entryById.get(target.entryId);
-    if (!a || !b) return;
+    if (!a || !b || a.id === b.id) return;
     runCommand({
       operation: 'SWAP_ENTRIES',
       payload: { entryAId: a.id, entryBId: b.id },
@@ -511,7 +512,7 @@ export function TimetablePage() {
         {editor.selectedEntryId && (
           <div className="flex flex-wrap items-center gap-2 rounded-xl bg-info-bg px-3 py-2">
             <span className="text-xs font-medium text-info">
-              Entry selected — click an empty slot to move, right-click to swap, or use the actions below
+              Entry selected — drag it onto a free slot to move, or onto another entry to swap — or use the actions below
             </span>
             <div className="ml-auto flex flex-wrap items-center gap-2">
               <Button variant="secondary" size="sm" onClick={() => setEditingEntryId(editor.selectedEntryId)}>
@@ -578,22 +579,71 @@ export function TimetablePage() {
                           ? 'ring-2 ring-danger/60'
                           : 'ring-2 ring-[#d9a13a]/60'
                         : '';
+                    // While dragging: green ring on every valid drop target
+                    // (blocked cells keep their red/amber preview ring).
+                    const dragRing =
+                      isDragging && !isOwnSlot && !preview ? 'ring-2 ring-success/70' : '';
                     return (
                       <td
                         key={cell.periodIndex}
-                        className={`rounded-lg p-1 align-top transition-shadow duration-150 ${bg} ${isSelected ? 'ring-2 ring-metric-blue' : ''} ${previewRing}`}
+                        className={`rounded-lg p-1 align-top transition-shadow duration-150 ${bg} ${isSelected ? 'ring-2 ring-metric-blue' : ''} ${previewRing} ${dragRing}`}
                         title={
                           preview && !isOwnSlot
                             ? `${preview.kind === 'MOVE' ? 'Move' : 'Swap'} blocked: ${preview.reason.replace(/_/g, ' ').toLowerCase()}`
-                            : occupied && cell.isStart
-                              ? `${cell.subjectName} — ${cell.facultyName}`
-                              : undefined
+                            : isDragging && !isOwnSlot
+                              ? occupied
+                                ? `Drop to swap with ${cell.subjectName}`
+                                : 'Drop here to move'
+                              : occupied && cell.isStart
+                                ? `${cell.subjectName} — ${cell.facultyName}`
+                                : undefined
                         }
+                        draggable={occupied}
+                        onDragStart={(e) => {
+                          if (!cell.entryId) {
+                            e.preventDefault();
+                            return;
+                          }
+                          e.dataTransfer.setData('text/plain', cell.entryId);
+                          e.dataTransfer.effectAllowed = 'move';
+                          // Select immediately so the blocked-target previews
+                          // (red/amber rings) are live for the whole drag.
+                          editor.selectEntry(cell.entryId);
+                          setIsDragging(true);
+                        }}
+                        onDragEnd={() => setIsDragging(false)}
+                        onDragOver={(e) => {
+                          if (!editor.selectedEntryId || isOwnSlot) return;
+                          e.preventDefault();
+                          e.dataTransfer.dropEffect = 'move';
+                        }}
+                        onDrop={(e) => {
+                          e.preventDefault();
+                          const draggedId = e.dataTransfer.getData('text/plain');
+                          setIsDragging(false);
+                          // Ignore drops of foreign content (other apps/tabs).
+                          if (draggedId && draggedId !== editor.selectedEntryId) return;
+                          const sourceId = draggedId || editor.selectedEntryId;
+                          if (!sourceId || sourceId === cell.entryId) return;
+                          if (!cell.entryId) moveSelectedTo(cell.dayIndex, cell.periodIndex);
+                          else swapSelectedWith(cell.dayIndex, cell.periodIndex);
+                        }}
+                        onContextMenu={(e) => {
+                          // Swap lives on the cell (not just empty slots): with a
+                          // selection, right-click any OTHER entry to swap with it.
+                          if (!editor.selectedEntryId) return;
+                          e.preventDefault();
+                          if (cell.entryId && cell.entryId !== editor.selectedEntryId) {
+                            swapSelectedWith(cell.dayIndex, cell.periodIndex);
+                          } else if (!cell.entryId) {
+                            editor.showToast('warning', 'Right-click an occupied entry to swap with the selection.');
+                          }
+                        }}
                       >
                         {occupied && cell.isStart ? (
                           <button
                             type="button"
-                            className="w-full cursor-pointer rounded-md p-1.5 text-left focus-visible:outline-2 focus-visible:outline-metric-blue"
+                            className="w-full cursor-grab rounded-md p-1.5 text-left active:cursor-grabbing focus-visible:outline-2 focus-visible:outline-metric-blue"
                             onClick={() => onCellClick(cell)}
                             onDoubleClick={() => setEditingEntryId(cell.entryId)}
                             aria-label={`${cell.subjectCode} ${cell.facultyName} day ${cell.dayIndex + 1} period ${cell.periodIndex + 1}`}
@@ -603,7 +653,7 @@ export function TimetablePage() {
                             {cell.type === 'LAB' && <span className="block text-[10px] font-medium text-[#5b3fb8]">LAB (2p)</span>}
                           </button>
                         ) : occupied && cell.isContinuation ? (
-                          <span className="block p-1.5 text-[10px] text-body-gray">↳ {cell.subjectCode}</span>
+                          <span className="block cursor-grab p-1.5 text-[10px] text-body-gray">↳ {cell.subjectCode}</span>
                         ) : (
                           <button
                             type="button"
@@ -616,13 +666,15 @@ export function TimetablePage() {
                               if (editor.selectedEntryId) moveSelectedTo(cell.dayIndex, cell.periodIndex);
                               else openAddSession(cell.dayIndex, cell.periodIndex);
                             }}
-                            onContextMenu={(e) => {
-                              e.preventDefault();
-                              if (editor.selectedEntryId) swapSelectedWith(cell.dayIndex, cell.periodIndex);
-                            }}
                             aria-label={`Empty slot day ${cell.dayIndex + 1} period ${cell.periodIndex + 1}`}
                           >
-                            {preview ? '✕ blocked' : editor.selectedEntryId ? '+ move here' : '+ add session'}
+                            {preview
+                              ? '✕ blocked'
+                              : isDragging
+                                ? '↓ drop here'
+                                : editor.selectedEntryId
+                                  ? '+ move here'
+                                  : '+ add session'}
                           </button>
                         )}
                       </td>
@@ -633,8 +685,18 @@ export function TimetablePage() {
             </tbody>
           </table>
         </div>
-        <p className="mt-3 text-xs text-body-gray">
-          Click an entry to select it — blocked targets are tinted red (move) / amber (swap) before you click. With a selection: click an empty slot to move, right-click to swap, or use Edit… to change subject, faculty, day or period. Double-click an entry to open the editor. With nothing selected, click an empty slot to add a session. Labs move as one 2-period block.
+        <ul className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[11px] text-body-gray" aria-label="Grid legend">
+          <li className="flex items-center gap-1.5"><span className="h-3.5 w-5 rounded bg-[#dce4fd] ring-1 ring-inset ring-hairline" aria-hidden="true" /> Theory</li>
+          <li className="flex items-center gap-1.5"><span className="h-3.5 w-5 rounded bg-[#e7e0fd] ring-1 ring-inset ring-hairline" aria-hidden="true" /> Lab (2 periods)</li>
+          <li className="flex items-center gap-1.5"><span className="h-3.5 w-5 rounded bg-surface-1 ring-1 ring-inset ring-hairline" aria-hidden="true" /> Free slot</li>
+          <li className="flex items-center gap-1.5"><span className="h-3.5 w-5 rounded bg-danger-bg ring-1 ring-inset ring-hairline" aria-hidden="true" /> Conflict</li>
+          <li className="flex items-center gap-1.5"><span className="h-3.5 w-5 rounded bg-[#dce4fd] ring-2 ring-metric-blue" aria-hidden="true" /> Selected</li>
+          <li className="flex items-center gap-1.5"><span className="h-3.5 w-5 rounded bg-danger-bg/60 ring-2 ring-danger/60" aria-hidden="true" /> Move blocked</li>
+          <li className="flex items-center gap-1.5"><span className="h-3.5 w-5 rounded bg-[#dce4fd] ring-2 ring-[#d9a13a]/60" aria-hidden="true" /> Swap blocked</li>
+          <li className="flex items-center gap-1.5"><span className="text-[11px] text-body-gray" aria-hidden="true">↳</span> Lab continuation</li>
+        </ul>
+        <p className="mt-2 text-xs text-body-gray">
+          Drag an entry onto a free slot to move it, or onto another entry to swap — green rings mark valid drop targets while dragging. Prefer clicks? Click an entry to select, then click a free slot to move or right-click an entry to swap; double-click to edit subject, faculty, day or period. With nothing selected, click a free slot to add a session. Labs move as one 2-period block.
         </p>
         {editor.selectedEntryId && (hasMovePreview || hasSwapPreview) && (
           <p className="mt-1 text-[11px] text-danger/80">
