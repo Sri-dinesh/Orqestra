@@ -13,7 +13,7 @@ The app is **fully client-side** — no backend, no accounts. Workspace data liv
 - **Automated generation** — backtracking scheduler with seeded randomness, preflight feasibility analysis, faculty fairness heuristics, and configurable time/node budgets
 - **Fully-packed schedules** — the solver fills every period of every day for every section when requirements match weekly capacity
 - **Manual editor** — move/swap sessions, change subject or faculty, custom day/period placement via an edit dialog, all with undo/redo
-- **Robust conflict blocking** — every edit runs the full authoritative validator *before* commit; hard conflicts are rejected with a blocking modal explaining why
+- **Robust conflict blocking** — every edit runs the full authoritative validator _before_ commit; hard conflicts are rejected with a blocking modal explaining why
 - **Faculty availability** — set available and preferred teaching windows with a dedicated grid editor
 - **Faculty timetable view** — review a teacher's weekly workload across all sections in a read-only grid
 - **Version history** — every generation and edit creates a restore-point snapshot; browse and restore any version from the timetable page
@@ -25,7 +25,7 @@ The app is **fully client-side** — no backend, no accounts. Workspace data liv
 1. Create a department from scratch or apply a built-in preset from the dashboard.
 2. Configure working days, periods per day, sections, subjects, and faculty.
 3. Assign weekly session requirements per section (labs count as 2 consecutive periods).
-4. Run generation. Preflight diagnostics warn about capacity gaps, unassigned faculty, and infeasibility *before* the search starts.
+4. Run generation. Preflight diagnostics warn about capacity gaps, unassigned faculty, and infeasibility _before_ the search starts.
 5. Open the timetable editor: click an entry to select it, click an empty slot to move, right-click to swap, double-click (or "Edit…") to change subject/faculty/day/period.
 6. Use the faculty page to set availability and preferred periods, then review the read-only faculty timetable view for weekly workload balance.
 7. Restore any earlier version from the version history panel.
@@ -62,13 +62,13 @@ Orqestra follows a **layered, unidirectional architecture**. Dependencies only e
 
 ### Layer responsibilities
 
-| Layer | What it does | What it never does |
-|---|---|---|
-| **UI** (`src/features`, `src/components`) | Renders pages, grids, modals; dispatches edit commands and generation requests | Contains no scheduling or validation logic |
-| **State** (`src/state/stores`) | Holds the workspace (departments, sections, subjects, faculty, timetables), editor state (selection, undo/redo), and generation job state | Doesn't validate or transform domain data |
-| **Application** (`src/application`) | Orchestrates flows: preflight → generate → validate; draft → validate → commit edits; version snapshots; exports | No direct DOM or storage access |
-| **Domain** (`src/domain`) | Pure logic: solver engine, validation rules, models, Zod schemas, versioning policy | Zero React, zero browser APIs, fully unit-testable |
-| **Storage** (`src/storage`) | Serializes the workspace to local storage, runs schema migrations, recovers from corruption | Understands nothing about scheduling |
+| Layer                                     | What it does                                                                                                                              | What it never does                                 |
+| ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| **UI** (`src/features`, `src/components`) | Renders pages, grids, modals; dispatches edit commands and generation requests                                                            | Contains no scheduling or validation logic         |
+| **State** (`src/state/stores`)            | Holds the workspace (departments, sections, subjects, faculty, timetables), editor state (selection, undo/redo), and generation job state | Doesn't validate or transform domain data          |
+| **Application** (`src/application`)       | Orchestrates flows: preflight → generate → validate; draft → validate → commit edits; version snapshots; exports                          | No direct DOM or storage access                    |
+| **Domain** (`src/domain`)                 | Pure logic: solver engine, validation rules, models, Zod schemas, versioning policy                                                       | Zero React, zero browser APIs, fully unit-testable |
+| **Storage** (`src/storage`)               | Serializes the workspace to local storage, runs schema migrations, recovers from corruption                                               | Understands nothing about scheduling               |
 
 ### Key data flow: editing a session
 
@@ -135,7 +135,7 @@ Before any search, the config is analyzed so the user learns about impossibiliti
 
 Each section requirement like "THE-1, 6×/week" expands into **6 independent session units**. Labs expand into 1 unit carrying `durationPeriods = 2` — atomicity is guaranteed by construction, since a lab is placed as a single indivisible block spanning 2 consecutive periods.
 
-Sessions are then arranged **section-major**: all of one section's sessions (labs first, longer durations first) before the next section. Sections interact *only* through shared faculty, so this converts one giant search into a sequence of near-independent sub-problems — critical for fully-packed timetables where naive global lab-first ordering thrashes.
+Sessions are then arranged **section-major**: all of one section's sessions (labs first, longer durations first) before the next section. Sections interact _only_ through shared faculty, so this converts one giant search into a sequence of near-independent sub-problems — critical for fully-packed timetables where naive global lab-first ordering thrashes.
 
 ### [3] The backtracking search (`src/domain/scheduler/solver`)
 
@@ -152,28 +152,28 @@ The chosen session is swapped into the current position and swapped back on back
 
 For the chosen session, candidates are enumerated over the full grid: `day × startPeriod × eligibleFaculty`. Before scoring, each candidate must pass **hard constraints** (checked via the occupancy index in ~O(1)):
 
-| Constraint | Enforced by |
-|---|---|
-| Section collision — a section can't be in two rooms at once | `OccupancyIndex.isSectionFree` |
-| Faculty collision — a teacher can't teach two sections simultaneously | `OccupancyIndex.isFacultyFree` |
-| Lab atomicity — labs span 2 consecutive periods on one day | session unit construction |
-| Subject/day cap — max sessions of one subject per section per day (optional) | `subjectPerDayWithinLimits` |
-| Lab/day cap — max lab blocks per section per day (optional) | `labPerDayWithinLimits` |
-| Faculty workload caps — `maxPeriodsPerWeek` / `maxPeriodsPerDay` | `facultyWithinLimits` |
+| Constraint                                                                   | Enforced by                    |
+| ---------------------------------------------------------------------------- | ------------------------------ |
+| Section collision — a section can't be in two rooms at once                  | `OccupancyIndex.isSectionFree` |
+| Faculty collision — a teacher can't teach two sections simultaneously        | `OccupancyIndex.isFacultyFree` |
+| Lab atomicity — labs span 2 consecutive periods on one day                   | session unit construction      |
+| Subject/day cap — max sessions of one subject per section per day (optional) | `subjectPerDayWithinLimits`    |
+| Lab/day cap — max lab blocks per section per day (optional)                  | `labPerDayWithinLimits`        |
+| Faculty workload caps — `maxPeriodsPerWeek` / `maxPeriodsPerDay`             | `facultyWithinLimits`          |
 
 #### Heuristic candidate scoring
 
 Feasible candidates are ranked by a weighted score — this is what turns "a valid timetable" into "a good timetable":
 
-| Term | Weight | Purpose |
-|---|---|---|
-| `− sectionDayLoad × 2` | strongest | spread each section's load across days; prevents starved days and deep dead ends on packed schedules |
-| day-completion bonus `+1.5` | — | prefer extending a partially-filled day over opening a sparse one; consolidates slack onto few days instead of one hole per day |
-| `− facultyLoad × 2` | — | **faculty fairness**: always prefer the least-loaded eligible teacher, so pools share work evenly |
-| `− periodUsage × 1.2` | — | **period-band balancing**: spread sessions across the day so the last period isn't systematically empty |
-| `− sameDayCount × 0.8` | — | distribute a subject's weekly sessions across distinct days |
-| `− labStartUsage × 1.5` (labs only) | — | lab start times vary across sections instead of stacking at one slot |
-| day/period/faculty index tie-breakers | — | fully deterministic ordering (no `Math.random` in the solver) |
+| Term                                  | Weight    | Purpose                                                                                                                         |
+| ------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `− sectionDayLoad × 2`                | strongest | spread each section's load across days; prevents starved days and deep dead ends on packed schedules                            |
+| day-completion bonus `+1.5`           | —         | prefer extending a partially-filled day over opening a sparse one; consolidates slack onto few days instead of one hole per day |
+| `− facultyLoad × 2`                   | —         | **faculty fairness**: always prefer the least-loaded eligible teacher, so pools share work evenly                               |
+| `− periodUsage × 1.2`                 | —         | **period-band balancing**: spread sessions across the day so the last period isn't systematically empty                         |
+| `− sameDayCount × 0.8`                | —         | distribute a subject's weekly sessions across distinct days                                                                     |
+| `− labStartUsage × 1.5` (labs only)   | —         | lab start times vary across sections instead of stacking at one slot                                                            |
+| day/period/faculty index tie-breakers | —         | fully deterministic ordering (no `Math.random` in the solver)                                                                   |
 
 All the counters feeding these terms (`periodUsageByDay`, `facultyLoad`, `labStartPeriodUsage`) are maintained **incrementally** — O(1) update on place, O(1) on rollback.
 
@@ -193,7 +193,7 @@ Two hash maps — `sectionOccupancy` and `facultyOccupancy` — keyed by `"secti
 
 #### Determinism & budgets
 
-- **Seeded PRNG (mulberry32)** — `createSeededRng(seed)`; the seed is stored in generation metadata, so *identical input + identical seed = bit-identical timetable*. Auto mode picks a random seed per run.
+- **Seeded PRNG (mulberry32)** — `createSeededRng(seed)`; the seed is stored in generation metadata, so _identical input + identical seed = bit-identical timetable_. Auto mode picks a random seed per run.
 - **Cancellation** — checked every node via a `CancellationToken` (the Cancel button).
 - **Node budget** — `maxExploredNodes` (default 20 M); exceeded → `SEARCH_NODE_LIMIT`.
 - **Time budget** — `maxSearchDurationMs` (default 60 s), checked every 1024 nodes (`& 0x3ff`) to keep clock reads off the hot path; exceeded → `SEARCH_TIMEOUT`. Both are configurable per department on the Generate page.
@@ -214,7 +214,7 @@ The enterprise preset (9 sections × 6 days × 7 periods = **378 sessions, 100% 
 1. **section-major decomposition** — each section is a near-independent sub-problem;
 2. **MRV fail-fast** — dead ends are detected before placement, not after;
 3. **occupancy indexing** — O(1) collision checks;
-4. **day-balancing heuristics** — the greedy ordering keeps every section's days perfectly balanced, which for fully-packed inputs is also exactly what the backtracker wants, so greedy usually *is* the solution;
+4. **day-balancing heuristics** — the greedy ordering keeps every section's days perfectly balanced, which for fully-packed inputs is also exactly what the backtracker wants, so greedy usually _is_ the solution;
 5. **incremental counters** — rollback is O(1) per undo.
 
 The same engine also handles slack configurations (e.g. 41/42 periods) — the day-completion bonus concentrates leftover empty periods onto few days instead of scattering one hole per day.
@@ -223,17 +223,17 @@ The same engine also handles slack configurations (e.g. 41/42 periods) — the d
 
 Layered rule checks, each producing structured `Conflict` objects:
 
-| Layer | Rule | Blocks edits? |
-|---|---|---|
-| Structure & references | entries reference existing sections/subjects/faculty | ✅ |
-| Collisions | faculty & section double-booking | ✅ |
-| Laboratories | atomic 2-period blocks, no overlap | ✅ |
-| Requirements | missing/excess sessions vs. snapshot counts | ❌ — removal is intentional; timetable marked INVALID instead |
-| Configuration consistency | stale timetable after config changes | surfaces as STALE status |
+| Layer                     | Rule                                                 | Blocks edits?                                                 |
+| ------------------------- | ---------------------------------------------------- | ------------------------------------------------------------- |
+| Structure & references    | entries reference existing sections/subjects/faculty | ✅                                                            |
+| Collisions                | faculty & section double-booking                     | ✅                                                            |
+| Laboratories              | atomic 2-period blocks, no overlap                   | ✅                                                            |
+| Requirements              | missing/excess sessions vs. snapshot counts          | ❌ — removal is intentional; timetable marked INVALID instead |
+| Configuration consistency | stale timetable after config changes                 | surfaces as STALE status                                      |
 
 ### Edit transactionality (`src/application/timetable-service.ts`)
 
-Every edit follows **draft → validate → commit**. Nothing mutates committed state before validation passes, so a rejected edit leaves the timetable byte-identical. Rejected edits surface a **blocking modal** (not a dismissible toast) so the user always learns *why*.
+Every edit follows **draft → validate → commit**. Nothing mutates committed state before validation passes, so a rejected edit leaves the timetable byte-identical. Rejected edits surface a **blocking modal** (not a dismissible toast) so the user always learns _why_.
 
 ### Versioning (`src/application/timetable-versioning.ts`)
 
