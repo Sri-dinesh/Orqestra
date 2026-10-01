@@ -120,6 +120,9 @@ export function FacultyTimetablePage() {
               {weeklyLoad} periods / week
             </Badge>
             <Button variant="secondary" size="sm" onClick={() => window.print()}>Print</Button>
+            <Link to={`/departments/${departmentId}/master-timetable`}>
+              <Button variant="secondary" size="sm">Master view</Button>
+            </Link>
             <Link to={`/departments/${departmentId}/timetable`}>
               <Button variant="secondary" size="sm">Section view →</Button>
             </Link>

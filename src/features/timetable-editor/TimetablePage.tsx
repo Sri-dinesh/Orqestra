@@ -480,6 +480,9 @@ export function TimetablePage() {
             <Link to={`/departments/${departmentId}/faculty-timetable`}>
               <Button variant="secondary" size="sm">Faculty view</Button>
             </Link>
+            <Link to={`/departments/${departmentId}/master-timetable`}>
+              <Button variant="secondary" size="sm">Master view</Button>
+            </Link>
             <Link to={`/departments/${departmentId}/generate`}>
               <Button size="sm">Regenerate</Button>
             </Link>
