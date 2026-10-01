@@ -499,7 +499,12 @@ export function TimetablePage() {
             Section:
             <Select
               value={activeSectionId ?? ''}
-              onChange={(e) => setSelectedSectionId(e.target.value)}
+              onChange={(e) => {
+                setSelectedSectionId(e.target.value);
+                // Drop any selection: previews/swaps target the previously
+                // displayed section's entries, which would mislead here.
+                if (editor.selectedEntryId) editor.selectEntry(null);
+              }}
               className="w-48"
               aria-label="Select section"
             >
