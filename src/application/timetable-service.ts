@@ -85,6 +85,29 @@ export class TimetableEditService {
     return { status: 'COMMITTED', timetable: committed, conflicts: [], error: null };
   }
 
+  /** Preview whether a command is valid without committing and without full validation overhead. */
+  previewCommand(timetable: Timetable, command: EditCommand): { status: string; conflicts: { type: string }[]; error?: string | null } {
+    const draft: Timetable = { ...timetable, entries: [...timetable.entries] };
+    const applied = applyEditCommand(draft, command);
+    if (applied.error !== null) {
+      return { status: 'REJECTED', conflicts: [], error: applied.error };
+    }
+    draft.entries = applied.entries;
+    draft.configurationSnapshot = timetable.configurationSnapshot;
+
+    const targeted = validateEntryPlacement(draft, this.config, command.affectedEntryIds);
+    const blocking = targeted.conflicts.filter(
+      (c) =>
+        c.severity === 'ERROR' &&
+        c.type !== 'MISSING_REQUIRED_SESSION' &&
+        c.type !== 'EXCESS_REQUIRED_SESSION',
+    );
+    if (blocking.length > 0) {
+      return { status: 'REJECTED', conflicts: blocking.map((c) => ({ type: c.type })), error: 'HARD_CONFLICT' };
+    }
+    return { status: 'VALID', conflicts: [], error: null };
+  }
+
   /** Preview whether a would-be placement is valid, without committing. */
   previewPlacement(
     timetable: Timetable,

@@ -1,5 +1,6 @@
 import type { Timetable, TimetableConfiguration } from '@/domain/models';
 import type { EditCommand } from '@/application/timetable-edit-commands';
+import { buildGridLayout, isBreakColumn } from '@/domain/scheduler/grid-layout';
 
 export type SlotConflictKind = 'MOVE' | 'SWAP';
 
@@ -33,6 +34,10 @@ export function computeSlotConflicts(
       t: Timetable,
       c: EditCommand,
     ): { status: string; conflicts: { type: string }[]; error?: string | null };
+    previewCommand(
+      t: Timetable,
+      c: EditCommand,
+    ): { status: string; conflicts: { type: string }[]; error?: string | null };
   },
   config: TimetableConfiguration,
   selectedEntryId: string | null,
@@ -42,7 +47,9 @@ export function computeSlotConflicts(
   const entry = timetable.entries.find((e) => e.id === selectedEntryId);
   if (!entry) return result;
 
-  const periodsPerDay = config.periodsPerDay;
+  // Grid coordinates: break columns are never actionable targets.
+  const layout = buildGridLayout(config.periodsPerDay, config.breaks);
+  const periodsPerDay = layout.gridSlotsPerDay;
   const dayCount = config.workingDays.length;
 
   /** The entry of the SELECTED entry's section covering this slot, if any. */
@@ -60,12 +67,13 @@ export function computeSlotConflicts(
 
   for (let day = 0; day < dayCount; day++) {
     for (let p = 0; p < periodsPerDay; p++) {
+      if (isBreakColumn(layout, p)) continue; // lunch etc. — not a move/swap target
       const target = sectionTargetAt(day, p);
       if (target && target.id === entry.id) continue; // its own slot — not actionable
 
       if (!target) {
         // Empty cell → MOVE attempt for this exact start period.
-        const outcome = service.executeCommand(timetable, {
+        const outcome = service.previewCommand(timetable, {
           operation: 'MOVE_ENTRY',
           payload: { entryId: entry.id, dayIndex: day, startPeriod: p },
           affectedEntryIds: [entry.id],
@@ -89,7 +97,7 @@ export function computeSlotConflicts(
           // Payload-level rejection (theory vs lab) — no service call needed.
           markTarget('DURATION_MISMATCH');
         } else {
-          const outcome = service.executeCommand(timetable, {
+          const outcome = service.previewCommand(timetable, {
             operation: 'SWAP_ENTRIES',
             payload: { entryAId: entry.id, entryBId: target.id },
             affectedEntryIds: [entry.id, target.id],
