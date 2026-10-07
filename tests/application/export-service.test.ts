@@ -9,6 +9,7 @@ import { generateTimetable } from '@/domain/scheduler/engine';
 import { datasetMinimal } from '../fixtures/datasets';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 vi.mock('xlsx', async (importOriginal) => {
   const actual = await importOriginal<typeof import('xlsx')>();
@@ -17,9 +18,12 @@ vi.mock('xlsx', async (importOriginal) => {
 
 vi.mock('jspdf', () => {
   const mockDoc = {
+    setFont: vi.fn(),
     setFontSize: vi.fn(),
-    text: vi.fn(),
     setTextColor: vi.fn(),
+    getTextColor: vi.fn(() => '#000000'),
+    text: vi.fn(),
+    line: vi.fn(),
     save: vi.fn(),
     output: vi.fn(() => new ArrayBuffer(1024)),
     internal: { pageSize: { getWidth: () => 297, getHeight: () => 210 } },
@@ -115,5 +119,60 @@ describe('export service', () => {
     expect(JsPDF).toHaveBeenCalledWith({ orientation: 'landscape', unit: 'mm', format: 'a4' });
     const instance = JsPDF.mock.results[0].value as { save: ReturnType<typeof vi.fn> };
     expect(instance.save).toHaveBeenCalledWith(`timetable-${ds.department.code}-${ds.sections[0].name}.pdf`);
+  });
+
+  it('renders the official notice-board format with vertical break columns', () => {
+    const { ds, input } = makeExportInput();
+    const official = {
+      ...input,
+      breaks: [
+        { id: 'brk1', name: 'Break', dayIndex: null, startPeriod: 2, durationPeriods: 1 },
+        { id: 'brk2', name: 'Lunch', dayIndex: null, startPeriod: 4, durationPeriods: 1 },
+      ],
+      collegeDetails: {
+        name: 'Vardhaman College of Engineering',
+        code: '',
+        address: '',
+        city: '',
+        state: '',
+        pincode: '',
+        website: '',
+        contactEmail: '',
+        contactPhone: '',
+        academicYear: '2026 - 2027',
+        logoDataUrl: '',
+      },
+      sections: [{ ...ds.sections[0], roomNo: '1020', classAdvisor: 'Mr. P. Vikram' }],
+    };
+    vi.mocked(autoTable).mockClear();
+    exportTimetableAsPdf(official);
+    const JsPDF = jsPDF as unknown as ReturnType<typeof vi.fn>;
+    const instance = JsPDF.mock.results[0].value as { text: ReturnType<typeof vi.fn> };
+    const texts = instance.text.mock.calls.map((c) => String(c[0]));
+    expect(texts.some((t) => t.includes('CLASS TIMETABLE'))).toBe(true);
+    expect(texts.some((t) => t.includes('Room No: 1020'))).toBe(true);
+    expect(texts.some((t) => t.includes('VARDHAMAN COLLEGE OF ENGINEERING'))).toBe(true);
+    // Grid table: time row carries vertical break markers spanning all rows.
+    const calls = vi.mocked(autoTable).mock.calls.map((c) => c[1] as { body?: unknown[][] });
+    const gridCall = calls.find((c) =>
+      (c.body ?? []).some((row) =>
+        (row as { vertical?: string }[]).some(
+          (cell) => typeof cell === 'object' && cell !== null && 'vertical' in cell,
+        ),
+      ),
+    );
+    expect(gridCall).toBeDefined();
+    const verticals = (gridCall!.body ?? []).flatMap((row) =>
+      (row as { vertical?: string }[]).map((cell) =>
+        typeof cell === 'object' && cell !== null ? cell.vertical : undefined,
+      ),
+    );
+    expect(verticals).toContain('Break');
+    expect(verticals).toContain('Lunch');
+    // Advisor bar table mentions the class advisor.
+    const advisorCall = calls.find((c) =>
+      JSON.stringify(c.body ?? []).includes('Mr. P. Vikram'),
+    );
+    expect(advisorCall).toBeDefined();
   });
 });
