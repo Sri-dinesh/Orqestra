@@ -1,10 +1,13 @@
 import type { WorkingDay } from '@/domain/enums';
+import type { CollegeDetails, PeriodTiming } from '@/domain/models';
 import type { useWorkspaceStore } from '@/state/stores/workspace-store';
 
 export interface PresetSubject {
   code: string;
   name: string;
   type: 'THEORY' | 'LAB';
+  /** Official course code for exports (e.g. "A8519"). */
+  courseCode?: string;
   sessionsPerWeek: number;
   /** Indices into the preset's faculty list. */
   faculty: number[];
@@ -16,10 +19,11 @@ export interface PresetDefinition {
   id: string;
   label: string;
   description: string;
-  department: { code: string; name: string };
+  department: { code: string; name: string; effectiveFrom?: string; mentors?: string };
   workingDays: WorkingDay[];
+  /** Teaching periods per day (breaks add extra columns, never counted here). */
   periodsPerDay: number;
-  sections: Array<{ name: string; year: number; semester: number; studentCount: number }>;
+  sections: Array<{ name: string; year: number; semester: number; studentCount: number; roomNo?: string; classAdvisor?: string }>;
   faculty: Array<{ facultyCode: string; name: string }>;
   subjects: PresetSubject[];
   /** Per-section weekly requirements: [sectionIndex][subjectIndex] = sessions. */
@@ -28,7 +32,16 @@ export interface PresetDefinition {
   generationSettings?: {
     maxSessionsPerSubjectPerDay?: number | null;
     maxLabSessionsPerSectionPerDay?: number | null;
+    maxConsecutiveTheory?: number | null;
+    maxGapsPerDay?: number | null;
   };
+  rooms?: { code: string; name: string; capacity: number; type: "GENERAL" | "THEORY" | "LAB" }[];
+  /** Break positions are teaching-coordinate: startPeriod = "after this many teaching periods". */
+  breaks?: { name: string; dayIndex: number | null; startPeriod: number; durationPeriods: number; startTime?: string; endTime?: string }[];
+  /** Wall-clock times per teaching period (index-aligned). */
+  periodTimings?: PeriodTiming[];
+  /** Institution profile applied with the preset (merged over current values). */
+  college?: Partial<CollegeDetails>;
 }
 
 const WEEK5: WorkingDay[] = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY'];
@@ -172,6 +185,93 @@ export const BUILT_IN_PRESETS: PresetDefinition[] = [
       maxLabSessionsPerSectionPerDay: 1,
     },
   },
+  {
+    id: 'btech-cse-3rd-year',
+    label: 'B.Tech CSE 3rd Year',
+    description: 'Vardhaman III Year I Semester pattern: 6 Days, 7 Teaching Periods + Break & Lunch, 3 Sections (CSE-G/H/I). Real subjects, faculty, rooms & timings.',
+    department: {
+      code: 'CSE-3',
+      name: 'Computer Science and Engineering',
+      effectiveFrom: '01-06-2026',
+      mentors: 'Mr. B. J. V. Varma (5BZ-5CW), Ms. Monika Garg (5CX-5DU), Mr. Gireesh K. Agarwal (5DV-5EQ), Ms. Sahezadi Begum (LE43-LE49)',
+    },
+    workingDays: ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'],
+    periodsPerDay: 7,
+    // Wall-clock times per teaching period (P1–P7), matching the reference timetable.
+    periodTimings: [
+      { start: '9:10 AM', end: '10:00 AM' },
+      { start: '10:10 AM', end: '11:00 AM' },
+      { start: '11:10 AM', end: '12:00 PM' },
+      { start: '12:00 PM', end: '12:50 PM' },
+      { start: '1:40 PM', end: '2:40 PM' },
+      { start: '2:40 PM', end: '3:30 PM' },
+      { start: '3:30 PM', end: '4:40 PM' },
+    ],
+    sections: [
+      { name: 'CSE-G', year: 3, semester: 5, studentCount: 60, roomNo: '1020', classAdvisor: 'Mr. P. Vikram' },
+      { name: 'CSE-H', year: 3, semester: 5, studentCount: 60, roomNo: '1021' },
+      { name: 'CSE-I', year: 3, semester: 5, studentCount: 60, roomNo: '1022' },
+    ],
+    faculty: [
+      { facultyCode: 'VTR', name: 'Ms. Varsha Thakur' },
+      { facultyCode: 'GAA', name: 'Ms. G. Anusha' },
+      { facultyCode: 'PVM', name: 'Mr. P. Vikram' },
+      { facultyCode: 'MCA', name: 'Mr. Manish Chhabra' },
+      { facultyCode: 'AAI', name: 'Ms. A. Ashwini' },
+      { facultyCode: 'GBM', name: 'Dr. Gouse Baig Mohammad' },
+      { facultyCode: 'RBP', name: 'Dr. Rajkumar B Patil' },
+      { facultyCode: 'RAS', name: 'Ms. R. Arul Selvi' },
+      { facultyCode: 'CMA', name: 'Dr. Ch. Madhurya' },
+      { facultyCode: 'PKI', name: 'Ms. P. Kaveri' },
+      { facultyCode: 'DDS', name: 'Ms. Devika Das' },
+      { facultyCode: 'VPI', name: 'Dr. V. Parvathi' },
+      { facultyCode: 'YVA', name: 'Dr. Y. Vijayalata' },
+    ],
+    subjects: [
+      { code: 'CNS', name: 'Computer Networks', courseCode: 'A8519', type: 'THEORY', sessionsPerWeek: 6, faculty: [0], sections: [0, 1, 2] },
+      { code: 'SEG', name: 'Software Engineering', courseCode: 'A8520', type: 'THEORY', sessionsPerWeek: 5, faculty: [1], sections: [0, 1, 2] },
+      { code: 'WTS', name: 'Web Technologies', courseCode: 'A8604', type: 'THEORY', sessionsPerWeek: 5, faculty: [2], sections: [0, 1, 2] },
+      { code: 'MLG', name: 'Machine Learning', courseCode: 'A8703', type: 'THEORY', sessionsPerWeek: 6, faculty: [3], sections: [0, 1, 2] },
+      { code: 'PE-I', name: 'Professional Elective - I (UML / EHG / DSE)', courseCode: 'A8557 / A8651 / A8851', type: 'THEORY', sessionsPerWeek: 5, faculty: [4, 5, 6, 3], sections: [0, 1, 2] },
+      { code: 'MAD', name: 'Mobile Application Development', courseCode: 'A8606', type: 'THEORY', sessionsPerWeek: 2, faculty: [9, 1], sections: [0, 1, 2] },
+      { code: 'MADL', name: 'Mobile Application Development Laboratory', type: 'LAB', sessionsPerWeek: 1, faculty: [9, 1], sections: [0, 1, 2] },
+      { code: 'RMY', name: 'Research Methodology', courseCode: 'A8035', type: 'THEORY', sessionsPerWeek: 2, faculty: [12], sections: [0, 1, 2] },
+      { code: 'LSM', name: 'Library/Sports/Mentoring', courseCode: '--', type: 'THEORY', sessionsPerWeek: 3, faculty: [2], sections: [0, 1, 2] },
+      { code: 'WTL', name: 'Web Technologies Laboratory', courseCode: 'A8605', type: 'LAB', sessionsPerWeek: 1, faculty: [2, 7], sections: [0, 1, 2] },
+      { code: 'MLL', name: 'Machine Learning Laboratory', courseCode: 'A8704', type: 'LAB', sessionsPerWeek: 1, faculty: [3, 8], sections: [0, 1, 2] },
+      { code: 'ACS', name: 'Advanced English Communication Skills Laboratory', courseCode: 'A8012', type: 'LAB', sessionsPerWeek: 1, faculty: [10, 11], sections: [0, 1, 2] },
+    ],
+    // 6 days × 7 teaching periods = 42 teachable periods required.
+    // 34 theory + 4 lab blocks × 2 periods = 42. Full packing!
+    requirements: Array.from({ length: 3 }, () => [6, 5, 5, 6, 5, 2, 1, 2, 3, 1, 1, 1]),
+    rooms: [
+      { code: '1020', name: 'Theory Room 1020', capacity: 70, type: 'THEORY' },
+      { code: '1021', name: 'Theory Room 1021', capacity: 70, type: 'THEORY' },
+      { code: '1022', name: 'Theory Room 1022', capacity: 70, type: 'THEORY' },
+      { code: '1201-A', name: 'WTL Lab A', capacity: 65, type: 'LAB' },
+      { code: '1201-B', name: 'WTL Lab B', capacity: 65, type: 'LAB' },
+      { code: '1202', name: 'MLL Lab 1202', capacity: 65, type: 'LAB' },
+      { code: '1203', name: 'MLL Lab 1203', capacity: 65, type: 'LAB' },
+      { code: '1101-A', name: 'MAD Lab A', capacity: 65, type: 'LAB' },
+      { code: '1101-B', name: 'MAD Lab B', capacity: 65, type: 'LAB' },
+      { code: '5105', name: 'ACS Lab 5105', capacity: 65, type: 'LAB' },
+    ],
+    breaks: [
+      // Teaching-coordinate positions: short break after P2, lunch after the 4 morning periods (P1–P4).
+      { name: 'Break', dayIndex: null, startPeriod: 2, durationPeriods: 1, startTime: '11:00 AM', endTime: '11:10 AM' },
+      { name: 'Lunch', dayIndex: null, startPeriod: 4, durationPeriods: 1, startTime: '12:50 PM', endTime: '1:40 PM' },
+    ],
+    generationSettings: {
+      maxSessionsPerSubjectPerDay: 2,
+      maxLabSessionsPerSectionPerDay: 1,
+      maxConsecutiveTheory: 4,
+      maxGapsPerDay: 1,
+    },
+    college: {
+      name: 'Vardhaman College of Engineering',
+      academicYear: '2026 - 2027',
+    },
+  }
 ];
 
 export function getPresetById(id: string): PresetDefinition | undefined {
@@ -190,9 +290,20 @@ export function applyPreset(preset: PresetDefinition, store: WorkspaceStore): st
     name: preset.department.name,
     workingDays: [...preset.workingDays],
     periodsPerDay: preset.periodsPerDay,
+    ...(preset.periodTimings ? { periodTimings: preset.periodTimings.map((t) => ({ ...t })) } : {}),
   });
 
-  store.updateDepartment(department.id, { status: 'READY' });
+  store.updateDepartment(department.id, {
+    status: 'READY',
+    ...(preset.department.effectiveFrom !== undefined
+      ? { effectiveFrom: preset.department.effectiveFrom }
+      : {}),
+    ...(preset.department.mentors !== undefined ? { mentors: preset.department.mentors } : {}),
+  });
+
+  if (preset.college) {
+    store.setCollegeDetails({ ...store.collegeDetails, ...preset.college });
+  }
 
   const facultyIds = preset.faculty.map((f) =>
     store.addFaculty({
@@ -216,6 +327,8 @@ export function applyPreset(preset: PresetDefinition, store: WorkspaceStore): st
       semester: s.semester,
       studentCount: s.studentCount,
       subjectRequirements: [],
+      ...(s.roomNo !== undefined ? { roomNo: s.roomNo } : {}),
+      ...(s.classAdvisor !== undefined ? { classAdvisor: s.classAdvisor } : {}),
     }).id,
   );
 
@@ -225,6 +338,7 @@ export function applyPreset(preset: PresetDefinition, store: WorkspaceStore): st
       code: s.code,
       name: s.name,
       type: s.type,
+      ...(s.courseCode !== undefined ? { courseCode: s.courseCode } : {}),
       sessionsPerWeek: s.sessionsPerWeek,
       durationPeriods: s.type === 'LAB' ? 2 : 1,
       eligibleFacultyIds: s.faculty.map((i) => facultyIds[i]),
@@ -240,6 +354,32 @@ export function applyPreset(preset: PresetDefinition, store: WorkspaceStore): st
       .map((r) => ({ id: `req_${sectionIds[sectionIdx]}_${r.subjectId}`, ...r }));
     store.updateSection(sectionIds[sectionIdx], { subjectRequirements: reqs });
   });
+
+
+  if (preset.rooms) {
+    preset.rooms.forEach((r) => {
+      store.addRoom({
+        departmentId: department.id,
+        code: r.code,
+        name: r.name,
+        capacity: r.capacity,
+        type: r.type,
+      });
+    });
+  }
+
+  if (preset.breaks) {
+    preset.breaks.forEach((b) => {
+      store.addBreak({
+        name: b.name,
+        dayIndex: b.dayIndex,
+        startPeriod: b.startPeriod,
+        durationPeriods: b.durationPeriods,
+        ...(b.startTime !== undefined ? { startTime: b.startTime } : {}),
+        ...(b.endTime !== undefined ? { endTime: b.endTime } : {}),
+      });
+    });
+  }
 
   // Presets may declare generation settings overrides (e.g. per-day caps).
   if (preset.generationSettings) {
