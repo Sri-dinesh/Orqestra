@@ -12,8 +12,28 @@ import {
   validateLaboratories,
   validateRequirements,
   validateStructureAndReferences,
+  validateFacultyLimits,
+  validateRooms,
+  validateBreaks,
+  validateFatigueAndGaps,
 } from './rules';
 import type { ValidationContext } from './rules';
+import { buildGridLayout, toGridBreaks } from '../scheduler/grid-layout';
+
+/**
+ * Shared grid truth for one validation pass: the teaching→grid column layout
+ * plus teaching-coordinate breaks converted to grid spans. Entries, conflicts
+ * and availability windows all live in these grid coordinates.
+ */
+function buildGridContext(config: TimetableConfiguration): Pick<ValidationContext, 'layout' | 'gridBreaks' | 'breakColumns'> {
+  const layout = buildGridLayout(config.periodsPerDay, config.breaks);
+  const gridBreaks = toGridBreaks(layout, config.breaks, config.workingDays.length);
+  const breakColumns = new Set<number>();
+  layout.columns.forEach((col, g) => {
+    if (col.kind === 'break') breakColumns.add(g);
+  });
+  return { layout, gridBreaks, breakColumns };
+}
 
 /**
  * Independent authoritative validator (§14.1).
@@ -24,7 +44,7 @@ export function validateTimetable(
   config: TimetableConfiguration,
   currentSnapshot = buildConfigurationSnapshot(config),
 ): ValidationResult {
-  const ctx: ValidationContext = { timetable, config, currentSnapshot };
+  const ctx: ValidationContext = { timetable, config, currentSnapshot, ...buildGridContext(config) };
 
   const conflicts: Conflict[] = [
     ...validateStructureAndReferences(ctx),
@@ -32,6 +52,10 @@ export function validateTimetable(
     ...validateLaboratories(ctx),
     ...validateRequirements(ctx),
     ...validateConfigurationConsistency(ctx),
+    ...validateFacultyLimits(ctx),
+    ...validateRooms(ctx),
+    ...validateBreaks(ctx),
+    ...validateFatigueAndGaps(ctx),
   ];
 
   const hardConflicts = conflicts.filter((c) => c.severity === 'ERROR');
@@ -56,7 +80,7 @@ export function validateEntryPlacement(
   config: TimetableConfiguration,
   affectedEntryIds: string[],
 ): ValidationResult {
-  const ctx: ValidationContext = { timetable, config, currentSnapshot: timetable.configurationSnapshot };
+  const ctx: ValidationContext = { timetable, config, currentSnapshot: timetable.configurationSnapshot, affectedEntryIds, ...buildGridContext(config) };
 
   const conflicts: Conflict[] = [
     ...validateStructureAndReferences(ctx).filter((c) =>
@@ -66,6 +90,18 @@ export function validateEntryPlacement(
       c.entryIds.some((id) => affectedEntryIds.includes(id)),
     ),
     ...validateLaboratories(ctx).filter((c) =>
+      c.entryIds.some((id) => affectedEntryIds.includes(id)),
+    ),
+    ...validateFacultyLimits(ctx).filter((c) =>
+      c.entryIds.some((id) => affectedEntryIds.includes(id)),
+    ),
+    ...validateRooms(ctx).filter((c) =>
+      c.entryIds.some((id) => affectedEntryIds.includes(id)),
+    ),
+    ...validateBreaks(ctx).filter((c) =>
+      c.entryIds.some((id) => affectedEntryIds.includes(id)),
+    ),
+    ...validateFatigueAndGaps(ctx).filter((c) =>
       c.entryIds.some((id) => affectedEntryIds.includes(id)),
     ),
   ];
