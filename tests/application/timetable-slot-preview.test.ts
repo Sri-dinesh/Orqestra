@@ -18,7 +18,7 @@ function makeTimetable(ds: ReturnType<typeof datasetMinimal>, entries: Timetable
     revision: 0,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-  };
+  } as unknown as Timetable;
 }
 
 function baseEntries(ds: ReturnType<typeof datasetMinimal>): TimetableEntry[] {
@@ -28,10 +28,10 @@ function baseEntries(ds: ReturnType<typeof datasetMinimal>): TimetableEntry[] {
   const phyl = ds.subjects.find((s) => s.code === 'PHYL')!;
   const out: TimetableEntry[] = [];
   for (let i = 0; i < 4; i++)
-    out.push({ id: `e_m${i}`, sectionId: section.id, subjectId: math.id, facultyId: 'F0', dayIndex: Math.floor(i / 2), startPeriod: (i % 2) * 3, durationPeriods: 1, source: 'GENERATED', revision: 0 });
+    out.push({ id: `e_m${i}`, sectionId: section.id, subjectId: math.id, facultyId: 'F0', roomId: null, dayIndex: Math.floor(i / 2), startPeriod: (i % 2) * 3, durationPeriods: 1, source: 'GENERATED', revision: 0 });
   for (let i = 0; i < 3; i++)
-    out.push({ id: `e_p${i}`, sectionId: section.id, subjectId: phy.id, facultyId: 'F1', dayIndex: Math.floor(i / 2), startPeriod: (i % 2) * 3 + 1, durationPeriods: 1, source: 'GENERATED', revision: 0 });
-  out.push({ id: 'e_lab', sectionId: section.id, subjectId: phyl.id, facultyId: 'F1', dayIndex: 4, startPeriod: 0, durationPeriods: 2, source: 'GENERATED', revision: 0 });
+    out.push({ id: `e_p${i}`, sectionId: section.id, subjectId: phy.id, facultyId: 'F1', roomId: null, dayIndex: Math.floor(i / 2), startPeriod: (i % 2) * 3 + 1, durationPeriods: 1, source: 'GENERATED', revision: 0 });
+  out.push({ id: 'e_lab', sectionId: section.id, subjectId: phyl.id, facultyId: 'F1', roomId: null, dayIndex: 4, startPeriod: 0, durationPeriods: 2, source: 'GENERATED', revision: 0 });
   return out;
 }
 
@@ -87,15 +87,15 @@ describe('computeSlotConflicts', () => {
     const cs2 = ds2.subjects.find((s) => s.code === 'CS2')!; // F1, section A
     const entries: TimetableEntry[] = [
       // Section A: CS1 (F0) at day0 p0, CS2 (F1) at day0 p2.
-      { id: 'a1', sectionId: secA.id, subjectId: cs1.id, facultyId: 'F0', dayIndex: 0, startPeriod: 0, durationPeriods: 1, source: 'GENERATED', revision: 0 },
-      { id: 'a2', sectionId: secA.id, subjectId: cs2.id, facultyId: 'F1', dayIndex: 0, startPeriod: 2, durationPeriods: 1, source: 'GENERATED', revision: 0 },
+      { id: 'a1', sectionId: secA.id, subjectId: cs1.id, facultyId: 'F0', roomId: null, dayIndex: 0, startPeriod: 0, durationPeriods: 1, source: 'GENERATED', revision: 0 },
+      { id: 'a2', sectionId: secA.id, subjectId: cs2.id, facultyId: 'F1', roomId: null, dayIndex: 0, startPeriod: 2, durationPeriods: 1, source: 'GENERATED', revision: 0 },
       // Section B: CS1 (F0) at day0 p1 — empty from section A's perspective.
-      { id: 'b1', sectionId: secB.id, subjectId: cs1.id, facultyId: 'F0', dayIndex: 0, startPeriod: 1, durationPeriods: 1, source: 'GENERATED', revision: 0 },
+      { id: 'b1', sectionId: secB.id, subjectId: cs1.id, facultyId: 'F0', roomId: null, dayIndex: 0, startPeriod: 1, durationPeriods: 1, source: 'GENERATED', revision: 0 },
       // More sessions so the fixture resembles a real week.
-      { id: 'a3', sectionId: secA.id, subjectId: cs1.id, facultyId: 'F0', dayIndex: 1, startPeriod: 0, durationPeriods: 1, source: 'GENERATED', revision: 0 },
-      { id: 'a4', sectionId: secA.id, subjectId: cs2.id, facultyId: 'F1', dayIndex: 1, startPeriod: 2, durationPeriods: 1, source: 'GENERATED', revision: 0 },
+      { id: 'a3', sectionId: secA.id, subjectId: cs1.id, facultyId: 'F0', roomId: null, dayIndex: 1, startPeriod: 0, durationPeriods: 1, source: 'GENERATED', revision: 0 },
+      { id: 'a4', sectionId: secA.id, subjectId: cs2.id, facultyId: 'F1', roomId: null, dayIndex: 1, startPeriod: 2, durationPeriods: 1, source: 'GENERATED', revision: 0 },
       // Section B's remaining sessions (MA1/F2, no interaction with F0).
-      { id: 'b2', sectionId: secB.id, subjectId: ds2.subjects.find((s) => s.code === 'MA1')!.id, facultyId: 'F2', dayIndex: 2, startPeriod: 0, durationPeriods: 1, source: 'GENERATED', revision: 0 },
+      { id: 'b2', sectionId: secB.id, subjectId: ds2.subjects.find((s) => s.code === 'MA1')!.id, facultyId: 'F2', roomId: null, dayIndex: 2, startPeriod: 0, durationPeriods: 1, source: 'GENERATED', revision: 0 },
     ];
     const tt = makeTimetable(ds2, entries);
     // Select a1 (F0). day0 p1 is EMPTY for section A but F0 teaches b1
@@ -119,12 +119,12 @@ describe('computeSlotConflicts', () => {
     const entries: TimetableEntry[] = [
       // a1 (F0) at day0 p0, a2 (F1) at day0 p1 in section A; b1 (F0) also
       // sits at day0 p1 in section B → swapping a1↔a2 would land F0 on b1.
-      { id: 'a1', sectionId: secA.id, subjectId: cs1.id, facultyId: 'F0', dayIndex: 0, startPeriod: 0, durationPeriods: 1, source: 'GENERATED', revision: 0 },
-      { id: 'a2', sectionId: secA.id, subjectId: cs2.id, facultyId: 'F1', dayIndex: 0, startPeriod: 1, durationPeriods: 1, source: 'GENERATED', revision: 0 },
-      { id: 'b1', sectionId: secB.id, subjectId: cs1.id, facultyId: 'F0', dayIndex: 0, startPeriod: 1, durationPeriods: 1, source: 'GENERATED', revision: 0 },
-      { id: 'a3', sectionId: secA.id, subjectId: cs1.id, facultyId: 'F0', dayIndex: 2, startPeriod: 0, durationPeriods: 1, source: 'GENERATED', revision: 0 },
-      { id: 'a4', sectionId: secA.id, subjectId: cs2.id, facultyId: 'F1', dayIndex: 2, startPeriod: 1, durationPeriods: 1, source: 'GENERATED', revision: 0 },
-      { id: 'b2', sectionId: secB.id, subjectId: ds2.subjects.find((s) => s.code === 'MA1')!.id, facultyId: 'F2', dayIndex: 3, startPeriod: 0, durationPeriods: 1, source: 'GENERATED', revision: 0 },
+      { id: 'a1', sectionId: secA.id, subjectId: cs1.id, facultyId: 'F0', roomId: null, dayIndex: 0, startPeriod: 0, durationPeriods: 1, source: 'GENERATED', revision: 0 },
+      { id: 'a2', sectionId: secA.id, subjectId: cs2.id, facultyId: 'F1', roomId: null, dayIndex: 0, startPeriod: 1, durationPeriods: 1, source: 'GENERATED', revision: 0 },
+      { id: 'b1', sectionId: secB.id, subjectId: cs1.id, facultyId: 'F0', roomId: null, dayIndex: 0, startPeriod: 1, durationPeriods: 1, source: 'GENERATED', revision: 0 },
+      { id: 'a3', sectionId: secA.id, subjectId: cs1.id, facultyId: 'F0', roomId: null, dayIndex: 2, startPeriod: 0, durationPeriods: 1, source: 'GENERATED', revision: 0 },
+      { id: 'a4', sectionId: secA.id, subjectId: cs2.id, facultyId: 'F1', roomId: null, dayIndex: 2, startPeriod: 1, durationPeriods: 1, source: 'GENERATED', revision: 0 },
+      { id: 'b2', sectionId: secB.id, subjectId: ds2.subjects.find((s) => s.code === 'MA1')!.id, facultyId: 'F2', roomId: null, dayIndex: 3, startPeriod: 0, durationPeriods: 1, source: 'GENERATED', revision: 0 },
     ];
     const tt = makeTimetable(ds2, entries);
     // Select a1: right-clicking a2 (occupied, same section, same duration)

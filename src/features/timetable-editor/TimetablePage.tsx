@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Badge, Button, Card, EditModal, Field, PageHeader, Select } from '@/components/ui/primitives';
 import { ConflictModal } from '@/components/ui/ConflictModal';
+import { TimetableGridHeader } from '@/components/ui/TimetableGridHeader';
 import type { Conflict } from '@/domain/models';
 import { useEditorStore, popUndoCommand, popRedoCommand } from '@/state/stores/editor-store';
 import {
@@ -18,6 +19,7 @@ import { exportTimetable } from '@/application/export-service';
 import type { EditCommand } from '@/application/timetable-edit-commands';
 import { buildConfigurationSnapshot } from '@/domain/configuration/normalize';
 import { DEFAULT_GENERATION_SETTINGS, DEFAULT_HARD_CONSTRAINTS, DEFAULT_SOFT_WEIGHTS } from '@/domain/policies';
+import { buildGridLayout, gridColumnLabel } from '@/domain/scheduler/grid-layout';
 import type { TimetableConfiguration } from '@/domain/models';
 
 interface CellVm {
@@ -30,6 +32,8 @@ interface CellVm {
   subjectName: string;
   facultyName: string;
   type: 'THEORY' | 'LAB';
+  /** Set for break columns (e.g. lunch): rendered as a non-interactive break cell. */
+  breakName: string | null;
 }
 
 export function TimetablePage() {
@@ -38,6 +42,8 @@ export function TimetablePage() {
   const sections = useWorkspaceStore(selectCurrentSections);
   const subjects = useWorkspaceStore(selectCurrentSubjects);
   const faculty = useWorkspaceStore(selectCurrentFaculty);
+  const rooms = useWorkspaceStore((s) => s.rooms);
+  const breaks = useWorkspaceStore((s) => s.breaks);
   const timetable = useWorkspaceStore(selectTimetableForActiveDepartment);
   const editor = useEditorStore();
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null);
@@ -57,13 +63,21 @@ export function TimetablePage() {
       sections,
       subjects,
       faculty,
+      rooms,
+      breaks,
       hardConstraints: DEFAULT_HARD_CONSTRAINTS,
       softWeights: DEFAULT_SOFT_WEIGHTS,
       generationSettings: { ...DEFAULT_GENERATION_SETTINGS },
     };
-  }, [department, sections, subjects, faculty]);
+  }, [department, sections, subjects, faculty, rooms, breaks]);
 
   const editService = useMemo(() => (config ? new TimetableEditService(config) : null), [config]);
+
+  // Grid columns: teaching periods plus inserted break columns (e.g. lunch).
+  const layout = useMemo(
+    () => buildGridLayout(department?.periodsPerDay ?? 0, breaks),
+    [department?.periodsPerDay, breaks],
+  );
 
   if (!department || !config || !editService) {
     return <p className="text-sm text-body-gray">Select a department first.</p>;
@@ -95,18 +109,22 @@ export function TimetablePage() {
   const subjectById = new Map(subjects.map((s) => [s.id, s]));
   const facultyById = new Map(faculty.map((f) => [f.id, f]));
 
-  // Build grid view models (§94, §95)
+  // Build grid view models (§94, §95). Entries live in grid coordinates;
+  // break columns (e.g. lunch) render as non-interactive break cells.
+  const emptyCell = (dayIndex: number, periodIndex: number, breakName: string | null): CellVm => ({
+    dayIndex, periodIndex, entryId: null, isStart: false, isContinuation: false,
+    subjectCode: '', subjectName: '', facultyName: '', type: 'THEORY', breakName,
+  });
   const cells: CellVm[][] = department.workingDays.map((_, dayIndex) =>
-    Array.from({ length: department.periodsPerDay }, (_, periodIndex): CellVm => {
+    layout.columns.map((col, periodIndex): CellVm => {
+      if (col.kind === 'break') return emptyCell(dayIndex, periodIndex, col.name);
       const entry = entries.find(
         (e) =>
           e.dayIndex === dayIndex &&
           periodIndex >= e.startPeriod &&
           periodIndex < e.startPeriod + e.durationPeriods,
       );
-      if (!entry) {
-        return { dayIndex, periodIndex, entryId: null, isStart: false, isContinuation: false, subjectCode: '', subjectName: '', facultyName: '', type: 'THEORY' };
-      }
+      if (!entry) return emptyCell(dayIndex, periodIndex, null);
       const subject = subjectById.get(entry.subjectId);
       const member = facultyById.get(entry.facultyId);
       return {
@@ -119,6 +137,7 @@ export function TimetablePage() {
         subjectName: subject?.name ?? 'Unknown subject',
         facultyName: member?.name ?? 'Unknown faculty',
         type: subject?.type ?? 'THEORY',
+        breakName: null,
       };
     }),
   );
@@ -245,6 +264,8 @@ export function TimetablePage() {
         sections,
         subjects,
         faculty,
+        collegeDetails: state.collegeDetails,
+        breaks,
         sectionId: activeSectionId,
       });
       editor.showToast('success', 'PDF exported.');
@@ -262,6 +283,8 @@ export function TimetablePage() {
         sections,
         subjects,
         faculty,
+        collegeDetails: state.collegeDetails,
+        breaks,
         sectionId: activeSectionId,
       });
       editor.showToast('success', 'Excel exported.');
@@ -371,6 +394,7 @@ export function TimetablePage() {
           dayIndex: addSlot.dayIndex,
           startPeriod: addSlot.periodIndex,
           durationPeriods: subject?.type === 'LAB' ? 2 : 1,
+          roomId: null,
         },
       },
       affectedEntryIds: [],
@@ -550,14 +574,11 @@ export function TimetablePage() {
         <div className="overflow-x-auto pb-1">
           <table className="min-w-full border-separate border-spacing-1 text-sm">
             <thead>
-              <tr>
-                <th className="p-1"></th>
-                {Array.from({ length: department.periodsPerDay }, (_, i) => (
-                  <th key={i} className="p-1 text-[11px] font-semibold uppercase tracking-wide text-body-gray">
-                    P{i + 1}
-                  </th>
-                ))}
-              </tr>
+              <TimetableGridHeader
+                columns={layout.columns}
+                periodTimings={department.periodTimings}
+                breaks={breaks}
+              />
             </thead>
             <tbody>
               {cells.map((row, dayIndex) => (
@@ -566,6 +587,24 @@ export function TimetablePage() {
                     {department.workingDays[dayIndex].slice(0, 3)}
                   </th>
                   {row.map((cell) => {
+                    // Break columns (e.g. lunch): labeled, non-interactive, excluded
+                    // from selection, drag-and-drop, previews and add-session.
+                    if (cell.breakName) {
+                      return (
+                        <td
+                          key={cell.periodIndex}
+                          className="rounded-lg bg-[#fdf6e9] p-1 align-middle ring-1 ring-inset ring-[#f0dfb8]"
+                          title={cell.breakName}
+                        >
+                          <span
+                            className="block rounded-md p-1.5 text-center text-[10px] font-semibold uppercase tracking-wide text-[#92690e]"
+                            aria-label={`${cell.breakName} — ${department.workingDays[cell.dayIndex]}`}
+                          >
+                            🍽 {cell.breakName}
+                          </span>
+                        </td>
+                      );
+                    }
                     const occupied = cell.entryId !== null;
                     const isConflict = conflictCells.has(`${cell.dayIndex}:${cell.periodIndex}`);
                     const isSelected = cell.entryId !== null && cell.entryId === editor.selectedEntryId;
@@ -654,7 +693,7 @@ export function TimetablePage() {
                             className="w-full cursor-grab rounded-md p-1.5 text-left active:cursor-grabbing focus-visible:outline-2 focus-visible:outline-metric-blue"
                             onClick={() => onCellClick(cell)}
                             onDoubleClick={() => setEditingEntryId(cell.entryId)}
-                            aria-label={`${cell.subjectCode} ${cell.facultyName} day ${cell.dayIndex + 1} period ${cell.periodIndex + 1}`}
+                            aria-label={`${cell.subjectCode} ${cell.facultyName} day ${cell.dayIndex + 1} ${gridColumnLabel(layout, cell.periodIndex)}`}
                           >
                             <span className="block text-xs font-semibold text-ink">{cell.subjectCode}</span>
                             <span className="block truncate text-[10px] text-body-gray">{cell.facultyName}</span>
@@ -674,7 +713,7 @@ export function TimetablePage() {
                               if (editor.selectedEntryId) moveSelectedTo(cell.dayIndex, cell.periodIndex);
                               else openAddSession(cell.dayIndex, cell.periodIndex);
                             }}
-                            aria-label={`Empty slot day ${cell.dayIndex + 1} period ${cell.periodIndex + 1}`}
+                            aria-label={`Empty slot day ${cell.dayIndex + 1} ${gridColumnLabel(layout, cell.periodIndex)}`}
                           >
                             {preview
                               ? '✕ blocked'
@@ -697,6 +736,7 @@ export function TimetablePage() {
           <li className="flex items-center gap-1.5"><span className="h-3.5 w-5 rounded bg-[#dce4fd] ring-1 ring-inset ring-hairline" aria-hidden="true" /> Theory</li>
           <li className="flex items-center gap-1.5"><span className="h-3.5 w-5 rounded bg-[#e7e0fd] ring-1 ring-inset ring-hairline" aria-hidden="true" /> Lab (2 periods)</li>
           <li className="flex items-center gap-1.5"><span className="h-3.5 w-5 rounded bg-surface-1 ring-1 ring-inset ring-hairline" aria-hidden="true" /> Free slot</li>
+          <li className="flex items-center gap-1.5"><span className="h-3.5 w-5 rounded bg-[#fdf6e9] ring-1 ring-inset ring-[#f0dfb8]" aria-hidden="true" /> Break</li>
           <li className="flex items-center gap-1.5"><span className="h-3.5 w-5 rounded bg-danger-bg ring-1 ring-inset ring-hairline" aria-hidden="true" /> Conflict</li>
           <li className="flex items-center gap-1.5"><span className="h-3.5 w-5 rounded bg-[#dce4fd] ring-2 ring-metric-blue" aria-hidden="true" /> Selected</li>
           <li className="flex items-center gap-1.5"><span className="h-3.5 w-5 rounded bg-danger-bg/60 ring-2 ring-danger/60" aria-hidden="true" /> Move blocked</li>
@@ -704,7 +744,7 @@ export function TimetablePage() {
           <li className="flex items-center gap-1.5"><span className="text-[11px] text-body-gray" aria-hidden="true">↳</span> Lab continuation</li>
         </ul>
         <p className="mt-2 text-xs text-body-gray">
-          Drag an entry onto a free slot to move it, or onto another entry to swap — green rings mark valid drop targets while dragging. Prefer clicks? Click an entry to select, then click a free slot to move or right-click an entry to swap; double-click to edit subject, faculty, day or period. With nothing selected, click a free slot to add a session. Labs move as one 2-period block.
+          Drag an entry onto a free slot to move it, or onto another entry to swap — green rings mark valid drop targets while dragging. Prefer clicks? Click an entry to select, then click a free slot to move or right-click an entry to swap; double-click to edit subject, faculty, day or period. With nothing selected, click a free slot to add a session. Labs move as one 2-period block. Break columns (e.g. lunch) are fixed and never accept sessions.
         </p>
         {editor.selectedEntryId && (hasMovePreview || hasSwapPreview) && (
           <p className="mt-1 text-[11px] text-danger/80">
@@ -735,7 +775,7 @@ export function TimetablePage() {
                 </div>
                 <p className="mt-1 text-body-gray">
                   {c.dayIndex !== null ? `${department.workingDays[c.dayIndex]} ` : ''}
-                  {c.periodIndex !== null ? `period ${c.periodIndex + 1}` : ''}
+                  {c.periodIndex !== null ? gridColumnLabel(layout, c.periodIndex) : ''}
                 </p>
                 {c.resolutionHints.length > 0 && (
                   <ul className="mt-1 list-disc pl-4 text-body-gray">
@@ -798,9 +838,11 @@ export function TimetablePage() {
               </Field>
               <Field label="Start period">
                 <Select name="startPeriod" defaultValue={String(editingEntry.startPeriod)} aria-label="Start period">
-                  {Array.from({ length: department.periodsPerDay }, (_, i) => (
-                    <option key={i} value={i}>P{i + 1}</option>
-                  ))}
+                  {layout.columns.map((col, g) =>
+                    col.kind === 'teaching' ? (
+                      <option key={g} value={g}>P{col.teachingIndex + 1}</option>
+                    ) : null,
+                  )}
                 </Select>
               </Field>
             </div>
@@ -819,7 +861,7 @@ export function TimetablePage() {
 
       {addSlot && (
         <EditModal
-          title={`Add session — ${department.workingDays[addSlot.dayIndex]} P${addSlot.periodIndex + 1}`}
+          title={`Add session — ${department.workingDays[addSlot.dayIndex]} ${gridColumnLabel(layout, addSlot.periodIndex)}`}
           onClose={() => setAddSlot(null)}
           onSubmit={(e) => {
             e.preventDefault();

@@ -256,7 +256,7 @@ export function DashboardPage() {
               </div>
               <p className="mt-1.5 text-xs leading-relaxed text-body-gray">{preset.description}</p>
               <p className="mt-3 text-[11px] text-body-gray/80">
-                {preset.sections.length} section(s) · {preset.subjects.length} subjects · {preset.faculty.length} faculty · {preset.workingDays.length} days × {preset.periodsPerDay} periods
+                {preset.sections.length} section(s) · {preset.subjects.length} subjects · {preset.faculty.length} faculty · {preset.workingDays.length} days × {preset.periodsPerDay} teaching periods{(preset.breaks?.length ?? 0) > 0 ? ` + ${preset.breaks!.map((b) => b.name.toLowerCase()).join(', ')}` : ''}
               </p>
             </div>
           ))}

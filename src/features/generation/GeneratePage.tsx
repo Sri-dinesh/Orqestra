@@ -23,6 +23,8 @@ export function GeneratePage() {
   const sections = useWorkspaceStore(selectCurrentSections);
   const subjects = useWorkspaceStore(selectCurrentSubjects);
   const faculty = useWorkspaceStore(selectCurrentFaculty);
+  const rooms = useWorkspaceStore((s) => s.rooms);
+  const breaks = useWorkspaceStore((s) => s.breaks);
   const existingTimetable = useWorkspaceStore(selectTimetableForActiveDepartment);
   const gen = useGenerationStore();
   const editor = useEditorStore();
@@ -66,6 +68,8 @@ export function GeneratePage() {
       sections,
       subjects,
       faculty,
+      rooms,
+      breaks,
       hardConstraints: DEFAULT_HARD_CONSTRAINTS,
       softWeights: DEFAULT_SOFT_WEIGHTS,
       generationSettings: (() => {
@@ -79,7 +83,7 @@ export function GeneratePage() {
         };
       })(),
     };
-  }, [department, sections, subjects, faculty, seedInput, state.generationSettingsOverrides]);
+  }, [department, sections, subjects, faculty, rooms, breaks, seedInput, state.generationSettingsOverrides]);
 
   if (!department || !config) {
     return <p className="text-sm text-body-gray">Select a department first.</p>;
@@ -101,13 +105,14 @@ export function GeneratePage() {
     sections,
     subjects,
     faculty,
+    breaks,
   });
 
   const running = gen.status === 'VALIDATING' || gen.status === 'PREPARING' || gen.status === 'SEARCHING' || gen.status === 'OPTIMIZING' || gen.status === 'FINAL_VALIDATION';
 
   // Clear the stale result card whenever the configuration or verdict changes,
   // so an old "Generation completed" never sits next to a new failure.
-  const feasibilityKey = `${preflight.verdict}:${totalSessions}:${sections.length}:${subjects.length}:${faculty.length}:${department.periodsPerDay}:${department.workingDays.length}`;
+  const feasibilityKey = `${preflight.verdict}:${totalSessions}:${sections.length}:${subjects.length}:${faculty.length}:${department.periodsPerDay}:${department.workingDays.length}:${breaks.length}`;
   const lastFeasibilityKey = useRef(feasibilityKey);
   useEffect(() => {
     if (lastFeasibilityKey.current !== feasibilityKey) {
@@ -200,7 +205,24 @@ export function GeneratePage() {
           <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
             <dt className="text-body-gray">Sections</dt><dd className="text-right font-medium text-ink">{sections.length}</dd>
             <dt className="text-body-gray">Working days</dt><dd className="text-right font-medium text-ink">{department.workingDays.length}</dd>
-            <dt className="text-body-gray">Periods per day</dt><dd className="text-right font-medium text-ink">{department.periodsPerDay}</dd>
+            <dt className="text-body-gray">Teaching periods / day</dt><dd className="text-right font-medium text-ink">{department.periodsPerDay}</dd>
+            {breaks.length > 0 && (
+              <>
+                <dt className="text-body-gray">Breaks</dt>
+                <dd className="text-right font-medium text-ink">
+                  {breaks
+                    .map((b) => {
+                      const when =
+                        b.startPeriod <= 0
+                          ? 'start of day'
+                          : `after P${Math.min(b.startPeriod, department.periodsPerDay)}`;
+                      const day = b.dayIndex === null ? '' : ` ${department.workingDays[b.dayIndex] ?? ''}`;
+                      return `${b.name} (${when}${day})`;
+                    })
+                    .join(', ')}
+                </dd>
+              </>
+            )}
             <dt className="text-body-gray">Required periods</dt><dd className="text-right font-medium text-ink">{totalSessions}</dd>
             <dt className="text-body-gray">Lab subjects</dt><dd className="text-right font-medium text-ink">{totalLabBlocks}</dd>
             <dt className="text-body-gray">Faculty</dt><dd className="text-right font-medium text-ink">{faculty.length}</dd>

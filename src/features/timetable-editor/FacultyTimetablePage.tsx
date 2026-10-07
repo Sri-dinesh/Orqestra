@@ -8,6 +8,8 @@ import {
   selectTimetableForActiveDepartment,
   useWorkspaceStore,
 } from '@/state/stores/workspace-store';
+import { buildGridLayout, gridColumnLabel } from '@/domain/scheduler/grid-layout';
+import { TimetableGridHeader } from '@/components/ui/TimetableGridHeader';
 
 interface FacultyCell {
   sectionId: string;
@@ -38,6 +40,7 @@ export function FacultyTimetablePage() {
   const subjects = useWorkspaceStore(selectCurrentSubjects);
   const faculty = useWorkspaceStore(selectCurrentFaculty);
   const timetable = useWorkspaceStore(selectTimetableForActiveDepartment);
+  const breaks = useWorkspaceStore((s) => s.breaks);
 
   const department = state.departments.find((d) => d.id === departmentId);
   const [selectedFacultyId, setSelectedFacultyId] = useState<string | null>(null);
@@ -93,6 +96,8 @@ export function FacultyTimetablePage() {
 
   const dayCount = department.workingDays.length;
   const ppd = department.periodsPerDay;
+  // Grid columns: teaching periods plus inserted break columns (e.g. lunch).
+  const layout = buildGridLayout(ppd, breaks);
 
   // Weekly stats for the selected faculty.
   const weeklyLoad = cellBySlot.size;
@@ -175,14 +180,11 @@ export function FacultyTimetablePage() {
         <div className="overflow-x-auto pb-1">
           <table className="min-w-full border-separate border-spacing-1 text-sm">
             <thead>
-              <tr>
-                <th className="p-1"></th>
-                {Array.from({ length: ppd }, (_, i) => (
-                  <th key={i} className="p-1 text-[11px] font-semibold uppercase tracking-wide text-body-gray">
-                    P{i + 1}
-                  </th>
-                ))}
-              </tr>
+              <TimetableGridHeader
+                columns={layout.columns}
+                periodTimings={department.periodTimings}
+                breaks={breaks}
+              />
             </thead>
             <tbody>
               {Array.from({ length: dayCount }, (_, dayIndex) => (
@@ -190,12 +192,24 @@ export function FacultyTimetablePage() {
                   <th className="whitespace-nowrap rounded-lg bg-surface-2 px-2.5 text-[11px] font-semibold text-ink">
                     {department.workingDays[dayIndex].slice(0, 3)}
                   </th>
-                  {Array.from({ length: ppd }, (_, periodIndex) => {
+                  {layout.columns.map((col, periodIndex) => {
+                    if (col.kind === 'break') {
+                      return (
+                        <td key={periodIndex} className="rounded-lg bg-[#fdf6e9] p-1 align-middle ring-1 ring-inset ring-[#f0dfb8]">
+                          <span
+                            className="block rounded-md p-1.5 text-center text-[10px] font-semibold uppercase tracking-wide text-[#92690e]"
+                            aria-label={`${col.name} — ${department.workingDays[dayIndex]}`}
+                          >
+                            🍽 {col.name}
+                          </span>
+                        </td>
+                      );
+                    }
                     const cell = cellBySlot.get(`${dayIndex}:${periodIndex}`);
                     if (!cell) {
                       return (
                         <td key={periodIndex} className="rounded-lg bg-surface-1 p-1">
-                          <span className="block h-12" aria-label={`Free period ${periodIndex + 1}`} />
+                          <span className="block h-12" aria-label={`Free ${gridColumnLabel(layout, periodIndex)}`} />
                         </td>
                       );
                     }
