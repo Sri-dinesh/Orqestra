@@ -1,6 +1,7 @@
 import { CONSTRAINT_VERSION, SCHEDULER_VERSION } from '../policies';
 import { buildConfigurationSnapshot, hashString, stableStringify } from '../configuration/normalize';
 import { validateTimetable } from '../validation/engine';
+import { buildGridLayout, toGridBreaks } from './grid-layout';
 import { solveSchedule } from './solver';
 import { improveSchedule } from './post-pass';
 import { scoreSchedule } from './scoring';
@@ -36,6 +37,11 @@ export interface SchedulerRequest {
 export function generateTimetable(request: SchedulerRequest): GenerationResult {
   const seed = request.seed ?? createDefaultSeed();
 
+  // Teaching-coordinate breaks become grid-coordinate spans once, here, so
+  // the solver, post-pass and validator all share one grid truth.
+  const layout = buildGridLayout(request.config.periodsPerDay, request.config.breaks);
+  const gridBreaks = toGridBreaks(layout, request.config.breaks, request.config.workingDays.length);
+
   const solverResult = solveSchedule(
     {
       department: request.department,
@@ -47,6 +53,9 @@ export function generateTimetable(request: SchedulerRequest): GenerationResult {
       maxExploredNodes: request.maxExploredNodes,
       maxSessionsPerSubjectPerDay: request.config.generationSettings.maxSessionsPerSubjectPerDay ?? null,
       maxLabSessionsPerSectionPerDay: request.config.generationSettings.maxLabSessionsPerSectionPerDay ?? null,
+      rooms: request.config.rooms,
+      breaks: gridBreaks,
+      gridSlotsPerDay: layout.gridSlotsPerDay,
     },
     request.cancellation,
   );
@@ -82,10 +91,12 @@ export function generateTimetable(request: SchedulerRequest): GenerationResult {
   // independent validator below regardless.
   const postPass = improveSchedule({
     entries: solverResult.entries,
-    periodsPerDay: request.config.periodsPerDay,
+    periodsPerDay: layout.gridSlotsPerDay,
     workingDaysCount: request.config.workingDays.length,
     weights: request.config.softWeights,
     faculty: request.faculty,
+    breaks: gridBreaks,
+    rooms: request.config.rooms,
     maxDurationMs: Math.min(2_000, Math.max(250, request.maxDurationMs >> 5)),
     maxEvaluations: 150_000,
     seed,
@@ -107,12 +118,25 @@ export function generateTimetable(request: SchedulerRequest): GenerationResult {
     request.config,
     timetable.configurationSnapshot,
   );
-  timetable.validationSummary = validation;
-  timetable.status = validation.isValid ? 'VALID' : 'INVALID';
+  
+  let finalTimetable: Timetable;
+  if (validation.isValid) {
+    finalTimetable = {
+      ...timetable,
+      status: 'VALID',
+      validationSummary: validation as (typeof validation & { isValid: true })
+    };
+  } else {
+    finalTimetable = {
+      ...timetable,
+      status: 'INVALID',
+      validationSummary: validation as (typeof validation & { isValid: false })
+    };
+  }
 
   const score = scoreSchedule({
-    entries: timetable.entries,
-    periodsPerDay: request.config.periodsPerDay,
+    entries: finalTimetable.entries,
+    periodsPerDay: layout.gridSlotsPerDay,
     workingDaysCount: request.config.workingDays.length,
     weights: request.config.softWeights,
   });
@@ -120,7 +144,7 @@ export function generateTimetable(request: SchedulerRequest): GenerationResult {
 
   return {
     status: 'COMPLETED',
-    timetable,
+    timetable: finalTimetable,
     validation,
     diagnostics: [],
     metrics: solverResult.metrics,

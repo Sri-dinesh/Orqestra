@@ -1,8 +1,9 @@
 import { analyzeFeasibility } from '@/domain/scheduler/feasibility';
-import { MainThreadSchedulerRunner } from '@/scheduler-runtime/scheduler-runner';
+import { MainThreadSchedulerRunner, WebWorkerSchedulerRunner } from '@/scheduler-runtime/scheduler-runner';
 import { buildConfigurationSnapshot } from '@/domain/configuration/normalize';
 import type { CancellationToken } from '@/domain/scheduler/solver';
 import type {
+  Break,
   Department,
   Faculty,
   GenerationResult,
@@ -16,6 +17,7 @@ export interface GenerationRequestInput {
   sections: Section[];
   subjects: Subject[];
   faculty: Faculty[];
+  breaks?: Break[];
   config: TimetableConfiguration;
   seed: number | null;
   runner?: import('@/scheduler-runtime/scheduler-runner').SchedulerRunner;
@@ -36,6 +38,7 @@ export class GenerationService {
       sections: input.sections,
       subjects: input.subjects,
       faculty: input.faculty,
+      breaks: input.breaks ?? input.config.breaks,
     });
     if (feasibility.verdict === 'IMPOSSIBLE_OR_INVALID') {
       return {
@@ -52,7 +55,8 @@ export class GenerationService {
     onStage?.('Building constraints');
     onStage?.('Searching schedule');
 
-    const runner = input.runner ?? new MainThreadSchedulerRunner();
+    const isBrowser = typeof window !== 'undefined' && typeof Worker !== 'undefined';
+    const runner = input.runner ?? (isBrowser ? new WebWorkerSchedulerRunner() : new MainThreadSchedulerRunner());
     const result = await runner.run({
       department: input.department,
       sections: input.sections,
@@ -75,6 +79,7 @@ export class GenerationService {
     sections: Section[];
     subjects: Subject[];
     faculty: Faculty[];
+    breaks?: Break[];
   }) {
     return analyzeFeasibility(input);
   }
