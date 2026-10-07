@@ -9,6 +9,7 @@ import type { Subject } from '@/domain/models';
 interface SubjectFormState {
   code: string;
   name: string;
+  courseCode: string;
   type: SubjectType;
   sessions: number;
   eligibleSections: string[];
@@ -19,6 +20,7 @@ function subjectFormFrom(s: Subject): SubjectFormState {
   return {
     code: s.code,
     name: s.name,
+    courseCode: s.courseCode ?? '',
     type: s.type,
     sessions: s.sessionsPerWeek,
     eligibleSections: [...s.eligibleSectionIds],
@@ -211,6 +213,7 @@ export function SubjectsPage() {
             state.updateSubject(editing.id, {
               code: editForm.code.trim(),
               name: editForm.name.trim(),
+              courseCode: editForm.courseCode.trim() ? editForm.courseCode.trim() : undefined,
               type: editForm.type,
               sessionsPerWeek: Math.max(1, editForm.sessions),
               durationPeriods: editForm.type === 'LAB' ? 2 : 1,
@@ -225,6 +228,7 @@ export function SubjectsPage() {
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Code"><Input value={editForm.code} onChange={(e) => setEditForm({ ...editForm, code: e.target.value })} required aria-label="Edit subject code" /></Field>
             <Field label="Name"><Input value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} required aria-label="Edit subject name" /></Field>
+            <Field label="Course code" hint="Official exports (e.g. A8519)"><Input value={editForm.courseCode} onChange={(e) => setEditForm({ ...editForm, courseCode: e.target.value })} placeholder="A8519" aria-label="Edit course code" /></Field>
             <Field label="Type" hint="Changing type also updates session length (lab = 2 periods).">
               <Select value={editForm.type} onChange={(e) => setEditForm({ ...editForm, type: e.target.value as SubjectType })} aria-label="Edit subject type">
                 <option value="THEORY">Theory</option>

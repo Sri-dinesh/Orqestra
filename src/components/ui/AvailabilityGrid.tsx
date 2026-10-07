@@ -1,9 +1,12 @@
 import { useState } from 'react';
-import type { FacultyAvailability } from '@/domain/models';
+import type { Break, FacultyAvailability } from '@/domain/models';
+import { buildGridLayout } from '@/domain/scheduler/grid-layout';
 
 interface Props {
   workingDays: string[];
+  /** Teaching periods per day (break columns are added on top, grid coordinates kept). */
   periodsPerDay: number;
+  breaks?: Break[];
   /** Initially available windows. */
   availability: FacultyAvailability[];
   /** Initially preferred windows. */
@@ -37,11 +40,15 @@ function toWindows(grid: boolean[][]): FacultyAvailability[] {
  * Preferences are a subset of availability (a preferred period is always
  * available).
  */
-export function AvailabilityGrid({ workingDays, periodsPerDay, availability, preferredSlots, onChange }: Props) {
+export function AvailabilityGrid({ workingDays, periodsPerDay, breaks = [], availability, preferredSlots, onChange }: Props) {
   const [mode, setMode] = useState<'available' | 'preferred'>('available');
+  // Grid columns (teaching + breaks); availability windows live in these
+  // grid coordinates. Break columns are shown but never toggleable.
+  const layout = buildGridLayout(periodsPerDay, breaks);
+  const gridWidth = layout.gridSlotsPerDay;
 
   const [availGrid] = useState(() => {
-    const g = workingDays.map(() => new Array<boolean>(periodsPerDay).fill(false));
+    const g = workingDays.map(() => new Array<boolean>(gridWidth).fill(false));
     for (const w of availability) {
       const row = g[w.dayIndex];
       if (row) for (let p = w.startPeriod; p < w.startPeriod + w.durationPeriods; p++) if (p < row.length) row[p] = true;
@@ -49,7 +56,7 @@ export function AvailabilityGrid({ workingDays, periodsPerDay, availability, pre
     return g;
   });
   const [prefGrid] = useState(() => {
-    const g = workingDays.map(() => new Array<boolean>(periodsPerDay).fill(false));
+    const g = workingDays.map(() => new Array<boolean>(gridWidth).fill(false));
     for (const w of preferredSlots) {
       const row = g[w.dayIndex];
       if (row) for (let p = w.startPeriod; p < w.startPeriod + w.durationPeriods; p++) if (p < row.length) row[p] = true;
@@ -115,8 +122,10 @@ export function AvailabilityGrid({ workingDays, periodsPerDay, availability, pre
         <thead>
           <tr>
             <th></th>
-            {Array.from({ length: periodsPerDay }, (_, i) => (
-              <th key={i} className="p-0.5 font-semibold text-body-gray">P{i + 1}</th>
+            {layout.columns.map((col, i) => (
+              <th key={i} className="p-0.5 font-semibold text-body-gray">
+                {col.kind === 'teaching' ? `P${col.teachingIndex + 1}` : col.name}
+              </th>
             ))}
           </tr>
         </thead>
@@ -124,7 +133,20 @@ export function AvailabilityGrid({ workingDays, periodsPerDay, availability, pre
           {workingDays.map((day, d) => (
             <tr key={day}>
               <th className="pr-1.5 text-right font-semibold text-ink">{day.slice(0, 3)}</th>
-              {Array.from({ length: periodsPerDay }, (_, p) => {
+              {layout.columns.map((col, p) => {
+                if (col.kind === 'break') {
+                  return (
+                    <td key={p}>
+                      <span
+                        className="flex h-7 w-8 items-center justify-center rounded-md bg-[#fdf6e9] text-[10px] text-[#92690e] ring-1 ring-inset ring-[#f0dfb8]"
+                        title={col.name}
+                        aria-label={`${day} ${col.name} (not teachable)`}
+                      >
+                        🍽
+                      </span>
+                    </td>
+                  );
+                }
                 const avail = availGrid[d]?.[p] ?? false;
                 const pref = prefGrid[d]?.[p] ?? false;
                 return (
@@ -132,7 +154,7 @@ export function AvailabilityGrid({ workingDays, periodsPerDay, availability, pre
                     <button
                       type="button"
                       aria-pressed={mode === 'available' ? avail : pref}
-                      aria-label={`${day} period ${p + 1} ${mode === 'available' ? 'available' : 'preferred'}`}
+                      aria-label={`${day} period ${col.teachingIndex + 1} ${mode === 'available' ? 'available' : 'preferred'}`}
                       className={`h-7 w-8 cursor-pointer rounded-md text-[10px] font-semibold transition-colors duration-150 ${cellCls(avail, pref)}`}
                       onClick={() => toggle(d, p)}
                     >

@@ -237,6 +237,7 @@ export function FacultyPage() {
                 <AvailabilityGrid
                   workingDays={department?.workingDays ?? ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY']}
                   periodsPerDay={department?.periodsPerDay ?? 7}
+                  breaks={state.breaks}
                   availability={editAvailability}
                   preferredSlots={editPreferred}
                   onChange={(a, p) => {

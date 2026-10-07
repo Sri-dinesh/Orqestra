@@ -19,10 +19,10 @@ describe('built-in presets', () => {
     });
   });
 
-  it('exposes five presets with unique ids and codes', () => {
-    expect(BUILT_IN_PRESETS.length).toBe(5);
-    expect(new Set(BUILT_IN_PRESETS.map((p) => p.id)).size).toBe(5);
-    expect(new Set(BUILT_IN_PRESETS.map((p) => p.department.code)).size).toBe(5);
+  it('exposes six presets with unique ids and codes', () => {
+    expect(BUILT_IN_PRESETS.length).toBe(6);
+    expect(new Set(BUILT_IN_PRESETS.map((p) => p.id)).size).toBe(6);
+    expect(new Set(BUILT_IN_PRESETS.map((p) => p.department.code)).size).toBe(6);
   });
 
   for (const preset of BUILT_IN_PRESETS) {
@@ -50,6 +50,9 @@ describe('built-in presets', () => {
         sections,
         subjects,
         faculty,
+        // Mirror the Generate page: presets may ship rooms and breaks.
+        rooms: store.rooms.filter((r) => r.departmentId === deptId),
+        breaks: store.breaks,
         hardConstraints: DEFAULT_HARD_CONSTRAINTS,
         softWeights: DEFAULT_SOFT_WEIGHTS,
         generationSettings: {
@@ -60,9 +63,19 @@ describe('built-in presets', () => {
       };
 
       // Presets must be feasible (they are realistic configurations)
-      expect(analyzeFeasibility({ department, sections, subjects, faculty }).verdict).toBe('READY');
+      const feasibility = analyzeFeasibility({ department, sections, subjects, faculty, breaks: store.breaks });
+      expect(feasibility.verdict).toBe('READY');
+      if (preset.id === 'btech-cse-3rd-year') {
+        // 6 days × 7 teaching periods = 42 teachable; break + lunch add
+        // their own columns, so preflight must be completely clean.
+        expect(feasibility.diagnostics).toEqual([]);
+        for (const report of feasibility.sectionReports) {
+          expect(report.requiredPeriods).toBe(42);
+          expect(report.weeklyCapacity).toBe(42);
+        }
+      }
 
-      const isEnterprise = preset.id === 'enterprise';
+      const isLarge = preset.id === 'enterprise' || preset.id === 'btech-cse-3rd-year';
       const result = generateTimetable({
         department,
         sections,
@@ -70,8 +83,8 @@ describe('built-in presets', () => {
         faculty,
         config,
         seed: 123456,
-        maxDurationMs: isEnterprise ? 60_000 : 10_000,
-        maxExploredNodes: isEnterprise ? 50_000_000 : 2_000_000,
+        maxDurationMs: isLarge ? 60_000 : 10_000,
+        maxExploredNodes: isLarge ? 50_000_000 : 2_000_000,
         cancellation: { isCancelled: () => false },
       });
       expect(result.status).toBe('COMPLETED');

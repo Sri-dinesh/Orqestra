@@ -25,7 +25,7 @@ export function DepartmentConfigPage() {
   const [semester, setSemester] = useState(1);
   const [studentCount, setStudentCount] = useState(60);
   const [editingSectionId, setEditingSectionId] = useState<string | null>(null);
-  const [sectionEditForm, setSectionEditForm] = useState({ name: '', year: 1, semester: 1, studentCount: 0 });
+  const [sectionEditForm, setSectionEditForm] = useState({ name: '', year: 1, semester: 1, studentCount: 0, roomNo: '', classAdvisor: '' });
   const [editingDepartment, setEditingDepartment] = useState(false);
   const [departmentEditForm, setDepartmentEditForm] = useState({ code: '', name: '' });
 
@@ -79,7 +79,7 @@ export function DepartmentConfigPage() {
       <div className="grid gap-4 lg:grid-cols-2">
         <Card title="Academic period details">
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Periods per day">
+            <Field label="Teaching periods per day" hint="Breaks (e.g. lunch) add their own columns and are never counted here.">
               <Input
                 type="number"
                 min={1}
@@ -104,6 +104,30 @@ export function DepartmentConfigPage() {
                 <option value="ARCHIVED">ARCHIVED</option>
               </Select>
             </Field>
+            <Field label="Effective from" hint="Official exports">
+              <Input
+                value={department.effectiveFrom ?? ''}
+                onChange={(e) =>
+                  state.updateDepartment(department.id, {
+                    effectiveFrom: e.target.value.trim() ? e.target.value.trim() : undefined,
+                  })
+                }
+                placeholder="01-06-2026"
+                aria-label="Effective from date"
+              />
+            </Field>
+            <Field label="Mentors" hint="Official exports, free text">
+              <Input
+                value={department.mentors ?? ''}
+                onChange={(e) =>
+                  state.updateDepartment(department.id, {
+                    mentors: e.target.value.trim() ? e.target.value : undefined,
+                  })
+                }
+                placeholder="Name (roll range), …"
+                aria-label="Mentors"
+              />
+            </Field>
             <div className="sm:col-span-2">
               <span className="mb-1.5 block text-xs font-medium text-body-gray">Working days</span>
               <div className="flex flex-wrap gap-2">
@@ -121,6 +145,45 @@ export function DepartmentConfigPage() {
               </div>
             </div>
           </div>
+        </Card>
+
+        <Card title="Period timings">
+          <p className="mb-3 text-xs text-body-gray">
+            Wall-clock times for each teaching period, shown in timetable grids and exports. Leave blank to show period numbers only.
+          </p>
+          <ul className="grid gap-2 sm:grid-cols-2">
+            {Array.from({ length: department.periodsPerDay }, (_, i) => {
+              const current = department.periodTimings?.[i] ?? { start: '', end: '' };
+              const setTiming = (patch: { start?: string; end?: string }) => {
+                const next = Array.from({ length: department.periodsPerDay }, (_, j) =>
+                  j === i
+                    ? { start: patch.start ?? department.periodTimings?.[j]?.start ?? '', end: patch.end ?? department.periodTimings?.[j]?.end ?? '' }
+                    : { ...(department.periodTimings?.[j] ?? { start: '', end: '' }) },
+                );
+                state.updateDepartment(department.id, { periodTimings: next });
+              };
+              return (
+                <li key={i} className="flex items-center gap-1.5 rounded-xl bg-surface-1 px-2.5 py-2">
+                  <span className="w-7 shrink-0 text-xs font-semibold text-ink">P{i + 1}</span>
+                  <Input
+                    value={current.start}
+                    onChange={(e) => setTiming({ start: e.target.value })}
+                    placeholder="9:10 AM"
+                    aria-label={`Period ${i + 1} start time`}
+                    className="min-w-0"
+                  />
+                  <span className="shrink-0 text-xs text-body-gray">–</span>
+                  <Input
+                    value={current.end}
+                    onChange={(e) => setTiming({ end: e.target.value })}
+                    placeholder="10:00 AM"
+                    aria-label={`Period ${i + 1} end time`}
+                    className="min-w-0"
+                  />
+                </li>
+              );
+            })}
+          </ul>
         </Card>
 
         <Card title={`Sections (${sections.length})`}>
@@ -161,7 +224,7 @@ export function DepartmentConfigPage() {
                     size="sm"
                     onClick={() => {
                       setEditingSectionId(s.id);
-                      setSectionEditForm({ name: s.name, year: s.year, semester: s.semester, studentCount: s.studentCount });
+                      setSectionEditForm({ name: s.name, year: s.year, semester: s.semester, studentCount: s.studentCount, roomNo: s.roomNo ?? '', classAdvisor: s.classAdvisor ?? '' });
                     }}
                   >
                     Edit
@@ -270,6 +333,8 @@ export function DepartmentConfigPage() {
               year: Math.max(1, sectionEditForm.year),
               semester: Math.max(1, sectionEditForm.semester),
               studentCount: Math.max(0, sectionEditForm.studentCount),
+              roomNo: sectionEditForm.roomNo.trim() ? sectionEditForm.roomNo.trim() : undefined,
+              classAdvisor: sectionEditForm.classAdvisor.trim() ? sectionEditForm.classAdvisor.trim() : undefined,
             });
             setEditingSectionId(null);
           }}
@@ -279,6 +344,8 @@ export function DepartmentConfigPage() {
             <Field label="Year"><Input type="number" min={1} max={8} value={sectionEditForm.year} onChange={(e) => setSectionEditForm({ ...sectionEditForm, year: Number(e.target.value) })} aria-label="Edit year" /></Field>
             <Field label="Semester"><Input type="number" min={1} max={12} value={sectionEditForm.semester} onChange={(e) => setSectionEditForm({ ...sectionEditForm, semester: Number(e.target.value) })} aria-label="Edit semester" /></Field>
             <Field label="Students"><Input type="number" min={0} value={sectionEditForm.studentCount} onChange={(e) => setSectionEditForm({ ...sectionEditForm, studentCount: Number(e.target.value) })} aria-label="Edit student count" /></Field>
+            <Field label="Room No" hint="Official exports"><Input value={sectionEditForm.roomNo} onChange={(e) => setSectionEditForm({ ...sectionEditForm, roomNo: e.target.value })} placeholder="1020" aria-label="Edit room number" /></Field>
+            <Field label="Class advisor" hint="Official exports"><Input value={sectionEditForm.classAdvisor} onChange={(e) => setSectionEditForm({ ...sectionEditForm, classAdvisor: e.target.value })} placeholder="Mr. P. Vikram" aria-label="Edit class advisor" /></Field>
             <div className="flex gap-2 sm:col-span-2">
               <Button type="submit">Save changes</Button>
               <Button type="button" variant="secondary" onClick={() => setEditingSectionId(null)}>Cancel</Button>

@@ -80,7 +80,10 @@ export function SettingsPage() {
         subjects: doc.payload.subjects,
         faculty: doc.payload.faculty,
         timetables: doc.payload.timetables,
+        rooms: doc.payload.rooms,
+        breaks: doc.payload.breaks,
         activeDepartmentId: doc.payload.activeDepartmentId,
+        generationSettingsOverrides: doc.payload.generationSettingsOverrides,
         collegeDetails: doc.payload.collegeDetails,
       });
       showToast('success', 'Workspace imported.');
@@ -101,6 +104,8 @@ export function SettingsPage() {
       subjects: [],
       faculty: [],
       timetables: [],
+      rooms: [],
+      breaks: [],
       activeDepartmentId: null,
       collegeDetails: { ...EMPTY_COLLEGE_DETAILS },
     });
