@@ -17,7 +17,7 @@ The app is **fully client-side** — no backend, no accounts. Workspace data liv
 - **Faculty availability** — set available and preferred teaching windows with a dedicated grid editor
 - **Faculty timetable view** — review a teacher's weekly workload across all sections in a read-only grid
 - **Version history** — every generation and edit creates a restore-point snapshot; browse and restore any version from the timetable page
-- **Export** — PDF and Excel output per section
+- **Export** — official notice-board PDF per section (crest header, time grid with vertical break columns, class advisor, course/instructor details, mentors, signatories) plus Excel grid output
 - **Persistence** — schema-versioned local storage with migrations, import/export, and corruption recovery
 
 ## How It Works
@@ -31,7 +31,7 @@ The app is **fully client-side** — no backend, no accounts. Workspace data liv
 7. Restore any earlier version from the version history panel.
 8. Export the final timetable as PDF or Excel.
 
-> **Full-packing rule:** a section's weekly requirements must sum to exactly `working days × periods per day` (labs = 2 periods each). If they sum to less, the shortfall shows up as empty periods — the Generate page's preflight warnings tell you the exact gap.
+> **Full-packing rule:** a section's weekly requirements must sum to exactly `working days × teaching periods per day` (labs = 2 periods each). Breaks such as lunch sit in their own grid columns after the 4th teaching period and are not counted. If requirements sum to less, the shortfall shows up as empty periods — the Generate page's preflight warnings tell you the exact gap.
 
 ---
 
@@ -126,8 +126,8 @@ Requirements (per section, per subject)
 
 Before any search, the config is analyzed so the user learns about impossibilities in milliseconds instead of after a timeout:
 
-- **Section capacity** — `requiredPeriods = Σ sessions × duration (labs = 2)` per section, compared against `workingDays × periodsPerDay`. Over-capacity blocks generation; under-capacity (`SECTION_CAPACITY_SLACK`) is an advisory warning listing exactly how many empty periods to expect.
-- **Lab capacity** — at most `periodsPerDay − 1` non-overlapping 2-period blocks fit per day per section.
+- **Section capacity** — `requiredPeriods = Σ sessions × duration (labs = 2)` per section, compared against the teachable periods: `workingDays × periodsPerDay`, where `periodsPerDay` counts _teaching_ periods only. All-day breaks (e.g. lunch) render as their own grid columns and never consume a period number; only day-specific breaks reduce usable capacity. Over-capacity blocks generation; under-capacity (`SECTION_CAPACITY_SLACK`) is an advisory warning listing exactly how many empty periods to expect.
+- **Lab capacity** — within each day, free teaching runs split at all-day break columns contribute `floor(run / 2)` placeable 2-period blocks; a lab can never span a break.
 - **Faculty workload** — each subject's demand is summed across all sections and split evenly (ceil) among its eligible faculty pool; anyone over their weekly cap raises `FACULTY_CAPACITY_EXCEEDED` (blocking), anyone eligible for nothing raises `FACULTY_UNASSIGNED` (advisory).
 - **Missing subjects** — stale references in section requirements.
 
@@ -311,7 +311,7 @@ Open the local URL shown by Vite in your browser.
 
 ## Built-in Presets
 
-Five presets ship with the app, from a 1-section Quick Start to an **Enterprise** preset: 9 sections × 6 days × 7 periods, 6 theory subjects × 6 sessions/week + 3 labs, 40 faculty in dedicated pools — fully packed at 42/42 periods per section per week, solved in ~2–5 s.
+Six presets ship with the app, from a 1-section Quick Start to an **Enterprise** preset: 9 sections × 6 days × 7 periods, 6 theory subjects × 6 sessions/week + 3 labs, 40 faculty in dedicated pools — fully packed at 42/42 periods per section per week, solved in ~2–5 s. The **B.Tech CSE 3rd Year** preset mirrors a real Vardhaman College III-I timetable: 3 sections (CSE-G/H/I) × 6 days × 7 teaching periods with real subjects, faculty, rooms, period timings, plus Break (after P2) and Lunch (after P4) columns — fully packed at 42/42, solved in ~1 s.
 
 ## Data Persistence
 
