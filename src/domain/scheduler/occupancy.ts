@@ -7,6 +7,7 @@ import type { TimetableEntry } from '../models';
 export class OccupancyIndex {
   readonly sectionOccupancy = new Map<string, Map<string, string>>();
   readonly facultyOccupancy = new Map<string, Map<string, string>>();
+  readonly roomOccupancy = new Map<string, Map<string, string>>();
   readonly subjectSessionCounts = new Map<string, number>();
 
   private key(dayIndex: number, period: number): string {
@@ -25,6 +26,12 @@ export class OccupancyIndex {
     return periods.every((p) => !day.has(this.key(dayIndex, p)));
   }
 
+  isRoomFree(roomId: string, dayIndex: number, periods: number[]): boolean {
+    const day = this.roomOccupancy.get(roomId);
+    if (!day) return true;
+    return periods.every((p) => !day.has(this.key(dayIndex, p)));
+  }
+
   /** Apply an entry's full occupied range. Returns a rollback closure. */
   apply(entry: TimetableEntry): () => void {
     const occupied: Array<{ map: Map<string, Map<string, string>>; id: string; k: string }> = [];
@@ -34,6 +41,10 @@ export class OccupancyIndex {
       occupied.push({ map: this.sectionOccupancy, id: entry.sectionId, k });
       this.getOrCreate(this.facultyOccupancy, entry.facultyId).set(k, entry.id);
       occupied.push({ map: this.facultyOccupancy, id: entry.facultyId, k });
+      if (entry.roomId) {
+        this.getOrCreate(this.roomOccupancy, entry.roomId).set(k, entry.id);
+        occupied.push({ map: this.roomOccupancy, id: entry.roomId, k });
+      }
     }
     const countKey = `${entry.sectionId}:${entry.subjectId}`;
     this.subjectSessionCounts.set(countKey, (this.subjectSessionCounts.get(countKey) ?? 0) + 1);

@@ -26,6 +26,14 @@ export interface SolverInput {
   maxSessionsPerSubjectPerDay: number | null;
   /** Optional cap on lab blocks per section per day. */
   maxLabSessionsPerSectionPerDay: number | null;
+  rooms: import('../../models').Room[];
+  /**
+   * Breaks in GRID coordinates (see `toGridBreaks`): all-day break columns
+   * plus day-specific overlays already mapped through inserted columns.
+   */
+  breaks: import('../../models').Break[];
+  /** Total grid columns per day, including all-day break columns. */
+  gridSlotsPerDay: number;
 }
 
 export interface CancellationToken {
@@ -119,8 +127,36 @@ export function solveSchedule(
     return { status: 'IMPOSSIBLE', entries: null, metrics, diagnostics };
   }
 
-  const periodsPerDay = input.department.periodsPerDay;
+  // Grid coordinates throughout: entries, candidates and occupancy all index
+  // break columns as ordinary slots that `breakWithinLimits` forbids.
+  const periodsPerDay = input.gridSlotsPerDay;
   const dayCount = input.department.workingDays.length;
+
+  /**
+   * Grid slots blocked by breaks, per day. Precomputed once so MRV counting
+   * and candidate generation skip unteachable starts instead of discovering
+   * them one rejection at a time (critical for fully-packed split days,
+   * where lunch starts would otherwise inflate feasibility counts and
+   * mislead the most-constrained-first ordering).
+   */
+  const blockedByDay: Array<Set<number>> = Array.from({ length: dayCount }, () => new Set<number>());
+  for (const b of input.breaks) {
+    const duration = Math.max(1, b.durationPeriods);
+    for (let day = 0; day < dayCount; day++) {
+      if (b.dayIndex !== null && b.dayIndex !== day) continue;
+      for (let p = b.startPeriod; p < b.startPeriod + duration; p++) {
+        if (p >= 0 && p < periodsPerDay) blockedByDay[day].add(p);
+      }
+    }
+  }
+  const rangeHitsBreak = (day: number, start: number, duration: number): boolean => {
+    const blocked = blockedByDay[day];
+    if (!blocked) return false;
+    for (let p = start; p < start + duration; p++) {
+      if (blocked.has(p)) return true;
+    }
+    return false;
+  };
   const maxSessionsPerSubjectPerDay = input.maxSessionsPerSubjectPerDay ?? null;
   const maxLabSessionsPerSectionPerDay = input.maxLabSessionsPerSectionPerDay ?? null;
   const occupancy = new OccupancyIndex();
@@ -204,6 +240,7 @@ export function solveSchedule(
       }
       const maxStart = periodsPerDay - session.durationPeriods;
       for (let p = 0; p <= maxStart && count < MRV_COUNT_CAP; p++) {
+        if (rangeHitsBreak(day, p, session.durationPeriods)) continue;
         const periods: number[] = [];
         for (let q = p; q < p + session.durationPeriods; q++) periods.push(q);
         if (!occupancy.isSectionFree(session.sectionId, day, periods)) continue;
@@ -234,6 +271,54 @@ export function solveSchedule(
   }
 
   /** Recursive backtracking over remaining sessions (most-constrained first). */
+  
+  const sectionById = new Map(input.sections.map(s => [s.id, s]));
+  const subjectById = new Map(input.subjects.map(s => [s.id, s]));
+
+  function breakWithinLimits(entry: TimetableEntry): boolean {
+    const eStart = entry.startPeriod;
+    const eEnd = entry.startPeriod + entry.durationPeriods;
+    for (const b of input.breaks) {
+      if (b.dayIndex !== null && b.dayIndex !== entry.dayIndex) continue;
+      const bStart = b.startPeriod;
+      const bEnd = b.startPeriod + b.durationPeriods;
+      if (Math.max(bStart, eStart) < Math.min(bEnd, eEnd)) return false;
+    }
+    return true;
+  }
+
+  function assignRoom(entry: TimetableEntry): string | null {
+    if (input.rooms.length === 0) return null;
+    const section = sectionById.get(entry.sectionId);
+    const subject = subjectById.get(entry.subjectId);
+    if (!section || !subject) return null;
+
+    const periods: number[] = [];
+    for (let p = entry.startPeriod; p < entry.startPeriod + entry.durationPeriods; p++) periods.push(p);
+
+    // Filter eligible rooms
+    const eligibleRooms = input.rooms.filter(r => {
+      if (r.capacity < section.studentCount) return false;
+      if (r.type !== 'GENERAL' && r.type !== subject.type) return false;
+      return occupancy.isRoomFree(r.id, entry.dayIndex, periods);
+    });
+
+    if (eligibleRooms.length === 0) return false as any; // Trick to indicate failure
+
+    // Pick best room (e.g. smallest capacity that fits, to save large rooms)
+    eligibleRooms.sort((a, b) => {
+      // Prefer exact match for type, then capacity
+      if (a.type !== b.type) {
+        if (a.type === subject.type) return -1;
+        if (b.type === subject.type) return 1;
+      }
+      return a.capacity - b.capacity;
+    });
+
+    return eligibleRooms[0].id;
+  }
+
+  /** Recursive backtracking over remaining sessions (most-constrained first). */
   function backtrack(index: number): boolean {
     if (index >= searchOrder.length) return true;
     checkCancellationAndBudget();
@@ -257,6 +342,7 @@ export function solveSchedule(
         dayIndex: candidate.dayIndex,
         startPeriod: candidate.startPeriod,
         durationPeriods: session.durationPeriods,
+        roomId: null,
         source: 'GENERATED',
         revision: 0,
       };
@@ -266,6 +352,12 @@ export function solveSchedule(
       if (!facultyWithinLimits(entry)) continue;
       if (!subjectPerDayWithinLimits(entry)) continue;
       if (!labPerDayWithinLimits(entry)) continue;
+      if (!breakWithinLimits(entry)) continue;
+      if (input.rooms.length > 0) {
+        const roomId = assignRoom(entry);
+        if (roomId === false as any) continue;
+        entry.roomId = roomId;
+      }
 
 
       // Apply + propagate
@@ -300,6 +392,7 @@ export function solveSchedule(
     for (let day = 0; day < dayCount; day++) {
       const maxStart = periodsPerDay - session.durationPeriods;
       for (let p = 0; p <= maxStart; p++) {
+        if (rangeHitsBreak(day, p, session.durationPeriods)) continue;
         for (const fid of session.eligibleFacultyIds) {
           if (!facultyById.get(fid)?.active) continue;
           candidates.push({
@@ -328,7 +421,7 @@ export function solveSchedule(
       id: 'pseudo',
       sectionId: session.sectionId,
       subjectId: session.subjectId,
-      facultyId: c.facultyId,
+      facultyId: c.facultyId, roomId: null,
       dayIndex: c.dayIndex,
       startPeriod: c.startPeriod,
       durationPeriods: session.durationPeriods,

@@ -1,4 +1,5 @@
 import type {
+  Break,
   Department,
   Faculty,
   GenerationDiagnostic,
@@ -7,12 +8,15 @@ import type {
 } from '../../models';
 import { validateConfiguration } from '../../configuration/validate';
 import type { ConfigurationValidationResult } from '../../configuration/validate';
+import { clampTeachingPosition } from '../grid-layout';
 
 export interface FeasibilityInput {
   department: Department;
   sections: Section[];
   subjects: Subject[];
   faculty: Faculty[];
+  /** Scheduled breaks (e.g. lunch) block those periods for teaching. */
+  breaks?: Break[];
 }
 
 export interface SectionCapacityReport {
@@ -59,9 +63,85 @@ export function computeSectionRequirement(
   return { requiredPeriods, labSessions, missingSubjects };
 }
 
-/** Theoretical maximum non-overlapping 2-period blocks per section per week (§4.3). */
-export function computeLabCapacity(workingDaysCount: number, periodsPerDay: number): number {
-  return Math.max(0, periodsPerDay - 1) * workingDaysCount;
+/**
+ * Teaching slots blocked on a given day by DAY-SPECIFIC breaks only.
+ * All-day breaks insert extra grid columns instead of consuming teaching
+ * periods, so they never reduce usable capacity — but they do split lab
+ * runs (see `allDaySplitPositions`). Out-of-range teaching indices are
+ * ignored so a stale break can never drive capacity negative.
+ */
+export function daySpecificBlockedTeaching(
+  dayIndex: number,
+  teachingPerDay: number,
+  breaks: Break[],
+): Set<number> {
+  const blocked = new Set<number>();
+  for (const b of breaks) {
+    if (b.dayIndex === null || b.dayIndex !== dayIndex) continue;
+    const duration = Math.max(1, Math.floor(b.durationPeriods));
+    for (let t = Math.floor(b.startPeriod); t < Math.floor(b.startPeriod) + duration; t++) {
+      if (t >= 0 && t < teachingPerDay) blocked.add(t);
+    }
+  }
+  return blocked;
+}
+
+/** Sorted unique teaching-coordinate positions where all-day breaks split the day. */
+export function allDaySplitPositions(teachingPerDay: number, breaks: Break[]): number[] {
+  const positions = new Set<number>();
+  for (const b of breaks) {
+    if (b.dayIndex !== null) continue;
+    positions.add(clampTeachingPosition(b.startPeriod, teachingPerDay));
+  }
+  return [...positions].sort((a, b) => a - b);
+}
+
+/**
+ * Teachable periods per week (§4.3): teaching periods minus teaching slots
+ * blocked by day-specific breaks. All-day breaks add their own columns, so
+ * they leave usable capacity untouched.
+ */
+export function computeUsableCapacity(
+  workingDaysCount: number,
+  teachingPerDay: number,
+  breaks: Break[] = [],
+): number {
+  let usable = 0;
+  for (let day = 0; day < workingDaysCount; day++) {
+    usable += teachingPerDay - daySpecificBlockedTeaching(day, teachingPerDay, breaks).size;
+  }
+  return Math.max(0, usable);
+}
+
+/**
+ * Theoretical maximum non-overlapping 2-period lab blocks per section per
+ * week (§4.3): within each day, free teaching runs — split at all-day break
+ * columns and excluding day-specific blocks — contribute floor(run / 2).
+ */
+export function computeLabCapacity(
+  workingDaysCount: number,
+  teachingPerDay: number,
+  breaks: Break[] = [],
+): number {
+  const splits = allDaySplitPositions(teachingPerDay, breaks);
+  let capacity = 0;
+  for (let day = 0; day < workingDaysCount; day++) {
+    const blocked = daySpecificBlockedTeaching(day, teachingPerDay, breaks);
+    const bounds = [0, ...splits, teachingPerDay];
+    for (let s = 0; s < bounds.length - 1; s++) {
+      let run = 0;
+      for (let t = bounds[s]; t < bounds[s + 1]; t++) {
+        if (blocked.has(t)) {
+          capacity += Math.floor(run / 2);
+          run = 0;
+        } else {
+          run++;
+        }
+      }
+      capacity += Math.floor(run / 2);
+    }
+  }
+  return capacity;
 }
 
 /**
@@ -99,7 +179,7 @@ const WARNING_CODES = new Set(['SECTION_CAPACITY_SLACK', 'FACULTY_UNASSIGNED']);
 
 /** Full preflight analysis. Returns structured diagnostics, never throws. */
 export function analyzeFeasibility(input: FeasibilityInput): FeasibilityResult {
-  const { department, sections, subjects, faculty } = input;
+  const { department, sections, subjects, faculty, breaks = [] } = input;
   const diagnostics: GenerationDiagnostic[] = [];
 
   const configValidation = validateConfiguration({
@@ -121,10 +201,17 @@ export function analyzeFeasibility(input: FeasibilityInput): FeasibilityResult {
   }
 
   const activeSections = sections.filter((s) => s.active);
-  const weeklyCapacity = department.workingDays.length * department.periodsPerDay;
+  // `periodsPerDay` counts teaching periods only: all-day breaks add their
+  // own grid columns, so only day-specific breaks reduce usable capacity.
+  const weeklyCapacity = computeUsableCapacity(
+    department.workingDays.length,
+    department.periodsPerDay,
+    breaks,
+  );
   const labCapacity = computeLabCapacity(
     department.workingDays.length,
     department.periodsPerDay,
+    breaks,
   );
 
   const sectionReports: SectionCapacityReport[] = [];
@@ -152,6 +239,7 @@ export function analyzeFeasibility(input: FeasibilityInput): FeasibilityResult {
         suggestions: [
           'Increase working days or periods per day.',
           'Reduce required weekly sessions for this section.',
+          'Reduce break durations blocking teachable periods.',
         ],
       });
     }

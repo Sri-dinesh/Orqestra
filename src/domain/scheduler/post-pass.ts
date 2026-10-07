@@ -1,13 +1,18 @@
-import type { Faculty, SoftConstraintWeights, TimetableEntry } from '../models';
+import type { Break, Faculty, Room, SoftConstraintWeights, TimetableEntry } from '../models';
 import { createSeededRng } from './seeded-rng';
 import { scoreSchedule } from './scoring';
 
 export interface PostPassInput {
   entries: TimetableEntry[];
+  /** Grid columns per day, including all-day break columns. */
   periodsPerDay: number;
   workingDaysCount: number;
   weights: SoftConstraintWeights;
   faculty: Faculty[];
+  /** Grid-coordinate breaks: moves overlapping one are never accepted. */
+  breaks?: Break[];
+  /** When rooms are in play, moves must keep room occupancy collision-free. */
+  rooms?: Room[];
   /** Wall-clock budget in ms (checked every sweep). */
   maxDurationMs: number;
   /** Hard cap on evaluated neighbor moves. */
@@ -35,6 +40,9 @@ export interface PostPassResult {
  *  - SWAP: two entries of the SAME section and SAME duration exchange
  *    (day, startPeriod). Section occupancy is invariant; faculty collisions
  *    are explicitly re-checked for both teachers in both slots.
+ *  - BREAKS / ROOMS: target slots overlapping a break are rejected, and when
+ *    rooms are configured the target slot must also be free in the entry's
+ *    room — so the post-pass can never invalidate what the solver proved.
  *
  * The search evaluates ALL neighbors and applies the single best improving
  * move per sweep, terminating when no improvement exists (local optimum),
@@ -60,8 +68,42 @@ export function improveSchedule(input: PostPassInput): PostPassResult {
   let improved = true;
   void input.faculty; // faculty referenced for interface completeness; feasibility is relocation-invariant here
 
+  const breaks = input.breaks ?? [];
+  const roomsEnabled = (input.rooms ?? []).length > 0;
+
+  /** True when [start, start + duration) on `day` overlaps any break. */
+  const overlapsBreak = (day: number, startPeriod: number, durationPeriods: number): boolean => {
+    const end = startPeriod + durationPeriods;
+    for (const b of breaks) {
+      if (b.dayIndex !== null && b.dayIndex !== day) continue;
+      if (Math.max(b.startPeriod, startPeriod) < Math.min(b.startPeriod + b.durationPeriods, end)) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  /** Periods of `entry` at (day, startPeriod) already taken in its room. */
+  const roomTaken = (
+    roomId: string,
+    day: number,
+    startPeriod: number,
+    durationPeriods: number,
+    ignoreIds: Set<string>,
+  ): boolean => {
+    const end = startPeriod + durationPeriods;
+    for (const other of entries) {
+      if (ignoreIds.has(other.id) || other.roomId !== roomId || other.dayIndex !== day) continue;
+      if (Math.max(other.startPeriod, startPeriod) < Math.min(other.startPeriod + other.durationPeriods, end)) {
+        return true;
+      }
+    }
+    return false;
+  };
+
   /** Does `entry` fit at (day, start) given all other entries? */
   const fits = (entry: TimetableEntry, day: number, startPeriod: number, ignoreId: string): boolean => {
+    if (overlapsBreak(day, startPeriod, entry.durationPeriods)) return false;
     for (const other of entries) {
       if (other.id === ignoreId || other.id === entry.id) continue;
       if (other.dayIndex !== day) continue;
@@ -73,6 +115,13 @@ export function improveSchedule(input: PostPassInput): PostPassResult {
       const overlapsFaculty =
         other.facultyId === entry.facultyId && startPeriod < otherEnd && otherStart < myEnd;
       if (overlapsSection || overlapsFaculty) return false;
+    }
+    // Room occupancy is not covered above: the entry keeps its room, so the
+    // target slot must be free in that room (ignoring the moved entry itself).
+    if (roomsEnabled && entry.roomId) {
+      if (roomTaken(entry.roomId, day, startPeriod, entry.durationPeriods, new Set([entry.id, ignoreId]))) {
+        return false;
+      }
     }
     return true;
   };
