@@ -67,6 +67,8 @@ describe('enterprise preset', () => {
       sections,
       subjects,
       faculty,
+      rooms: [],
+      breaks: [],
       hardConstraints: DEFAULT_HARD_CONSTRAINTS,
       softWeights: DEFAULT_SOFT_WEIGHTS,
       generationSettings: {
@@ -198,6 +200,8 @@ describe('maxSessionsPerSubjectPerDay constraint (two-sections-shared fixture)',
       sections,
       subjects,
       faculty,
+      rooms: [],
+      breaks: [],
       hardConstraints: DEFAULT_HARD_CONSTRAINTS,
       softWeights: DEFAULT_SOFT_WEIGHTS,
       generationSettings: {

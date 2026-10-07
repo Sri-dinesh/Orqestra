@@ -87,9 +87,20 @@ function build(
     sections,
     subjects,
     faculty,
-    hardConstraints: DEFAULT_HARD_CONSTRAINTS,
+    rooms: [],
+    breaks: [],
+    hardConstraints: {
+      ...DEFAULT_HARD_CONSTRAINTS,
+      enforceRoomCollision: true,
+      enforceBreaks: true,
+    },
     softWeights: DEFAULT_SOFT_WEIGHTS,
-    generationSettings: { ...DEFAULT_GENERATION_SETTINGS, seed: 123456 },
+    generationSettings: {
+      ...DEFAULT_GENERATION_SETTINGS,
+      maxConsecutiveTheory: null,
+      maxGapsPerDay: null,
+      seed: 123456,
+    },
   };
   return { department, sections, subjects, faculty, config };
 }

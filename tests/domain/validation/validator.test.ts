@@ -22,7 +22,7 @@ function makeTimetable(ds: ReturnType<typeof datasetMinimal>, entries: Timetable
 
 function entry(overrides: Partial<TimetableEntry> & { sectionId: string; subjectId: string; facultyId: string; dayIndex: number; startPeriod: number }): TimetableEntry {
   return {
-    id: generateId('entry'),
+    id: generateId('entry'), roomId: null,
     durationPeriods: 1,
     source: 'GENERATED',
     revision: 0,
