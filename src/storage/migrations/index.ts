@@ -45,6 +45,71 @@ const MIGRATIONS: Record<number, MigrationFn> = {
       },
     };
   },
+  /**
+   * v3 → v4: periods-per-day counts teaching periods only.
+   * - Rooms/breaks default to [] when absent (breaks previously didn't persist).
+   * - Each department sheds its enclosed all-day break durations from
+   *   periodsPerDay, so usable capacity is unchanged.
+   * - Break startPeriod values move from grid to teaching coordinates:
+   *   all-day breaks shift left past earlier break columns, day-specific
+   *   overlays shift past enclosed break columns. The rendered grid is
+   *   identical, so stored entries, availability windows and conflicts stay
+   *   valid without remapping.
+   */
+  4: (d) => {
+    const payload = (d['payload'] ?? d) as Record<string, unknown>;
+    const num = (v: unknown): number =>
+      typeof v === 'number' && Number.isFinite(v) ? v : 0;
+    const departments = (Array.isArray(payload['departments']) ? payload['departments'] : []) as Record<string, unknown>[];
+    const rawBreaks = (Array.isArray(payload['breaks']) ? payload['breaks'] : []) as Record<string, unknown>[];
+
+    const allDay = rawBreaks
+      .map((b, i) => ({ b, i }))
+      // eslint-disable-next-line eqeqeq -- stored JSON may omit dayIndex; treat missing as all-day
+      .filter(({ b }) => b['dayIndex'] == null)
+      .sort((x, y) => num(x.b['startPeriod']) - num(y.b['startPeriod']) || x.i - y.i);
+
+    // Teaching-coordinate position per all-day break (stable order).
+    const allDayPos = new Map<Record<string, unknown>, number>();
+    let columnsBefore = 0;
+    for (const { b } of allDay) {
+      allDayPos.set(b, num(b['startPeriod']) - columnsBefore);
+      columnsBefore += Math.max(0, num(b['durationPeriods']));
+    }
+
+    const migratedBreaks = rawBreaks.map((b) => {
+      // eslint-disable-next-line eqeqeq -- see above
+      if (b['dayIndex'] == null) {
+        return { ...b, startPeriod: Math.max(0, allDayPos.get(b) ?? num(b['startPeriod'])) };
+      }
+      const s = num(b['startPeriod']);
+      let shift = 0;
+      for (const { b: a } of allDay) {
+        const aStart = num(a['startPeriod']);
+        if (aStart < s) shift += Math.min(Math.max(0, num(a['durationPeriods'])), s - aStart);
+      }
+      return { ...b, startPeriod: Math.max(0, s - shift) };
+    });
+
+    const migratedDepartments = departments.map((dept) => {
+      const oldP = num(dept['periodsPerDay']);
+      let enclosed = 0;
+      for (const { b } of allDay) {
+        if (num(b['startPeriod']) < oldP) enclosed += Math.max(0, num(b['durationPeriods']));
+      }
+      return { ...dept, periodsPerDay: Math.max(1, oldP - enclosed) };
+    });
+
+    return {
+      ...d,
+      payload: {
+        ...payload,
+        rooms: payload['rooms'] ?? [],
+        breaks: migratedBreaks,
+        departments: migratedDepartments,
+      },
+    };
+  },
 };
 
 /** Run the migration chain old → current (§32). Returns null if unusable. */

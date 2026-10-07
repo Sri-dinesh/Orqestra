@@ -97,6 +97,38 @@ describe('storage service', () => {
     expect(service.load().status).toBe('CORRUPT');
   });
 
+  it('migrates v3 teaching-unaware grids to teaching-period counts (v4)', () => {
+    const { payload } = makeWorkspace();
+    // Old semantics: 7 grid slots including lunch at grid index 3.
+    const v3 = {
+      schemaVersion: 3,
+      applicationVersion: '1.0.0',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      payload: {
+        ...payload,
+        departments: [{ ...payload.departments[0], periodsPerDay: 7 }],
+        breaks: [
+          { id: 'brk_lunch', name: 'Lunch Break', dayIndex: null, startPeriod: 3, durationPeriods: 1 },
+          { id: 'brk_asm', name: 'Assembly', dayIndex: 1, startPeriod: 5, durationPeriods: 1 },
+        ],
+      },
+    };
+    adapter.setRaw(JSON.stringify(v3));
+    const outcome = service.load();
+    expect(outcome.status).toBe('LOADED');
+    const migrated = outcome.workspace!;
+    expect(migrated.schemaVersion).toBe(4);
+    // Lunch is excluded from the count; its column stays 4th.
+    expect(migrated.payload.departments[0].periodsPerDay).toBe(6);
+    expect(migrated.payload.breaks).toMatchObject([
+      { id: 'brk_lunch', startPeriod: 3 },
+      // Assembly sat on old-grid slot 5 (past one lunch column) → teaching slot 4.
+      { id: 'brk_asm', startPeriod: 4 },
+    ]);
+    expect(migrated.payload.rooms).toEqual([]);
+  });
+
   it('exports and imports the workspace', () => {
     const { payload } = makeWorkspace();
     service.save(payload);

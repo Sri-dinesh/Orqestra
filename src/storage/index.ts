@@ -70,7 +70,7 @@ export class StorageService {
         message: `Workspace failed validation: ${result.error.issues[0]?.message ?? 'unknown'}`,
       };
     }
-    return { status: 'LOADED', workspace: result.data, rawBackup: null, message: null };
+    return { status: 'LOADED', workspace: result.data as PersistedWorkspace, rawBackup: null, message: null };
   }
 
   save(payload: PersistedWorkspacePayload, createdAt?: string): void {
@@ -125,7 +125,7 @@ export class StorageService {
         `Import failed schema validation: ${result.error.issues[0]?.message ?? 'unknown'}`,
       );
     }
-    return result.data;
+    return result.data as PersistedWorkspace;
   }
 
   import(json: string): PersistedWorkspace {

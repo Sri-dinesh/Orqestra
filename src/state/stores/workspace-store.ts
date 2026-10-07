@@ -5,9 +5,12 @@ import type {
   Department,
   Faculty,
   GenerationMetadata,
+  PeriodTiming,
   Section,
   Subject,
   Timetable,
+  Room,
+  Break,
 } from '@/domain/models';
 import { EMPTY_COLLEGE_DETAILS } from '@/domain/models';
 import type { WorkingDay } from '@/domain/enums';
@@ -19,6 +22,8 @@ export interface GenerationSettingsOverrides {
   maxSearchDurationMs: number | null;
   /** Search node budget (overrides the default). */
   maxExploredNodes: number | null;
+  maxConsecutiveTheory: number | null;
+  maxGapsPerDay: number | null;
 }
 
 export interface WorkspaceState {
@@ -27,6 +32,8 @@ export interface WorkspaceState {
   subjects: Subject[];
   faculty: Faculty[];
   timetables: Timetable[];
+  rooms: Room[];
+  breaks: Break[];
   activeDepartmentId: string | null;
   persistenceStatus: 'IDLE' | 'SAVING' | 'SAVED' | 'ERROR';
   /** Per-department generation settings overrides (keyed by department ID). */
@@ -35,7 +42,7 @@ export interface WorkspaceState {
   collegeDetails: CollegeDetails;
 
   setActiveDepartment: (id: string | null) => void;
-  addDepartment: (input: { code: string; name: string; workingDays: WorkingDay[]; periodsPerDay: number }) => Department;
+  addDepartment: (input: { code: string; name: string; workingDays: WorkingDay[]; periodsPerDay: number; periodTimings?: PeriodTiming[] }) => Department;
   updateDepartment: (id: string, patch: Partial<Department>) => void;
   removeDepartment: (id: string) => void;
 
@@ -55,12 +62,22 @@ export interface WorkspaceState {
   setTimetableStatus: (id: string, status: Timetable['status']) => void;
   updateTimetable: (id: string, patch: Partial<Timetable>) => void;
 
+  addRoom: (input: Omit<Room, 'id' | 'active'>) => Room;
+  updateRoom: (id: string, patch: Partial<Room>) => void;
+  removeRoom: (id: string) => void;
+
+  addBreak: (input: Omit<Break, 'id'>) => Break;
+  updateBreak: (id: string, patch: Partial<Break>) => void;
+  removeBreak: (id: string) => void;
+
   replaceAll: (payload: {
     departments: Department[];
     sections: Section[];
     subjects: Subject[];
     faculty: Faculty[];
     timetables: Timetable[];
+    rooms?: Room[];
+    breaks?: Break[];
     activeDepartmentId: string | null;
     generationSettingsOverrides?: Record<string, Partial<GenerationSettingsOverrides>>;
     collegeDetails?: CollegeDetails;
@@ -79,6 +96,8 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
   subjects: [],
   faculty: [],
   timetables: [],
+  rooms: [],
+  breaks: [],
   activeDepartmentId: null,
   persistenceStatus: 'IDLE',
   generationSettingsOverrides: {},
@@ -182,19 +201,39 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
 
   setTimetableStatus: (id, status) =>
     set((s) => ({
-      timetables: s.timetables.map((t) => (t.id === id ? { ...t, status } : t)),
+      timetables: s.timetables.map((t) => (t.id === id ? ({ ...t, status } as unknown as Timetable) : t)),
     })),
 
   updateTimetable: (id, patch) =>
     set((s) => ({
       timetables: s.timetables.map((t) =>
-        t.id === id ? { ...t, ...patch, updatedAt: new Date().toISOString() } : t,
+        t.id === id ? ({ ...t, ...patch, updatedAt: new Date().toISOString() } as unknown as Timetable) : t,
       ),
     })),
+
+  addRoom: (input) => {
+    const room = { ...input, id: generateId('room'), active: true };
+    set((state) => ({ rooms: [...state.rooms, room] }));
+    return room;
+  },
+  updateRoom: (id, patch) =>
+    set((state) => ({ rooms: state.rooms.map((r) => (r.id === id ? { ...r, ...patch } : r)) })),
+  removeRoom: (id) => set((state) => ({ rooms: state.rooms.filter((r) => r.id !== id) })),
+
+  addBreak: (input) => {
+    const brk = { ...input, id: generateId('break') };
+    set((state) => ({ breaks: [...state.breaks, brk] }));
+    return brk;
+  },
+  updateBreak: (id, patch) =>
+    set((state) => ({ breaks: state.breaks.map((b) => (b.id === id ? { ...b, ...patch } : b)) })),
+  removeBreak: (id) => set((state) => ({ breaks: state.breaks.filter((b) => b.id !== id) })),
 
   replaceAll: (payload) =>
     set({
       ...payload,
+      rooms: payload.rooms ?? [],
+      breaks: payload.breaks ?? [],
       collegeDetails: payload.collegeDetails ?? EMPTY_COLLEGE_DETAILS,
       persistenceStatus: 'IDLE',
     }),

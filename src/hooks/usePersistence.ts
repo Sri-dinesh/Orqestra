@@ -34,7 +34,10 @@ export function usePersistence(): LoadOutcome | null {
         subjects: outcome.workspace.payload.subjects,
         faculty: outcome.workspace.payload.faculty,
         timetables: outcome.workspace.payload.timetables,
+        rooms: outcome.workspace.payload.rooms,
+        breaks: outcome.workspace.payload.breaks,
         activeDepartmentId: outcome.workspace.payload.activeDepartmentId,
+        generationSettingsOverrides: outcome.workspace.payload.generationSettingsOverrides,
         collegeDetails: outcome.workspace.payload.collegeDetails,
       });
     }
@@ -55,10 +58,12 @@ export function usePersistence(): LoadOutcome | null {
             subjects: state.subjects,
             faculty: state.faculty,
             timetables: state.timetables,
+            rooms: state.rooms,
+            breaks: state.breaks,
             activeDepartmentId: state.activeDepartmentId,
             generationSettingsOverrides: state.generationSettingsOverrides,
             collegeDetails: state.collegeDetails,
-          } as never,
+          },
           (getStoredCreatedAt() as string | null) ?? undefined,
         );
         useWorkspaceStore.getState().setPersistenceStatus('SAVED');
@@ -69,7 +74,7 @@ export function usePersistence(): LoadOutcome | null {
     return () => {
       if (timer.current) clearTimeout(timer.current);
     };
-  }, [state.departments, state.sections, state.subjects, state.faculty, state.timetables, state.activeDepartmentId, state.generationSettingsOverrides, state.collegeDetails, state.persistenceStatus]);
+  }, [state.departments, state.sections, state.subjects, state.faculty, state.timetables, state.rooms, state.breaks, state.activeDepartmentId, state.generationSettingsOverrides, state.collegeDetails, state.persistenceStatus]);
 
   return outcomeRef.current;
 }
@@ -99,10 +104,12 @@ export function flushPersistence(): void {
         subjects: state.subjects,
         faculty: state.faculty,
         timetables: state.timetables,
+        rooms: state.rooms,
+        breaks: state.breaks,
         activeDepartmentId: state.activeDepartmentId,
         generationSettingsOverrides: state.generationSettingsOverrides,
         collegeDetails: state.collegeDetails,
-      } as never,
+      },
       (getStoredCreatedAt() as string | null) ?? undefined,
     );
     state.setPersistenceStatus('SAVED');
