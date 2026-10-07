@@ -9,6 +9,8 @@ export type TimetableEntryId = string;
 export type RequirementId = string;
 export type SessionUnitId = string;
 export type GenerationJobId = string;
+export type RoomId = string;
+export type BreakId = string;
 
 export interface Identifiable {
   id: string;

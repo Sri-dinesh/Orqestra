@@ -44,6 +44,8 @@ export const sectionSchema = z.object({
   semester: z.number().int().min(1).max(12),
   studentCount: z.number().int().min(0),
   subjectRequirements: z.array(subjectRequirementSchema),
+  roomNo: z.string().optional(),
+  classAdvisor: z.string().optional(),
   active: z.boolean(),
 });
 
@@ -53,6 +55,7 @@ export const subjectSchema = z.object({
   code: z.string().min(1),
   name: z.string().min(1),
   type: subjectTypeSchema,
+  courseCode: z.string().optional(),
   sessionsPerWeek: z.number().int().min(0),
   durationPeriods: z.number().int().min(1).max(3),
   eligibleFacultyIds: z.array(z.string()),
@@ -80,15 +83,45 @@ export const facultySchema = z.object({
   active: z.boolean(),
 });
 
+export const periodTimingSchema = z.object({
+  start: z.string(),
+  end: z.string(),
+});
+
 export const departmentSchema = z.object({
   id: z.string(),
   code: z.string().min(1),
   name: z.string().min(1),
   workingDays: z.array(workingDaySchema).min(1),
+  /** Teaching periods per day — break columns are stored separately and never counted here. */
   periodsPerDay: z.number().int().min(1).max(12),
+  periodTimings: z.array(periodTimingSchema).optional(),
+  effectiveFrom: z.string().optional(),
+  mentors: z.string().optional(),
   status: departmentStatusSchema,
   createdAt: isoString,
   updatedAt: isoString,
+});
+
+export const roomSchema = z.object({
+  id: z.string(),
+  departmentId: z.string(),
+  code: z.string().min(1),
+  name: z.string().min(1),
+  capacity: z.number().int().min(0),
+  type: z.enum(['THEORY', 'LAB', 'GENERAL']),
+  active: z.boolean(),
+});
+
+export const breakSchema = z.object({
+  id: z.string(),
+  name: z.string().min(1),
+  dayIndex: z.number().int().min(0).max(6).nullable(),
+  /** Teaching-coordinate position: "after this many teaching periods". */
+  startPeriod: z.number().int().min(0),
+  durationPeriods: z.number().int().min(1),
+  startTime: z.string().optional(),
+  endTime: z.string().optional(),
 });
 
 /* ---------- Institution profile (descriptive only) ---------- */
@@ -247,6 +280,8 @@ export const persistedWorkspacePayloadSchema = z.object({
   subjects: z.array(subjectSchema),
   faculty: z.array(facultySchema),
   timetables: z.array(timetableSchema),
+  rooms: z.array(roomSchema).optional(),
+  breaks: z.array(breakSchema).optional(),
   activeDepartmentId: z.string().nullable(),
   collegeDetails: collegeDetailsSchema.optional(),
   generationSettingsOverrides: z
@@ -256,6 +291,8 @@ export const persistedWorkspacePayloadSchema = z.object({
         maxLabSessionsPerSectionPerDay: z.number().int().min(1).nullable().optional(),
         maxSearchDurationMs: z.number().int().min(1000).nullable().optional(),
         maxExploredNodes: z.number().int().min(1000).nullable().optional(),
+        maxConsecutiveTheory: z.number().int().min(1).nullable().optional(),
+        maxGapsPerDay: z.number().int().min(0).nullable().optional(),
       }),
     )
     .optional(),

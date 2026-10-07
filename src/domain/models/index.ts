@@ -7,6 +7,8 @@ import type {
   SectionId,
   SubjectId,
   TimetableEntryId,
+  RoomId,
+  BreakId,
 } from './ids';
 import type {
   ConflictSeverity,
@@ -53,12 +55,25 @@ export const EMPTY_COLLEGE_DETAILS: CollegeDetails = {
   logoDataUrl: '',
 };
 
+/** Wall-clock time range of one teaching period, free text (e.g. "9:10 AM"). */
+export interface PeriodTiming {
+  start: string;
+  end: string;
+}
+
 export interface Department {
   id: DepartmentId;
   code: string;
   name: string;
   workingDays: WorkingDay[];
+  /** TEACHING periods per day. Breaks (e.g. lunch) add extra grid columns and are never counted here. */
   periodsPerDay: number;
+  /** Optional wall-clock times per teaching period (index-aligned, may be partial). */
+  periodTimings?: PeriodTiming[];
+  /** Official timetable header: "With effect from" date (free text). */
+  effectiveFrom?: string;
+  /** Mentor block printed on official exports (free text). */
+  mentors?: string;
   status: DepartmentStatus;
   createdAt: string;
   updatedAt: string;
@@ -72,6 +87,10 @@ export interface Section {
   semester: number;
   studentCount: number;
   subjectRequirements: SubjectRequirement[];
+  /** Homeroom shown on official exports (e.g. "1020"). */
+  roomNo?: string;
+  /** Class advisor name shown on official exports. */
+  classAdvisor?: string;
   active: boolean;
 }
 
@@ -87,8 +106,9 @@ export interface Subject {
   code: string;
   name: string;
   type: SubjectType;
+  /** Official course code shown on exports (e.g. "A8519"). */
+  courseCode?: string;
   sessionsPerWeek: number;
-  /** Derived from type by default: THEORY=1, LAB=2. Kept explicit for future types. */
   durationPeriods: number;
   eligibleFacultyIds: FacultyId[];
   eligibleSectionIds: SectionId[];
@@ -97,6 +117,7 @@ export interface Subject {
 
 export interface FacultyAvailability {
   dayIndex: number;
+  /** Grid-coordinate start slot (includes break columns; lunch is never teachable anyway). */
   startPeriod: number;
   durationPeriods: number;
 }
@@ -116,6 +137,33 @@ export interface Faculty {
   active: boolean;
 }
 
+export interface Room {
+  id: RoomId;
+  departmentId: DepartmentId;
+  code: string;
+  name: string;
+  capacity: number;
+  type: SubjectType | 'GENERAL';
+  active: boolean;
+}
+
+export interface Break {
+  id: BreakId;
+  name: string;
+  dayIndex: number | null; // null means everyday
+  /**
+   * Position in TEACHING coordinates: "after this many teaching periods"
+   * (0 = first column, teachingPerDay = end of day). All-day breaks insert
+   * extra grid columns at this position; day-specific breaks instead block
+   * that teaching range on their day so the grid stays rectangular.
+   */
+  startPeriod: number;
+  durationPeriods: number;
+  /** Optional wall-clock display times (free text, e.g. "12:50 PM"). */
+  startTime?: string;
+  endTime?: string;
+}
+
 /* ---------- Configuration ---------- */
 
 export interface PeriodDefinition {
@@ -129,6 +177,8 @@ export interface HardConstraintPolicy {
   enforceFacultyCollision: boolean;
   enforceLabAtomicity: boolean;
   enforceRequirementCounts: boolean;
+  enforceRoomCollision: boolean;
+  enforceBreaks: boolean;
 }
 
 export interface SoftConstraintWeights {
@@ -149,6 +199,8 @@ export interface GenerationSettings {
   maxSessionsPerSubjectPerDay: number | null;
   /** Soft cap: avoid >N laboratory blocks for a section on one day. */
   maxLabSessionsPerSectionPerDay: number | null;
+  maxConsecutiveTheory: number | null;
+  maxGapsPerDay: number | null;
   softWeights: SoftConstraintWeights;
 }
 
@@ -159,6 +211,8 @@ export interface TimetableConfiguration {
   sections: Section[];
   subjects: Subject[];
   faculty: Faculty[];
+  rooms: Room[];
+  breaks: Break[];
   hardConstraints: HardConstraintPolicy;
   softWeights: SoftConstraintWeights;
   generationSettings: GenerationSettings;
@@ -171,8 +225,9 @@ export interface TimetableEntry {
   sectionId: SectionId;
   subjectId: SubjectId;
   facultyId: FacultyId;
+  roomId: RoomId | null;
   dayIndex: number;
-  /** 0-based start period. */
+  /** 0-based start slot in GRID coordinates (includes break columns). */
   startPeriod: number;
   durationPeriods: number;
   source: EntrySource;
@@ -194,6 +249,7 @@ export interface Conflict {
   messageKey: string;
   messageParams: Record<string, string | number>;
   dayIndex: number | null;
+  /** Grid-coordinate slot (includes break columns). */
   periodIndex: number | null;
   entryIds: string[];
   facultyIds: string[];
@@ -258,20 +314,39 @@ export interface GenerationResult {
   metadata: GenerationMetadata | null;
 }
 
-export interface Timetable {
+export interface BaseTimetable {
   id: string;
   departmentId: DepartmentId;
   configurationSnapshot: ConfigurationSnapshot;
   entries: TimetableEntry[];
-  status: TimetableStatus;
-  validationSummary: ValidationResult | null;
   generationMetadata: GenerationMetadata | null;
   revision: number;
   createdAt: string;
   updatedAt: string;
-  /** Snapshot history, newest last. Empty/absent for timetables created before versioning. */
   versionHistory?: TimetableVersion[];
 }
+
+export interface ValidTimetable extends BaseTimetable {
+  status: 'VALID';
+  validationSummary: ValidationResult & { isValid: true };
+}
+
+export interface InvalidTimetable extends BaseTimetable {
+  status: 'INVALID';
+  validationSummary: ValidationResult & { isValid: false };
+}
+
+export interface StaleTimetable extends BaseTimetable {
+  status: 'STALE';
+  validationSummary: ValidationResult | null;
+}
+
+export interface OtherTimetable extends BaseTimetable {
+  status: Exclude<TimetableStatus, 'VALID' | 'INVALID' | 'STALE'>;
+  validationSummary: ValidationResult | null;
+}
+
+export type Timetable = ValidTimetable | InvalidTimetable | StaleTimetable | OtherTimetable;
 
 /** Why a version snapshot was recorded. */
 export type TimetableVersionOrigin = 'GENERATED' | 'EDIT' | 'RESTORE';

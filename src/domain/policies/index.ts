@@ -5,7 +5,7 @@ import type {
 } from '../models';
 
 export const APPLICATION_VERSION = '1.0.0';
-export const SCHEMA_VERSION = 3;
+export const SCHEMA_VERSION = 4;
 export const SCHEDULER_VERSION = '1.0.0';
 export const VALIDATOR_VERSION = '1.0.0';
 export const CONSTRAINT_VERSION = '1.0.0';
@@ -15,6 +15,8 @@ export const DEFAULT_HARD_CONSTRAINTS: HardConstraintPolicy = {
   enforceFacultyCollision: true,
   enforceLabAtomicity: true,
   enforceRequirementCounts: true,
+  enforceRoomCollision: true,
+  enforceBreaks: true,
 };
 
 export const DEFAULT_SOFT_WEIGHTS: SoftConstraintWeights = {
@@ -36,5 +38,7 @@ export const DEFAULT_GENERATION_SETTINGS: GenerationSettings = {
   maxBacktrackDepth: null,
   maxSessionsPerSubjectPerDay: null,
   maxLabSessionsPerSectionPerDay: null,
+  maxConsecutiveTheory: null,
+  maxGapsPerDay: null,
   softWeights: DEFAULT_SOFT_WEIGHTS,
 };
