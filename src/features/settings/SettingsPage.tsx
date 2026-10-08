@@ -236,7 +236,7 @@ export function SettingsPage() {
                 </Button>
               )}
             </div>
-            {logoError && <p className="mt-1 text-xs text-danger" role="alert">{logoError}</p>}
+            {logoError && <p className="mt-1 text-xs text-rose-700" role="alert">{logoError}</p>}
           </Field>
         </div>
       </Card>

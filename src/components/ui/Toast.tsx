@@ -16,7 +16,7 @@ export function Toast() {
     toast.kind === 'success'
       ? 'bg-success-bg text-success'
       : toast.kind === 'error'
-        ? 'bg-danger-bg text-danger'
+        ? 'bg-danger-bg text-rose-700'
         : 'bg-warning-bg text-warning';
   const dot =
     toast.kind === 'success' ? 'bg-success' : toast.kind === 'error' ? 'bg-danger' : 'bg-warning';

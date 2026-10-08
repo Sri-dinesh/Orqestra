@@ -31,7 +31,7 @@ export function ConflictModal({
     >
       <div className="w-full max-w-md rounded-card bg-white shadow-raised">
         <div className="flex items-center gap-2.5 border-b border-hairline px-5 py-3.5">
-          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-danger-bg text-sm font-bold text-danger" aria-hidden="true">
+          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-danger-bg text-sm font-bold text-rose-700" aria-hidden="true">
             !
           </span>
           <h2 className="text-sm font-semibold text-ink">Edit blocked — conflict detected</h2>
@@ -42,7 +42,7 @@ export function ConflictModal({
           </p>
           <ul className="mt-3 space-y-2">
             {conflicts.slice(0, 8).map((c, i) => (
-              <li key={c.id ?? i} className="rounded-xl bg-danger-bg p-3 text-xs text-danger">
+              <li key={c.id ?? i} className="rounded-xl bg-danger-bg p-3 text-xs text-rose-700">
                 <strong>{c.type.replace(/_/g, ' ').toLowerCase()}</strong>
                 {c.dayIndex !== null && (
                   <span className="ml-1 text-body-gray">
