@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 export const Footer: React.FC = () => {
   return (
@@ -19,8 +19,9 @@ export const Footer: React.FC = () => {
               </span>
             </div>
             <p className="text-xs text-white/60 leading-relaxed max-w-sm font-sans">
-              Timetabling infrastructure for modern education. Automated, conflict-free academic scheduling
-              engineered for colleges, universities, and multi-campus institutions worldwide.
+              Timetabling infrastructure for modern education. Automated,
+              conflict-free academic scheduling engineered for colleges,
+              universities, and multi-campus institutions worldwide.
             </p>
             <div className="pt-2 flex items-center gap-2 font-mono text-[11px] text-white/40">
               <span className="w-2 h-2 rounded-full bg-emerald-400" />
@@ -34,11 +35,46 @@ export const Footer: React.FC = () => {
               Product
             </div>
             <ul className="space-y-2.5 text-xs text-white/70">
-              <li><a href="#interactive-demo" className="hover:text-white transition-colors">Timetable Generator</a></li>
-              <li><a href="#architecture" className="hover:text-white transition-colors">Constraint Solver</a></li>
-              <li><a href="#controls" className="hover:text-white transition-colors">Policy Invariants Engine</a></li>
-              <li><a href="#analytics" className="hover:text-white transition-colors">Room Utilization Heatmaps</a></li>
-              <li><a href="#interactive-demo" className="hover:text-white transition-colors">Dynamic Conflict Resolver</a></li>
+              <li>
+                <a
+                  href="#interactive-demo"
+                  className="hover:text-white transition-colors"
+                >
+                  Timetable Generator
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#architecture"
+                  className="hover:text-white transition-colors"
+                >
+                  Constraint Solver
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#controls"
+                  className="hover:text-white transition-colors"
+                >
+                  Policy Invariants Engine
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#analytics"
+                  className="hover:text-white transition-colors"
+                >
+                  Room Utilization Heatmaps
+                </a>
+              </li>
+              <li>
+                <a
+                  href="#interactive-demo"
+                  className="hover:text-white transition-colors"
+                >
+                  Dynamic Conflict Resolver
+                </a>
+              </li>
             </ul>
           </div>
 
@@ -48,11 +84,31 @@ export const Footer: React.FC = () => {
               Solutions
             </div>
             <ul className="space-y-2.5 text-xs text-white/70">
-              <li><a href="#scale" className="hover:text-white transition-colors">Colleges & Universities</a></li>
-              <li><a href="#scale" className="hover:text-white transition-colors">Secondary Schools</a></li>
-              <li><a href="#scale" className="hover:text-white transition-colors">Multi-Campus Systems</a></li>
-              <li><a href="#scale" className="hover:text-white transition-colors">Technical Institutes</a></li>
-              <li><a href="#scale" className="hover:text-white transition-colors">Medical & Laboratory Wings</a></li>
+              <li>
+                <a href="#scale" className="hover:text-white transition-colors">
+                  Colleges & Universities
+                </a>
+              </li>
+              <li>
+                <a href="#scale" className="hover:text-white transition-colors">
+                  Secondary Schools
+                </a>
+              </li>
+              <li>
+                <a href="#scale" className="hover:text-white transition-colors">
+                  Multi-Campus Systems
+                </a>
+              </li>
+              <li>
+                <a href="#scale" className="hover:text-white transition-colors">
+                  Technical Institutes
+                </a>
+              </li>
+              <li>
+                <a href="#scale" className="hover:text-white transition-colors">
+                  Medical & Laboratory Wings
+                </a>
+              </li>
             </ul>
           </div>
 
@@ -62,11 +118,31 @@ export const Footer: React.FC = () => {
               Infrastructure
             </div>
             <ul className="space-y-2.5 text-xs text-white/70">
-              <li><span className="hover:text-white transition-colors cursor-pointer">SIS / Canvas LMS APIs</span></li>
-              <li><span className="hover:text-white transition-colors cursor-pointer">FERPA Compliance</span></li>
-              <li><span className="hover:text-white transition-colors cursor-pointer">SOC 2 Type II Security</span></li>
-              <li><span className="hover:text-white transition-colors cursor-pointer">Immutable Audit Trail</span></li>
-              <li><span className="hover:text-white transition-colors cursor-pointer">System Status</span></li>
+              <li>
+                <span className="hover:text-white transition-colors cursor-pointer">
+                  SIS / Canvas LMS APIs
+                </span>
+              </li>
+              <li>
+                <span className="hover:text-white transition-colors cursor-pointer">
+                  FERPA Compliance
+                </span>
+              </li>
+              <li>
+                <span className="hover:text-white transition-colors cursor-pointer">
+                  SOC 2 Type II Security
+                </span>
+              </li>
+              <li>
+                <span className="hover:text-white transition-colors cursor-pointer">
+                  Immutable Audit Trail
+                </span>
+              </li>
+              <li>
+                <span className="hover:text-white transition-colors cursor-pointer">
+                  System Status
+                </span>
+              </li>
             </ul>
           </div>
         </div>
@@ -77,9 +153,15 @@ export const Footer: React.FC = () => {
             © 2026 Cadence Academic Technologies Inc. All rights reserved.
           </div>
           <div className="flex items-center gap-6">
-            <span className="hover:text-white transition-colors cursor-pointer">Privacy Policy</span>
-            <span className="hover:text-white transition-colors cursor-pointer">Institutional Terms</span>
-            <span className="hover:text-white transition-colors cursor-pointer">Security Whitepaper</span>
+            <span className="hover:text-white transition-colors cursor-pointer">
+              Privacy Policy
+            </span>
+            <span className="hover:text-white transition-colors cursor-pointer">
+              Institutional Terms
+            </span>
+            <span className="hover:text-white transition-colors cursor-pointer">
+              Security Whitepaper
+            </span>
           </div>
         </div>
       </div>

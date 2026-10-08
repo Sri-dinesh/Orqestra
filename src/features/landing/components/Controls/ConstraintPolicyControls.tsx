@@ -1,29 +1,37 @@
-import React, { useState } from 'react';
-import { ShieldCheck } from 'lucide-react';
+import React, { useState } from "react";
+import { ShieldCheck } from "lucide-react";
 
 export const ConstraintPolicyControls: React.FC = () => {
   const [maxDailyHours, setMaxDailyHours] = useState(4);
   const [lunchSynchronized, setLunchSynchronized] = useState(true);
   const [avoidConsecutiveLabs, setAvoidConsecutiveLabs] = useState(true);
-  const [saturdayPolicy, setSaturdayPolicy] = useState<'off' | 'electives' | 'full'>('off');
+  const [saturdayPolicy, setSaturdayPolicy] = useState<
+    "off" | "electives" | "full"
+  >("off");
   const [capacityMargin, setCapacityMargin] = useState(15);
 
   return (
-    <section id="controls" className="gsap-section-reveal py-20 lg:py-28 bg-[#F7F8F5] relative">
+    <section
+      id="controls"
+      className="gsap-section-reveal py-20 lg:py-28 bg-[#F7F8F5] relative"
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="max-w-3xl mb-14">
           <div className="flex items-center gap-2 text-xs font-mono font-medium text-[#4B5259] uppercase tracking-widest mb-3">
             <span>Governance & Policy</span>
-            <span aria-hidden="true" className="text-black/30">·</span>
+            <span aria-hidden="true" className="text-black/30">
+              ·
+            </span>
             <span className="text-[#0047FF]">Institutional Invariants</span>
           </div>
           <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-[#111315] leading-tight text-balance">
             Automation without surrendering control.
           </h2>
           <p className="mt-4 text-base sm:text-lg text-[#4B5259] leading-relaxed max-w-2xl text-balance">
-            Academic administrators define the strict boundaries and soft pedagogical preferences.
-            The engine executes within your institutional constitution—never overriding human authority.
+            Academic administrators define the strict boundaries and soft
+            pedagogical preferences. The engine executes within your
+            institutional constitution—never overriding human authority.
           </p>
         </div>
 
@@ -57,7 +65,8 @@ export const ConstraintPolicyControls: React.FC = () => {
                   </span>
                 </div>
                 <p className="text-xs text-[#71767B] mt-0.5">
-                  Prevents pedagogical fatigue and guarantees time for research and student office hours.
+                  Prevents pedagogical fatigue and guarantees time for research
+                  and student office hours.
                 </p>
               </div>
               <div className="flex items-center gap-3">
@@ -87,18 +96,19 @@ export const ConstraintPolicyControls: React.FC = () => {
                   </span>
                 </div>
                 <p className="text-xs text-[#71767B] mt-0.5">
-                  Protects 12:45 – 13:30 across every department for dining, club meetings, and transit.
+                  Protects 12:45 – 13:30 across every department for dining,
+                  club meetings, and transit.
                 </p>
               </div>
               <button
                 onClick={() => setLunchSynchronized(!lunchSynchronized)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold font-mono transition-all ${
                   lunchSynchronized
-                    ? 'bg-[#111315] text-white'
-                    : 'bg-[#E5E8E0] text-[#71767B]'
+                    ? "bg-[#111315] text-white"
+                    : "bg-[#E5E8E0] text-[#71767B]"
                 }`}
               >
-                {lunchSynchronized ? 'ENFORCED (12:45)' : 'DISABLED'}
+                {lunchSynchronized ? "ENFORCED (12:45)" : "DISABLED"}
               </button>
             </div>
 
@@ -114,18 +124,19 @@ export const ConstraintPolicyControls: React.FC = () => {
                   </span>
                 </div>
                 <p className="text-xs text-[#71767B] mt-0.5">
-                  Students never spend four consecutive hours in high-intensity hardware or wet chemistry labs.
+                  Students never spend four consecutive hours in high-intensity
+                  hardware or wet chemistry labs.
                 </p>
               </div>
               <button
                 onClick={() => setAvoidConsecutiveLabs(!avoidConsecutiveLabs)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold font-mono transition-all ${
                   avoidConsecutiveLabs
-                    ? 'bg-[#0047FF] text-white'
-                    : 'bg-[#E5E8E0] text-[#71767B]'
+                    ? "bg-[#0047FF] text-white"
+                    : "bg-[#E5E8E0] text-[#71767B]"
                 }`}
               >
-                {avoidConsecutiveLabs ? 'ACTIVE' : 'INACTIVE'}
+                {avoidConsecutiveLabs ? "ACTIVE" : "INACTIVE"}
               </button>
             </div>
 
@@ -141,21 +152,26 @@ export const ConstraintPolicyControls: React.FC = () => {
                   </span>
                 </div>
                 <p className="text-xs text-[#71767B] mt-0.5">
-                  Controls whether Saturday can host elective coursework or remains strictly closed.
+                  Controls whether Saturday can host elective coursework or
+                  remains strictly closed.
                 </p>
               </div>
               <div className="flex items-center gap-1 bg-[#F1F3ED] p-1 rounded-lg text-xs font-medium">
-                {(['off', 'electives', 'full'] as const).map((mode) => (
+                {(["off", "electives", "full"] as const).map((mode) => (
                   <button
                     key={mode}
                     onClick={() => setSaturdayPolicy(mode)}
                     className={`px-2.5 py-1 rounded text-[11px] font-mono capitalize transition-all ${
                       saturdayPolicy === mode
-                        ? 'bg-white text-[#111315] shadow-xs font-bold'
-                        : 'text-[#4B5259] hover:text-[#111315]'
+                        ? "bg-white text-[#111315] shadow-xs font-bold"
+                        : "text-[#4B5259] hover:text-[#111315]"
                     }`}
                   >
-                    {mode === 'off' ? 'No Weekends' : mode === 'electives' ? 'Electives Only' : 'Full Sat'}
+                    {mode === "off"
+                      ? "No Weekends"
+                      : mode === "electives"
+                        ? "Electives Only"
+                        : "Full Sat"}
                   </button>
                 ))}
               </div>
@@ -173,7 +189,8 @@ export const ConstraintPolicyControls: React.FC = () => {
                   </span>
                 </div>
                 <p className="text-xs text-[#71767B] mt-0.5">
-                  Requires physical room capacity to exceed enrolled students by this percentage.
+                  Requires physical room capacity to exceed enrolled students by
+                  this percentage.
                 </p>
               </div>
               <div className="flex items-center gap-3">
@@ -205,27 +222,35 @@ export const ConstraintPolicyControls: React.FC = () => {
             </h3>
 
             <p className="text-xs text-white/70 leading-relaxed font-sans">
-              Cadence uses a two-tier optimization function: Hard constraints cannot be breached under any
-              mathematical condition; soft preferences maximize pedagogical quality.
+              Cadence uses a two-tier optimization function: Hard constraints
+              cannot be breached under any mathematical condition; soft
+              preferences maximize pedagogical quality.
             </p>
 
             <div className="space-y-3 font-mono text-xs pt-4 border-t border-white/10">
               <div className="p-3 rounded-lg bg-white/5 border border-white/5">
-                <div className="text-emerald-400 font-bold mb-1">Tier 1: Hard Invariants</div>
+                <div className="text-emerald-400 font-bold mb-1">
+                  Tier 1: Hard Invariants
+                </div>
                 <div className="text-[11px] text-white/60 font-sans">
-                  Double bookings = 0, Room capacity deficit = 0, Lunch collisions = 0.
+                  Double bookings = 0, Room capacity deficit = 0, Lunch
+                  collisions = 0.
                 </div>
               </div>
               <div className="p-3 rounded-lg bg-white/5 border border-white/5">
-                <div className="text-blue-400 font-bold mb-1">Tier 2: Soft Heuristics</div>
+                <div className="text-blue-400 font-bold mb-1">
+                  Tier 2: Soft Heuristics
+                </div>
                 <div className="text-[11px] text-white/60 font-sans">
-                  Professor preferred mornings, even weekly student distribution, campus transit minimization.
+                  Professor preferred mornings, even weekly student
+                  distribution, campus transit minimization.
                 </div>
               </div>
             </div>
 
             <div className="pt-4 border-t border-white/10 text-[11px] text-white/50 font-mono">
-              ROLE: ACADEMIC REGISTRAR PERMISSIONS REQUIRED TO ALTER POLICY INVARIANTS.
+              ROLE: ACADEMIC REGISTRAR PERMISSIONS REQUIRED TO ALTER POLICY
+              INVARIANTS.
             </div>
           </div>
         </div>

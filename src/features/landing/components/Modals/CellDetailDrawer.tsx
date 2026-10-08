@@ -1,13 +1,16 @@
-import React from 'react';
-import { ScheduleClass } from '../../types/schedule';
-import { X, Clock, MapPin, User, CheckCircle2 } from 'lucide-react';
+import React from "react";
+import { ScheduleClass } from "../../types/schedule";
+import { X, Clock, MapPin, User, CheckCircle2 } from "lucide-react";
 
 interface CellDetailDrawerProps {
   selectedClass: ScheduleClass | null;
   onClose: () => void;
 }
 
-export const CellDetailDrawer: React.FC<CellDetailDrawerProps> = ({ selectedClass, onClose }) => {
+export const CellDetailDrawer: React.FC<CellDetailDrawerProps> = ({
+  selectedClass,
+  onClose,
+}) => {
   if (!selectedClass) return null;
 
   return (
@@ -24,7 +27,9 @@ export const CellDetailDrawer: React.FC<CellDetailDrawerProps> = ({ selectedClas
         <div className="flex items-center gap-2 text-xs font-mono text-[#0047FF] uppercase tracking-wider mb-2">
           <span>SCHEDULE BLOCK DETAIL</span>
           <span className="text-black/20">|</span>
-          <span className="text-emerald-700 font-semibold">VERIFIED ASSIGNMENT</span>
+          <span className="text-emerald-700 font-semibold">
+            VERIFIED ASSIGNMENT
+          </span>
         </div>
 
         <h3 className="font-display text-xl font-bold text-[#111315] mb-1">
@@ -38,24 +43,36 @@ export const CellDetailDrawer: React.FC<CellDetailDrawerProps> = ({ selectedClas
           <div className="p-3 rounded-xl bg-[#FAFBF9] border border-[#E5E8E0] flex items-center gap-3">
             <Clock className="w-4 h-4 text-[#0047FF] shrink-0" />
             <div>
-              <div className="text-[10px] text-[#71767B]">TIME & SCHEDULE PERIOD</div>
-              <div className="font-bold text-[#111315]">{selectedClass.day} · {selectedClass.startTime}</div>
+              <div className="text-[10px] text-[#71767B]">
+                TIME & SCHEDULE PERIOD
+              </div>
+              <div className="font-bold text-[#111315]">
+                {selectedClass.day} · {selectedClass.startTime}
+              </div>
             </div>
           </div>
 
           <div className="p-3 rounded-xl bg-[#FAFBF9] border border-[#E5E8E0] flex items-center gap-3">
             <User className="w-4 h-4 text-[#0047FF] shrink-0" />
             <div>
-              <div className="text-[10px] text-[#71767B]">ASSIGNED INSTRUCTOR</div>
-              <div className="font-bold text-[#111315]">{selectedClass.facultyName}</div>
+              <div className="text-[10px] text-[#71767B]">
+                ASSIGNED INSTRUCTOR
+              </div>
+              <div className="font-bold text-[#111315]">
+                {selectedClass.facultyName}
+              </div>
             </div>
           </div>
 
           <div className="p-3 rounded-xl bg-[#FAFBF9] border border-[#E5E8E0] flex items-center gap-3">
             <MapPin className="w-4 h-4 text-[#0047FF] shrink-0" />
             <div>
-              <div className="text-[10px] text-[#71767B]">ALLOCATED PHYSICAL FACILITY</div>
-              <div className="font-bold text-[#111315]">{selectedClass.roomName}</div>
+              <div className="text-[10px] text-[#71767B]">
+                ALLOCATED PHYSICAL FACILITY
+              </div>
+              <div className="font-bold text-[#111315]">
+                {selectedClass.roomName}
+              </div>
             </div>
           </div>
         </div>

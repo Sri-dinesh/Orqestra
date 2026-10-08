@@ -1,34 +1,40 @@
-import React from 'react';
+import React from "react";
 
 export const OperationalAnalyticsSection: React.FC = () => {
   const hourlyOccupancy = [
-    { hour: '08:00', percent: 72 },
-    { hour: '09:00', percent: 89 },
-    { hour: '10:00', percent: 94 },
-    { hour: '11:00', percent: 91 },
-    { hour: '12:00', percent: 45 }, // lunch break drop
-    { hour: '13:00', percent: 84 },
-    { hour: '14:00', percent: 88 },
-    { hour: '15:00', percent: 82 },
-    { hour: '16:00', percent: 64 },
+    { hour: "08:00", percent: 72 },
+    { hour: "09:00", percent: 89 },
+    { hour: "10:00", percent: 94 },
+    { hour: "11:00", percent: 91 },
+    { hour: "12:00", percent: 45 }, // lunch break drop
+    { hour: "13:00", percent: 84 },
+    { hour: "14:00", percent: 88 },
+    { hour: "15:00", percent: 82 },
+    { hour: "16:00", percent: 64 },
   ];
 
   return (
-    <section id="analytics" className="gsap-section-reveal py-20 lg:py-28 bg-[#111315] text-white relative">
+    <section
+      id="analytics"
+      className="gsap-section-reveal py-20 lg:py-28 bg-[#111315] text-white relative"
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Section Header */}
         <div className="max-w-3xl mb-14">
           <div className="flex items-center gap-2 text-xs font-mono font-medium text-blue-400 uppercase tracking-widest mb-3">
             <span>Operational Intelligence</span>
-            <span aria-hidden="true" className="text-white/30">·</span>
+            <span aria-hidden="true" className="text-white/30">
+              ·
+            </span>
             <span>Auditable Analytics</span>
           </div>
           <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white leading-tight text-balance">
             Real institutional analytics. Not generic metrics.
           </h2>
           <p className="mt-4 text-base sm:text-lg text-white/70 leading-relaxed max-w-2xl text-balance">
-            Track actual space efficiency, equipment utilization rates, and faculty equity indices
-            derived directly from your verified timetable schedules.
+            Track actual space efficiency, equipment utilization rates, and
+            faculty equity indices derived directly from your verified timetable
+            schedules.
           </p>
         </div>
 
@@ -42,7 +48,8 @@ export const OperationalAnalyticsSection: React.FC = () => {
                   Hourly Space Utilization Profile
                 </h3>
                 <p className="text-xs text-white/50 font-sans mt-0.5">
-                  Campus-wide lecture hall and laboratory occupancy throughout standard academic days.
+                  Campus-wide lecture hall and laboratory occupancy throughout
+                  standard academic days.
                 </p>
               </div>
               <span className="text-xs font-mono text-emerald-400 font-semibold bg-emerald-500/10 px-2.5 py-1 rounded border border-emerald-500/20">
@@ -59,8 +66,8 @@ export const OperationalAnalyticsSection: React.FC = () => {
                     <div
                       className={`analytics-bar-fill h-full rounded-md transition-all duration-500 flex items-center justify-end pr-2 text-[10px] font-bold ${
                         slot.percent < 50
-                          ? 'bg-amber-500/70 text-white'
-                          : 'bg-[#0047FF] text-white'
+                          ? "bg-amber-500/70 text-white"
+                          : "bg-[#0047FF] text-white"
                       }`}
                       data-width={`${slot.percent}%`}
                       style={{ width: `${slot.percent}%` }}
@@ -69,7 +76,7 @@ export const OperationalAnalyticsSection: React.FC = () => {
                     </div>
                   </div>
                   <span className="text-[10px] text-white/40 w-20 text-right font-sans">
-                    {slot.percent < 50 ? 'Lunch Sync' : 'Optimal'}
+                    {slot.percent < 50 ? "Lunch Sync" : "Optimal"}
                   </span>
                 </div>
               ))}
@@ -77,7 +84,9 @@ export const OperationalAnalyticsSection: React.FC = () => {
 
             <div className="mt-6 pt-4 border-t border-white/10 flex flex-wrap items-center justify-between text-xs text-white/50 font-sans">
               <span>Eliminated 8 AM dead slots and 4 PM clustering</span>
-              <span className="font-mono text-emerald-400">+28% Real Estate Efficiency</span>
+              <span className="font-mono text-emerald-400">
+                +28% Real Estate Efficiency
+              </span>
             </div>
           </div>
 
@@ -88,22 +97,35 @@ export const OperationalAnalyticsSection: React.FC = () => {
                 Faculty Teaching Equity Index
               </h3>
               <p className="text-xs text-white/60 leading-relaxed mb-6 font-sans">
-                Gini coefficient of workload distribution across departments. Ensures junior and senior
-                professors carry balanced contact credit hours.
+                Gini coefficient of workload distribution across departments.
+                Ensures junior and senior professors carry balanced contact
+                credit hours.
               </p>
 
               <div className="p-4 rounded-xl bg-white/5 border border-white/5 space-y-3 font-mono text-xs">
                 <div className="flex justify-between">
-                  <span className="text-white/60">Workload Gini Coefficient:</span>
-                  <span className="text-emerald-400 font-bold tabular">0.08 (Near Perfect Balance)</span>
+                  <span className="text-white/60">
+                    Workload Gini Coefficient:
+                  </span>
+                  <span className="text-emerald-400 font-bold tabular">
+                    0.08 (Near Perfect Balance)
+                  </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-white/60">Excess Teaching Outliers:</span>
-                  <span className="text-white font-bold tabular">0 Faculty &gt; 18h/wk</span>
+                  <span className="text-white/60">
+                    Excess Teaching Outliers:
+                  </span>
+                  <span className="text-white font-bold tabular">
+                    0 Faculty &gt; 18h/wk
+                  </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-white/60">Protected Research Windows:</span>
-                  <span className="text-blue-400 font-bold tabular">100% Granted</span>
+                  <span className="text-white/60">
+                    Protected Research Windows:
+                  </span>
+                  <span className="text-blue-400 font-bold tabular">
+                    100% Granted
+                  </span>
                 </div>
               </div>
             </div>
@@ -113,7 +135,8 @@ export const OperationalAnalyticsSection: React.FC = () => {
                 Specialized Lab Idle Reduction
               </h3>
               <p className="text-xs text-white/60 leading-relaxed mb-4 font-sans">
-                Expensive hardware synthesis and cleanroom facilities scheduled with back-to-back cohort batching.
+                Expensive hardware synthesis and cleanroom facilities scheduled
+                with back-to-back cohort batching.
               </p>
               <div className="font-display text-3xl font-bold text-emerald-400 tabular">
                 -62%

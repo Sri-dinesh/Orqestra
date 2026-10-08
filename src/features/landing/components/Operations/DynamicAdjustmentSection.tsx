@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { UserX, RefreshCw, CheckCircle2 } from 'lucide-react';
-import confetti from 'canvas-confetti';
+import React, { useState } from "react";
+import { UserX, RefreshCw, CheckCircle2 } from "lucide-react";
+import confetti from "canvas-confetti";
 
 export const DynamicAdjustmentSection: React.FC = () => {
   const [professorUnavailable, setProfessorUnavailable] = useState(false);
@@ -20,7 +20,7 @@ export const DynamicAdjustmentSection: React.FC = () => {
           particleCount: 25,
           spread: 45,
           origin: { y: 0.6 },
-          colors: ['#0047FF', '#10B981'],
+          colors: ["#0047FF", "#10B981"],
         });
       } catch {
         // ignore
@@ -41,15 +41,18 @@ export const DynamicAdjustmentSection: React.FC = () => {
         <div className="max-w-3xl mb-14">
           <div className="flex items-center gap-2 text-xs font-mono font-medium text-[#4B5259] uppercase tracking-widest mb-3">
             <span>Dynamic Adaptation</span>
-            <span aria-hidden="true" className="text-black/30">·</span>
+            <span aria-hidden="true" className="text-black/30">
+              ·
+            </span>
             <span className="text-[#0047FF]">Mid-Semester Agility</span>
           </div>
           <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-[#111315] leading-tight text-balance">
             Change the plan without rebuilding everything.
           </h2>
           <p className="mt-4 text-base sm:text-lg text-[#4B5259] leading-relaxed max-w-2xl text-balance">
-            When a professor goes on emergency medical leave or an auditorium undergoes electrical repair,
-            Cadence recalculates localized assignments while holding the rest of the schedule stable.
+            When a professor goes on emergency medical leave or an auditorium
+            undergoes electrical repair, Cadence recalculates localized
+            assignments while holding the rest of the schedule stable.
           </p>
         </div>
 
@@ -67,8 +70,12 @@ export const DynamicAdjustmentSection: React.FC = () => {
                     MC
                   </div>
                   <div>
-                    <div className="font-bold text-sm text-[#111315]">Dr. Marcus Chen</div>
-                    <div className="text-xs text-[#4B5259]">Algorithms & Complexity · 3 Sections</div>
+                    <div className="font-bold text-sm text-[#111315]">
+                      Dr. Marcus Chen
+                    </div>
+                    <div className="text-xs text-[#4B5259]">
+                      Algorithms & Complexity · 3 Sections
+                    </div>
                   </div>
                 </div>
 
@@ -79,11 +86,13 @@ export const DynamicAdjustmentSection: React.FC = () => {
                   <span
                     className={`text-xs font-mono font-bold px-2.5 py-1 rounded-md ${
                       professorUnavailable
-                        ? 'bg-rose-100 text-rose-800'
-                        : 'bg-emerald-100 text-emerald-800'
+                        ? "bg-rose-100 text-rose-800"
+                        : "bg-emerald-100 text-emerald-800"
                     }`}
                   >
-                    {professorUnavailable ? 'UNAVAILABLE (SYMPOSIUM)' : 'AVAILABLE (NORMAL)'}
+                    {professorUnavailable
+                      ? "UNAVAILABLE (SYMPOSIUM)"
+                      : "AVAILABLE (NORMAL)"}
                   </span>
                 </div>
               </div>
@@ -124,7 +133,8 @@ export const DynamicAdjustmentSection: React.FC = () => {
                     Evaluating non-disruptive permutations...
                   </div>
                   <div className="text-[11px] text-[#71767B]">
-                    Freezing unaffected 2,397 sections · Rescheduling 3 impacted classes
+                    Freezing unaffected 2,397 sections · Rescheduling 3 impacted
+                    classes
                   </div>
                 </div>
               )}
@@ -133,7 +143,9 @@ export const DynamicAdjustmentSection: React.FC = () => {
                 <div className="space-y-3">
                   <div className="p-3 rounded-lg bg-white border border-[#E5E8E0] flex items-center justify-between">
                     <div>
-                      <div className="font-bold text-[#111315]">WED 08:30 · CS-415 (Compilers)</div>
+                      <div className="font-bold text-[#111315]">
+                        WED 08:30 · CS-415 (Compilers)
+                      </div>
                       <div className="text-[10px] text-[#71767B] font-sans">
                         Assigned to Dr. Chen in Shannon 204
                       </div>
@@ -142,7 +154,9 @@ export const DynamicAdjustmentSection: React.FC = () => {
                   </div>
                   <div className="p-3 rounded-lg bg-white border border-[#E5E8E0] flex items-center justify-between">
                     <div>
-                      <div className="font-bold text-[#111315]">WED 10:45 · CS-301 (Algorithms Sec A)</div>
+                      <div className="font-bold text-[#111315]">
+                        WED 10:45 · CS-301 (Algorithms Sec A)
+                      </div>
                       <div className="text-[10px] text-[#71767B] font-sans">
                         Assigned to Dr. Chen in Turing 101
                       </div>
@@ -150,7 +164,8 @@ export const DynamicAdjustmentSection: React.FC = () => {
                     <span className="text-emerald-700 font-bold">STABLE</span>
                   </div>
                   <div className="p-2.5 text-center text-[#71767B] text-[11px] font-sans">
-                    Baseline timetable running normally with 0 conflicts. Click simulate above.
+                    Baseline timetable running normally with 0 conflicts. Click
+                    simulate above.
                   </div>
                 </div>
               )}
@@ -160,26 +175,40 @@ export const DynamicAdjustmentSection: React.FC = () => {
                   <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-300 text-emerald-900">
                     <div className="font-bold flex items-center gap-1.5 text-xs text-emerald-950 mb-1">
                       <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                      <span>3 Classes Automatically Relocated · 0 Downstream Conflicts</span>
+                      <span>
+                        3 Classes Automatically Relocated · 0 Downstream
+                        Conflicts
+                      </span>
                     </div>
                     <div className="text-[11px] text-emerald-800 font-sans">
-                      Displaced CS-301 moved to Thursday 08:30 open slot. CS-415 swapped with Friday tutorial.
-                      Remaining 2,397 sections across the university were completely untouched!
+                      Displaced CS-301 moved to Thursday 08:30 open slot. CS-415
+                      swapped with Friday tutorial. Remaining 2,397 sections
+                      across the university were completely untouched!
                     </div>
                   </div>
 
                   <div className="grid grid-cols-3 gap-2 text-center pt-2">
                     <div className="p-2 rounded bg-white border">
                       <div className="font-bold text-[#111315]">3 Classes</div>
-                      <div className="text-[10px] text-[#71767B]">Rescheduled</div>
+                      <div className="text-[10px] text-[#71767B]">
+                        Rescheduled
+                      </div>
                     </div>
                     <div className="p-2 rounded bg-white border">
-                      <div className="font-bold text-emerald-600">0 Collisions</div>
-                      <div className="text-[10px] text-[#71767B]">Introduced</div>
+                      <div className="font-bold text-emerald-600">
+                        0 Collisions
+                      </div>
+                      <div className="text-[10px] text-[#71767B]">
+                        Introduced
+                      </div>
                     </div>
                     <div className="p-2 rounded bg-white border">
-                      <div className="font-bold text-[#111315]">1.8 Seconds</div>
-                      <div className="text-[10px] text-[#71767B]">Solve Time</div>
+                      <div className="font-bold text-[#111315]">
+                        1.8 Seconds
+                      </div>
+                      <div className="text-[10px] text-[#71767B]">
+                        Solve Time
+                      </div>
                     </div>
                   </div>
                 </div>

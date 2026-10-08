@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { ArrowRight, CheckCircle2 } from 'lucide-react';
+import React, { useState } from "react";
+import { ArrowRight, CheckCircle2 } from "lucide-react";
 
 interface FinalCTASectionProps {
   onRequestPilot: () => void;
@@ -14,10 +14,34 @@ export const FinalCTASection: React.FC<FinalCTASectionProps> = ({
 
   // Floating timetable preview chips
   const floatingBlocks = [
-    { code: 'CS-301', title: 'Algorithms & Complexity', room: 'Turing 101', time: 'MON 09:30', pos: 'top-8 left-8 hidden lg:block' },
-    { code: 'EE-205', title: 'Digital Logic Lab', room: 'Circuits 01', time: 'TUE 13:30', pos: 'top-12 right-12 hidden lg:block' },
-    { code: 'MA-201', title: 'Linear Algebra', room: 'Shannon 204', time: 'WED 10:45', pos: 'bottom-12 left-16 hidden lg:block' },
-    { code: 'CS-408', title: 'Distributed Systems', room: 'Systems Lab 03', time: 'THU 08:30', pos: 'bottom-10 right-20 hidden lg:block' },
+    {
+      code: "CS-301",
+      title: "Algorithms & Complexity",
+      room: "Turing 101",
+      time: "MON 09:30",
+      pos: "top-8 left-8 hidden lg:block",
+    },
+    {
+      code: "EE-205",
+      title: "Digital Logic Lab",
+      room: "Circuits 01",
+      time: "TUE 13:30",
+      pos: "top-12 right-12 hidden lg:block",
+    },
+    {
+      code: "MA-201",
+      title: "Linear Algebra",
+      room: "Shannon 204",
+      time: "WED 10:45",
+      pos: "bottom-12 left-16 hidden lg:block",
+    },
+    {
+      code: "CS-408",
+      title: "Distributed Systems",
+      room: "Systems Lab 03",
+      time: "THU 08:30",
+      pos: "bottom-10 right-20 hidden lg:block",
+    },
   ];
 
   return (
@@ -31,15 +55,17 @@ export const FinalCTASection: React.FC<FinalCTASectionProps> = ({
           key={b.code}
           className={`gsap-parallax-float absolute ${b.pos} p-3.5 rounded-xl bg-white/[0.04] border border-white/10 backdrop-blur-md transition-all duration-700 pointer-events-none font-mono text-xs ${
             isHovered
-              ? 'opacity-80 translate-y-0 scale-100'
-              : 'opacity-25 translate-y-2 scale-95'
+              ? "opacity-80 translate-y-0 scale-100"
+              : "opacity-25 translate-y-2 scale-95"
           }`}
         >
           <div className="flex items-center justify-between text-[10px] text-white/50 mb-1">
             <span>{b.time}</span>
             <span className="text-emerald-400">0 CONFLICTS</span>
           </div>
-          <div className="font-bold text-white font-sans">{b.code} · {b.title}</div>
+          <div className="font-bold text-white font-sans">
+            {b.code} · {b.title}
+          </div>
           <div className="text-[10px] text-white/60 mt-0.5">{b.room}</div>
         </div>
       ))}
@@ -48,7 +74,9 @@ export const FinalCTASection: React.FC<FinalCTASectionProps> = ({
         {/* Kicker */}
         <div className="inline-flex items-center gap-2 text-xs font-mono text-blue-400 uppercase tracking-widest mb-6">
           <span>INSTITUTIONAL DEPLOYMENT</span>
-          <span aria-hidden="true" className="text-white/30">·</span>
+          <span aria-hidden="true" className="text-white/30">
+            ·
+          </span>
           <span>AUTUMN 2026 SEMESTER</span>
         </div>
 

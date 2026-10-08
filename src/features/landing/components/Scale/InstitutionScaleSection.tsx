@@ -1,29 +1,36 @@
-import React, { useState } from 'react';
-import { INSTITUTION_TIERS } from '../../data/mockSchedule';
-import { Building2, Users, Clock } from 'lucide-react';
+import React, { useState } from "react";
+import { INSTITUTION_TIERS } from "../../data/mockSchedule";
+import { Building2, Users, Clock } from "lucide-react";
 
 export const InstitutionScaleSection: React.FC = () => {
-  const [selectedTier, setSelectedTier] = useState<string>('university');
+  const [selectedTier, setSelectedTier] = useState<string>("university");
 
   const currentTier =
-    INSTITUTION_TIERS.find((t) => t.id === selectedTier) || INSTITUTION_TIERS[2];
+    INSTITUTION_TIERS.find((t) => t.id === selectedTier) ||
+    INSTITUTION_TIERS[2];
 
   return (
-    <section id="scale" className="gsap-section-reveal py-20 lg:py-28 bg-[#F7F8F5] relative">
+    <section
+      id="scale"
+      className="gsap-section-reveal py-20 lg:py-28 bg-[#F7F8F5] relative"
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="max-w-3xl mb-14">
           <div className="flex items-center gap-2 text-xs font-mono font-medium text-[#4B5259] uppercase tracking-widest mb-3">
             <span>Organizational Scale</span>
-            <span aria-hidden="true" className="text-black/30">·</span>
+            <span aria-hidden="true" className="text-black/30">
+              ·
+            </span>
             <span className="text-[#0047FF]">Architecture Across Campuses</span>
           </div>
           <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-[#111315] leading-tight text-balance">
             Built for 50 students or 50,000.
           </h2>
           <p className="mt-4 text-base sm:text-lg text-[#4B5259] leading-relaxed max-w-2xl text-balance">
-            From single-building preparatory academies to distributed multi-campus university systems,
-            the constraint solver scales without degradation in solve time or schedule optimality.
+            From single-building preparatory academies to distributed
+            multi-campus university systems, the constraint solver scales
+            without degradation in solve time or schedule optimality.
           </p>
         </div>
 
@@ -37,12 +44,16 @@ export const InstitutionScaleSection: React.FC = () => {
                 onClick={() => setSelectedTier(tier.id)}
                 className={`p-4 rounded-xl border text-left transition-all ${
                   isSelected
-                    ? 'bg-[#111315] text-white border-[#111315] shadow-sm'
-                    : 'bg-white text-[#30363D] border-[#E5E8E0] hover:border-black/30'
+                    ? "bg-[#111315] text-white border-[#111315] shadow-sm"
+                    : "bg-white text-[#30363D] border-[#E5E8E0] hover:border-black/30"
                 }`}
               >
-                <div className="font-display font-bold text-sm mb-1">{tier.name}</div>
-                <div className={`text-xs tabular font-mono ${isSelected ? 'text-blue-300' : 'text-[#71767B]'}`}>
+                <div className="font-display font-bold text-sm mb-1">
+                  {tier.name}
+                </div>
+                <div
+                  className={`text-xs tabular font-mono ${isSelected ? "text-blue-300" : "text-[#71767B]"}`}
+                >
                   {tier.students.toLocaleString()} students
                 </div>
               </button>
@@ -73,13 +84,17 @@ export const InstitutionScaleSection: React.FC = () => {
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-[#71767B]">Total Course Allocations:</span>
+                  <span className="text-[#71767B]">
+                    Total Course Allocations:
+                  </span>
                   <span className="font-bold text-[#111315] tabular">
                     {currentTier.courses.toLocaleString()}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-[#71767B]">Distributed Rooms & Labs:</span>
+                  <span className="text-[#71767B]">
+                    Distributed Rooms & Labs:
+                  </span>
                   <span className="font-bold text-[#111315] tabular">
                     {currentTier.rooms.toLocaleString()}
                   </span>

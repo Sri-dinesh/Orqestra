@@ -1,8 +1,8 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowRight, Check } from 'lucide-react';
-import { HeroScheduleVisualizer } from './HeroScheduleVisualizer';
-import { ScheduleClass } from '../../types/schedule';
+import React from "react";
+import { Link } from "react-router-dom";
+import { ArrowRight, Check } from "lucide-react";
+import { HeroScheduleVisualizer } from "./HeroScheduleVisualizer";
+import { ScheduleClass } from "../../types/schedule";
 
 interface HeroSectionProps {
   onScrollToDemo: () => void;
@@ -29,13 +29,17 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           {/* Eyebrow - Clean unboxed text with typographic separator (Zero-pill discipline) */}
           <div className="flex items-center justify-center gap-2 text-xs font-mono font-medium tracking-widest text-[#4B5259] uppercase mb-4">
             <span>Academic Scheduling Infrastructure</span>
-            <span aria-hidden="true" className="text-black/30">·</span>
-            <span className="text-[#0047FF] font-semibold">Constraint Solver Engine</span>
+            <span aria-hidden="true" className="text-black/30">
+              ·
+            </span>
+            <span className="text-[#0047FF] font-semibold">
+              Constraint Solver Engine
+            </span>
           </div>
 
           {/* Primary Editorial Headline */}
           <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-[#111315] leading-[1.08] text-balance mb-6">
-            Build the timetable your institution{' '}
+            Build the timetable your institution{" "}
             <span className="relative inline-block">
               actually needs.
               <span className="absolute bottom-1 left-0 w-full h-[3px] bg-[#0047FF]/25 -z-10 rounded-full" />
@@ -44,8 +48,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
           {/* Value Proposition Subtitle */}
           <p className="text-base sm:text-lg lg:text-xl text-[#4B5259] max-w-2xl mx-auto leading-relaxed text-balance mb-8">
-            Generate optimized, conflict-free academic schedules by coordinating faculty availability,
-            classrooms, laboratories, sections, workloads, and institutional rules automatically.
+            Generate optimized, conflict-free academic schedules by coordinating
+            faculty availability, classrooms, laboratories, sections, workloads,
+            and institutional rules automatically.
           </p>
 
           {/* Dual CTAs */}
@@ -86,7 +91,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         <div className="max-w-5xl mx-auto">
           <div className="mb-2 flex items-center justify-between text-xs text-[#71767B] px-1 font-mono">
             <span>LIVE SOLVER INTERFACE</span>
-            <span className="tabular">LATENCY: 0.04S · CONFLICT RESOLUTION: ACTIVE</span>
+            <span className="tabular">
+              LATENCY: 0.04S · CONFLICT RESOLUTION: ACTIVE
+            </span>
           </div>
           <HeroScheduleVisualizer onSelectClass={onSelectClass} />
         </div>

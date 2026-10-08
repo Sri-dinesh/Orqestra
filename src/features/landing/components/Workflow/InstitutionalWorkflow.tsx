@@ -1,41 +1,51 @@
-import React, { useState } from 'react';
-import { Shield, Users, BookOpen, GraduationCap, CheckCircle2 } from 'lucide-react';
+import React, { useState } from "react";
+import {
+  Shield,
+  Users,
+  BookOpen,
+  GraduationCap,
+  CheckCircle2,
+} from "lucide-react";
 
 export const InstitutionalWorkflow: React.FC = () => {
   const [activeRole, setActiveRole] = useState(0);
 
   const roles = [
     {
-      id: 'admin',
-      role: 'Academic Registrar',
+      id: "admin",
+      role: "Academic Registrar",
       icon: Shield,
-      responsibility: 'Constitutional Invariants & Policy',
-      action: 'Configures academic calendar windows, campus lunch intermissions, building travel buffers, and hard constraint rules.',
-      output: 'Enforced Institutional Rulebook',
+      responsibility: "Constitutional Invariants & Policy",
+      action:
+        "Configures academic calendar windows, campus lunch intermissions, building travel buffers, and hard constraint rules.",
+      output: "Enforced Institutional Rulebook",
     },
     {
-      id: 'chair',
-      role: 'Department Head',
+      id: "chair",
+      role: "Department Head",
       icon: Users,
-      responsibility: 'Course Allocations & Cohorts',
-      action: 'Assigns faculty to curriculum modules, defines laboratory section splits, and sets elective prerequisites.',
-      output: 'Curriculum Credit Matrix',
+      responsibility: "Course Allocations & Cohorts",
+      action:
+        "Assigns faculty to curriculum modules, defines laboratory section splits, and sets elective prerequisites.",
+      output: "Curriculum Credit Matrix",
     },
     {
-      id: 'faculty',
-      role: 'Teaching Faculty',
+      id: "faculty",
+      role: "Teaching Faculty",
       icon: BookOpen,
-      responsibility: 'Availability & Preferences',
-      action: 'Submits research blockouts, preferred morning or afternoon lecturing slots, and office hour windows.',
-      output: 'Verified Availability Vectors',
+      responsibility: "Availability & Preferences",
+      action:
+        "Submits research blockouts, preferred morning or afternoon lecturing slots, and office hour windows.",
+      output: "Verified Availability Vectors",
     },
     {
-      id: 'student',
-      role: 'Student & Registrant',
+      id: "student",
+      role: "Student & Registrant",
       icon: GraduationCap,
-      responsibility: 'Conflict-Free Enrollment',
-      action: 'Receives synchronized ICS calendar feeds, Canvas LMS timetable integration, and personalized room navigation.',
-      output: '100% Conflict-Free Semester',
+      responsibility: "Conflict-Free Enrollment",
+      action:
+        "Receives synchronized ICS calendar feeds, Canvas LMS timetable integration, and personalized room navigation.",
+      output: "100% Conflict-Free Semester",
     },
   ];
 
@@ -46,15 +56,18 @@ export const InstitutionalWorkflow: React.FC = () => {
         <div className="max-w-3xl mb-14">
           <div className="flex items-center gap-2 text-xs font-mono font-medium text-[#4B5259] uppercase tracking-widest mb-3">
             <span>Governance Architecture</span>
-            <span aria-hidden="true" className="text-black/30">·</span>
+            <span aria-hidden="true" className="text-black/30">
+              ·
+            </span>
             <span className="text-[#0047FF]">Multi-Role Orchestration</span>
           </div>
           <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-[#111315] leading-tight text-balance">
             Coordinated across every institutional tier.
           </h2>
           <p className="mt-4 text-base sm:text-lg text-[#4B5259] leading-relaxed max-w-2xl text-balance">
-            Scheduling touches everyone from the university provost to undergraduate freshmen.
-            Cadence unites institutional stakeholders in a unified role-governed pipeline.
+            Scheduling touches everyone from the university provost to
+            undergraduate freshmen. Cadence unites institutional stakeholders in
+            a unified role-governed pipeline.
           </p>
         </div>
 
@@ -69,22 +82,30 @@ export const InstitutionalWorkflow: React.FC = () => {
                 onClick={() => setActiveRole(idx)}
                 className={`p-5 rounded-2xl border text-left transition-all relative ${
                   isSelected
-                    ? 'bg-[#111315] text-white border-[#111315] shadow-md'
-                    : 'bg-white text-[#30363D] border-[#E5E8E0] hover:border-black/30'
+                    ? "bg-[#111315] text-white border-[#111315] shadow-md"
+                    : "bg-white text-[#30363D] border-[#E5E8E0] hover:border-black/30"
                 }`}
               >
                 <div className="flex items-center justify-between mb-3">
                   <div
                     className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                      isSelected ? 'bg-blue-600 text-white' : 'bg-[#FAFBF9] text-[#111315]'
+                      isSelected
+                        ? "bg-blue-600 text-white"
+                        : "bg-[#FAFBF9] text-[#111315]"
                     }`}
                   >
                     <Icon className="w-4 h-4" />
                   </div>
-                  <span className="font-mono text-xs opacity-50">0{idx + 1}</span>
+                  <span className="font-mono text-xs opacity-50">
+                    0{idx + 1}
+                  </span>
                 </div>
-                <div className="font-display font-bold text-sm mb-1">{item.role}</div>
-                <div className={`text-[11px] leading-tight ${isSelected ? 'text-white/70' : 'text-[#71767B]'}`}>
+                <div className="font-display font-bold text-sm mb-1">
+                  {item.role}
+                </div>
+                <div
+                  className={`text-[11px] leading-tight ${isSelected ? "text-white/70" : "text-[#71767B]"}`}
+                >
                   {item.responsibility}
                 </div>
               </button>
