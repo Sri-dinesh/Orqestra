@@ -27,22 +27,20 @@ export function DepartmentConfigPage() {
   const [editingSectionId, setEditingSectionId] = useState<string | null>(null);
   const [sectionEditForm, setSectionEditForm] = useState({ name: '', year: 1, semester: 1, studentCount: 0, roomNo: '', classAdvisor: '' });
   const [editingDepartment, setEditingDepartment] = useState(false);
-  const [departmentEditForm, setDepartmentEditForm] = useState({ code: '', name: '' });
-
-  if (!department) {
-    return (
-      <div className="rounded-card bg-white p-10 text-center shadow-panel">
-        <p className="text-sm font-medium text-ink">No department selected</p>
-        <p className="mt-1 text-sm text-body-gray">
-          Pick one from the{' '}
-          <Link className="text-metric-blue underline" to="/">
-            dashboard
-          </Link>
-          .
-        </p>
-      </div>
-    );
-  }
+  const [departmentEditForm, setDepartmentEditForm] = useState({ code: '', name: '' });      if (!department) {
+        return (
+          <div className="rounded-2xl bg-white p-10 text-center border border-[#E5E8E0] shadow-card">
+            <p className="text-sm font-medium text-[#111315]">No department selected</p>
+            <p className="mt-1 text-sm text-[#71767B]">
+              Pick one from the{' '}
+              <Link className="text-[#0047FF] underline" to="/dashboard">
+                dashboard
+              </Link>
+              .
+            </p>
+          </div>
+        );
+      }
 
   const updateDays = (day: WorkingDay, checked: boolean) => {
     const next = checked
@@ -132,7 +130,7 @@ export function DepartmentConfigPage() {
               <span className="mb-1.5 block text-xs font-medium text-body-gray">Working days</span>
               <div className="flex flex-wrap gap-2">
                 {WORKING_DAYS.map((day) => (
-                  <label key={day} className="flex cursor-pointer items-center gap-1.5 rounded-full bg-surface-2 px-3 py-1.5 text-xs font-medium text-ink transition-colors duration-150 has-checked:bg-info-bg hover:bg-surface-3">
+                  <label key={day} className="flex cursor-pointer items-center gap-1.5 rounded-full bg-[#F1F3ED] px-3 py-1.5 text-xs font-medium text-[#111315] transition-colors duration-150 hover:bg-[#E5E8E0] has-checked:bg-blue-100">
                     <input
                       type="checkbox"
                       className="accent-metric-blue"
@@ -213,8 +211,8 @@ export function DepartmentConfigPage() {
           </form>
           <ul className="space-y-2">
             {sections.map((s) => (
-              <li key={s.id} className="flex items-center justify-between gap-2 rounded-xl bg-surface-1 px-3 py-2">
-                <span className="text-sm text-ink">
+              <li key={s.id} className="flex items-center justify-between gap-2 rounded-xl bg-[#FAFBF9] px-3 py-2 border border-[#E5E8E0]">
+                <span className="text-sm text-[#111315]">
                   <strong>{s.name}</strong>
                   <span className="ml-2 text-xs text-body-gray">Y{s.year} S{s.semester} · {s.studentCount} students</span>
                 </span>
@@ -248,8 +246,8 @@ export function DepartmentConfigPage() {
         ) : (
           <div className="grid gap-4 lg:grid-cols-2">
             {sections.map((section) => (
-              <div key={section.id} className="rounded-xl bg-surface-1 p-4">
-                <h3 className="mb-2 text-sm font-semibold text-ink">{section.name}</h3>
+              <div key={section.id} className="rounded-xl bg-[#FAFBF9] p-4 border border-[#E5E8E0]">
+                <h3 className="mb-2 text-sm font-semibold text-[#111315]">{section.name}</h3>
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="text-left text-[11px] uppercase tracking-wide text-body-gray">
@@ -263,10 +261,10 @@ export function DepartmentConfigPage() {
                       const value = req?.sessionsPerWeek ?? 0;
                       const applicable = sub.eligibleSectionIds.includes(section.id);
                       return (
-                        <tr key={sub.id} className="border-t border-white">
-                          <td className="py-1.5 pr-2">
-                            <span className="font-medium text-ink">{sub.code}</span>
-                            <span className="ml-1.5 text-xs text-body-gray">{sub.type === 'LAB' ? 'Lab' : 'Theory'}</span>
+                        <tr key={sub.id} className="border-t border-[#E5E8E0]">
+                          <td className="py-1.5 pr-2 border-b border-[#E5E8E0]">
+                            <span className="font-medium text-[#111315]">{sub.code}</span>
+                            <span className="ml-1.5 text-xs text-[#71767B]">{sub.type === 'LAB' ? 'Lab' : 'Theory'}</span>
                             {!applicable && value > 0 && (
                               <button
                                 type="button"
@@ -281,7 +279,7 @@ export function DepartmentConfigPage() {
                               </button>
                             )}
                           </td>
-                          <td className="py-1.5">
+                          <td className="py-1.5 border-b border-[#E5E8E0]">
                             <Input
                               type="number"
                               min={0}

@@ -43,7 +43,7 @@ function CheckboxChips({
       {options.map((o) => (
         <label
           key={o.id}
-          className="flex cursor-pointer items-center gap-1.5 rounded-full bg-surface-2 px-3 py-1.5 text-xs font-medium text-ink transition-colors duration-150 has-checked:bg-info-bg hover:bg-surface-3"
+          className="flex cursor-pointer items-center gap-1.5 rounded-full bg-[#F1F3ED] px-3 py-1.5 text-xs font-medium text-[#111315] transition-colors duration-150 has-checked:bg-blue-100 hover:bg-[#E5E8E0]"
         >
           <input
             type="checkbox"
@@ -149,13 +149,13 @@ export function SubjectsPage() {
         ) : (
           <ul className="space-y-2">
             {subjects.map((s) => (
-              <li key={s.id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-surface-1 px-3 py-2.5">
+              <li key={s.id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-[#FAFBF9] px-3 py-2.5 border border-[#E5E8E0]">
                 <div className="min-w-0">
-                  <p className="text-sm text-ink">
+                  <p className="text-sm text-[#111315]">
                     <strong>{s.code}</strong> — {s.name}
-                    {!s.active && <span className="ml-2 text-xs font-medium text-danger">inactive</span>}
+                    {!s.active && <span className="ml-2 text-xs font-medium text-rose-700">inactive</span>}
                   </p>
-                  <p className="mt-0.5 text-xs text-body-gray">
+                  <p className="mt-0.5 text-xs text-[#71767B]">
                     {s.type === 'LAB' ? 'Lab' : 'Theory'} · {s.sessionsPerWeek}/wk · {s.durationPeriods}p · {s.eligibleFacultyIds.length} faculty · {s.eligibleSectionIds.length} sections
                   </p>
                 </div>

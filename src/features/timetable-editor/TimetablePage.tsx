@@ -80,7 +80,7 @@ export function TimetablePage() {
   );
 
   if (!department || !config || !editService) {
-    return <p className="text-sm text-body-gray">Select a department first.</p>;
+    return <p className="text-sm text-[#71767B]">Select a department first.</p>;
   }
 
   if (!timetable) {
@@ -88,7 +88,7 @@ export function TimetablePage() {
       <div className="space-y-6">
         <PageHeader eyebrow="Weekly schedule" title={`Timetable — ${department.code}`} />
         <Card>
-          <p className="text-sm text-body-gray">No timetable generated yet.</p>
+          <p className="text-sm text-[#71767B]">No timetable generated yet.</p>
           <Link to={`/departments/${departmentId}/generate`}>
             <Button size="sm" className="mt-3">Go to generation →</Button>
           </Link>
@@ -583,7 +583,7 @@ export function TimetablePage() {
             <tbody>
               {cells.map((row, dayIndex) => (
                 <tr key={dayIndex}>
-                  <th className="whitespace-nowrap rounded-lg bg-surface-2 px-2.5 text-[11px] font-semibold text-ink">
+                  <th className="whitespace-nowrap rounded-lg bg-[#F1F3ED] px-2.5 text-[11px] font-semibold text-[#111315]">
                     {department.workingDays[dayIndex].slice(0, 3)}
                   </th>
                   {row.map((cell) => {
@@ -614,7 +614,7 @@ export function TimetablePage() {
                     const bg = !occupied
                       ? preview
                         ? 'bg-danger-bg/60 hover:bg-danger-bg'
-                        : 'bg-surface-1 hover:bg-surface-2'
+                        : 'bg-[#FAFBF9] hover:bg-[#F1F3ED]'
                       : isConflict
                         ? 'bg-danger-bg'
                         : cell.type === 'LAB'
@@ -696,18 +696,18 @@ export function TimetablePage() {
                             aria-label={`${cell.subjectCode} ${cell.facultyName} day ${cell.dayIndex + 1} ${gridColumnLabel(layout, cell.periodIndex)}`}
                           >
                             <span className="block text-xs font-semibold text-ink">{cell.subjectCode}</span>
-                            <span className="block truncate text-[10px] text-body-gray">{cell.facultyName}</span>
+                            <span className="block truncate text-[10px] text-[#71767B]">{cell.facultyName}</span>
                             {cell.type === 'LAB' && <span className="block text-[10px] font-medium text-[#5b3fb8]">LAB (2p)</span>}
                           </button>
                         ) : occupied && cell.isContinuation ? (
-                          <span className="block cursor-grab p-1.5 text-[10px] text-body-gray">↳ {cell.subjectCode}</span>
+                          <span className="block cursor-grab p-1.5 text-[10px] text-[#71767B]">↳ {cell.subjectCode}</span>
                         ) : (
                           <button
                             type="button"
                             className={`h-12 w-full cursor-pointer rounded-md text-left text-[10px] transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-metric-blue ${
                               preview
                                 ? 'cursor-not-allowed text-danger/70'
-                                : 'text-body-gray/50 hover:text-body-gray'
+                                : 'text-[#71767B]/50 hover:text-body-gray'
                             } ${editor.selectedEntryId ? 'p-1.5' : ''}`}
                             onClick={() => {
                               if (editor.selectedEntryId) moveSelectedTo(cell.dayIndex, cell.periodIndex);
@@ -732,7 +732,7 @@ export function TimetablePage() {
             </tbody>
           </table>
         </div>
-        <ul className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[11px] text-body-gray" aria-label="Grid legend">
+        <ul className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[11px] text-[#71767B]" aria-label="Grid legend">
           <li className="flex items-center gap-1.5"><span className="h-3.5 w-5 rounded bg-[#dce4fd] ring-1 ring-inset ring-hairline" aria-hidden="true" /> Theory</li>
           <li className="flex items-center gap-1.5"><span className="h-3.5 w-5 rounded bg-[#e7e0fd] ring-1 ring-inset ring-hairline" aria-hidden="true" /> Lab (2 periods)</li>
           <li className="flex items-center gap-1.5"><span className="h-3.5 w-5 rounded bg-surface-1 ring-1 ring-inset ring-hairline" aria-hidden="true" /> Free slot</li>
@@ -741,13 +741,13 @@ export function TimetablePage() {
           <li className="flex items-center gap-1.5"><span className="h-3.5 w-5 rounded bg-[#dce4fd] ring-2 ring-metric-blue" aria-hidden="true" /> Selected</li>
           <li className="flex items-center gap-1.5"><span className="h-3.5 w-5 rounded bg-danger-bg/60 ring-2 ring-danger/60" aria-hidden="true" /> Move blocked</li>
           <li className="flex items-center gap-1.5"><span className="h-3.5 w-5 rounded bg-[#dce4fd] ring-2 ring-[#d9a13a]/60" aria-hidden="true" /> Swap blocked</li>
-          <li className="flex items-center gap-1.5"><span className="text-[11px] text-body-gray" aria-hidden="true">↳</span> Lab continuation</li>
+          <li className="flex items-center gap-1.5"><span className="text-[11px] text-[#71767B]" aria-hidden="true">↳</span> Lab continuation</li>
         </ul>
-        <p className="mt-2 text-xs text-body-gray">
+        <p className="mt-2 text-xs text-[#71767B]">
           Drag an entry onto a free slot to move it, or onto another entry to swap — green rings mark valid drop targets while dragging. Prefer clicks? Click an entry to select, then click a free slot to move or right-click an entry to swap; double-click to edit subject, faculty, day or period. With nothing selected, click a free slot to add a session. Labs move as one 2-period block. Break columns (e.g. lunch) are fixed and never accept sessions.
         </p>
         {editor.selectedEntryId && (hasMovePreview || hasSwapPreview) && (
-          <p className="mt-1 text-[11px] text-danger/80">
+          <p className="mt-1 text-[11px] text-rose-700/80">
             {hasMovePreview && <span>{hasSwapPreview ? 'Red' : 'Tinted'} slots: move would be rejected. </span>}
             {hasSwapPreview && <span>Amber slots: swap would be rejected.</span>}
           </p>
@@ -760,25 +760,25 @@ export function TimetablePage() {
             <span className="h-2 w-2 rounded-full bg-success" aria-hidden="true" />
             <div className="text-sm">
               <p className="font-medium text-success">Valid timetable</p>
-              <p className="text-xs text-body-gray">0 hard conflicts, 0 missing sessions, 0 duplicate sessions.</p>
+              <p className="text-xs text-[#71767B]">0 hard conflicts, 0 missing sessions, 0 duplicate sessions.</p>
             </div>
           </div>
         ) : (
           <ul className="space-y-2">
             {conflictsForSection.map((c) => (
-              <li key={c.id} className={`rounded-xl p-3 text-xs ${c.severity === 'ERROR' ? 'bg-danger-bg text-danger' : 'bg-warning-bg text-warning'}`}>
+              <li key={c.id} className={`rounded-xl p-3 text-xs ${c.severity === 'ERROR' ? 'bg-danger-bg text-rose-700' : 'bg-warning-bg text-warning'}`}>
                 <div className="flex items-center justify-between">
                   <strong>{c.type}</strong>
                   <Button variant="ghost" size="sm" onClick={() => setFocusConflictId(c.id)}>
                     Inspect
                   </Button>
                 </div>
-                <p className="mt-1 text-body-gray">
+                <p className="mt-1 text-[#71767B]">
                   {c.dayIndex !== null ? `${department.workingDays[c.dayIndex]} ` : ''}
                   {c.periodIndex !== null ? gridColumnLabel(layout, c.periodIndex) : ''}
                 </p>
                 {c.resolutionHints.length > 0 && (
-                  <ul className="mt-1 list-disc pl-4 text-body-gray">
+                  <ul className="mt-1 list-disc pl-4 text-[#71767B]">
                     {c.resolutionHints.map((h, i) => <li key={i}>{h}</li>)}
                   </ul>
                 )}
@@ -846,7 +846,7 @@ export function TimetablePage() {
                 </Select>
               </Field>
             </div>
-            <p className="text-xs text-body-gray">
+            <p className="text-xs text-[#71767B]">
               Changes that create hard conflicts (double-booked faculty, section collisions, lab overruns) are rejected.
             </p>
             <div className="flex justify-end gap-2">
@@ -897,7 +897,7 @@ export function TimetablePage() {
                 This section has no subject requirements configured. Add subjects in Configuration first.
               </p>
             )}
-            <p className="text-xs text-body-gray">
+            <p className="text-xs text-[#71767B]">
               Placements that double-book the section or the faculty member are rejected. Labs occupy 2 consecutive periods.
             </p>
             <div className="flex justify-end gap-2">
@@ -918,7 +918,7 @@ export function TimetablePage() {
 
       <Card title={`Version history (${versionHistory.length})`}>
         {versionHistory.length === 0 ? (
-          <p className="text-sm text-body-gray">
+          <p className="text-sm text-[#71767B]">
             No versions recorded yet. Regenerating or editing the timetable creates restore points.
           </p>
         ) : (
@@ -931,9 +931,9 @@ export function TimetablePage() {
                     <Badge tone={v.origin === 'GENERATED' ? 'blue' : v.origin === 'RESTORE' ? 'amber' : 'slate'}>
                       {v.origin}
                     </Badge>
-                    <span className="truncate text-body-gray">{v.label}</span>
+                    <span className="truncate text-[#71767B]">{v.label}</span>
                   </div>
-                  <div className="mt-0.5 text-body-gray">
+                  <div className="mt-0.5 text-[#71767B]">
                     {new Date(v.recordedAt).toLocaleString()} · {v.entries.length} sessions
                   </div>
                 </div>

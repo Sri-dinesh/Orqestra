@@ -110,20 +110,19 @@ export function FacultyPage() {
               const capacity = f.maxPeriodsPerWeek ?? null;
               const over = capacity !== null && required > capacity;
               return (
-                <li key={f.id} className="rounded-xl bg-surface-1 px-3 py-2.5">
+                <li key={f.id} className="rounded-xl bg-[#FAFBF9] px-3 py-2.5 border border-[#E5E8E0]">
                   <div className="flex flex-wrap items-start justify-between gap-2">
                     <div className="min-w-0">
-                      <p className="text-sm text-ink">
+                      <p className="text-sm text-[#111315]">
                         <strong>{f.facultyCode}</strong> — {f.name}
-                        {!f.active && <span className="ml-2 text-xs font-medium text-danger">inactive</span>}
+                        {!f.active && <span className="ml-2 text-xs font-medium text-rose-700">inactive</span>}
                       </p>
-                      <p className="mt-0.5 text-xs text-body-gray">
+                      <p className="mt-0.5 text-xs text-[#71767B]">
                         Required: <strong className="text-ink">{required}</strong>/wk
                         {timetable ? (<> · Assigned: <strong className="text-ink">{assigned}</strong></>) : null}
                         {capacity !== null ? (<> · Capacity {capacity}</>) : null}
-                        {over && <span className="ml-1.5 font-semibold text-danger">Over capacity</span>}
-                      </p>
-                      <p className="mt-0.5 text-[11px] text-body-gray">
+                        {over && <span className="ml-1.5 font-semibold text-rose-700">Over capacity</span>}
+                      </p>                          <p className="mt-0.5 text-[11px] text-[#71767B]">
                         {f.availability.length === 0
                           ? 'Availability: all slots'
                           : `Availability: ${f.availability.reduce((a, w) => a + w.durationPeriods, 0)} periods/wk`}
@@ -136,7 +135,7 @@ export function FacultyPage() {
                           .map((s) => (
                             <label
                               key={s.id}
-                              className="flex cursor-pointer items-center gap-1.5 rounded-full bg-white px-2.5 py-1 text-[11px] font-medium text-ink ring-1 ring-inset ring-hairline transition-colors duration-150 has-checked:bg-info-bg hover:bg-surface-2"
+                              className="flex cursor-pointer items-center gap-1.5 rounded-full bg-white px-2.5 py-1 text-[11px] font-medium text-[#111315] ring-1 ring-inset ring-[#E5E8E0] transition-colors duration-150 has-checked:bg-blue-100 hover:bg-[#FAFBF9]"
                             >
                               <input
                                 type="checkbox"

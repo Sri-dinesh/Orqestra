@@ -285,7 +285,7 @@ export function GeneratePage() {
                     return (
                       <li key={f.id} className="flex items-center justify-between gap-2 rounded-lg bg-white px-2 py-1">
                         <span className="truncate text-ink">{f.name}</span>
-                        <span className={`shrink-0 tabular-nums ${over ? 'font-semibold text-danger' : 'text-body-gray'}`}>
+                        <span className={`shrink-0 tabular-nums ${over ? 'font-semibold text-rose-700' : 'text-body-gray'}`}>
                           {required} / {capacity}{over ? ' ⚠' : ''}
                         </span>
                       </li>
@@ -412,7 +412,7 @@ export function GeneratePage() {
           )}
           {(gen.status === 'IMPOSSIBLE' || gen.status === 'FAILED' || gen.status === 'TIMEOUT') && (
             <div role="alert" className="text-sm">
-              <p className="font-medium text-danger">
+              <p className="font-medium text-rose-700">
                 {gen.status === 'TIMEOUT' ? 'Search budget exhausted.' : 'Generation could not complete.'}
               </p>
               {gen.status === 'TIMEOUT' && (
@@ -423,7 +423,7 @@ export function GeneratePage() {
               {gen.diagnostics.length > 0 && (
                 <ul className="mt-3 space-y-2">
                   {gen.diagnostics.map((d, i) => (
-                    <li key={i} className="rounded-xl bg-danger-bg p-3 text-xs text-danger">
+                    <li key={i} className="rounded-xl bg-danger-bg p-3 text-xs text-rose-700">
                       <strong>{d.code}</strong>: {d.message}
                       {d.suggestions.length > 0 && (
                         <ul className="mt-1.5 list-disc pl-4 text-body-gray">

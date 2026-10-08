@@ -77,7 +77,7 @@ export function FacultyTimetablePage() {
   }, [timetable, activeFacultyId, sections, subjects]);
 
   if (!department) {
-    return <p className="text-sm text-body-gray">Select a department first.</p>;
+    return <p className="text-sm text-[#71767B]">Select a department first.</p>;
   }
 
   if (!timetable) {
@@ -85,7 +85,7 @@ export function FacultyTimetablePage() {
       <div className="space-y-6">
         <PageHeader eyebrow="Faculty workload" title={`Faculty timetable — ${department.code}`} />
         <Card>
-          <p className="text-sm text-body-gray">No timetable generated yet.</p>
+          <p className="text-sm text-[#71767B]">No timetable generated yet.</p>
           <Link to={`/departments/${departmentId}/generate`}>
             <Button size="sm" className="mt-3">Go to generation →</Button>
           </Link>
@@ -157,21 +157,21 @@ export function FacultyTimetablePage() {
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           <Card>
             <p className="text-xl font-semibold tracking-tight text-ink">{weeklyLoad}</p>
-            <p className="text-xs text-body-gray">Periods / week</p>
+            <p className="text-xs text-[#71767B]">Periods / week</p>
           </Card>
           <Card>
             <p className="text-xl font-semibold tracking-tight text-ink">{busyDays}/{dayCount}</p>
-            <p className="text-xs text-body-gray">Busy days</p>
+            <p className="text-xs text-[#71767B]">Busy days</p>
           </Card>
           <Card>
             <p className="text-xl font-semibold tracking-tight text-ink">{freePeriods}</p>
-            <p className="text-xs text-body-gray">Free periods</p>
+            <p className="text-xs text-[#71767B]">Free periods</p>
           </Card>
           <Card>
             <p className="text-xl font-semibold tracking-tight text-ink">
               {new Set([...cellBySlot.values()].map((c) => c.sectionId)).size}
             </p>
-            <p className="text-xs text-body-gray">Sections taught</p>
+            <p className="text-xs text-[#71767B]">Sections taught</p>
           </Card>
         </div>
       )}
@@ -219,13 +219,13 @@ export function FacultyTimetablePage() {
                         {cell.isStart ? (
                           <div className="p-1.5">
                             <span className="block text-xs font-semibold text-ink">{cell.subjectCode}</span>
-                            <span className="block truncate text-[10px] text-body-gray">{cell.sectionName}</span>
+                            <span className="block truncate text-[10px] text-[#71767B]">{cell.sectionName}</span>
                             {cell.durationPeriods >= 2 && (
                               <span className="block text-[10px] font-medium text-[#5b3fb8]">LAB (2p)</span>
                             )}
                           </div>
                         ) : (
-                          <span className="block p-1.5 text-[10px] text-body-gray">↳ {cell.subjectCode}</span>
+                          <span className="block p-1.5 text-[10px] text-[#71767B]">↳ {cell.subjectCode}</span>
                         )}
                       </td>
                     );
@@ -235,7 +235,7 @@ export function FacultyTimetablePage() {
             </tbody>
           </table>
         </div>
-        <p className="mt-3 text-xs text-body-gray">
+        <p className="mt-3 text-xs text-[#71767B]">
           Read-only view: every session this faculty member teaches, across all sections. Cell colors identify the section. Use the section timetable to edit sessions.
         </p>
       </Card>
