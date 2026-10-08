@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { Link, Navigate, NavLink, Route, Routes, useLocation } from 'react-router-dom';
 import { ErrorBoundary } from './ErrorBoundary';
+import { LandingPage } from '@/features/landing/LandingPage';
 import { DashboardPage } from '@/features/dashboard/DashboardPage';
 import { DepartmentConfigPage } from '@/features/departments/DepartmentConfigPage';
 import { SubjectsPage } from '@/features/subjects/SubjectsPage';
@@ -47,7 +48,7 @@ export default function App() {
             )}
           </Link>
           <nav aria-label="Main navigation" className="flex items-center gap-1">
-            <NavLink className={navLinkCls} to="/" end>
+            <NavLink className={navLinkCls} to="/dashboard">
               Dashboard
             </NavLink>
             <NavLink className={navLinkCls} to="/departments">
@@ -62,8 +63,9 @@ export default function App() {
       <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6" aria-live="polite">
         <ErrorBoundary area="application">
           <Routes location={location}>
-            <Route path="/" element={<DashboardPage />} />
-            <Route path="/dashboard" element={<Navigate to="/" replace />} />
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/dashboard" element={<DashboardPage />} />
+
             <Route path="/departments" element={<DepartmentConfigPage />} />
             <Route path="/departments/:departmentId/configuration" element={<DepartmentConfigPage />} />
             <Route path="/departments/:departmentId/subjects" element={<SubjectsPage />} />
