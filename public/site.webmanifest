@@ -1,0 +1,17 @@
+{
+  "name": "Orqestra — Academic Timetable Generator",
+  "short_name": "Orqestra",
+  "description": "Enterprise academic timetable generator and constraint solver engine.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F7F8F5",
+  "theme_color": "#111315",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
