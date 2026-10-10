@@ -1,0 +1,7 @@
+# Robots.txt for Orqestra
+# https://orqestra.app
+
+User-agent: *
+Allow: /
+
+Sitemap: https://orqestra.app/sitemap.xml
