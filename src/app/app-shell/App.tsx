@@ -35,8 +35,33 @@ export default function App() {
   const collegeName = useWorkspaceStore((s) => s.collegeDetails.name);
 
   useEffect(() => {
-    document.title = "Orqestra";
-  }, []);
+    const path = location.pathname;
+    let pageTitle = "Orqestra — Intelligent Academic Timetable Generator & Constraint Solver";
+
+    if (path === "/dashboard") {
+      pageTitle = "Dashboard — Orqestra";
+    } else if (path.startsWith("/departments")) {
+      if (path.includes("/subjects")) {
+        pageTitle = "Subjects Management — Orqestra";
+      } else if (path.includes("/faculty-timetable")) {
+        pageTitle = "Faculty Timetable View — Orqestra";
+      } else if (path.includes("/faculty")) {
+        pageTitle = "Faculty Management — Orqestra";
+      } else if (path.includes("/generate")) {
+        pageTitle = "Generate Timetable — Orqestra";
+      } else if (path.includes("/master-timetable")) {
+        pageTitle = "Master Timetable — Orqestra";
+      } else if (path.includes("/timetable")) {
+        pageTitle = "Timetable Editor — Orqestra";
+      } else {
+        pageTitle = "Department Configuration — Orqestra";
+      }
+    } else if (path === "/settings") {
+      pageTitle = "Settings — Orqestra";
+    }
+
+    document.title = pageTitle;
+  }, [location.pathname]);
 
   return (
     <div className="min-h-screen bg-[#F7F8F5] text-[#111315] font-sans">
