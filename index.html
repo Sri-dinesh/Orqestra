@@ -3,10 +3,118 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Orqestra</title>
+    <title>Orqestra — Intelligent Academic Timetable Generator &amp; Constraint Solver</title>
+
+    <!-- SEO Meta Tags -->
+    <meta
+      name="description"
+      content="Orqestra is a browser-based academic timetable generator for institutions and colleges. Automatically generate conflict-free schedules, optimize faculty workloads, and export official timetables to PDF and Excel."
+    />
+    <meta
+      name="keywords"
+      content="timetable generator, academic scheduling, college timetable software, automated timetable generator, school schedule maker, conflict-free timetable, faculty workload scheduler, university timetable generator"
+    />
+    <meta name="author" content="Orqestra" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <link rel="canonical" href="https://orqestra.app/" />
+
+    <!-- Brand & Mobile Styling -->
+    <meta name="theme-color" content="#111315" />
+    <meta name="color-scheme" content="light" />
+    <meta name="application-name" content="Orqestra" />
+    <meta name="apple-mobile-web-app-title" content="Orqestra" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+
+    <!-- Favicon & Icons -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <!-- Open Graph (Facebook / LinkedIn / Discord) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://orqestra.app/" />
+    <meta property="og:site_name" content="Orqestra" />
+    <meta property="og:title" content="Orqestra — Intelligent Academic Timetable Generator &amp; Constraint Solver" />
+    <meta
+      property="og:description"
+      content="Build conflict-free institutional timetables with automated constraint-solving intelligence. Fully offline &amp; private in your browser."
+    />
+    <meta property="og:image" content="https://orqestra.app/favicon.svg" />
+    <meta property="og:locale" content="en_US" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:url" content="https://orqestra.app/" />
+    <meta name="twitter:title" content="Orqestra — Intelligent Academic Timetable Generator" />
+    <meta
+      name="twitter:description"
+      content="Build conflict-free institutional timetables with automated constraint-solving intelligence. Fully offline &amp; private in your browser."
+    />
+    <meta name="twitter:image" content="https://orqestra.app/favicon.svg" />
+
+    <!-- Schema.org JSON-LD Structured Data for Google Search -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebApplication",
+            "@id": "https://orqestra.app/#webapp",
+            "name": "Orqestra",
+            "url": "https://orqestra.app/",
+            "applicationCategory": "EducationalApplication",
+            "operatingSystem": "All",
+            "browserRequirements": "Requires JavaScript. Requires HTML5.",
+            "description": "Browser-based enterprise timetable generator and academic scheduling solver. Generates conflict-free schedules, manages faculty availability, and exports official timetables to PDF and Excel.",
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "USD"
+            },
+            "featureList": [
+              "Automated backtracking scheduler with constraint satisfaction",
+              "Section and department management",
+              "Faculty workload and availability balancing",
+              "Real-time conflict detection and edit validation",
+              "Official notice-board PDF and Excel schedule export",
+              "100% client-side privacy with offline local storage"
+            ]
+          },
+          {
+            "@type": "Organization",
+            "@id": "https://orqestra.app/#organization",
+            "name": "Orqestra",
+            "url": "https://orqestra.app/",
+            "logo": "https://orqestra.app/favicon.svg"
+          }
+        ]
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
+
+    <!-- Crawlable noscript fallback for search engine crawlers -->
+    <noscript>
+      <div style="font-family: sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; line-height: 1.6;">
+        <h1>Orqestra — Intelligent Academic Timetable Generator &amp; Constraint Solver</h1>
+        <p>
+          Orqestra is a high-performance browser-based academic timetable generator for institutions, colleges, and departments.
+          It automatically generates conflict-free schedules, balances faculty workloads, and exports official timetables to PDF and Excel.
+        </p>
+        <h2>Key Capabilities</h2>
+        <ul>
+          <li><strong>Automated Scheduling:</strong> Constraint-satisfaction engine with intelligent heuristic guidance.</li>
+          <li><strong>Faculty Workload Balancing:</strong> Manage preferred teaching windows and weekly capacity limits.</li>
+          <li><strong>Real-time Conflict Blocking:</strong> Instant validation of all room, faculty, and section assignments.</li>
+          <li><strong>Export Ready:</strong> Generate notice-board ready PDF and Excel spreadsheets.</li>
+          <li><strong>Private &amp; Offline:</strong> All processing is performed client-side in your browser.</li>
+        </ul>
+        <p>Please enable JavaScript to use the interactive application.</p>
+      </div>
+    </noscript>
+
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
