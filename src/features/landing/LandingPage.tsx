@@ -10,9 +10,9 @@ import { EditorSection } from './components/Operations/EditorSection';
 import { FacultySection } from './components/Faculty/FacultySection';
 import { ConstraintPolicyControls } from './components/Controls/ConstraintPolicyControls';
 import { ConflictDetectionDemo } from './components/ConflictDetection/ConflictDetectionDemo';
-import { InstitutionScaleSection } from './components/Scale/InstitutionScaleSection';
+import { PresetsSection } from './components/Presets/PresetsSection';
+import { DataSection } from './components/Data/DataSection';
 import { HowItWorksSection } from './components/Workflow/HowItWorksSection';
-import { OperationalAnalyticsSection } from './components/Analytics/OperationalAnalyticsSection';
 import { TrustReliabilitySection } from './components/Trust/TrustReliabilitySection';
 import { FinalCTASection } from './components/CTA/FinalCTASection';
 import { Footer } from './components/Footer/Footer';
@@ -83,14 +83,14 @@ export function LandingPage() {
         {/* 9. Smart Conflict Detection & Autonomous Remediation */}
         <ConflictDetectionDemo />
 
-        {/* 10. Multi-Institution Scale Visualizer (50 to 50,000+ students) */}
-        <InstitutionScaleSection />
+        {/* 10. Built-in presets */}
+        <PresetsSection />
 
         {/* 11. How it works — the real app workflow */}
         <HowItWorksSection />
 
-        {/* 12. Real Operational Space & Faculty Analytics */}
-        <OperationalAnalyticsSection />
+        {/* 12. Export, version history & privacy */}
+        <DataSection />
 
         {/* 13. Institutional Trust, Security & Editorial Testimonials */}
         <TrustReliabilitySection />
