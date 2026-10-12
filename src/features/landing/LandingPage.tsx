@@ -10,7 +10,7 @@ import { DynamicAdjustmentSection } from './components/Operations/DynamicAdjustm
 import { ConstraintPolicyControls } from './components/Controls/ConstraintPolicyControls';
 import { ConflictDetectionDemo } from './components/ConflictDetection/ConflictDetectionDemo';
 import { InstitutionScaleSection } from './components/Scale/InstitutionScaleSection';
-import { InstitutionalWorkflow } from './components/Workflow/InstitutionalWorkflow';
+import { HowItWorksSection } from './components/Workflow/HowItWorksSection';
 import { OperationalAnalyticsSection } from './components/Analytics/OperationalAnalyticsSection';
 import { TrustReliabilitySection } from './components/Trust/TrustReliabilitySection';
 import { FinalCTASection } from './components/CTA/FinalCTASection';
@@ -82,8 +82,8 @@ export function LandingPage() {
         {/* 10. Multi-Institution Scale Visualizer (50 to 50,000+ students) */}
         <InstitutionScaleSection />
 
-        {/* 11. Multi-Role Institutional Governance Workflow */}
-        <InstitutionalWorkflow />
+        {/* 11. How it works — the real app workflow */}
+        <HowItWorksSection />
 
         {/* 12. Real Operational Space & Faculty Analytics */}
         <OperationalAnalyticsSection />
