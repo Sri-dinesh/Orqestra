@@ -6,7 +6,8 @@ import { EngineArchitectureSection } from './components/Engine/EngineArchitectur
 import { InteractiveTimetable } from './components/InteractiveDemo/InteractiveTimetable';
 import { FeatureStorytelling } from './components/Features/FeatureStorytelling';
 import { BeforeAfterSection } from './components/Comparison/BeforeAfterSection';
-import { DynamicAdjustmentSection } from './components/Operations/DynamicAdjustmentSection';
+import { EditorSection } from './components/Operations/EditorSection';
+import { FacultySection } from './components/Faculty/FacultySection';
 import { ConstraintPolicyControls } from './components/Controls/ConstraintPolicyControls';
 import { ConflictDetectionDemo } from './components/ConflictDetection/ConflictDetectionDemo';
 import { InstitutionScaleSection } from './components/Scale/InstitutionScaleSection';
@@ -70,8 +71,11 @@ export function LandingPage() {
         {/* 6. Before / After: Spreadsheet Chaos vs Cadence Infrastructure */}
         <BeforeAfterSection />
 
-        {/* 7. Operations: Dynamic Faculty Absence & Instant Rescheduling */}
-        <DynamicAdjustmentSection />
+        {/* 7. Timetable editor: draft → validate → commit */}
+        <EditorSection />
+
+        {/* 7b. Faculty availability, fairness, and review */}
+        <FacultySection />
 
         {/* 8. Constraint & Governance Policy Rules */}
         <ConstraintPolicyControls />
