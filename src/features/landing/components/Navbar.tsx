@@ -3,11 +3,10 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, Menu, X } from 'lucide-react';
 
 interface NavbarProps {
-  onRequestPilot: () => void;
-  onScrollToDemo: () => void;
+  onScrollToDemo?: () => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ onRequestPilot }) => {
+export const Navbar: React.FC<NavbarProps> = ({ onScrollToDemo }) => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -20,11 +19,12 @@ export const Navbar: React.FC<NavbarProps> = ({ onRequestPilot }) => {
   }, []);
 
   const navLinks = [
-    { label: 'Architecture', href: '#architecture' },
-    { label: 'Engine Demo', href: '#interactive-demo' },
-    { label: 'Institutions', href: '#scale' },
-    { label: 'Rules & Policy', href: '#controls' },
-    { label: 'Analytics', href: '#analytics' },
+    { label: 'Features', href: '#features' },
+    { label: 'How it works', href: '#how-it-works' },
+    { label: 'Engine', href: '#engine' },
+    { label: 'Editor', href: '#editor' },
+    { label: 'Presets', href: '#presets' },
+    { label: 'FAQ', href: '#faq' },
   ];
 
   return (
@@ -37,7 +37,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onRequestPilot }) => {
         }`}
       >
         <div className="flex items-center justify-between">
-          {/* Zone 1: Single text element wordmark in display face */}
+          {/* Zone 1: wordmark */}
           <Link
             to="/"
             className="flex items-center gap-2.5 text-xl font-bold tracking-tight text-[#111315] hover:opacity-90 transition-opacity"
@@ -50,7 +50,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onRequestPilot }) => {
             </span>
           </Link>
 
-          {/* Zone 2: 4-6 clean text navigation links */}
+          {/* Zone 2: product navigation */}
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-[#4B5259]">
             <Link
               to="/dashboard"
@@ -69,21 +69,23 @@ export const Navbar: React.FC<NavbarProps> = ({ onRequestPilot }) => {
             ))}
           </nav>
 
-          {/* Zone 3: 1-2 primary actions */}
+          {/* Zone 3: primary actions */}
           <div className="hidden sm:flex items-center gap-3">
+            {onScrollToDemo && (
+              <button
+                onClick={onScrollToDemo}
+                className="px-3.5 py-2 text-xs font-semibold text-[#30363D] hover:text-[#111315] hover:bg-black/5 rounded-lg transition-colors whitespace-nowrap"
+              >
+                See how it works
+              </button>
+            )}
             <Link
               to="/dashboard"
-              className="px-3.5 py-2 text-xs font-semibold text-[#30363D] hover:text-[#111315] hover:bg-black/5 rounded-lg transition-colors whitespace-nowrap"
-            >
-              Enter App
-            </Link>
-            <button
-              onClick={onRequestPilot}
               className="group inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold text-white bg-[#111315] hover:bg-[#0047FF] rounded-lg transition-all duration-200 whitespace-nowrap shadow-sm"
             >
-              <span>Schedule Pilot</span>
+              <span>Open app</span>
               <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-            </button>
+            </Link>
           </div>
 
           {/* Mobile hamburger button */}
@@ -120,19 +122,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onRequestPilot }) => {
               <Link
                 to="/dashboard"
                 onClick={() => setMobileMenuOpen(false)}
-                className="w-full text-left px-3 py-2 text-sm font-semibold text-[#111315] hover:bg-black/5 rounded-lg"
+                className="w-full text-center py-2.5 text-xs font-semibold text-white bg-[#111315] hover:bg-[#0047FF] rounded-lg"
               >
-                Enter Dashboard
+                Open app
               </Link>
-              <button
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  onRequestPilot();
-                }}
-                className="w-full text-center py-2.5 text-xs font-semibold text-white bg-[#0047FF] hover:bg-[#0038CC] rounded-lg"
-              >
-                Schedule Institutional Pilot
-              </button>
             </div>
           </div>
         )}

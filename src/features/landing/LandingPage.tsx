@@ -42,7 +42,6 @@ export function LandingPage() {
     <div className="min-h-screen bg-[#F7F8F5] text-[#111315] font-sans selection:bg-[#0047FF] selection:text-white flex flex-col">
       {/* 3-Zone Floating Navigation Bar */}
       <Navbar
-        onRequestPilot={() => setPilotModalOpen(true)}
         onScrollToDemo={scrollToDemo}
       />
 
@@ -51,7 +50,6 @@ export function LandingPage() {
         {/* 1. Hero Section with Signature Scheduling Engine Visualizer */}
         <HeroSection
           onScrollToDemo={scrollToDemo}
-          onRequestPilot={() => setPilotModalOpen(true)}
           onSelectClass={(item) => setInspectedClass(item)}
         />
 

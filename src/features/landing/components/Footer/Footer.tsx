@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 export const Footer: React.FC = () => {
   return (
@@ -12,20 +13,22 @@ export const Footer: React.FC = () => {
           <div className="lg:col-span-2 space-y-4">
             <div className="flex items-center gap-2.5">
               <span className="w-7 h-7 rounded-lg bg-white text-[#111315] flex items-center justify-center font-mono text-xs font-bold">
-                C⊞
+                O
               </span>
               <span className="font-display text-xl font-bold tracking-tight text-white">
-                Cadence
+                Orqestra
               </span>
             </div>
             <p className="text-xs text-white/60 leading-relaxed max-w-sm font-sans">
-              Timetabling infrastructure for modern education. Automated,
-              conflict-free academic scheduling engineered for colleges,
-              universities, and multi-campus institutions worldwide.
+              A browser-based timetable generator for teaching departments.
+              Configure sections, subjects, and faculty, generate conflict-free
+              weekly schedules, edit with full validation, and export official
+              PDF and Excel timetables — all offline, with nothing leaving your
+              machine.
             </p>
             <div className="pt-2 flex items-center gap-2 font-mono text-[11px] text-white/40">
               <span className="w-2 h-2 rounded-full bg-emerald-400" />
-              <span>CORE SOLVER CLUSTER: OPERATIONAL (0.04S)</span>
+              <span>100% CLIENT-SIDE · NO BACKEND · NO ACCOUNT</span>
             </div>
           </div>
 
@@ -36,132 +39,106 @@ export const Footer: React.FC = () => {
             </div>
             <ul className="space-y-2.5 text-xs text-white/70">
               <li>
-                <a
-                  href="#interactive-demo"
-                  className="hover:text-white transition-colors"
-                >
-                  Timetable Generator
+                <a href="#features" className="hover:text-white transition-colors">
+                  Features
                 </a>
               </li>
               <li>
-                <a
-                  href="#architecture"
-                  className="hover:text-white transition-colors"
-                >
-                  Constraint Solver
+                <a href="#how-it-works" className="hover:text-white transition-colors">
+                  How it works
                 </a>
               </li>
               <li>
-                <a
-                  href="#controls"
-                  className="hover:text-white transition-colors"
-                >
-                  Policy Invariants Engine
+                <a href="#engine" className="hover:text-white transition-colors">
+                  Scheduling engine
                 </a>
               </li>
               <li>
-                <a
-                  href="#analytics"
-                  className="hover:text-white transition-colors"
-                >
-                  Room Utilization Heatmaps
+                <a href="#editor" className="hover:text-white transition-colors">
+                  Timetable editor
                 </a>
               </li>
               <li>
-                <a
-                  href="#interactive-demo"
-                  className="hover:text-white transition-colors"
-                >
-                  Dynamic Conflict Resolver
+                <a href="#presets" className="hover:text-white transition-colors">
+                  Built-in presets
+                </a>
+              </li>
+              <li>
+                <a href="#faq" className="hover:text-white transition-colors">
+                  FAQ
                 </a>
               </li>
             </ul>
           </div>
 
-          {/* Column 2: Solutions */}
+          {/* Column 2: Workflow (real app screens) */}
           <div>
             <div className="text-xs font-mono font-semibold text-white/40 uppercase tracking-wider mb-4">
-              Solutions
+              Workflow
             </div>
             <ul className="space-y-2.5 text-xs text-white/70">
               <li>
-                <a href="#scale" className="hover:text-white transition-colors">
-                  Colleges & Universities
-                </a>
+                <Link to="/dashboard" className="hover:text-white transition-colors">
+                  Dashboard
+                </Link>
               </li>
               <li>
-                <a href="#scale" className="hover:text-white transition-colors">
-                  Secondary Schools
-                </a>
+                <Link to="/departments" className="hover:text-white transition-colors">
+                  Department configuration
+                </Link>
               </li>
               <li>
-                <a href="#scale" className="hover:text-white transition-colors">
-                  Multi-Campus Systems
-                </a>
+                <Link to="/dashboard" className="hover:text-white transition-colors">
+                  Generate timetable
+                </Link>
               </li>
               <li>
-                <a href="#scale" className="hover:text-white transition-colors">
-                  Technical Institutes
-                </a>
+                <Link to="/dashboard" className="hover:text-white transition-colors">
+                  Timetable editor
+                </Link>
               </li>
               <li>
-                <a href="#scale" className="hover:text-white transition-colors">
-                  Medical & Laboratory Wings
-                </a>
+                <Link to="/dashboard" className="hover:text-white transition-colors">
+                  Faculty timetable view
+                </Link>
+              </li>
+              <li>
+                <Link to="/settings" className="hover:text-white transition-colors">
+                  Settings
+                </Link>
               </li>
             </ul>
           </div>
 
-          {/* Column 3: Standards & Trust */}
+          {/* Column 3: Data & privacy (real guarantees) */}
           <div>
             <div className="text-xs font-mono font-semibold text-white/40 uppercase tracking-wider mb-4">
-              Infrastructure
+              Data & Privacy
             </div>
             <ul className="space-y-2.5 text-xs text-white/70">
-              <li>
-                <span className="hover:text-white transition-colors cursor-pointer">
-                  SIS / Canvas LMS APIs
-                </span>
-              </li>
-              <li>
-                <span className="hover:text-white transition-colors cursor-pointer">
-                  FERPA Compliance
-                </span>
-              </li>
-              <li>
-                <span className="hover:text-white transition-colors cursor-pointer">
-                  SOC 2 Type II Security
-                </span>
-              </li>
-              <li>
-                <span className="hover:text-white transition-colors cursor-pointer">
-                  Immutable Audit Trail
-                </span>
-              </li>
-              <li>
-                <span className="hover:text-white transition-colors cursor-pointer">
-                  System Status
-                </span>
-              </li>
+              <li>Offline-first local storage</li>
+              <li>Workspace import / export (JSON)</li>
+              <li>Version history with restore</li>
+              <li>Notice-board PDF export</li>
+              <li>Excel grid export</li>
+              <li>No account, no tracking backend</li>
             </ul>
           </div>
         </div>
 
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between text-xs text-white/40 font-mono gap-4">
-          <div>
-            © 2026 Cadence Academic Technologies Inc. All rights reserved.
-          </div>
+          <div>© 2026 Orqestra. MIT licensed. Your data never leaves your browser.</div>
           <div className="flex items-center gap-6">
-            <span className="hover:text-white transition-colors cursor-pointer">
-              Privacy Policy
-            </span>
-            <span className="hover:text-white transition-colors cursor-pointer">
-              Institutional Terms
-            </span>
-            <span className="hover:text-white transition-colors cursor-pointer">
-              Security Whitepaper
-            </span>
+            <Link to="/dashboard" className="hover:text-white transition-colors">
+              Open app
+            </Link>
+            <a href="#how-it-works" className="hover:text-white transition-colors">
+              How it works
+            </a>
+            <a href="#faq" className="hover:text-white transition-colors">
+              FAQ
+            </a>
           </div>
         </div>
       </div>
