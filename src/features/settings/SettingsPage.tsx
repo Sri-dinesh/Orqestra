@@ -1,11 +1,14 @@
 import { useRef, useState } from 'react';
 import { Button, Card, Field, Input, PageHeader } from '@/components/ui/primitives';
+import { Calendar, Copy } from 'lucide-react';
 import { getStorageService } from '@/hooks/usePersistence';
 import { useEditorStore } from '@/state/stores/editor-store';
 import { useWorkspaceStore } from '@/state/stores/workspace-store';
 import { ImportError } from '@/domain/errors';
 import { EMPTY_COLLEGE_DETAILS } from '@/domain/models';
 import type { CollegeDetails } from '@/domain/models';
+import { SemesterSwitcherModal } from '@/components/ui/SemesterSwitcherModal';
+import { getActiveTerm, listTerms } from '@/storage/term-manager';
 
 export function SettingsPage() {
   const state = useWorkspaceStore();
@@ -14,6 +17,9 @@ export function SettingsPage() {
   const [pendingImport, setPendingImport] = useState<string | null>(null);
   const [importSummary, setImportSummary] = useState<string | null>(null);
   const [logoError, setLogoError] = useState<string | null>(null);
+  const [semesterModalOpen, setSemesterModalOpen] = useState(false);
+  const activeTerm = getActiveTerm();
+  const terms = listTerms();
 
   const details = state.collegeDetails;
   const setField = (key: keyof CollegeDetails, value: string) =>
@@ -241,6 +247,48 @@ export function SettingsPage() {
         </div>
       </Card>
 
+      <Card
+        title="Multi-Semester & Academic Term Workspaces"
+        actions={
+          <Button
+            size="sm"
+            onClick={() => setSemesterModalOpen(true)}
+            className="flex items-center gap-1.5"
+          >
+            <Copy className="w-3.5 h-3.5" />
+            <span>Manage & Clone Semesters</span>
+          </Button>
+        }
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-body-gray">
+            Maintain independent timetable workspaces across academic years and terms. Clone an existing semester to carry over your faculty directory, room infrastructure, and department structures without re-entering data.
+          </p>
+          <div className="p-4 rounded-xl bg-[#FAFBF9] border border-[#E5E8E0] flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <span className="p-2.5 rounded-xl bg-blue-50 text-[#0047FF]">
+                <Calendar className="w-5 h-5" />
+              </span>
+              <div>
+                <p className="text-xs font-bold text-[#111315]">
+                  Active Semester: {activeTerm.name}
+                </p>
+                <p className="text-xs text-[#71767B]">
+                  Academic Year: {activeTerm.academicYear} · {terms.length} total semester(s) configured
+                </p>
+              </div>
+            </div>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => setSemesterModalOpen(true)}
+            >
+              Switch or Duplicate
+            </Button>
+          </div>
+        </div>
+      </Card>
+
       <div className="grid items-start gap-4 lg:grid-cols-2">
         <Card title="Export / Import">
           <div className="flex flex-col gap-3">
@@ -286,6 +334,11 @@ export function SettingsPage() {
           </Button>
         </Card>
       </div>
+
+      <SemesterSwitcherModal
+        isOpen={semesterModalOpen}
+        onClose={() => setSemesterModalOpen(false)}
+      />
     </div>
   );
 }
