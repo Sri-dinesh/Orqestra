@@ -10,6 +10,7 @@ import {
 } from '@/state/stores/workspace-store';
 import { buildGridLayout, gridColumnLabel } from '@/domain/scheduler/grid-layout';
 import { TimetableGridHeader } from '@/components/ui/TimetableGridHeader';
+import { ExportPreviewModal } from '@/components/ui/ExportPreviewModal';
 
 interface FacultyCell {
   sectionId: string;
@@ -44,6 +45,7 @@ export function FacultyTimetablePage() {
 
   const department = state.departments.find((d) => d.id === departmentId);
   const [selectedFacultyId, setSelectedFacultyId] = useState<string | null>(null);
+  const [previewModalOpen, setPreviewModalOpen] = useState(false);
 
   const activeFacultyId = selectedFacultyId ?? faculty.find((f) => f.active)?.id ?? null;
   const activeFaculty = faculty.find((f) => f.id === activeFacultyId);
@@ -124,6 +126,9 @@ export function FacultyTimetablePage() {
             <Badge tone={weeklyLoad > 0 ? 'blue' : 'slate'}>
               {weeklyLoad} periods / week
             </Badge>
+            <Button variant="secondary" size="sm" onClick={() => setPreviewModalOpen(true)}>
+              Preview & Export
+            </Button>
             <Button variant="secondary" size="sm" onClick={() => window.print()}>Print</Button>
             <Link to={`/departments/${departmentId}/master-timetable`}>
               <Button variant="secondary" size="sm">Master view</Button>
@@ -239,6 +244,22 @@ export function FacultyTimetablePage() {
           Read-only view: every session this faculty member teaches, across all sections. Cell colors identify the section. Use the section timetable to edit sessions.
         </p>
       </Card>
+
+      {timetable && (
+        <ExportPreviewModal
+          isOpen={previewModalOpen}
+          onClose={() => setPreviewModalOpen(false)}
+          timetable={timetable}
+          department={department}
+          sections={sections}
+          subjects={subjects}
+          faculty={faculty}
+          breaks={breaks}
+          collegeDetails={state.collegeDetails}
+          activeFacultyId={activeFacultyId ?? undefined}
+          type="FACULTY"
+        />
+      )}
     </div>
   );
 }

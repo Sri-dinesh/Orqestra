@@ -10,6 +10,7 @@ import {
 } from '@/state/stores/workspace-store';
 import { buildGridLayout, gridColumnLabel } from '@/domain/scheduler/grid-layout';
 import { TimetableGridHeader } from '@/components/ui/TimetableGridHeader';
+import { ExportPreviewModal } from '@/components/ui/ExportPreviewModal';
 
 interface MasterCell {
   entryId: string;
@@ -51,6 +52,7 @@ export function MasterTimetablePage() {
 
   const department = state.departments.find((d) => d.id === departmentId);
   const [focusSectionId, setFocusSectionId] = useState<string | null>(null);
+  const [previewModalOpen, setPreviewModalOpen] = useState(false);
 
   /**
    * All sessions indexed by `dayIndex:periodIndex`, each slot holding a chip
@@ -149,6 +151,9 @@ export function MasterTimetablePage() {
             <Badge tone={timetable.validationSummary?.isValid ? 'green' : 'red'}>
               {sections.length} sections · {totalSessions} periods
             </Badge>
+            <Button variant="secondary" size="sm" onClick={() => setPreviewModalOpen(true)}>
+              Preview & Export
+            </Button>
             <Button variant="secondary" size="sm" onClick={() => window.print()}>Print</Button>
             <Link to={`/departments/${departmentId}/timetable`}>
               <Button variant="secondary" size="sm">Section view →</Button>
@@ -299,6 +304,22 @@ export function MasterTimetablePage() {
           Read-only overview of every section in {department.code}. Filter with the section chips above; hover a cell for subject and faculty details. Labs span two periods. Use the section view to edit.
         </p>
       </Card>
+
+      {timetable && (
+        <ExportPreviewModal
+          isOpen={previewModalOpen}
+          onClose={() => setPreviewModalOpen(false)}
+          timetable={timetable}
+          department={department}
+          sections={sections}
+          subjects={subjects}
+          faculty={faculty}
+          breaks={breaks}
+          collegeDetails={state.collegeDetails}
+          initialSectionId={focusSectionId ?? undefined}
+          type="MASTER"
+        />
+      )}
     </div>
   );
 }

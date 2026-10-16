@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Badge, Button, Card, EditModal, Field, PageHeader, Select } from '@/components/ui/primitives';
 import { ConflictModal } from '@/components/ui/ConflictModal';
+import { ExportPreviewModal } from '@/components/ui/ExportPreviewModal';
 import { TimetableGridHeader } from '@/components/ui/TimetableGridHeader';
 import type { Conflict } from '@/domain/models';
 import { useEditorStore, popUndoCommand, popRedoCommand } from '@/state/stores/editor-store';
@@ -52,6 +53,7 @@ export function TimetablePage() {
   const [blockedConflicts, setBlockedConflicts] = useState<Conflict[] | null>(null);
   const [addSlot, setAddSlot] = useState<{ dayIndex: number; periodIndex: number } | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [previewModalOpen, setPreviewModalOpen] = useState(false);
 
   const department = state.departments.find((d) => d.id === departmentId);
   const config: TimetableConfiguration | null = useMemo(() => {
@@ -498,8 +500,11 @@ export function TimetablePage() {
             <Button variant="secondary" size="sm" onClick={handleRedo} disabled={editor.redoStack.length === 0}>
               Redo
             </Button>
-            <Button variant="secondary" size="sm" onClick={doExportPdf}>Export PDF</Button>
-            <Button variant="secondary" size="sm" onClick={doExportExcel}>Export Excel</Button>
+            <Button variant="secondary" size="sm" onClick={() => setPreviewModalOpen(true)}>
+              Preview & Export
+            </Button>
+            <Button variant="secondary" size="sm" onClick={doExportPdf}>PDF</Button>
+            <Button variant="secondary" size="sm" onClick={doExportExcel}>Excel</Button>
             <Button variant="secondary" size="sm" onClick={() => window.print()}>Print</Button>
             <Link to={`/departments/${departmentId}/faculty-timetable`}>
               <Button variant="secondary" size="sm">Faculty view</Button>
@@ -915,6 +920,20 @@ export function TimetablePage() {
       {blockedConflicts && (
         <ConflictModal conflicts={blockedConflicts} onClose={() => setBlockedConflicts(null)} />
       )}
+
+      <ExportPreviewModal
+        isOpen={previewModalOpen}
+        onClose={() => setPreviewModalOpen(false)}
+        timetable={timetable}
+        department={department}
+        sections={sections}
+        subjects={subjects}
+        faculty={faculty}
+        breaks={breaks}
+        collegeDetails={state.collegeDetails}
+        initialSectionId={activeSectionId ?? undefined}
+        type="SECTION"
+      />
 
       <Card title={`Version history (${versionHistory.length})`}>
         {versionHistory.length === 0 ? (
