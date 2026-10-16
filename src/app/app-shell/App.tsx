@@ -12,6 +12,7 @@ import { LandingPage } from "@/features/landing/LandingPage";
 import { DepartmentConfigPage } from "@/features/departments/DepartmentConfigPage";
 import { SubjectsPage } from "@/features/subjects/SubjectsPage";
 import { FacultyPage } from "@/features/faculty/FacultyPage";
+import { RoomsPage } from "@/features/rooms/RoomsPage";
 import { GeneratePage } from "@/features/generation/GeneratePage";
 import { TimetablePage } from "@/features/timetable-editor/TimetablePage";
 import { FacultyTimetablePage } from "@/features/timetable-editor/FacultyTimetablePage";
@@ -47,6 +48,8 @@ export default function App() {
         pageTitle = "Faculty Timetable View — Orqestra";
       } else if (path.includes("/faculty")) {
         pageTitle = "Faculty Management — Orqestra";
+      } else if (path.includes("/rooms")) {
+        pageTitle = "Rooms & Laboratories — Orqestra";
       } else if (path.includes("/generate")) {
         pageTitle = "Generate Timetable — Orqestra";
       } else if (path.includes("/master-timetable")) {
@@ -134,6 +137,10 @@ export default function App() {
               <Route
                 path="/departments/:departmentId/faculty"
                 element={<FacultyPage />}
+              />
+              <Route
+                path="/departments/:departmentId/rooms"
+                element={<RoomsPage />}
               />
               <Route
                 path="/departments/:departmentId/generate"

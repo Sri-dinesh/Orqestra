@@ -16,6 +16,7 @@ import { ManualCancellationToken } from '@/scheduler-runtime/scheduler-runner';
 import { buildConfigurationSnapshot } from '@/domain/configuration/normalize';
 import { DEFAULT_GENERATION_SETTINGS, DEFAULT_HARD_CONSTRAINTS, DEFAULT_SOFT_WEIGHTS } from '@/domain/policies';
 import type { TimetableConfiguration } from '@/domain/models';
+import { DepartmentNav } from '@/components/ui/DepartmentNav';
 
 export function GeneratePage() {
   const { departmentId } = useParams();
@@ -197,7 +198,8 @@ export function GeneratePage() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
+      <DepartmentNav />
       <PageHeader eyebrow="Scheduling engine" title={`Generate timetable — ${department.code}`} />
 
       <div className="grid items-start gap-4 lg:grid-cols-2">

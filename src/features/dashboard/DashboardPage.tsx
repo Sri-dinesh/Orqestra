@@ -346,6 +346,7 @@ export function DashboardPage() {
         const sections = state.sections.filter((s) => s.departmentId === d.id);
         const subjects = state.subjects.filter((s) => s.departmentId === d.id);
         const faculty = state.faculty.filter((f) => f.departmentId === d.id);
+        const rooms = state.rooms.filter((r) => r.departmentId === d.id);
         const timetable = state.timetables.find((t) => t.departmentId === d.id);
         const status = computeDepartmentStatus(
           timetable,
@@ -358,6 +359,7 @@ export function DashboardPage() {
           sections: sections.length,
           subjects: subjects.length,
           faculty: faculty.length,
+          rooms: rooms.length,
           timetable,
           status,
         };
@@ -367,6 +369,7 @@ export function DashboardPage() {
       state.sections,
       state.subjects,
       state.faculty,
+      state.rooms,
       state.timetables,
     ],
   );
@@ -377,8 +380,9 @@ export function DashboardPage() {
       sections: state.sections.length,
       subjects: state.subjects.length,
       faculty: state.faculty.length,
+      rooms: state.rooms.length,
     }),
-    [state.departments, state.sections, state.subjects, state.faculty],
+    [state.departments, state.sections, state.subjects, state.faculty, state.rooms],
   );
 
   return (
@@ -473,7 +477,7 @@ export function DashboardPage() {
       )}
 
       {totals.departments > 0 && (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-5">
           <StatTile
             label="Total Departments"
             value={totals.departments}
@@ -493,6 +497,11 @@ export function DashboardPage() {
             label="Faculty Members"
             value={totals.faculty}
             accent="coral"
+          />
+          <StatTile
+            label="Rooms & Labs"
+            value={totals.rooms}
+            accent="blue"
           />
         </div>
       )}
@@ -574,7 +583,7 @@ export function DashboardPage() {
                     }
                   </p>
                 )}
-                <div className="mt-5 grid grid-cols-2 gap-2">
+                <div className="mt-5 grid grid-cols-3 gap-2">
                   <Button
                     variant="secondary"
                     size="sm"
@@ -594,6 +603,26 @@ export function DashboardPage() {
                     }}
                   >
                     Subjects
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => {
+                      state.setActiveDepartment(department.id);
+                      navigate(`/departments/${department.id}/faculty`);
+                    }}
+                  >
+                    Faculty
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => {
+                      state.setActiveDepartment(department.id);
+                      navigate(`/departments/${department.id}/rooms`);
+                    }}
+                  >
+                    Rooms
                   </Button>
                   <Button
                     variant="secondary"

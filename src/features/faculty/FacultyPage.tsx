@@ -12,8 +12,8 @@ import {
 } from '@/state/stores/workspace-store';
 import { computeFacultyWorkload } from '@/domain/scheduler/feasibility';
 import type { Faculty } from '@/domain/models';
-
 import { BulkImportModal } from '@/components/ui/BulkImportModal';
+import { DepartmentNav } from '@/components/ui/DepartmentNav';
 
 interface FacultyFormState {
   facultyCode: string;
@@ -82,7 +82,8 @@ export function FacultyPage() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
+      <DepartmentNav />
       <PageHeader
         eyebrow="Teaching staff"
         title="Faculty"

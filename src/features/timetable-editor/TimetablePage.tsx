@@ -22,6 +22,7 @@ import { buildConfigurationSnapshot } from '@/domain/configuration/normalize';
 import { DEFAULT_GENERATION_SETTINGS, DEFAULT_HARD_CONSTRAINTS, DEFAULT_SOFT_WEIGHTS } from '@/domain/policies';
 import { buildGridLayout, gridColumnLabel } from '@/domain/scheduler/grid-layout';
 import type { TimetableConfiguration } from '@/domain/models';
+import { DepartmentNav } from '@/components/ui/DepartmentNav';
 
 interface CellVm {
   dayIndex: number;
@@ -485,7 +486,8 @@ export function TimetablePage() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
+      <DepartmentNav />
       <PageHeader
         eyebrow="Weekly schedule"
         title={`Timetable — ${department.code}`}

@@ -11,6 +11,7 @@ import {
 import { buildGridLayout, gridColumnLabel } from '@/domain/scheduler/grid-layout';
 import { TimetableGridHeader } from '@/components/ui/TimetableGridHeader';
 import { ExportPreviewModal } from '@/components/ui/ExportPreviewModal';
+import { DepartmentNav } from '@/components/ui/DepartmentNav';
 
 interface FacultyCell {
   sectionId: string;
@@ -117,7 +118,8 @@ export function FacultyTimetablePage() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
+      <DepartmentNav />
       <PageHeader
         eyebrow="Faculty workload"
         title={`Faculty timetable — ${department.code}`}

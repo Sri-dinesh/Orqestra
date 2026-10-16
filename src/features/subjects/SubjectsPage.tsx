@@ -6,6 +6,7 @@ import { selectCurrentFaculty, selectCurrentSections, useWorkspaceStore } from '
 import type { SubjectType } from '@/domain/enums';
 import type { Subject } from '@/domain/models';
 import { BulkImportModal } from '@/components/ui/BulkImportModal';
+import { DepartmentNav } from '@/components/ui/DepartmentNav';
 
 interface SubjectFormState {
   code: string;
@@ -102,7 +103,8 @@ export function SubjectsPage() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
+      <DepartmentNav />
       <PageHeader
         eyebrow="Course catalogue"
         title="Subjects"

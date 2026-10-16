@@ -11,6 +11,7 @@ import {
 import { buildGridLayout, gridColumnLabel } from '@/domain/scheduler/grid-layout';
 import { TimetableGridHeader } from '@/components/ui/TimetableGridHeader';
 import { ExportPreviewModal } from '@/components/ui/ExportPreviewModal';
+import { DepartmentNav } from '@/components/ui/DepartmentNav';
 
 interface MasterCell {
   entryId: string;
@@ -142,7 +143,8 @@ export function MasterTimetablePage() {
   const activeFacultyIds = new Set(timetable.entries.map((e) => e.facultyId));
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
+      <DepartmentNav />
       <PageHeader
         eyebrow="Institution view"
         title={`Master timetable — ${department.code}`}

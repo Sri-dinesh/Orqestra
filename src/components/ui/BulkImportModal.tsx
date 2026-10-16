@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { Upload, Download, FileSpreadsheet, AlertCircle, CheckCircle2, X } from 'lucide-react';
 import * as XLSX from 'xlsx';
 
-export type ImportType = 'FACULTY' | 'SUBJECTS';
+export type ImportType = 'FACULTY' | 'SUBJECTS' | 'ROOMS';
 
 interface BulkImportModalProps {
   isOpen: boolean;
@@ -39,7 +39,7 @@ export const BulkImportModal: React.FC<BulkImportModalProps> = ({
         ['MCA', 'Mr. Manish Chhabra', 3, 12],
         ['GAA', 'Ms. G. Anusha', 4, 15],
       ];
-    } else {
+    } else if (type === 'SUBJECTS') {
       filename = 'subjects-import-template.xlsx';
       headers = ['Short Code', 'Subject Title', 'Course Code', 'Type (THEORY/LAB)', 'Weekly Periods'];
       sampleData = [
@@ -47,6 +47,16 @@ export const BulkImportModal: React.FC<BulkImportModalProps> = ({
         ['SEG', 'Software Engineering', 'A8520', 'THEORY', 4],
         ['WTL', 'Web Technologies Laboratory', 'A8605', 'LAB', 2],
         ['MLL', 'Machine Learning Laboratory', 'A8704', 'LAB', 2],
+      ];
+    } else {
+      filename = 'rooms-import-template.xlsx';
+      headers = ['Room Code', 'Room Name', 'Capacity', 'Type (GENERAL/THEORY/LAB)'];
+      sampleData = [
+        ['LH-101', 'Lecture Hall 101', 60, 'GENERAL'],
+        ['LH-102', 'Lecture Hall 102', 60, 'THEORY'],
+        ['LAB-CN', 'Computer Networks Lab', 40, 'LAB'],
+        ['LAB-AI', 'Artificial Intelligence Lab', 35, 'LAB'],
+        ['LAB-HW', 'Hardware & IoT Lab', 35, 'LAB'],
       ];
     }
 
@@ -111,7 +121,7 @@ export const BulkImportModal: React.FC<BulkImportModalProps> = ({
               });
             }
           });
-        } else {
+        } else if (type === 'SUBJECTS') {
           // SUBJECTS
           const codeIdx = headerRow.findIndex((h) => h.includes('code') || h.includes('short'));
           const nameIdx = headerRow.findIndex((h) => h.includes('title') || h.includes('name'));
@@ -144,6 +154,36 @@ export const BulkImportModal: React.FC<BulkImportModalProps> = ({
               });
             }
           });
+        } else {
+          // ROOMS
+          const codeIdx = headerRow.findIndex((h) => h.includes('code') || h.includes('room') || h.includes('id') || h.includes('number'));
+          const nameIdx = headerRow.findIndex((h) => h.includes('name') || h.includes('title') || h.includes('lab'));
+          const capIdx = headerRow.findIndex((h) => h.includes('capacity') || h.includes('seats') || h.includes('size'));
+          const typeIdx = headerRow.findIndex((h) => h.includes('type'));
+
+          if (codeIdx === -1) {
+            setErrors(['Column "Room Code" is required in the header row.']);
+            return;
+          }
+
+          dataRows.forEach((row, i) => {
+            const rawCode = String(row[codeIdx] ?? '').trim().toUpperCase();
+            const rawName = nameIdx !== -1 && row[nameIdx] ? String(row[nameIdx]).trim() : rawCode;
+            const rawCap = capIdx !== -1 && row[capIdx] !== undefined ? Number(row[capIdx]) : 60;
+            const rawTypeStr = typeIdx !== -1 ? String(row[typeIdx] ?? '').toUpperCase().trim() : 'GENERAL';
+            const roomType = rawTypeStr.includes('LAB') ? 'LAB' : rawTypeStr.includes('THEORY') ? 'THEORY' : 'GENERAL';
+
+            if (!rawCode) {
+              validationErrors.push(`Row ${i + 2}: Room Code must not be empty.`);
+            } else {
+              validatedItems.push({
+                code: rawCode,
+                name: rawName,
+                capacity: Number.isFinite(rawCap) && rawCap > 0 ? rawCap : 60,
+                type: roomType,
+              });
+            }
+          });
         }
 
         setErrors(validationErrors);
@@ -172,7 +212,7 @@ export const BulkImportModal: React.FC<BulkImportModalProps> = ({
             </span>
             <div>
               <h3 className="text-base font-bold text-[#111315]">
-                Bulk Import {type === 'FACULTY' ? 'Faculty' : 'Subjects'}
+                Bulk Import {type === 'FACULTY' ? 'Faculty' : type === 'SUBJECTS' ? 'Subjects' : 'Rooms & Labs'}
               </h3>
               <p className="text-xs text-[#71767B]">
                 Upload CSV or Excel spreadsheets (.xlsx, .xls, .csv)
@@ -264,13 +304,20 @@ export const BulkImportModal: React.FC<BulkImportModalProps> = ({
                           <th className="p-2 border-b border-[#E5E8E0]">Max / Day</th>
                           <th className="p-2 border-b border-[#E5E8E0]">Max / Week</th>
                         </>
-                      ) : (
+                      ) : type === 'SUBJECTS' ? (
                         <>
                           <th className="p-2 border-b border-[#E5E8E0]">Code</th>
                           <th className="p-2 border-b border-[#E5E8E0]">Title</th>
                           <th className="p-2 border-b border-[#E5E8E0]">Course Code</th>
                           <th className="p-2 border-b border-[#E5E8E0]">Type</th>
                           <th className="p-2 border-b border-[#E5E8E0]">Periods/Wk</th>
+                        </>
+                      ) : (
+                        <>
+                          <th className="p-2 border-b border-[#E5E8E0]">Room Code</th>
+                          <th className="p-2 border-b border-[#E5E8E0]">Room Name</th>
+                          <th className="p-2 border-b border-[#E5E8E0]">Capacity</th>
+                          <th className="p-2 border-b border-[#E5E8E0]">Type</th>
                         </>
                       )}
                     </tr>
@@ -285,7 +332,7 @@ export const BulkImportModal: React.FC<BulkImportModalProps> = ({
                             <td className="p-2 text-[#666]">{row.maxPeriodsPerDay ?? '—'}</td>
                             <td className="p-2 text-[#666]">{row.maxPeriodsPerWeek ?? '—'}</td>
                           </>
-                        ) : (
+                        ) : type === 'SUBJECTS' ? (
                           <>
                             <td className="p-2 font-bold text-[#111315]">{row.code}</td>
                             <td className="p-2 text-[#333]">{row.name}</td>
@@ -296,6 +343,17 @@ export const BulkImportModal: React.FC<BulkImportModalProps> = ({
                               </span>
                             </td>
                             <td className="p-2 text-[#666]">{row.sessionsPerWeek}</td>
+                          </>
+                        ) : (
+                          <>
+                            <td className="p-2 font-bold text-[#111315]">{row.code}</td>
+                            <td className="p-2 text-[#333]">{row.name}</td>
+                            <td className="p-2 text-[#666]">{row.capacity} seats</td>
+                            <td className="p-2">
+                              <span className={`px-2 py-0.5 rounded text-[10px] font-semibold ${row.type === 'LAB' ? 'bg-purple-100 text-purple-700' : row.type === 'THEORY' ? 'bg-blue-100 text-blue-700' : 'bg-emerald-100 text-emerald-700'}`}>
+                                {row.type}
+                              </span>
+                            </td>
                           </>
                         )}
                       </tr>

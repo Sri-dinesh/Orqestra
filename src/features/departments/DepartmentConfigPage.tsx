@@ -10,6 +10,7 @@ import {
 import { WORKING_DAYS } from '@/domain/enums';
 import type { WorkingDay } from '@/domain/enums';
 import type { SubjectRequirement } from '@/domain/models';
+import { DepartmentNav } from '@/components/ui/DepartmentNav';
 
 export function DepartmentConfigPage() {
   const { departmentId } = useParams();
@@ -54,7 +55,8 @@ export function DepartmentConfigPage() {
     state.sections.find((s) => s.id === sectionId)?.subjectRequirements ?? [];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
+      <DepartmentNav />
       <PageHeader
         eyebrow="Department setup"
         title={`${department.code} — Configuration`}
