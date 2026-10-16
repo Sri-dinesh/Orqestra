@@ -109,298 +109,330 @@ interface OfficialCell {
 }
 
 /**
- * Official single-page class timetable PDF in notice-board format.
+ * Render one complete official notice-board page onto a jsPDF instance.
  */
-export function buildOfficialTimetablePdf(input: ExportInput): jsPDF {
+export function renderOfficialSectionTimetablePage(doc: jsPDF, input: ExportInput): void {
   const { timetable, department, sections, subjects, faculty, breaks = [] } = input;
   const college = input.collegeDetails;
   const section = sections.find((s) => s.id === input.sectionId);
   const sectionName = section?.name ?? 'Section';
 
+  const PAGE_W = 297;
+  const MARGIN = 8;
+  const CONTENT_W = PAGE_W - MARGIN * 2;
+  const CX = PAGE_W / 2;
+  let y = 6;
+
+  const subjectById = new Map(subjects.map((s) => [s.id, s]));
+  const facultyById = new Map(faculty.map((f) => [f.id, f]));
+  const layout = buildGridLayout(department.periodsPerDay, breaks);
+  const entries = timetable.entries.filter((e) => e.sectionId === input.sectionId);
+  const entryAt = (day: number, slot: number) =>
+    entries.find((e) => e.dayIndex === day && slot >= e.startPeriod && slot < e.startPeriod + e.durationPeriods);
+
+  // ---- Crest & Institution Header ----
+  const collegeName = college?.name?.trim() || department.name;
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(11);
+  doc.setTextColor(17, 19, 21);
+  doc.text(collegeName.toUpperCase(), CX, y, { align: 'center' });
+  y += 4;
+
+  doc.setFontSize(9);
+  doc.text(`DEPARTMENT OF ${department.name.toUpperCase()}`, CX, y, { align: 'center' });
+  y += 3.8;
+
+  const sectionYear = section?.year ?? 1;
+  const yearSem = Math.max(1, (section?.semester ?? 1) - (sectionYear - 1) * 2);
+  doc.text(
+    `CLASS TIMETABLE — B. Tech ${romanNumeral(sectionYear)} Year ${romanNumeral(yearSem)} Semester (${sectionName})`,
+    CX,
+    y,
+    { align: 'center' },
+  );
+  y += 3.5;
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  const academicYear = college?.academicYear?.trim() || '—';
+  const roomNo = section?.roomNo ?? '—';
+  const effectiveDate = department.effectiveFrom ?? formatDayMonthYear(timetable.createdAt || new Date().toISOString());
+  doc.text(
+    `Academic Year: ${academicYear}    |    Room No: ${roomNo}    |    With effect from: ${effectiveDate}`,
+    CX,
+    y,
+    { align: 'center' },
+  );
+  y += 2.5;
+
+  if (typeof doc.setDrawColor === 'function') doc.setDrawColor(160, 165, 170);
+  if (typeof doc.setLineWidth === 'function') doc.setLineWidth(0.2);
+  if (typeof doc.line === 'function') doc.line(MARGIN, y, PAGE_W - MARGIN, y);
+  y += 2;
+
+  // ---- Weekly Grid Table ----
+  const gridWidth = layout.gridSlotsPerDay;
+  const breakSlots = layout.columns.map((c, g) => (c.kind === 'break' ? g : -1)).filter((g) => g >= 0);
+  const totalRows = 2 + department.workingDays.length;
+  const timeRow: OfficialCell[] = [{ content: 'DAY / TIME', styles: { fontStyle: 'bold', fillColor: [240, 242, 245] } }];
+  const numberRow: OfficialCell[] = [{ content: 'PERIOD', styles: { fontStyle: 'bold', fillColor: [240, 242, 245] } }];
+
+  layout.columns.forEach((col, g) => {
+    if (col.kind === 'break') {
+      const b = breaks.find((x) => x.id === col.breakId);
+      const timeStr = [b?.startTime, b?.endTime].filter(Boolean).join(' - ');
+      timeRow.push({
+        content: timeStr ? `${col.name}\n${timeStr}` : col.name,
+        rowSpan: totalRows,
+        vertical: col.name,
+        styles: { fontStyle: 'bold', fillColor: [253, 248, 237], textColor: [146, 105, 14], halign: 'center', valign: 'middle' },
+      });
+      return;
+    }
+    const t = department.periodTimings?.[col.teachingIndex];
+    timeRow.push({
+      content: t?.start || t?.end ? `${t?.start ?? ''}\n${t?.end ?? ''}` : gridColumnLabel(layout, g),
+      styles: { fillColor: [245, 247, 250], fontStyle: 'bold' },
+    });
+    numberRow.push({
+      content: String(col.teachingIndex + 1),
+      styles: { fillColor: [245, 247, 250], fontStyle: 'bold' },
+    });
+  });
+
+  const body: OfficialCell[][] = [timeRow, numberRow];
+  department.workingDays.forEach((day, dayIndex) => {
+    const row: OfficialCell[] = [{ content: day.slice(0, 3).toUpperCase(), styles: { fontStyle: 'bold', fillColor: [245, 247, 250] } }];
+    for (let g = 0; g < gridWidth; g++) {
+      if (breakSlots.includes(g)) continue;
+      const entry = entryAt(dayIndex, g);
+      if (!entry) {
+        row.push({ content: '—', styles: { textColor: [160, 165, 170] } });
+        continue;
+      }
+      if (g !== entry.startPeriod) continue;
+      const subject = subjectById.get(entry.subjectId);
+      const member = facultyById.get(entry.facultyId);
+      const cell: OfficialCell = {
+        content: `${subject?.code ?? '?'}\n(${member?.facultyCode ?? member?.name?.split(' ')[0] ?? '?'})`,
+        styles: {
+          fontStyle: 'bold',
+          fillColor: subject?.type === 'LAB' ? [235, 230, 252] : [240, 245, 255],
+        },
+      };
+      if (entry.durationPeriods > 1) cell.colSpan = entry.durationPeriods;
+      row.push(cell);
+    }
+    body.push(row);
+  });
+
+  // Precise, uniform equal column widths for all teaching periods
+  const dayColWidth = 16;
+  const breakColWidth = 12;
+  const numBreaks = breakSlots.length;
+  const numTeaching = layout.columns.filter((c) => c.kind === 'teaching').length;
+  const teachingColWidth = (CONTENT_W - dayColWidth - (numBreaks * breakColWidth)) / Math.max(1, numTeaching);
+
+  const columnStyles: Record<number, { cellWidth: number }> = { 0: { cellWidth: dayColWidth } };
+  layout.columns.forEach((col, g) => {
+    columnStyles[g + 1] = { cellWidth: col.kind === 'break' ? breakColWidth : teachingColWidth };
+  });
+
+  autoTable(doc, {
+    startY: y,
+    body: body as never,
+    styles: {
+      fontSize: 7,
+      cellPadding: 1,
+      halign: 'center',
+      valign: 'middle',
+      lineWidth: 0.15,
+      lineColor: [70, 75, 80],
+      textColor: [17, 19, 21],
+      overflow: 'linebreak',
+    },
+    columnStyles,
+    margin: { left: MARGIN, right: MARGIN },
+  });
+  y = tableEndY(doc, y + 40) + 2.5;
+
+  // ---- Class Advisor & Mentors Bar ----
+  const advisorText = `Class Advisor : ${section?.classAdvisor ?? '—'}`;
+  const mentorsText = department.mentors?.trim() || '';
+  const advisorContent = mentorsText ? `${advisorText}        |        Mentors : ${mentorsText}` : advisorText;
+
+  autoTable(doc, {
+    startY: y,
+    body: [[{
+      content: advisorContent,
+      styles: { fontStyle: 'bold', fontSize: 7.5, fillColor: [248, 249, 250], textColor: [20, 20, 20], halign: 'left' },
+    }]],
+    styles: { cellPadding: 1.2, lineWidth: 0.15, lineColor: [70, 75, 80] },
+    margin: { left: MARGIN, right: MARGIN },
+  });
+  y = tableEndY(doc, y + 6) + 2.5;
+
+  // ---- Course Details & Instructor Details (Side by Side) ----
+  const sectionSubjects = subjects.filter((s) => s.eligibleSectionIds.includes(input.sectionId));
+  const courseBody: OfficialCell[][] = sectionSubjects.map((s) => [
+    { content: s.code, styles: { fontStyle: 'bold' } },
+    { content: s.courseCode ?? '—' },
+    { content: s.name, styles: { halign: 'left' } },
+  ]);
+
+  const courseWidth = 152;
+  autoTable(doc, {
+    startY: y,
+    head: [
+      [{ content: 'Course Details', colSpan: 3, styles: { halign: 'center', fontStyle: 'bold', fillColor: [235, 238, 242], textColor: [15, 20, 25] } }],
+      ['Short Name', 'Course Code', 'Title of the Course'],
+    ],
+    body: courseBody as never,
+    styles: {
+      fontSize: 6.5,
+      cellPadding: 0.9,
+      halign: 'center',
+      valign: 'middle',
+      lineWidth: 0.15,
+      lineColor: [70, 75, 80],
+      textColor: [17, 19, 21],
+    },
+    headStyles: { fontStyle: 'bold', fillColor: [242, 244, 247], textColor: [17, 19, 21], halign: 'center' },
+    columnStyles: {
+      0: { cellWidth: 20 },
+      1: { cellWidth: 28 },
+      2: { cellWidth: courseWidth - 48 },
+    },
+    margin: { left: MARGIN },
+    tableWidth: courseWidth,
+  });
+  const courseEndY = tableEndY(doc, y + 30);
+
+  const instructorBody: OfficialCell[][] = sectionSubjects.map((s) => {
+    const instructors = s.eligibleFacultyIds
+      .map((id) => facultyById.get(id)?.name ?? id)
+      .filter(Boolean);
+    return [
+      { content: s.code, styles: { fontStyle: 'bold' } },
+      { content: instructors.length > 0 ? instructors.join(' / ') : '—', styles: { halign: 'left' } },
+    ];
+  });
+
+  const instructorWidth = CONTENT_W - courseWidth - 3;
+  autoTable(doc, {
+    startY: y,
+    head: [
+      [{ content: 'Course Instructor Details', colSpan: 2, styles: { halign: 'center', fontStyle: 'bold', fillColor: [235, 238, 242], textColor: [15, 20, 25] } }],
+      ['Short Name', 'Name of the Course Instructor'],
+    ],
+    body: instructorBody as never,
+    styles: {
+      fontSize: 6.5,
+      cellPadding: 0.9,
+      halign: 'center',
+      valign: 'middle',
+      lineWidth: 0.15,
+      lineColor: [70, 75, 80],
+      textColor: [17, 19, 21],
+    },
+    headStyles: { fontStyle: 'bold', fillColor: [242, 244, 247], textColor: [17, 19, 21], halign: 'center' },
+    columnStyles: {
+      0: { cellWidth: 22 },
+      1: { cellWidth: instructorWidth - 22 },
+    },
+    margin: { left: MARGIN + courseWidth + 3 },
+    tableWidth: instructorWidth,
+  });
+  const instructorEndY = tableEndY(doc, y + 30);
+  y = Math.max(courseEndY, instructorEndY) + 2.5;
+
+  // ---- Signatories ----
+  const sigColWidth = CONTENT_W / 4;
+  autoTable(doc, {
+    startY: y,
+    body: [
+      [
+        { content: '\n\n', styles: { minCellHeight: 8 } },
+        { content: '\n\n', styles: { minCellHeight: 8 } },
+        { content: '\n\n', styles: { minCellHeight: 8 } },
+        { content: '\n\n', styles: { minCellHeight: 8 } },
+      ],
+      ['HOD', 'CHIEF TIME TABLE COORDINATOR', 'DEAN (ACADEMIC AFFAIRS)', 'PRINCIPAL'],
+    ],
+    styles: {
+      fontSize: 7,
+      fontStyle: 'bold',
+      halign: 'center',
+      valign: 'middle',
+      cellPadding: 1,
+      lineWidth: 0.15,
+      lineColor: [70, 75, 80],
+      textColor: [17, 19, 21],
+    },
+    columnStyles: {
+      0: { cellWidth: sigColWidth },
+      1: { cellWidth: sigColWidth },
+      2: { cellWidth: sigColWidth },
+      3: { cellWidth: sigColWidth },
+    },
+    margin: { left: MARGIN, right: MARGIN },
+  });
+  y = tableEndY(doc, y + 12) + 2.5;
+
+  // ---- Footer: Copy to (Left) & Version (Right) ----
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(6.8);
+  doc.setTextColor(60, 65, 70);
+  doc.text('Copy to:', MARGIN, y);
+  doc.setFont('helvetica', 'normal');
+  doc.text('1. PA to Principal   2. Office of the Dean of Academics   3. Office of the Controller of Examinations   4. Display in Notice Boards', MARGIN + 12, y);
+
+  const stamp = formatDayMonthYear(timetable.updatedAt || new Date().toISOString());
+  doc.setFont('helvetica', 'bolditalic');
+  doc.text(
+    `Version #: V${timetable.revision + 1} dated ${stamp}${department.effectiveFrom ? ` w.e.f ${department.effectiveFrom}` : ''}`,
+    PAGE_W - MARGIN,
+    y,
+    { align: 'right' },
+  );
+}
+
+/**
+ * Build single-section official PDF.
+ */
+export function buildOfficialTimetablePdf(input: ExportInput): jsPDF {
   try {
     const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
-    const PAGE_W = 297;
-    const MARGIN = 8;
-    const CONTENT_W = PAGE_W - MARGIN * 2;
-    const CX = PAGE_W / 2;
-    let y = 6;
-
-    const subjectById = new Map(subjects.map((s) => [s.id, s]));
-    const facultyById = new Map(faculty.map((f) => [f.id, f]));
-    const layout = buildGridLayout(department.periodsPerDay, breaks);
-    const entries = timetable.entries.filter((e) => e.sectionId === input.sectionId);
-    const entryAt = (day: number, slot: number) =>
-      entries.find((e) => e.dayIndex === day && slot >= e.startPeriod && slot < e.startPeriod + e.durationPeriods);
-
-    // ---- Crest & Institution Header ----
-    const collegeName = college?.name?.trim() || department.name;
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(11);
-    doc.setTextColor(17, 19, 21);
-    doc.text(collegeName.toUpperCase(), CX, y, { align: 'center' });
-    y += 4;
-
-    doc.setFontSize(9);
-    doc.text(`DEPARTMENT OF ${department.name.toUpperCase()}`, CX, y, { align: 'center' });
-    y += 3.8;
-
-    const sectionYear = section?.year ?? 1;
-    const yearSem = Math.max(1, (section?.semester ?? 1) - (sectionYear - 1) * 2);
-    doc.text(
-      `CLASS TIMETABLE — B. Tech ${romanNumeral(sectionYear)} Year ${romanNumeral(yearSem)} Semester (${sectionName})`,
-      CX,
-      y,
-      { align: 'center' },
-    );
-    y += 3.5;
-
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(8);
-    const academicYear = college?.academicYear?.trim() || '—';
-    const roomNo = section?.roomNo ?? '—';
-    const effectiveDate = department.effectiveFrom ?? formatDayMonthYear(timetable.createdAt || new Date().toISOString());
-    doc.text(
-      `Academic Year: ${academicYear}    |    Room No: ${roomNo}    |    With effect from: ${effectiveDate}`,
-      CX,
-      y,
-      { align: 'center' },
-    );
-    y += 2.5;
-
-    if (typeof doc.setDrawColor === 'function') doc.setDrawColor(160, 165, 170);
-    if (typeof doc.setLineWidth === 'function') doc.setLineWidth(0.2);
-    if (typeof doc.line === 'function') doc.line(MARGIN, y, PAGE_W - MARGIN, y);
-    y += 2;
-
-    // ---- Weekly Grid Table ----
-    const gridWidth = layout.gridSlotsPerDay;
-    const breakSlots = layout.columns.map((c, g) => (c.kind === 'break' ? g : -1)).filter((g) => g >= 0);
-    const totalRows = 2 + department.workingDays.length;
-    const timeRow: OfficialCell[] = [{ content: 'DAY / TIME', styles: { fontStyle: 'bold', fillColor: [240, 242, 245] } }];
-    const numberRow: OfficialCell[] = [{ content: 'PERIOD', styles: { fontStyle: 'bold', fillColor: [240, 242, 245] } }];
-
-    layout.columns.forEach((col, g) => {
-      if (col.kind === 'break') {
-        const b = breaks.find((x) => x.id === col.breakId);
-        const timeStr = [b?.startTime, b?.endTime].filter(Boolean).join(' - ');
-        timeRow.push({
-          content: timeStr ? `${col.name}\n${timeStr}` : col.name,
-          rowSpan: totalRows,
-          vertical: col.name,
-          styles: { fontStyle: 'bold', fillColor: [253, 248, 237], textColor: [146, 105, 14], halign: 'center', valign: 'middle' },
-        });
-        return;
-      }
-      const t = department.periodTimings?.[col.teachingIndex];
-      timeRow.push({
-        content: t?.start || t?.end ? `${t?.start ?? ''}\n${t?.end ?? ''}` : gridColumnLabel(layout, g),
-        styles: { fillColor: [245, 247, 250], fontStyle: 'bold' },
-      });
-      numberRow.push({
-        content: String(col.teachingIndex + 1),
-        styles: { fillColor: [245, 247, 250], fontStyle: 'bold' },
-      });
-    });
-
-    const body: OfficialCell[][] = [timeRow, numberRow];
-    department.workingDays.forEach((day, dayIndex) => {
-      const row: OfficialCell[] = [{ content: day.slice(0, 3).toUpperCase(), styles: { fontStyle: 'bold', fillColor: [245, 247, 250] } }];
-      for (let g = 0; g < gridWidth; g++) {
-        if (breakSlots.includes(g)) continue;
-        const entry = entryAt(dayIndex, g);
-        if (!entry) {
-          row.push({ content: '—', styles: { textColor: [160, 165, 170] } });
-          continue;
-        }
-        if (g !== entry.startPeriod) continue;
-        const subject = subjectById.get(entry.subjectId);
-        const member = facultyById.get(entry.facultyId);
-        const cell: OfficialCell = {
-          content: `${subject?.code ?? '?'}\n(${member?.facultyCode ?? member?.name?.split(' ')[0] ?? '?'})`,
-          styles: {
-            fontStyle: 'bold',
-            fillColor: subject?.type === 'LAB' ? [235, 230, 252] : [240, 245, 255],
-          },
-        };
-        if (entry.durationPeriods > 1) cell.colSpan = entry.durationPeriods;
-        row.push(cell);
-      }
-      body.push(row);
-    });
-
-    // Precise, uniform equal column widths for all teaching periods
-    const dayColWidth = 16;
-    const breakColWidth = 12;
-    const numBreaks = breakSlots.length;
-    const numTeaching = layout.columns.filter((c) => c.kind === 'teaching').length;
-    const teachingColWidth = (CONTENT_W - dayColWidth - (numBreaks * breakColWidth)) / Math.max(1, numTeaching);
-
-    const columnStyles: Record<number, { cellWidth: number }> = { 0: { cellWidth: dayColWidth } };
-    layout.columns.forEach((col, g) => {
-      columnStyles[g + 1] = { cellWidth: col.kind === 'break' ? breakColWidth : teachingColWidth };
-    });
-
-    autoTable(doc, {
-      startY: y,
-      body: body as never,
-      styles: {
-        fontSize: 7,
-        cellPadding: 1,
-        halign: 'center',
-        valign: 'middle',
-        lineWidth: 0.15,
-        lineColor: [70, 75, 80],
-        textColor: [17, 19, 21],
-        overflow: 'linebreak',
-      },
-      columnStyles,
-      margin: { left: MARGIN, right: MARGIN },
-    });
-    y = tableEndY(doc, y + 40) + 2.5;
-
-    // ---- Class Advisor & Mentors Bar ----
-    const advisorText = `Class Advisor : ${section?.classAdvisor ?? '—'}`;
-    const mentorsText = department.mentors?.trim() || '';
-    const advisorContent = mentorsText ? `${advisorText}        |        Mentors : ${mentorsText}` : advisorText;
-
-    autoTable(doc, {
-      startY: y,
-      body: [[{
-        content: advisorContent,
-        styles: { fontStyle: 'bold', fontSize: 7.5, fillColor: [248, 249, 250], textColor: [20, 20, 20], halign: 'left' },
-      }]],
-      styles: { cellPadding: 1.2, lineWidth: 0.15, lineColor: [70, 75, 80] },
-      margin: { left: MARGIN, right: MARGIN },
-    });
-    y = tableEndY(doc, y + 6) + 2.5;
-
-    // ---- Course Details & Instructor Details (Side by Side) ----
-    const sectionSubjects = subjects.filter((s) => s.eligibleSectionIds.includes(input.sectionId));
-    const courseBody: OfficialCell[][] = sectionSubjects.map((s) => [
-      { content: s.code, styles: { fontStyle: 'bold' } },
-      { content: s.courseCode ?? '—' },
-      { content: s.name, styles: { halign: 'left' } },
-    ]);
-
-    const courseWidth = 152;
-    autoTable(doc, {
-      startY: y,
-      head: [
-        [{ content: 'Course Details', colSpan: 3, styles: { halign: 'center', fontStyle: 'bold', fillColor: [235, 238, 242], textColor: [15, 20, 25] } }],
-        ['Short Name', 'Course Code', 'Title of the Course'],
-      ],
-      body: courseBody as never,
-      styles: {
-        fontSize: 6.5,
-        cellPadding: 0.9,
-        halign: 'center',
-        valign: 'middle',
-        lineWidth: 0.15,
-        lineColor: [70, 75, 80],
-        textColor: [17, 19, 21],
-      },
-      headStyles: { fontStyle: 'bold', fillColor: [242, 244, 247], textColor: [17, 19, 21], halign: 'center' },
-      columnStyles: {
-        0: { cellWidth: 20 },
-        1: { cellWidth: 28 },
-        2: { cellWidth: courseWidth - 48 },
-      },
-      margin: { left: MARGIN },
-      tableWidth: courseWidth,
-    });
-    const courseEndY = tableEndY(doc, y + 30);
-
-    const instructorBody: OfficialCell[][] = sectionSubjects.map((s) => {
-      const instructors = s.eligibleFacultyIds
-        .map((id) => facultyById.get(id)?.name ?? id)
-        .filter(Boolean);
-      return [
-        { content: s.code, styles: { fontStyle: 'bold' } },
-        { content: instructors.length > 0 ? instructors.join(' / ') : '—', styles: { halign: 'left' } },
-      ];
-    });
-
-    const instructorWidth = CONTENT_W - courseWidth - 3;
-    autoTable(doc, {
-      startY: y,
-      head: [
-        [{ content: 'Course Instructor Details', colSpan: 2, styles: { halign: 'center', fontStyle: 'bold', fillColor: [235, 238, 242], textColor: [15, 20, 25] } }],
-        ['Short Name', 'Name of the Course Instructor'],
-      ],
-      body: instructorBody as never,
-      styles: {
-        fontSize: 6.5,
-        cellPadding: 0.9,
-        halign: 'center',
-        valign: 'middle',
-        lineWidth: 0.15,
-        lineColor: [70, 75, 80],
-        textColor: [17, 19, 21],
-      },
-      headStyles: { fontStyle: 'bold', fillColor: [242, 244, 247], textColor: [17, 19, 21], halign: 'center' },
-      columnStyles: {
-        0: { cellWidth: 22 },
-        1: { cellWidth: instructorWidth - 22 },
-      },
-      margin: { left: MARGIN + courseWidth + 3 },
-      tableWidth: instructorWidth,
-    });
-    const instructorEndY = tableEndY(doc, y + 30);
-    y = Math.max(courseEndY, instructorEndY) + 2.5;
-
-    // ---- Signatories ----
-    const sigColWidth = CONTENT_W / 4;
-    autoTable(doc, {
-      startY: y,
-      body: [
-        [
-          { content: '\n\n', styles: { minCellHeight: 8 } },
-          { content: '\n\n', styles: { minCellHeight: 8 } },
-          { content: '\n\n', styles: { minCellHeight: 8 } },
-          { content: '\n\n', styles: { minCellHeight: 8 } },
-        ],
-        ['HOD', 'CHIEF TIME TABLE COORDINATOR', 'DEAN (ACADEMIC AFFAIRS)', 'PRINCIPAL'],
-      ],
-      styles: {
-        fontSize: 7,
-        fontStyle: 'bold',
-        halign: 'center',
-        valign: 'middle',
-        cellPadding: 1,
-        lineWidth: 0.15,
-        lineColor: [70, 75, 80],
-        textColor: [17, 19, 21],
-      },
-      columnStyles: {
-        0: { cellWidth: sigColWidth },
-        1: { cellWidth: sigColWidth },
-        2: { cellWidth: sigColWidth },
-        3: { cellWidth: sigColWidth },
-      },
-      margin: { left: MARGIN, right: MARGIN },
-    });
-    y = tableEndY(doc, y + 12) + 2.5;
-
-    // ---- Footer: Copy to (Left) & Version (Right) ----
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(6.8);
-    doc.setTextColor(60, 65, 70);
-    doc.text('Copy to:', MARGIN, y);
-    doc.setFont('helvetica', 'normal');
-    doc.text('1. PA to Principal   2. Office of the Dean of Academics   3. Office of the Controller of Examinations   4. Display in Notice Boards', MARGIN + 12, y);
-
-    const stamp = formatDayMonthYear(timetable.updatedAt || new Date().toISOString());
-    doc.setFont('helvetica', 'bolditalic');
-    doc.text(
-      `Version #: V${timetable.revision + 1} dated ${stamp}${department.effectiveFrom ? ` w.e.f ${department.effectiveFrom}` : ''}`,
-      PAGE_W - MARGIN,
-      y,
-      { align: 'right' },
-    );
-
+    renderOfficialSectionTimetablePage(doc, input);
     return doc;
   } catch (error) {
     throw new ExportError('Failed to generate PDF export.', { cause: String(error) });
+  }
+}
+
+/**
+ * Build Department Booklet containing all section timetables.
+ */
+export function buildDepartmentBookletPdf(input: Omit<ExportInput, 'sectionId'>): jsPDF {
+  try {
+    const { sections } = input;
+    const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+    sections.forEach((sec, idx) => {
+      if (idx > 0) doc.addPage('a4', 'landscape');
+      renderOfficialSectionTimetablePage(doc, { ...input, sectionId: sec.id });
+    });
+    return doc;
+  } catch (error) {
+    throw new ExportError('Failed to generate Department Booklet PDF export.', { cause: String(error) });
+  }
+}
+
+export function exportDepartmentBookletPdf(input: Omit<ExportInput, 'sectionId'>): void {
+  try {
+    const doc = buildDepartmentBookletPdf(input);
+    doc.save(`timetable-${input.department.code}-full-booklet.pdf`);
+  } catch (error) {
+    throw new ExportError('Failed to generate Department Booklet PDF export.', { cause: String(error) });
   }
 }
 

@@ -9,11 +9,13 @@ import {
   Maximize2,
   FileCode,
   CheckCircle2,
+  BookOpen,
 } from 'lucide-react';
 import {
   exportTimetableAsPdf,
   exportTimetableAsExcel,
   exportTimetableAsWord,
+  exportDepartmentBookletPdf,
   buildTimetableGrid,
   type ExportInput,
 } from '@/application/export-service';
@@ -112,6 +114,23 @@ export const ExportPreviewModal: React.FC<ExportPreviewModalProps> = ({
       notifySuccess('Word document downloaded!');
     } catch {
       alert('Failed to generate Word document');
+    }
+  };
+
+  const handleDownloadBooklet = () => {
+    try {
+      exportDepartmentBookletPdf({
+        timetable,
+        department,
+        sections,
+        subjects,
+        faculty,
+        breaks,
+        collegeDetails,
+      });
+      notifySuccess(`Department Booklet (${sections.length} sections) downloaded!`);
+    } catch {
+      alert('Failed to generate Department Booklet PDF');
     }
   };
 
@@ -511,6 +530,17 @@ export const ExportPreviewModal: React.FC<ExportPreviewModalProps> = ({
               <Printer className="w-3.5 h-3.5" />
               <span>Print Timetable</span>
             </button>
+            {sections.length > 1 && (
+              <button
+                type="button"
+                onClick={handleDownloadBooklet}
+                className="px-4 py-2 text-xs font-semibold text-[#0047FF] bg-[#EBF1FF] hover:bg-[#D9E5FF] rounded-xl transition-all duration-150 flex items-center gap-1.5 shadow-xs"
+                title="Generate combined PDF booklet for all sections in this department"
+              >
+                <BookOpen className="w-3.5 h-3.5" />
+                <span>Department Booklet ({sections.length})</span>
+              </button>
+            )}
             <button
               type="button"
               onClick={handleDownloadWord}

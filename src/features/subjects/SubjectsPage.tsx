@@ -5,6 +5,7 @@ import { useEditorStore } from '@/state/stores/editor-store';
 import { selectCurrentFaculty, selectCurrentSections, useWorkspaceStore } from '@/state/stores/workspace-store';
 import type { SubjectType } from '@/domain/enums';
 import type { Subject } from '@/domain/models';
+import { BulkImportModal } from '@/components/ui/BulkImportModal';
 
 interface SubjectFormState {
   code: string;
@@ -74,14 +75,43 @@ export function SubjectsPage() {
   const [eligibleFaculty, setEligibleFaculty] = useState<string[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<SubjectFormState | null>(null);
+  const [importModalOpen, setImportModalOpen] = useState(false);
 
   const editing = editingId ? (subjects.find((s) => s.id === editingId) ?? null) : null;
 
   if (!departmentId) return <p className="text-sm text-body-gray">Select a department first.</p>;
 
+  const handleBulkImport = (items: any[]) => {
+    let count = 0;
+    for (const item of items) {
+      if (subjects.some((s) => s.code === item.code)) continue;
+      state.addSubject({
+        departmentId,
+        code: item.code,
+        name: item.name,
+        courseCode: item.courseCode ?? undefined,
+        type: item.type,
+        sessionsPerWeek: item.sessionsPerWeek,
+        durationPeriods: item.type === 'LAB' ? 2 : 1,
+        eligibleSectionIds: sections.map((s) => s.id),
+        eligibleFacultyIds: [],
+      });
+      count++;
+    }
+    showToast('success', `Imported ${count} subjects successfully.`);
+  };
+
   return (
     <div className="space-y-8">
-      <PageHeader eyebrow="Course catalogue" title="Subjects" />
+      <PageHeader
+        eyebrow="Course catalogue"
+        title="Subjects"
+        actions={
+          <Button variant="secondary" size="sm" onClick={() => setImportModalOpen(true)}>
+            Bulk Import (Excel/CSV)
+          </Button>
+        }
+      />
 
       <Card title="Add subject">
         <form
@@ -290,6 +320,14 @@ export function SubjectsPage() {
           </div>
         </EditModal>
       )}
+
+      <BulkImportModal
+        isOpen={importModalOpen}
+        onClose={() => setImportModalOpen(false)}
+        type="SUBJECTS"
+        departmentId={departmentId}
+        onImport={handleBulkImport}
+      />
     </div>
   );
 }

@@ -13,6 +13,8 @@ import {
 import { computeFacultyWorkload } from '@/domain/scheduler/feasibility';
 import type { Faculty } from '@/domain/models';
 
+import { BulkImportModal } from '@/components/ui/BulkImportModal';
+
 interface FacultyFormState {
   facultyCode: string;
   name: string;
@@ -47,6 +49,7 @@ export function FacultyPage() {
   const [editForm, setEditForm] = useState<FacultyFormState | null>(null);
   const [editAvailability, setEditAvailability] = useState<FacultyAvailability[]>([]);
   const [editPreferred, setEditPreferred] = useState<FacultyAvailability[]>([]);
+  const [importModalOpen, setImportModalOpen] = useState(false);
 
   const editing = editingId ? (members.find((f) => f.id === editingId) ?? null) : null;
 
@@ -59,9 +62,36 @@ export function FacultyPage() {
     }
   }
 
+  const handleBulkImport = (items: any[]) => {
+    let count = 0;
+    for (const item of items) {
+      state.addFaculty({
+        departmentId,
+        facultyCode: item.facultyCode,
+        name: item.name,
+        subjectIds: [],
+        sectionIds: [],
+        availability: [],
+        preferredSlots: [],
+        maxPeriodsPerDay: item.maxPeriodsPerDay ?? null,
+        maxPeriodsPerWeek: item.maxPeriodsPerWeek ?? null,
+      });
+      count++;
+    }
+    showToast('success', `Imported ${count} faculty members.`);
+  };
+
   return (
     <div className="space-y-8">
-      <PageHeader eyebrow="Teaching staff" title="Faculty" />
+      <PageHeader
+        eyebrow="Teaching staff"
+        title="Faculty"
+        actions={
+          <Button variant="secondary" size="sm" onClick={() => setImportModalOpen(true)}>
+            Bulk Import (Excel/CSV)
+          </Button>
+        }
+      />
 
       <Card title="Add faculty member">
         <form
@@ -262,6 +292,14 @@ export function FacultyPage() {
           </div>
         </EditModal>
       )}
+
+      <BulkImportModal
+        isOpen={importModalOpen}
+        onClose={() => setImportModalOpen(false)}
+        type="FACULTY"
+        departmentId={departmentId}
+        onImport={handleBulkImport}
+      />
     </div>
   );
 }
