@@ -135,4 +135,22 @@ describe('validator', () => {
     const result = validateTimetable(tt, ds.config);
     expect(result.conflicts.some((c) => c.type === 'STALE_TIMETABLE')).toBe(true);
   });
+
+  it('detects faculty continuous teaching fatigue when burnout guard is configured', () => {
+    const configWithBurnout = {
+      ...ds.config,
+      generationSettings: {
+        ...ds.config.generationSettings,
+        maxConsecutiveTheory: 2,
+      },
+    };
+    // F0 teaches periods 0, 1, 2 consecutively on Day 0
+    const entries = [
+      entry({ sectionId: sectionA.id, subjectId: math.id, facultyId: f0, dayIndex: 0, startPeriod: 0 }),
+      entry({ sectionId: sectionA.id, subjectId: math.id, facultyId: f0, dayIndex: 0, startPeriod: 1 }),
+      entry({ sectionId: sectionA.id, subjectId: math.id, facultyId: f0, dayIndex: 0, startPeriod: 2 }),
+    ];
+    const result = validateTimetable(makeTimetable(ds, entries), configWithBurnout);
+    expect(result.warnings.some((c) => c.type === 'FATIGUE_EXCEEDED' && c.facultyIds.includes(f0))).toBe(true);
+  });
 });

@@ -55,6 +55,11 @@ export function GeneratePage() {
       ? String(overrides.maxExploredNodes)
       : '',
   );
+  const [maxConsecutiveInput, setMaxConsecutiveInput] = useState(
+    overrides?.maxConsecutiveTheory !== undefined && overrides?.maxConsecutiveTheory !== null
+      ? String(overrides.maxConsecutiveTheory)
+      : '',
+  );
 
   const department = state.departments.find((d) => d.id === departmentId);
   const config: TimetableConfiguration | null = useMemo(() => {
@@ -327,6 +332,22 @@ export function GeneratePage() {
                   setMaxLabPerDayInput(e.target.value);
                   state.setGenerationSettingsOverrides(department.id, {
                     maxLabSessionsPerSectionPerDay: e.target.value.trim() ? Number(e.target.value) : null,
+                  });
+                }}
+              />
+            </Field>
+            <Field label="Burnout Guard (Max consecutive teaching)" hint="Limit back-to-back periods (e.g. 3). Empty = unbounded.">
+              <Input
+                type="number"
+                min={1}
+                max={8}
+                value={maxConsecutiveInput}
+                placeholder="e.g. 3"
+                aria-label="Max consecutive teaching periods"
+                onChange={(e) => {
+                  setMaxConsecutiveInput(e.target.value);
+                  state.setGenerationSettingsOverrides(department.id, {
+                    maxConsecutiveTheory: e.target.value.trim() ? Number(e.target.value) : null,
                   });
                 }}
               />

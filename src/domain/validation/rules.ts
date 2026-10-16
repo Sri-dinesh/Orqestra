@@ -598,5 +598,59 @@ export function validateFatigueAndGaps(ctx: ValidationContext): Conflict[] {
     }
   }
 
+  // Faculty Burnout Guard: check continuous teaching across sections per day
+  if (maxConsecutiveTheory !== null) {
+    let facultyIdsToCheck: Set<string> | null = null;
+    if (affectedEntryIds) {
+      facultyIdsToCheck = new Set(timetable.entries.filter(e => affectedEntryIds.includes(e.id)).map(e => e.facultyId));
+    } else {
+      facultyIdsToCheck = new Set(config.faculty.map(f => f.id));
+    }
+
+    for (const facultyId of facultyIdsToCheck) {
+      for (let day = 0; day < config.workingDays.length; day++) {
+        const dailyEntries = timetable.entries
+          .filter(e => e.facultyId === facultyId && e.dayIndex === day)
+          .sort((a, b) => a.startPeriod - b.startPeriod);
+
+        if (dailyEntries.length <= 1) continue;
+
+        let consecutiveCount = 0;
+        let consecutiveIds: string[] = [];
+        let prevEnd = -1;
+
+        for (const entry of dailyEntries) {
+          if (prevEnd >= 0) {
+            let hasBreak = false;
+            for (const bc of ctx.breakColumns) {
+              if (bc >= prevEnd && bc < entry.startPeriod) {
+                hasBreak = true;
+                break;
+              }
+            }
+            if (hasBreak || entry.startPeriod > prevEnd) {
+              consecutiveCount = 0;
+              consecutiveIds = [];
+            }
+          }
+          prevEnd = entry.startPeriod + entry.durationPeriods;
+          consecutiveCount += entry.durationPeriods;
+          consecutiveIds.push(entry.id);
+
+          if (consecutiveCount > maxConsecutiveTheory) {
+            if (!affectedEntryIds || consecutiveIds.some(id => affectedEntryIds.includes(id))) {
+              conflicts.push(conflict('FATIGUE_EXCEEDED', 'WARNING', 'conflict.facultyFatigueExceeded', { count: consecutiveCount, limit: maxConsecutiveTheory }, {
+                entryIds: [...consecutiveIds],
+                facultyIds: [facultyId],
+                dayIndex: day,
+                resolutionHints: ['Faculty has excessive continuous teaching periods across sections. Add a free period or reassign a section to prevent burnout.']
+              }));
+            }
+          }
+        }
+      }
+    }
+  }
+
   return conflicts;
 }
