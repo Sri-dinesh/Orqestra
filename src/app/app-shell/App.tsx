@@ -19,6 +19,7 @@ import { TimetablePage } from "@/features/timetable-editor/TimetablePage";
 import { FacultyTimetablePage } from "@/features/timetable-editor/FacultyTimetablePage";
 import { MasterTimetablePage } from "@/features/timetable-editor/MasterTimetablePage";
 import { SettingsPage } from "@/features/settings/SettingsPage";
+import { SchedulePortalPage } from "@/features/portal/SchedulePortalPage";
 import { usePersistence } from "@/hooks/usePersistence";
 import { useWorkspaceStore } from "@/state/stores/workspace-store";
 import { Toast } from "@/components/ui/Toast";
@@ -64,6 +65,8 @@ export default function App() {
       } else {
         pageTitle = "Department Configuration — Orqestra";
       }
+    } else if (path === "/schedule-portal") {
+      pageTitle = "My Schedule Portal — Orqestra";
     } else if (path === "/settings") {
       pageTitle = "Settings — Orqestra";
     }
@@ -125,6 +128,9 @@ export default function App() {
                 <NavLink className={navLinkCls} to="/departments">
                   Configuration
                 </NavLink>
+                <NavLink className={navLinkCls} to="/schedule-portal">
+                  My Schedule
+                </NavLink>
                 <NavLink className={navLinkCls} to="/settings">
                   Settings
                 </NavLink>
@@ -179,6 +185,7 @@ export default function App() {
                 path="/departments/:departmentId/master-timetable"
                 element={<MasterTimetablePage />}
               />
+              <Route path="/schedule-portal" element={<SchedulePortalPage />} />
               <Route path="/settings" element={<SettingsPage />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
