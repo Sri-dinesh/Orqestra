@@ -119,24 +119,31 @@ h1, h2, h3, h4 {
 @media print {
   @page {
     size: A4 landscape;
-    margin: 12mm;
+    margin: 8mm;
   }
 
   header,
   nav,
-  button,
-  select,
-  input,
+  .no-print,
+  .print\:hidden,
   details,
   [role='alertdialog'],
-  [role='dialog'],
-  .print\:hidden {
+  [role='dialog'] {
+    display: none !important;
+  }
+
+  /* Hide UI action buttons and controls, but PRESERVE buttons inside timetable cells */
+  button:not(table button),
+  select:not(table select),
+  input:not(table input) {
     display: none !important;
   }
 
   body {
     background: #fff !important;
+    color: #111 !important;
   }
+
   main {
     max-width: none !important;
     padding: 0 !important;
@@ -152,36 +159,49 @@ h1, h2, h3, h4 {
   }
 
   * {
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 
   table {
     width: 100% !important;
     border-collapse: collapse !important;
     border-spacing: 0 !important;
-    font-size: 11px !important;
+    font-size: 10px !important;
+    margin-bottom: 8px !important;
   }
+
   table th,
   table td {
     border: 1px solid #444 !important;
     border-radius: 0 !important;
-    padding: 6px 4px !important;
-    background: #fff !important;
+    padding: 4px 3px !important;
     color: #111 !important;
     break-inside: avoid;
+    vertical-align: middle !important;
   }
+
   table thead th {
     font-weight: 700 !important;
+    background: #f0f2f5 !important;
     border-bottom: 2px solid #111 !important;
   }
-  table td span,
-  table td button,
-  table td div {
+
+  /* Table button reset so session entries render crisply */
+  table button {
+    display: block !important;
+    width: 100% !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 1px !important;
+    text-align: center !important;
+    cursor: default !important;
     color: #111 !important;
   }
 
-  main > div > .rounded-card:nth-of-type(n + 2) {
-    display: none !important;
+  table td span,
+  table td div {
+    color: #111 !important;
   }
 }
