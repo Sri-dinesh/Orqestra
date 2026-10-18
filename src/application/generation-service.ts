@@ -39,6 +39,7 @@ export class GenerationService {
       subjects: input.subjects,
       faculty: input.faculty,
       breaks: input.breaks ?? input.config.breaks,
+      rooms: input.config.rooms,
     });
     if (feasibility.verdict === 'IMPOSSIBLE_OR_INVALID') {
       return {
@@ -57,17 +58,38 @@ export class GenerationService {
 
     const isBrowser = typeof window !== 'undefined' && typeof Worker !== 'undefined';
     const runner = input.runner ?? (isBrowser ? new WebWorkerSchedulerRunner() : new MainThreadSchedulerRunner());
-    const result = await runner.run({
-      department: input.department,
-      sections: input.sections,
-      subjects: input.subjects,
-      faculty: input.faculty,
-      config: input.config,
-      seed: input.seed,
-      maxDurationMs: input.config.generationSettings.maxSearchDurationMs,
-      maxExploredNodes: input.config.generationSettings.maxExploredNodes,
-      cancellation: input.cancellation ?? { isCancelled: () => false },
-    });
+    let result: GenerationResult;
+    try {
+      result = await runner.run({
+        department: input.department,
+        sections: input.sections,
+        subjects: input.subjects,
+        faculty: input.faculty,
+        config: input.config,
+        seed: input.seed,
+        maxDurationMs: input.config.generationSettings.maxSearchDurationMs,
+        maxExploredNodes: input.config.generationSettings.maxExploredNodes,
+        cancellation: input.cancellation ?? { isCancelled: () => false },
+      });
+    } catch (runnerError) {
+      if (runner instanceof WebWorkerSchedulerRunner) {
+        console.warn('WebWorker runner failed, falling back to main thread runner:', runnerError);
+        const fallbackRunner = new MainThreadSchedulerRunner();
+        result = await fallbackRunner.run({
+          department: input.department,
+          sections: input.sections,
+          subjects: input.subjects,
+          faculty: input.faculty,
+          config: input.config,
+          seed: input.seed,
+          maxDurationMs: input.config.generationSettings.maxSearchDurationMs,
+          maxExploredNodes: input.config.generationSettings.maxExploredNodes,
+          cancellation: input.cancellation ?? { isCancelled: () => false },
+        });
+      } else {
+        throw runnerError;
+      }
+    }
 
     onStage?.('Optimizing schedule');
     onStage?.('Running final validation');
@@ -80,6 +102,7 @@ export class GenerationService {
     subjects: Subject[];
     faculty: Faculty[];
     breaks?: Break[];
+    rooms?: import('@/domain/models').Room[];
   }) {
     return analyzeFeasibility(input);
   }

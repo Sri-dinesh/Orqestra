@@ -3,6 +3,7 @@ import type {
   Department,
   Faculty,
   GenerationDiagnostic,
+  Room,
   Section,
   Subject,
 } from '../../models';
@@ -17,6 +18,8 @@ export interface FeasibilityInput {
   faculty: Faculty[];
   /** Scheduled breaks (e.g. lunch) block those periods for teaching. */
   breaks?: Break[];
+  /** Physical rooms and laboratories for capacity & concurrency preflight. */
+  rooms?: Room[];
 }
 
 export interface SectionCapacityReport {
@@ -175,7 +178,13 @@ export function computeFacultyWorkload(
 }
 
 /** Diagnostics that advise but do not make generation impossible. */
-const WARNING_CODES = new Set(['SECTION_CAPACITY_SLACK', 'FACULTY_UNASSIGNED']);
+const WARNING_CODES = new Set([
+  'SECTION_CAPACITY_SLACK',
+  'FACULTY_UNASSIGNED',
+  'ROOM_CONCURRENCY_SHORTAGE',
+  'ROOM_CAPACITY_DEFICIT',
+  'ROOM_LAB_MISSING',
+]);
 
 /** Full preflight analysis. Returns structured diagnostics, never throws. */
 export function analyzeFeasibility(input: FeasibilityInput): FeasibilityResult {
@@ -318,6 +327,58 @@ export function analyzeFeasibility(input: FeasibilityInput): FeasibilityResult {
           'Raise the faculty weekly cap.',
         ],
       });
+    }
+  }
+
+  // Physical room inventory preflight
+  const deptRooms = (input.rooms ?? []).filter(
+    (r) => r.active && (!r.departmentId || r.departmentId === department.id),
+  );
+  if (deptRooms.length > 0) {
+    const theoryRooms = deptRooms.filter((r) => r.type === 'THEORY' || r.type === 'GENERAL');
+    const labRooms = deptRooms.filter((r) => r.type === 'LAB' || r.type === 'GENERAL');
+    const hasLabSubjects = subjects.some((s) => s.active && s.type === 'LAB');
+
+    if (activeSections.length > theoryRooms.length && theoryRooms.length > 0) {
+      diagnostics.push({
+        code: 'ROOM_CONCURRENCY_SHORTAGE',
+        message: `Department has ${activeSections.length} sections but only ${theoryRooms.length} classroom(s). Some concurrent periods will remain unassigned to physical classrooms.`,
+        sectionIds: activeSections.map((s) => s.id),
+        subjectIds: [],
+        facultyIds: [],
+        suggestions: [
+          'Add more classrooms in the Rooms & Labs page if all sections need dedicated rooms.',
+          'Or proceed: available classrooms will be assigned first without blocking schedule generation.',
+        ],
+      });
+    }
+
+    if (hasLabSubjects && labRooms.length === 0) {
+      diagnostics.push({
+        code: 'ROOM_LAB_MISSING',
+        message: 'Department has laboratory subjects, but no laboratory or general rooms are configured.',
+        sectionIds: [],
+        subjectIds: subjects.filter((s) => s.active && s.type === 'LAB').map((s) => s.id),
+        facultyIds: [],
+        suggestions: ['Add laboratory rooms in the Rooms & Labs page to enable lab space allocation.'],
+      });
+    }
+
+    const maxTheoryCap = Math.max(0, ...theoryRooms.map((r) => r.capacity));
+    for (const section of activeSections) {
+      if (maxTheoryCap > 0 && section.studentCount > maxTheoryCap) {
+        diagnostics.push({
+          code: 'ROOM_CAPACITY_DEFICIT',
+          message: `Section "${section.name}" has ${section.studentCount} students, exceeding largest classroom capacity (${maxTheoryCap}).`,
+          sectionIds: [section.id],
+          subjectIds: [],
+          facultyIds: [],
+          suggestions: [
+            'Increase classroom capacities in Rooms & Labs.',
+            'Or proceed: best-fit rooms will be allocated.',
+          ],
+        });
+      }
     }
   }
 

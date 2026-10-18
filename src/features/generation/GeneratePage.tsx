@@ -74,7 +74,7 @@ export function GeneratePage() {
       sections,
       subjects,
       faculty,
-      rooms,
+      rooms: rooms.filter((r) => !r.departmentId || r.departmentId === department.id),
       breaks,
       hardConstraints: DEFAULT_HARD_CONSTRAINTS,
       softWeights: DEFAULT_SOFT_WEIGHTS,
@@ -95,6 +95,8 @@ export function GeneratePage() {
     return <p className="text-sm text-body-gray">Select a department first.</p>;
   }
 
+  const departmentRooms = rooms.filter((r) => !r.departmentId || r.departmentId === department.id);
+
   const totalSessions = sections.reduce(
     (acc, s) =>
       acc +
@@ -112,6 +114,7 @@ export function GeneratePage() {
     subjects,
     faculty,
     breaks,
+    rooms: departmentRooms,
   });
 
   const running = gen.status === 'VALIDATING' || gen.status === 'PREPARING' || gen.status === 'SEARCHING' || gen.status === 'OPTIMIZING' || gen.status === 'FINAL_VALIDATION';
@@ -141,64 +144,81 @@ export function GeneratePage() {
     const jobId = `job_${Date.now()}`;
     gen.startJob(jobId);
 
-    const result = await service.generate({
-      department,
-      sections,
-      subjects,
-      faculty,
-      config,
-      seed: config.generationSettings.seed,
-      cancellation: token,
-      onStage: (stage) => gen.setStage(stage as never),
-    });
+    try {
+      const result = await service.generate({
+        department,
+        sections,
+        subjects,
+        faculty,
+        config,
+        seed: config.generationSettings.seed,
+        cancellation: token,
+        onStage: (stage) => gen.setStage(stage as never),
+      });
 
-    if (result.status === 'COMPLETED' && result.timetable) {
-      const snapshot = buildConfigurationSnapshot(config);
-      const timetable = { ...result.timetable, configurationSnapshot: snapshot, departmentId: department.id };
-      if (existingTimetable) {
-        // Versioning: snapshot the outgoing timetable before the regeneration replaces it.
-        const versioned = withVersion(
-          { ...existingTimetable, updatedAt: existingTimetable.updatedAt },
-          'GENERATED',
-          `Regenerated — replaced by seed ${result.metadata?.seed ?? 'auto'}`,
+      if (result.status === 'COMPLETED' && result.timetable) {
+        const snapshot = buildConfigurationSnapshot(config);
+        const timetable = { ...result.timetable, configurationSnapshot: snapshot, departmentId: department.id };
+        if (existingTimetable) {
+          // Versioning: snapshot the outgoing timetable before the regeneration replaces it.
+          const versioned = withVersion(
+            { ...existingTimetable, updatedAt: existingTimetable.updatedAt },
+            'GENERATED',
+            `Regenerated — replaced by seed ${result.metadata?.seed ?? 'auto'}`,
+          );
+          state.upsertTimetable({
+            ...timetable,
+            id: existingTimetable.id,
+            revision: existingTimetable.revision + 1,
+            versionHistory: [...(versioned.versionHistory ?? [])],
+          });
+        } else {
+          state.upsertTimetable({
+            ...timetable,
+            versionHistory: [
+              {
+                version: 0,
+                origin: 'GENERATED',
+                recordedAt: new Date().toISOString(),
+                entries: timetable.entries.map((e) => ({ ...e })),
+                status: timetable.status,
+                validationSummary: timetable.validationSummary,
+                generationMetadata: timetable.generationMetadata,
+                label: `Initial generation — seed ${result.metadata?.seed ?? 'auto'}`,
+              },
+            ],
+          });
+        }
+        gen.complete(result.metrics!);
+        editor.showToast(
+          'success',
+          `Generated ${result.timetable.entries.length} sessions. Score: ${result.metrics?.finalScore ?? '—'}. Seed: ${result.metadata?.seed}`,
         );
-        state.upsertTimetable({
-          ...timetable,
-          id: existingTimetable.id,
-          revision: existingTimetable.revision + 1,
-          versionHistory: [...(versioned.versionHistory ?? [])],
-        });
+      } else if (result.status === 'CANCELLED') {
+        gen.cancel();
+        editor.showToast('warning', 'Generation cancelled.');
+      } else if (result.status === 'TIMEOUT') {
+        gen.timeout();
+        editor.showToast('error', 'Search budget exhausted before proving feasibility.');
       } else {
-        state.upsertTimetable({
-          ...timetable,
-          versionHistory: [
-            {
-              version: 0,
-              origin: 'GENERATED',
-              recordedAt: new Date().toISOString(),
-              entries: timetable.entries.map((e) => ({ ...e })),
-              status: timetable.status,
-              validationSummary: timetable.validationSummary,
-              generationMetadata: timetable.generationMetadata,
-              label: `Initial generation — seed ${result.metadata?.seed ?? 'auto'}`,
-            },
-          ],
-        });
+        gen.impossible(result.diagnostics);
+        editor.showToast('error', 'Generation failed — see diagnostics below.');
       }
-      gen.complete(result.metrics!);
-      editor.showToast(
-        'success',
-        `Generated ${result.timetable.entries.length} sessions. Score: ${result.metrics?.finalScore ?? '—'}. Seed: ${result.metadata?.seed}`,
-      );
-    } else if (result.status === 'CANCELLED') {
-      gen.cancel();
-      editor.showToast('warning', 'Generation cancelled.');
-    } else if (result.status === 'TIMEOUT') {
-      gen.timeout();
-      editor.showToast('error', 'Search budget exhausted before proving feasibility.');
-    } else {
-      gen.impossible(result.diagnostics);
-      editor.showToast('error', 'Generation failed — see diagnostics below.');
+    } catch (err: any) {
+      gen.impossible([
+        {
+          code: 'GENERATION_ERROR',
+          message: err?.message || 'An unexpected error occurred during scheduling.',
+          sectionIds: [],
+          subjectIds: [],
+          facultyIds: [],
+          suggestions: [
+            'Try regenerating with a different random seed.',
+            'Check department constraints, room capacities, and faculty availability.',
+          ],
+        },
+      ]);
+      editor.showToast('error', `Generation failed: ${err?.message || 'Engine error'}`);
     }
   };
 

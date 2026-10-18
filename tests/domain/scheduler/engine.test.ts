@@ -103,4 +103,61 @@ describe('scheduler engine', () => {
       expect(['IMPOSSIBLE', 'TIMEOUT']).toContain(result.status);
     }
   }, 30_000);
+
+  it('completes schedule generation without deadlock when rooms are fewer than sections', () => {
+    const ds = datasetMinimal();
+    // 2 sections, but only 1 theory room and 0 lab rooms
+    const configWithDeficitRooms = {
+      ...ds.config,
+      rooms: [
+        {
+          id: 'room_1',
+          departmentId: ds.department.id,
+          code: '101',
+          name: 'Lecture Room 101',
+          capacity: 60,
+          type: 'THEORY' as const,
+          active: true,
+        },
+      ],
+    };
+    const result = generateTimetable({
+      department: ds.department,
+      sections: ds.sections,
+      subjects: ds.subjects,
+      faculty: ds.faculty,
+      config: configWithDeficitRooms,
+      seed: 42,
+      maxDurationMs: 10_000,
+      maxExploredNodes: 500_000,
+      cancellation: { isCancelled: () => false },
+    });
+    expect(result.status).toBe('COMPLETED');
+    expect(result.timetable?.entries.length).toBe(8);
+  });
+
+  it('preflight flags advisory room shortages without blocking generation', () => {
+    const ds = datasetSharedFaculty();
+    const feasibility = analyzeFeasibility({
+      department: ds.department,
+      sections: ds.sections,
+      subjects: ds.subjects,
+      faculty: ds.faculty,
+      rooms: [
+        {
+          id: 'room_1',
+          departmentId: ds.department.id,
+          code: '101',
+          name: 'Classroom',
+          capacity: 60,
+          type: 'THEORY',
+          active: true,
+        },
+      ],
+    });
+    // Verdict remains READY because room shortages are non-blocking advisory warnings
+    expect(feasibility.verdict).toBe('READY');
+    expect(feasibility.diagnostics.some((d) => d.code === 'ROOM_CONCURRENCY_SHORTAGE')).toBe(true);
+  });
 });
+

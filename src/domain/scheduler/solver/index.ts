@@ -245,8 +245,21 @@ export function solveSchedule(
         for (let q = p; q < p + session.durationPeriods; q++) periods.push(q);
         if (!occupancy.isSectionFree(session.sectionId, day, periods)) continue;
         for (const fid of session.eligibleFacultyIds) {
-          if (!facultyById.get(fid)?.active) continue;
+          const f = facultyById.get(fid);
+          if (!f?.active) continue;
           if (!occupancy.isFacultyFree(fid, day, periods)) continue;
+          if (f.availability.length > 0) {
+            const dayWindows = f.availability.filter((w) => w.dayIndex === day);
+            if (dayWindows.length === 0) continue;
+            let withinAvail = true;
+            for (let q = p; q < p + session.durationPeriods; q++) {
+              if (!dayWindows.some((w) => q >= w.startPeriod && q < w.startPeriod + w.durationPeriods)) {
+                withinAvail = false;
+                break;
+              }
+            }
+            if (!withinAvail) continue;
+          }
           count++;
           if (count >= MRV_COUNT_CAP) break;
         }
@@ -287,27 +300,55 @@ export function solveSchedule(
     return true;
   }
 
-  function assignRoom(entry: TimetableEntry): string | null {
-    if (input.rooms.length === 0) return null;
+  // Pre-filter rooms for this department
+  const deptRooms = (input.rooms || []).filter(
+    (r) => r.active && (!r.departmentId || r.departmentId === input.department.id),
+  );
+  const theoryRooms = deptRooms.filter((r) => r.type === 'THEORY' || r.type === 'GENERAL');
+  const labRooms = deptRooms.filter((r) => r.type === 'LAB' || r.type === 'GENERAL');
+  const totalSectionsCount = input.sections.length;
+
+  function assignRoom(entry: TimetableEntry): string | null | false {
+    if (deptRooms.length === 0) return null;
     const section = sectionById.get(entry.sectionId);
     const subject = subjectById.get(entry.subjectId);
     if (!section || !subject) return null;
 
+    const availablePool = subject.type === 'LAB' ? labRooms : theoryRooms;
+    // If no rooms exist of this type in the department inventory, physical room assignment is unconstrained
+    if (availablePool.length === 0) return null;
+
     const periods: number[] = [];
     for (let p = entry.startPeriod; p < entry.startPeriod + entry.durationPeriods; p++) periods.push(p);
 
-    // Filter eligible rooms
-    const eligibleRooms = input.rooms.filter(r => {
-      if (r.capacity < section.studentCount) return false;
-      if (r.type !== 'GENERAL' && r.type !== subject.type) return false;
-      return occupancy.isRoomFree(r.id, entry.dayIndex, periods);
-    });
+    // Filter rooms by capacity and occupancy
+    let eligibleRooms = availablePool.filter(
+      (r) => r.capacity >= section.studentCount && occupancy.isRoomFree(r.id, entry.dayIndex, periods),
+    );
 
-    if (eligibleRooms.length === 0) return false as any; // Trick to indicate failure
+    // If no room with exact/sufficient capacity is free, but rooms of that type are free, use largest available
+    if (eligibleRooms.length === 0) {
+      eligibleRooms = availablePool.filter((r) => occupancy.isRoomFree(r.id, entry.dayIndex, periods));
+    }
 
-    // Pick best room (e.g. smallest capacity that fits, to save large rooms)
+    if (eligibleRooms.length === 0) {
+      // If the department has enough rooms of this type to host all concurrent sections,
+      // require collision-free placement and backtrack to find a non-conflicting time slot.
+      const minRequiredRooms =
+        subject.type === 'LAB'
+          ? Math.min(totalSectionsCount, input.subjects.filter((s) => s.type === 'LAB').length)
+          : totalSectionsCount;
+
+      if (availablePool.length >= minRequiredRooms) {
+        return false; // Backtrack to find a free room slot
+      }
+      // If there are fewer physical rooms than concurrent sections, it is mathematically impossible
+      // for every section to have a dedicated room at the same time. Fall back gracefully to unassigned.
+      return null;
+    }
+
+    // Pick best room: prefer exact type match, then closest capacity
     eligibleRooms.sort((a, b) => {
-      // Prefer exact match for type, then capacity
       if (a.type !== b.type) {
         if (a.type === subject.type) return -1;
         if (b.type === subject.type) return 1;
@@ -353,9 +394,9 @@ export function solveSchedule(
       if (!subjectPerDayWithinLimits(entry)) continue;
       if (!labPerDayWithinLimits(entry)) continue;
       if (!breakWithinLimits(entry)) continue;
-      if (input.rooms.length > 0) {
+      if (deptRooms.length > 0) {
         const roomId = assignRoom(entry);
-        if (roomId === false as any) continue;
+        if (roomId === false) continue;
         entry.roomId = roomId;
       }
 
@@ -393,8 +434,27 @@ export function solveSchedule(
       const maxStart = periodsPerDay - session.durationPeriods;
       for (let p = 0; p <= maxStart; p++) {
         if (rangeHitsBreak(day, p, session.durationPeriods)) continue;
+        const periods: number[] = [];
+        for (let q = p; q < p + session.durationPeriods; q++) periods.push(q);
+        if (!occupancy.isSectionFree(session.sectionId, day, periods)) continue;
+
         for (const fid of session.eligibleFacultyIds) {
-          if (!facultyById.get(fid)?.active) continue;
+          const f = facultyById.get(fid);
+          if (!f?.active) continue;
+          if (!occupancy.isFacultyFree(fid, day, periods)) continue;
+          if (f.availability.length > 0) {
+            const dayWindows = f.availability.filter((w) => w.dayIndex === day);
+            if (dayWindows.length === 0) continue;
+            let withinAvail = true;
+            for (let q = p; q < p + session.durationPeriods; q++) {
+              if (!dayWindows.some((w) => q >= w.startPeriod && q < w.startPeriod + w.durationPeriods)) {
+                withinAvail = false;
+                break;
+              }
+            }
+            if (!withinAvail) continue;
+          }
+
           candidates.push({
             dayIndex: day,
             startPeriod: p,
