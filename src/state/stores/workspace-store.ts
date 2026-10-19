@@ -232,8 +232,14 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
   replaceAll: (payload) =>
     set({
       ...payload,
+      departments: payload.departments ?? [],
+      sections: payload.sections ?? [],
+      subjects: payload.subjects ?? [],
+      faculty: payload.faculty ?? [],
+      timetables: payload.timetables ?? [],
       rooms: payload.rooms ?? [],
       breaks: payload.breaks ?? [],
+      generationSettingsOverrides: payload.generationSettingsOverrides ?? {},
       collegeDetails: payload.collegeDetails ?? EMPTY_COLLEGE_DETAILS,
       persistenceStatus: 'IDLE',
     }),

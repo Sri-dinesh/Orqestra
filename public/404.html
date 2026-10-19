@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Orqestra</title>
+    <script>
+      // Single Page App redirect for static file hosts like GitHub Pages
+      (function() {
+        var path = window.location.pathname;
+        var search = window.location.search;
+        var hash = window.location.hash;
+        var fullPath = path + search + hash;
+        sessionStorage.setItem('spa_redirect', fullPath);
+        window.location.replace('/');
+      })();
+    </script>
+  </head>
+  <body>
+    <p>Redirecting to Orqestra...</p>
+  </body>
+</html>

@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import {
   Calendar,
   User,
@@ -6,7 +7,9 @@ import {
   Building2,
   Printer,
   Coffee,
+  LayoutDashboard,
 } from 'lucide-react';
+import { Button } from '@/components/ui/primitives';
 import { useWorkspaceStore } from '@/state/stores/workspace-store';
 import { buildGridLayout } from '@/domain/scheduler/grid-layout';
 
@@ -149,9 +152,20 @@ export function SchedulePortalPage() {
 
   if (!currentDept) {
     return (
-      <div className="rounded-2xl bg-white p-12 text-center border border-[#E5E8E0] shadow-card">
+      <div className="rounded-2xl bg-white p-12 text-center border border-[#E5E8E0] shadow-card max-w-md mx-auto my-12">
+        <div className="inline-flex p-3 rounded-2xl bg-blue-50 text-[#0047FF] border border-blue-100 mb-3">
+          <Calendar className="w-8 h-8 text-[#0047FF]" />
+        </div>
         <p className="text-base font-bold text-[#111315]">No Departments Found</p>
-        <p className="text-xs text-[#71767B] mt-1">Please create a department in Dashboard first.</p>
+        <p className="text-xs text-[#71767B] mt-1">Please create a department in the Dashboard first to view student and faculty schedules.</p>
+        <div className="mt-5">
+          <Link to="/dashboard">
+            <Button size="sm" className="inline-flex items-center gap-1.5">
+              <LayoutDashboard className="w-4 h-4" />
+              <span>Go to Dashboard</span>
+            </Button>
+          </Link>
+        </div>
       </div>
     );
   }

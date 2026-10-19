@@ -14,6 +14,7 @@ import { computeFacultyWorkload } from '@/domain/scheduler/feasibility';
 import type { Faculty } from '@/domain/models';
 import { BulkImportModal } from '@/components/ui/BulkImportModal';
 import { DepartmentNav } from '@/components/ui/DepartmentNav';
+import { DepartmentNotFound } from '@/components/ui/DepartmentNotFound';
 
 interface FacultyFormState {
   facultyCode: string;
@@ -53,7 +54,7 @@ export function FacultyPage() {
 
   const editing = editingId ? (members.find((f) => f.id === editingId) ?? null) : null;
 
-  if (!departmentId) return <p className="text-sm text-body-gray">Select a department first.</p>;
+  if (!department || !departmentId) return <DepartmentNotFound requestedId={departmentId} targetPage="faculty" />;
 
   const assignedLoad = new Map<string, number>();
   if (timetable) {

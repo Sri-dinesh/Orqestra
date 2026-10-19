@@ -12,6 +12,7 @@ import { buildGridLayout, gridColumnLabel } from '@/domain/scheduler/grid-layout
 import { TimetableGridHeader } from '@/components/ui/TimetableGridHeader';
 import { ExportPreviewModal } from '@/components/ui/ExportPreviewModal';
 import { DepartmentNav } from '@/components/ui/DepartmentNav';
+import { DepartmentNotFound } from '@/components/ui/DepartmentNotFound';
 
 interface FacultyCell {
   sectionId: string;
@@ -80,7 +81,7 @@ export function FacultyTimetablePage() {
   }, [timetable, activeFacultyId, sections, subjects]);
 
   if (!department) {
-    return <p className="text-sm text-[#71767B]">Select a department first.</p>;
+    return <DepartmentNotFound requestedId={departmentId} targetPage="faculty-timetable" />;
   }
 
   if (!timetable) {

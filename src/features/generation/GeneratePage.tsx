@@ -18,6 +18,7 @@ import { DEFAULT_GENERATION_SETTINGS, DEFAULT_HARD_CONSTRAINTS, DEFAULT_SOFT_WEI
 import type { TimetableConfiguration } from '@/domain/models';
 import { DepartmentNav } from '@/components/ui/DepartmentNav';
 import { PeriodTimingsModal } from '@/components/ui/PeriodTimingsModal';
+import { DepartmentNotFound } from '@/components/ui/DepartmentNotFound';
 import { Clock } from 'lucide-react';
 
 export function GeneratePage() {
@@ -95,7 +96,7 @@ export function GeneratePage() {
   }, [department, sections, subjects, faculty, rooms, breaks, seedInput, state.generationSettingsOverrides]);
 
   if (!department || !config) {
-    return <p className="text-sm text-body-gray">Select a department first.</p>;
+    return <DepartmentNotFound requestedId={departmentId} targetPage="generate" />;
   }
 
   const departmentRooms = rooms.filter((r) => !r.departmentId || r.departmentId === department.id);

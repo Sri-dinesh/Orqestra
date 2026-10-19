@@ -6,6 +6,7 @@ import {
   Route,
   Routes,
   useLocation,
+  useNavigate,
 } from "react-router-dom";
 import { Calendar, ChevronDown } from "lucide-react";
 import { ErrorBoundary } from "./ErrorBoundary";
@@ -20,6 +21,7 @@ import { FacultyTimetablePage } from "@/features/timetable-editor/FacultyTimetab
 import { MasterTimetablePage } from "@/features/timetable-editor/MasterTimetablePage";
 import { SettingsPage } from "@/features/settings/SettingsPage";
 import { SchedulePortalPage } from "@/features/portal/SchedulePortalPage";
+import { NotFoundPage } from "@/components/ui/NotFoundPage";
 import { usePersistence } from "@/hooks/usePersistence";
 import { useWorkspaceStore } from "@/state/stores/workspace-store";
 import { Toast } from "@/components/ui/Toast";
@@ -37,9 +39,25 @@ const navLinkCls = ({ isActive }: { isActive: boolean }) =>
 export default function App() {
   usePersistence();
   const location = useLocation();
+  const navigate = useNavigate();
   const collegeName = useWorkspaceStore((s) => s.collegeDetails.name);
   const [semesterModalOpen, setSemesterModalOpen] = useState(false);
   const activeTerm = getActiveTerm();
+
+  // Restore SPA redirects from 404.html (for static hosting environments like GitHub Pages)
+  useEffect(() => {
+    try {
+      const redirect = sessionStorage.getItem("spa_redirect");
+      if (redirect) {
+        sessionStorage.removeItem("spa_redirect");
+        if (redirect !== "/" && redirect !== location.pathname) {
+          navigate(redirect, { replace: true });
+        }
+      }
+    } catch {
+      // sessionStorage may be blocked or unavailable in rare restricted contexts
+    }
+  }, [navigate, location.pathname]);
 
   useEffect(() => {
     const path = location.pathname;
@@ -74,9 +92,11 @@ export default function App() {
     document.title = pageTitle;
   }, [location.pathname]);
 
+  const isLanding = location.pathname === "/";
+
   return (
     <div className="min-h-screen bg-[#F7F8F5] text-[#111315] font-sans">
-      {location.pathname !== "/" && (
+      {!isLanding && (
         <header className="sticky top-0 z-50">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-3">
             <div className="flex items-center justify-between">
@@ -139,59 +159,60 @@ export default function App() {
           </div>
         </header>
       )}
+
       <main
-        className={`mx-auto w-full ${location.pathname === "/" ? "" : "max-w-7xl px-4 sm:px-6 lg:px-8 py-8"}`}
+        className={`w-full ${isLanding ? "" : "mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8"}`}
         aria-live="polite"
       >
-        {location.pathname === "/" ? (
+        <ErrorBoundary area="application">
           <Routes location={location}>
             <Route path="/" element={<LandingPage />} />
-          </Routes>
-        ) : (
-          <ErrorBoundary area="application">
-            <Routes location={location}>
-              <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/dashboard" element={<DashboardPage />} />
 
-              <Route path="/departments" element={<DepartmentConfigPage />} />
-              <Route
-                path="/departments/:departmentId/configuration"
-                element={<DepartmentConfigPage />}
-              />
-              <Route
-                path="/departments/:departmentId/subjects"
-                element={<SubjectsPage />}
-              />
-              <Route
-                path="/departments/:departmentId/faculty"
-                element={<FacultyPage />}
-              />
-              <Route
-                path="/departments/:departmentId/rooms"
-                element={<RoomsPage />}
-              />
-              <Route
-                path="/departments/:departmentId/generate"
-                element={<GeneratePage />}
-              />
-              <Route
-                path="/departments/:departmentId/timetable"
-                element={<TimetablePage />}
-              />
-              <Route
-                path="/departments/:departmentId/faculty-timetable"
-                element={<FacultyTimetablePage />}
-              />
-              <Route
-                path="/departments/:departmentId/master-timetable"
-                element={<MasterTimetablePage />}
-              />
-              <Route path="/schedule-portal" element={<SchedulePortalPage />} />
-              <Route path="/settings" element={<SettingsPage />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </ErrorBoundary>
-        )}
+            <Route path="/departments" element={<DepartmentConfigPage />} />
+            <Route
+              path="/departments/:departmentId"
+              element={<Navigate to="configuration" replace />}
+            />
+            <Route
+              path="/departments/:departmentId/configuration"
+              element={<DepartmentConfigPage />}
+            />
+            <Route
+              path="/departments/:departmentId/subjects"
+              element={<SubjectsPage />}
+            />
+            <Route
+              path="/departments/:departmentId/faculty"
+              element={<FacultyPage />}
+            />
+            <Route
+              path="/departments/:departmentId/rooms"
+              element={<RoomsPage />}
+            />
+            <Route
+              path="/departments/:departmentId/generate"
+              element={<GeneratePage />}
+            />
+            <Route
+              path="/departments/:departmentId/timetable"
+              element={<TimetablePage />}
+            />
+            <Route
+              path="/departments/:departmentId/faculty-timetable"
+              element={<FacultyTimetablePage />}
+            />
+            <Route
+              path="/departments/:departmentId/master-timetable"
+              element={<MasterTimetablePage />}
+            />
+            <Route path="/schedule-portal" element={<SchedulePortalPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
+            <Route path="*" element={<NotFoundPage />} />
+          </Routes>
+        </ErrorBoundary>
       </main>
+
       <SemesterSwitcherModal
         isOpen={semesterModalOpen}
         onClose={() => setSemesterModalOpen(false)}

@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import {
   Building2,
   Plus,
@@ -23,6 +23,7 @@ import {
   StatTile,
 } from '@/components/ui/primitives';
 import { DepartmentNav } from '@/components/ui/DepartmentNav';
+import { DepartmentNotFound } from '@/components/ui/DepartmentNotFound';
 import { BulkImportModal } from '@/components/ui/BulkImportModal';
 import { useWorkspaceStore } from '@/state/stores/workspace-store';
 import { useEditorStore } from '@/state/stores/editor-store';
@@ -89,18 +90,7 @@ export function RoomsPage() {
   }, [timetable]);
 
   if (!department || !departmentId) {
-    return (
-      <div className="rounded-2xl bg-white p-10 text-center border border-[#E5E8E0] shadow-card">
-        <p className="text-sm font-medium text-[#111315]">No department selected</p>
-        <p className="mt-1 text-sm text-[#71767B]">
-          Pick one from the{' '}
-          <Link className="text-[#0047FF] underline" to="/dashboard">
-            dashboard
-          </Link>
-          .
-        </p>
-      </div>
-    );
+    return <DepartmentNotFound requestedId={departmentId} targetPage="rooms" />;
   }
 
   const handleCreateRoom = (e: React.FormEvent) => {

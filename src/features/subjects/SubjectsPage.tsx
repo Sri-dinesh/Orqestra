@@ -7,6 +7,7 @@ import type { SubjectType } from '@/domain/enums';
 import type { Subject } from '@/domain/models';
 import { BulkImportModal } from '@/components/ui/BulkImportModal';
 import { DepartmentNav } from '@/components/ui/DepartmentNav';
+import { DepartmentNotFound } from '@/components/ui/DepartmentNotFound';
 
 interface SubjectFormState {
   code: string;
@@ -63,6 +64,7 @@ function CheckboxChips({
 export function SubjectsPage() {
   const { departmentId } = useParams();
   const state = useWorkspaceStore();
+  const department = state.departments.find((d) => d.id === departmentId);
   const sections = useWorkspaceStore(selectCurrentSections);
   const faculty = useWorkspaceStore(selectCurrentFaculty);
   const showToast = useEditorStore((s) => s.showToast);
@@ -80,7 +82,7 @@ export function SubjectsPage() {
 
   const editing = editingId ? (subjects.find((s) => s.id === editingId) ?? null) : null;
 
-  if (!departmentId) return <p className="text-sm text-body-gray">Select a department first.</p>;
+  if (!department || !departmentId) return <DepartmentNotFound requestedId={departmentId} targetPage="subjects" />;
 
   const handleBulkImport = (items: any[]) => {
     let count = 0;

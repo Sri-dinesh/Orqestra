@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Badge, Button, Card, EditModal, Field, Input, PageHeader, Select } from '@/components/ui/primitives';
 import {
   selectCurrentSections,
@@ -12,6 +12,7 @@ import type { WorkingDay } from '@/domain/enums';
 import type { SubjectRequirement } from '@/domain/models';
 import { DepartmentNav } from '@/components/ui/DepartmentNav';
 import { PeriodTimingsModal } from '@/components/ui/PeriodTimingsModal';
+import { DepartmentNotFound } from '@/components/ui/DepartmentNotFound';
 
 export function DepartmentConfigPage() {
   const { departmentId } = useParams();
@@ -33,20 +34,18 @@ export function DepartmentConfigPage() {
   const [departmentEditForm, setDepartmentEditForm] = useState({ code: '', name: '' });
   const [timingsModalOpen, setTimingsModalOpen] = useState(false);
 
+  useEffect(() => {
+    if (!departmentId && state.departments.length > 0) {
+      const targetId = state.activeDepartmentId && state.departments.some((d) => d.id === state.activeDepartmentId)
+        ? state.activeDepartmentId
+        : state.departments[0].id;
+      navigate(`/departments/${targetId}/configuration`, { replace: true });
+    }
+  }, [departmentId, state.departments, state.activeDepartmentId, navigate]);
+
   if (!department) {
-        return (
-          <div className="rounded-2xl bg-white p-10 text-center border border-[#E5E8E0] shadow-card">
-            <p className="text-sm font-medium text-[#111315]">No department selected</p>
-            <p className="mt-1 text-sm text-[#71767B]">
-              Pick one from the{' '}
-              <Link className="text-[#0047FF] underline" to="/dashboard">
-                dashboard
-              </Link>
-              .
-            </p>
-          </div>
-        );
-      }
+    return <DepartmentNotFound requestedId={departmentId} targetPage="configuration" />;
+  }
 
   const updateDays = (day: WorkingDay, checked: boolean) => {
     const next = checked

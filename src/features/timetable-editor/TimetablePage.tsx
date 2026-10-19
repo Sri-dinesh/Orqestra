@@ -4,6 +4,7 @@ import { Badge, Button, Card, EditModal, Field, PageHeader, Select } from '@/com
 import { ConflictModal } from '@/components/ui/ConflictModal';
 import { ExportPreviewModal } from '@/components/ui/ExportPreviewModal';
 import { PeriodTimingsModal } from '@/components/ui/PeriodTimingsModal';
+import { DepartmentNotFound } from '@/components/ui/DepartmentNotFound';
 import { TimetableGridHeader } from '@/components/ui/TimetableGridHeader';
 import type { Conflict } from '@/domain/models';
 import { useEditorStore, popUndoCommand, popRedoCommand } from '@/state/stores/editor-store';
@@ -85,7 +86,7 @@ export function TimetablePage() {
   );
 
   if (!department || !config || !editService) {
-    return <p className="text-sm text-[#71767B]">Select a department first.</p>;
+    return <DepartmentNotFound requestedId={departmentId} targetPage="timetable" />;
   }
 
   if (!timetable) {
