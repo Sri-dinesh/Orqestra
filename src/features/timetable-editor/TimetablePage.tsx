@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { Badge, Button, Card, EditModal, Field, PageHeader, Select } from '@/components/ui/primitives';
 import { ConflictModal } from '@/components/ui/ConflictModal';
 import { ExportPreviewModal } from '@/components/ui/ExportPreviewModal';
+import { PeriodTimingsModal } from '@/components/ui/PeriodTimingsModal';
 import { TimetableGridHeader } from '@/components/ui/TimetableGridHeader';
 import type { Conflict } from '@/domain/models';
 import { useEditorStore, popUndoCommand, popRedoCommand } from '@/state/stores/editor-store';
@@ -55,6 +56,7 @@ export function TimetablePage() {
   const [addSlot, setAddSlot] = useState<{ dayIndex: number; periodIndex: number } | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [previewModalOpen, setPreviewModalOpen] = useState(false);
+  const [timingsModalOpen, setTimingsModalOpen] = useState(false);
 
   const department = state.departments.find((d) => d.id === departmentId);
   const config: TimetableConfiguration | null = useMemo(() => {
@@ -502,6 +504,9 @@ export function TimetablePage() {
             <Button variant="secondary" size="sm" onClick={handleRedo} disabled={editor.redoStack.length === 0}>
               Redo
             </Button>
+            <Button variant="secondary" size="sm" onClick={() => setTimingsModalOpen(true)}>
+              Adjust Timings
+            </Button>
             <Button variant="secondary" size="sm" onClick={() => setPreviewModalOpen(true)}>
               Preview & Export
             </Button>
@@ -935,6 +940,17 @@ export function TimetablePage() {
         collegeDetails={state.collegeDetails}
         initialSectionId={activeSectionId ?? undefined}
         type="SECTION"
+      />
+
+      <PeriodTimingsModal
+        isOpen={timingsModalOpen}
+        onClose={() => setTimingsModalOpen(false)}
+        department={department}
+        breaks={breaks}
+        onSave={(nextTimings) => {
+          state.updateDepartment(department.id, { periodTimings: nextTimings });
+          editor.showToast('success', 'Period timings updated.');
+        }}
       />
 
       <Card title={`Version history (${versionHistory.length})`}>

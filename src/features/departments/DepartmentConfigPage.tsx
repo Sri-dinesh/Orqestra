@@ -11,6 +11,7 @@ import { WORKING_DAYS } from '@/domain/enums';
 import type { WorkingDay } from '@/domain/enums';
 import type { SubjectRequirement } from '@/domain/models';
 import { DepartmentNav } from '@/components/ui/DepartmentNav';
+import { PeriodTimingsModal } from '@/components/ui/PeriodTimingsModal';
 
 export function DepartmentConfigPage() {
   const { departmentId } = useParams();
@@ -20,6 +21,7 @@ export function DepartmentConfigPage() {
   const sections = useWorkspaceStore(selectCurrentSections);
   const subjects = useWorkspaceStore(selectCurrentSubjects);
   const faculty = useWorkspaceStore(selectCurrentFaculty);
+  const breaks = useWorkspaceStore((s) => s.breaks);
 
   const [sectionName, setSectionName] = useState('');
   const [year, setYear] = useState(1);
@@ -28,7 +30,10 @@ export function DepartmentConfigPage() {
   const [editingSectionId, setEditingSectionId] = useState<string | null>(null);
   const [sectionEditForm, setSectionEditForm] = useState({ name: '', year: 1, semester: 1, studentCount: 0, roomNo: '', classAdvisor: '' });
   const [editingDepartment, setEditingDepartment] = useState(false);
-  const [departmentEditForm, setDepartmentEditForm] = useState({ code: '', name: '' });      if (!department) {
+  const [departmentEditForm, setDepartmentEditForm] = useState({ code: '', name: '' });
+  const [timingsModalOpen, setTimingsModalOpen] = useState(false);
+
+  if (!department) {
         return (
           <div className="rounded-2xl bg-white p-10 text-center border border-[#E5E8E0] shadow-card">
             <p className="text-sm font-medium text-[#111315]">No department selected</p>
@@ -148,9 +153,20 @@ export function DepartmentConfigPage() {
         </Card>
 
         <Card title="Period timings">
-          <p className="mb-3 text-xs text-body-gray">
-            Wall-clock times for each teaching period, shown in timetable grids and exports. Leave blank to show period numbers only.
-          </p>
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <p className="text-xs text-body-gray">
+              Wall-clock times for each teaching period, shown in timetable grids and exports. Leave blank to show period numbers only.
+            </p>
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={() => setTimingsModalOpen(true)}
+              className="shrink-0 text-xs"
+            >
+              Quick Schedule Assistant
+            </Button>
+          </div>
           <ul className="grid gap-2 sm:grid-cols-2">
             {Array.from({ length: department.periodsPerDay }, (_, i) => {
               const current = department.periodTimings?.[i] ?? { start: '', end: '' };
@@ -378,6 +394,16 @@ export function DepartmentConfigPage() {
           </div>
         </EditModal>
       )}
+
+      <PeriodTimingsModal
+        isOpen={timingsModalOpen}
+        onClose={() => setTimingsModalOpen(false)}
+        department={department}
+        breaks={breaks}
+        onSave={(nextTimings) => {
+          state.updateDepartment(department.id, { periodTimings: nextTimings });
+        }}
+      />
     </div>
   );
 }

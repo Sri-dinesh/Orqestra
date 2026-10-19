@@ -17,6 +17,8 @@ import { buildConfigurationSnapshot } from '@/domain/configuration/normalize';
 import { DEFAULT_GENERATION_SETTINGS, DEFAULT_HARD_CONSTRAINTS, DEFAULT_SOFT_WEIGHTS } from '@/domain/policies';
 import type { TimetableConfiguration } from '@/domain/models';
 import { DepartmentNav } from '@/components/ui/DepartmentNav';
+import { PeriodTimingsModal } from '@/components/ui/PeriodTimingsModal';
+import { Clock } from 'lucide-react';
 
 export function GeneratePage() {
   const { departmentId } = useParams();
@@ -33,6 +35,7 @@ export function GeneratePage() {
 
   const [seedInput, setSeedInput] = useState('');
   const [regenerate, setRegenerate] = useState(false);
+  const [timingsModalOpen, setTimingsModalOpen] = useState(false);
   const departmentEarly = state.departments.find((d) => d.id === departmentId);
   const overrides = departmentEarly ? state.generationSettingsOverrides[departmentEarly.id] : undefined;
   const [maxSubjectPerDayInput, setMaxSubjectPerDayInput] = useState(
@@ -259,6 +262,54 @@ export function GeneratePage() {
             </dd>
           </dl>
 
+          {/* Period Timings & Schedule Hours Section */}
+          <div className="mt-4 rounded-xl border border-[#E5E8E0] bg-surface-1 p-3.5">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <Clock className="w-4 h-4 text-metric-blue shrink-0" />
+                <span className="text-xs font-semibold text-ink">Period Timings & Schedule Hours</span>
+              </div>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => setTimingsModalOpen(true)}
+                className="text-xs shrink-0"
+              >
+                Adjust timings
+              </Button>
+            </div>
+
+            {department.periodTimings && department.periodTimings.some((t) => t.start || t.end) ? (
+              <div className="mt-2.5 flex flex-wrap gap-1.5">
+                {Array.from({ length: department.periodsPerDay }, (_, i) => {
+                  const t = department.periodTimings?.[i];
+                  return (
+                    <span
+                      key={i}
+                      className="inline-flex items-center gap-1.5 rounded-lg bg-white px-2.5 py-1 text-[11px] font-medium text-ink border border-[#E5E8E0] shadow-2xs"
+                    >
+                      <strong className="text-metric-blue font-bold">P{i + 1}</strong>
+                      <span className="text-[#555A60]">
+                        {t?.start && t?.end ? `${t.start} – ${t.end}` : t?.start || t?.end || '—'}
+                      </span>
+                    </span>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="mt-2 flex items-center justify-between gap-2 text-xs text-body-gray">
+                <span>Timings not configured (periods will show P1, P2... in timetable).</span>
+                <button
+                  type="button"
+                  onClick={() => setTimingsModalOpen(true)}
+                  className="text-metric-blue hover:underline font-semibold text-xs shrink-0"
+                >
+                  Auto-fill schedule →
+                </button>
+              </div>
+            )}
+          </div>
+
           {preflight.diagnostics.length > 0 && preflight.verdict === 'READY' && (
             <ul className="mt-4 space-y-2">
               {preflight.diagnostics.map((d, i) => (
@@ -482,6 +533,17 @@ export function GeneratePage() {
           {gen.status === 'CANCELLED' && <p className="text-sm text-warning">Generation cancelled.</p>}
         </Card>
       </div>
+
+      <PeriodTimingsModal
+        isOpen={timingsModalOpen}
+        onClose={() => setTimingsModalOpen(false)}
+        department={department}
+        breaks={breaks}
+        onSave={(nextTimings) => {
+          state.updateDepartment(department.id, { periodTimings: nextTimings });
+          editor.showToast('success', 'Period timings updated successfully.');
+        }}
+      />
     </div>
   );
 }
