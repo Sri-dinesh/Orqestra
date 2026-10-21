@@ -13,6 +13,7 @@ import type { SubjectRequirement } from '@/domain/models';
 import { DepartmentNav } from '@/components/ui/DepartmentNav';
 import { PeriodTimingsModal } from '@/components/ui/PeriodTimingsModal';
 import { DepartmentNotFound } from '@/components/ui/DepartmentNotFound';
+import { BreaksCard } from '@/components/ui/BreaksCard';
 
 export function DepartmentConfigPage() {
   const { departmentId } = useParams();
@@ -200,6 +201,8 @@ export function DepartmentConfigPage() {
             })}
           </ul>
         </Card>
+
+        <BreaksCard department={department} />
 
         <Card title={`Sections (${sections.length})`}>
           <form

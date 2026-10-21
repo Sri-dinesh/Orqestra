@@ -11,6 +11,7 @@ import {
 import { buildGridLayout, gridColumnLabel } from '@/domain/scheduler/grid-layout';
 import { TimetableGridHeader } from '@/components/ui/TimetableGridHeader';
 import { ExportPreviewModal } from '@/components/ui/ExportPreviewModal';
+import { SubstituteModal } from '@/components/ui/SubstituteModal';
 import { DepartmentNav } from '@/components/ui/DepartmentNav';
 import { DepartmentNotFound } from '@/components/ui/DepartmentNotFound';
 
@@ -48,6 +49,7 @@ export function FacultyTimetablePage() {
   const department = state.departments.find((d) => d.id === departmentId);
   const [selectedFacultyId, setSelectedFacultyId] = useState<string | null>(null);
   const [previewModalOpen, setPreviewModalOpen] = useState(false);
+  const [substituteModalOpen, setSubstituteModalOpen] = useState(false);
 
   const activeFacultyId = selectedFacultyId ?? faculty.find((f) => f.active)?.id ?? null;
   const activeFaculty = faculty.find((f) => f.id === activeFacultyId);
@@ -131,6 +133,9 @@ export function FacultyTimetablePage() {
             </Badge>
             <Button variant="secondary" size="sm" onClick={() => setPreviewModalOpen(true)}>
               Preview & Export
+            </Button>
+            <Button variant="secondary" size="sm" onClick={() => setSubstituteModalOpen(true)}>
+              Substitute Assistant
             </Button>
             <Button variant="secondary" size="sm" onClick={() => window.print()}>Print</Button>
             <Link to={`/departments/${departmentId}/master-timetable`}>
@@ -261,6 +266,27 @@ export function FacultyTimetablePage() {
           collegeDetails={state.collegeDetails}
           activeFacultyId={activeFacultyId ?? undefined}
           type="FACULTY"
+        />
+      )}
+
+      {timetable && (
+        <SubstituteModal
+          isOpen={substituteModalOpen}
+          onClose={() => setSubstituteModalOpen(false)}
+          timetable={timetable}
+          department={department}
+          subjects={subjects}
+          faculty={faculty}
+          sections={sections}
+          initialFacultyId={activeFacultyId ?? undefined}
+          collegeName={state.collegeDetails?.name}
+          academicYear={state.collegeDetails?.academicYear}
+          onAssignSubstitute={(entryId, substituteFacultyId) => {
+            const nextEntries = timetable.entries.map((e) =>
+              e.id === entryId ? { ...e, facultyId: substituteFacultyId } : e,
+            );
+            state.updateTimetable(timetable.id, { entries: nextEntries });
+          }}
         />
       )}
     </div>

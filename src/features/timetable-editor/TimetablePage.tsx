@@ -4,6 +4,7 @@ import { Badge, Button, Card, EditModal, Field, PageHeader, Select } from '@/com
 import { ConflictModal } from '@/components/ui/ConflictModal';
 import { ExportPreviewModal } from '@/components/ui/ExportPreviewModal';
 import { PeriodTimingsModal } from '@/components/ui/PeriodTimingsModal';
+import { SubstituteModal } from '@/components/ui/SubstituteModal';
 import { DepartmentNotFound } from '@/components/ui/DepartmentNotFound';
 import { TimetableGridHeader } from '@/components/ui/TimetableGridHeader';
 import type { Conflict } from '@/domain/models';
@@ -58,6 +59,8 @@ export function TimetablePage() {
   const [isDragging, setIsDragging] = useState(false);
   const [previewModalOpen, setPreviewModalOpen] = useState(false);
   const [timingsModalOpen, setTimingsModalOpen] = useState(false);
+  const [substituteModalOpen, setSubstituteModalOpen] = useState(false);
+  const [substituteTargetEntryId, setSubstituteTargetEntryId] = useState<string | null>(null);
 
   const department = state.departments.find((d) => d.id === departmentId);
   const config: TimetableConfiguration | null = useMemo(() => {
@@ -505,6 +508,16 @@ export function TimetablePage() {
             <Button variant="secondary" size="sm" onClick={handleRedo} disabled={editor.redoStack.length === 0}>
               Redo
             </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => {
+                setSubstituteTargetEntryId(editor.selectedEntryId);
+                setSubstituteModalOpen(true);
+              }}
+            >
+              Substitute Assistant
+            </Button>
             <Button variant="secondary" size="sm" onClick={() => setTimingsModalOpen(true)}>
               Adjust Timings
             </Button>
@@ -560,6 +573,16 @@ export function TimetablePage() {
               Entry selected — drag it onto a free slot to move, or onto another entry to swap — or use the actions below
             </span>
             <div className="ml-auto flex flex-wrap items-center gap-2">
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => {
+                  setSubstituteTargetEntryId(editor.selectedEntryId);
+                  setSubstituteModalOpen(true);
+                }}
+              >
+                Find Substitute…
+              </Button>
               <Button variant="secondary" size="sm" onClick={() => setEditingEntryId(editor.selectedEntryId)}>
                 Edit…
               </Button>
@@ -951,6 +974,27 @@ export function TimetablePage() {
         onSave={(nextTimings) => {
           state.updateDepartment(department.id, { periodTimings: nextTimings });
           editor.showToast('success', 'Period timings updated.');
+        }}
+      />
+
+      <SubstituteModal
+        isOpen={substituteModalOpen}
+        onClose={() => setSubstituteModalOpen(false)}
+        timetable={timetable}
+        department={department}
+        subjects={subjects}
+        faculty={faculty}
+        sections={sections}
+        initialEntryId={substituteTargetEntryId}
+        collegeName={state.collegeDetails?.name}
+        academicYear={state.collegeDetails?.academicYear}
+        onAssignSubstitute={(entryId, substituteFacultyId) => {
+          runCommand({
+            operation: 'CHANGE_FACULTY',
+            payload: { entryId, facultyId: substituteFacultyId },
+            affectedEntryIds: [entryId],
+            timestamp: new Date().toISOString(),
+          });
         }}
       />
 
