@@ -88,6 +88,29 @@ export function TimetablePage() {
     [department?.periodsPerDay, breaks],
   );
 
+  const activeSectionId = selectedSectionId ?? sections[0]?.id ?? null;
+
+  // Conflict preview: which target slots would REJECT a move/swap of the
+  // selected entry. Computed with the real edit service (draft-only, no
+  // mutation), memoized on selection + timetable so grid renders stay cheap.
+  const slotConflicts: Map<string, SlotConflict> = useMemo(
+    () =>
+      timetable && editService && config
+        ? computeSlotConflicts(timetable, editService, config, editor.selectedEntryId)
+        : new Map(),
+    [timetable, editService, config, editor.selectedEntryId],
+  );
+
+  /** Subjects that this section is actually required to have (sensible add defaults). */
+  const addableSubjects = useMemo(() => {
+    if (!activeSectionId) return [];
+    const section = sections.find((s) => s.id === activeSectionId);
+    const requiredIds = new Set(
+      (section?.subjectRequirements ?? []).filter((r) => r.sessionsPerWeek > 0).map((r) => r.subjectId),
+    );
+    return subjects.filter((s) => s.active && (requiredIds.has(s.id) || s.eligibleSectionIds.includes(activeSectionId)));
+  }, [activeSectionId, sections, subjects]);
+
   if (!department || !config || !editService) {
     return <DepartmentNotFound requestedId={departmentId} targetPage="timetable" />;
   }
@@ -110,7 +133,6 @@ export function TimetablePage() {
   const currentSnapshot = buildConfigurationSnapshot(config);
   const isStale = timetable.configurationSnapshot.fingerprint !== currentSnapshot.fingerprint;
 
-  const activeSectionId = selectedSectionId ?? sections[0]?.id ?? null;
   const activeSection = sections.find((s) => s.id === activeSectionId);
 
   const entries = timetable.entries.filter((e) => e.sectionId === activeSectionId);
@@ -155,14 +177,6 @@ export function TimetablePage() {
     activeSectionId ? c.sectionIds.length === 0 || c.sectionIds.includes(activeSectionId) : true,
   );
 
-  // Conflict preview: which target slots would REJECT a move/swap of the
-  // selected entry. Computed with the real edit service (draft-only, no
-  // mutation), memoized on selection + timetable so grid renders stay cheap.
-  // eslint-disable-next-line react-hooks/rules-of-hooks -- conditional return above guarantees timetable/editService exist here
-  const slotConflicts: Map<string, SlotConflict> = useMemo(
-    () => computeSlotConflicts(timetable, editService, config, editor.selectedEntryId),
-    [timetable, editService, config, editor.selectedEntryId],
-  );
   const hasMovePreview = [...slotConflicts.values()].some((c) => c.kind === 'MOVE');
   const hasSwapPreview = [...slotConflicts.values()].some((c) => c.kind === 'SWAP');
   const conflictCells = new Set<string>();
@@ -372,16 +386,6 @@ export function TimetablePage() {
   const openAddSession = (dayIndex: number, periodIndex: number) => {
     setAddSlot({ dayIndex, periodIndex });
   };
-
-  /** Subjects that this section is actually required to have (sensible add defaults). */
-  const addableSubjects = useMemo(() => {
-    if (!activeSectionId) return [];
-    const section = sections.find((s) => s.id === activeSectionId);
-    const requiredIds = new Set(
-      (section?.subjectRequirements ?? []).filter((r) => r.sessionsPerWeek > 0).map((r) => r.subjectId),
-    );
-    return subjects.filter((s) => s.active && (requiredIds.has(s.id) || s.eligibleSectionIds.includes(activeSectionId)));
-  }, [activeSectionId, sections, subjects]);
 
   /** Eligible faculty for a given subject in the add modal. */
   const facultyForSubject = (subjectId: string) => {

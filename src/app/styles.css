@@ -11,8 +11,10 @@
   --color-accent-hover: #0038CC;
   --color-accent-subtle: #FAFBF9;
   --color-card-bg: #FFFFFF;
+  --color-surface-0: #FFFFFF;
   --color-surface-1: #FAFBF9;
   --color-surface-2: #F1F3ED;
+  --color-metric-blue: #0047FF;
 
   /* Semantic accents */
   --color-success: #059669;

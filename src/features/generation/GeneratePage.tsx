@@ -95,11 +95,7 @@ export function GeneratePage() {
     };
   }, [department, sections, subjects, faculty, rooms, breaks, seedInput, state.generationSettingsOverrides]);
 
-  if (!department || !config) {
-    return <DepartmentNotFound requestedId={departmentId} targetPage="generate" />;
-  }
-
-  const departmentRooms = rooms.filter((r) => !r.departmentId || r.departmentId === department.id);
+  const departmentRooms = department ? rooms.filter((r) => !r.departmentId || r.departmentId === department.id) : [];
 
   const totalSessions = sections.reduce(
     (acc, s) =>
@@ -112,27 +108,39 @@ export function GeneratePage() {
   );
   const totalLabBlocks = subjects.filter((s) => s.type === 'LAB' && s.active).length;
 
-  const preflight = new GenerationService().preflight({
-    department,
-    sections,
-    subjects,
-    faculty,
-    breaks,
-    rooms: departmentRooms,
-  });
+  const preflight: import('@/domain/scheduler/feasibility').FeasibilityResult = department
+    ? new GenerationService().preflight({
+        department,
+        sections,
+        subjects,
+        faculty,
+        breaks,
+        rooms: departmentRooms,
+      })
+    : {
+        verdict: 'IMPOSSIBLE_OR_INVALID',
+        configValidation: { isValid: false, issues: [] },
+        sectionReports: [],
+        facultyReports: [],
+        diagnostics: [],
+      };
 
   const running = gen.status === 'VALIDATING' || gen.status === 'PREPARING' || gen.status === 'SEARCHING' || gen.status === 'OPTIMIZING' || gen.status === 'FINAL_VALIDATION';
 
   // Clear the stale result card whenever the configuration or verdict changes,
   // so an old "Generation completed" never sits next to a new failure.
-  const feasibilityKey = `${preflight.verdict}:${totalSessions}:${sections.length}:${subjects.length}:${faculty.length}:${department.periodsPerDay}:${department.workingDays.length}:${breaks.length}`;
+  const feasibilityKey = `${preflight.verdict}:${totalSessions}:${sections.length}:${subjects.length}:${faculty.length}:${department?.periodsPerDay ?? 0}:${department?.workingDays.length ?? 0}:${breaks.length}`;
   const lastFeasibilityKey = useRef(feasibilityKey);
   useEffect(() => {
     if (lastFeasibilityKey.current !== feasibilityKey) {
       lastFeasibilityKey.current = feasibilityKey;
       if (gen.status !== 'IDLE' && !running) gen.reset();
     }
-  }, [feasibilityKey]);
+  }, [feasibilityKey, running, gen]);
+
+  if (!department || !config) {
+    return <DepartmentNotFound requestedId={departmentId} targetPage="generate" />;
+  }
 
   const start = async () => {
     const hasExisting = Boolean(existingTimetable);
