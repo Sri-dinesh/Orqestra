@@ -9,6 +9,7 @@ import { DepartmentNav } from '@/components/ui/DepartmentNav';
 import { PeriodTimingsModal } from '@/components/ui/PeriodTimingsModal';
 import { DepartmentNotFound } from '@/components/ui/DepartmentNotFound';
 import { BreaksCard } from '@/components/ui/BreaksCard';
+import { getDepartmentBreaks } from '@/domain/scheduler/grid-layout';
 
 export function DepartmentConfigPage() {
   const { departmentId } = useParams();
@@ -29,7 +30,11 @@ export function DepartmentConfigPage() {
     () => state.faculty.filter((f) => f.departmentId === departmentId),
     [state.faculty, departmentId],
   );
-  const breaks = useWorkspaceStore((s) => s.breaks);
+  const allBreaks = useWorkspaceStore((s) => s.breaks);
+  const breaks = useMemo(
+    () => getDepartmentBreaks(allBreaks, departmentId),
+    [allBreaks, departmentId],
+  );
 
   const [sectionName, setSectionName] = useState('');
   const [year, setYear] = useState(1);

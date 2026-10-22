@@ -3,6 +3,7 @@ import type { CollegeDetails, PeriodTiming, Timetable, TimetableConfiguration } 
 import { DEFAULT_HARD_CONSTRAINTS, DEFAULT_SOFT_WEIGHTS, DEFAULT_GENERATION_SETTINGS } from '@/domain/policies';
 import { GenerationService } from '@/application/generation-service';
 import { buildConfigurationSnapshot } from '@/domain/configuration/normalize';
+import { getDepartmentBreaks } from '@/domain/scheduler/grid-layout';
 import { useWorkspaceStore } from '@/state/stores/workspace-store';
 
 export interface PresetSubject {
@@ -528,8 +529,12 @@ export function applyPreset(preset: PresetDefinition, store: WorkspaceStore): st
   }
 
   if (preset.breaks) {
+    const existingBreaks = store.breaks.filter((b) => b.departmentId === department.id);
+    existingBreaks.forEach((b) => store.removeBreak(b.id));
+
     preset.breaks.forEach((b) => {
       store.addBreak({
+        departmentId: department.id,
         name: b.name,
         dayIndex: b.dayIndex,
         startPeriod: b.startPeriod,
@@ -569,7 +574,7 @@ export async function applyPresetWithTimetable(
   const subjects = state.subjects.filter((s) => s.departmentId === departmentId);
   const faculty = state.faculty.filter((f) => f.departmentId === departmentId);
   const rooms = state.rooms.filter((r) => !r.departmentId || r.departmentId === departmentId);
-  const breaks = state.breaks;
+  const breaks = getDepartmentBreaks(state.breaks, departmentId);
 
   const config: TimetableConfiguration = {
     workingDays: dept.workingDays,

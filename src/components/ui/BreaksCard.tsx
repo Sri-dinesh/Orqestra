@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Coffee, Plus, Trash2, Edit2, Clock, Check, Sparkles, X } from 'lucide-react';
 import { Button, Card, Field, Input, Select } from '@/components/ui/primitives';
 import type { Break, Department } from '@/domain/models';
+import { getDepartmentBreaks } from '@/domain/scheduler/grid-layout';
 import { useWorkspaceStore } from '@/state/stores/workspace-store';
 import { useEditorStore } from '@/state/stores/editor-store';
 
@@ -10,7 +11,11 @@ interface BreaksCardProps {
 }
 
 export const BreaksCard: React.FC<BreaksCardProps> = ({ department }) => {
-  const breaks = useWorkspaceStore((s) => s.breaks);
+  const allBreaks = useWorkspaceStore((s) => s.breaks);
+  const breaks = useMemo(
+    () => getDepartmentBreaks(allBreaks, department.id),
+    [allBreaks, department.id],
+  );
   const state = useWorkspaceStore();
   const showToast = useEditorStore((s) => s.showToast);
 
@@ -50,6 +55,7 @@ export const BreaksCard: React.FC<BreaksCardProps> = ({ department }) => {
 
     if (editingBreakId) {
       state.updateBreak(editingBreakId, {
+        departmentId: department.id,
         name: name.trim(),
         startPeriod: Math.max(0, Math.min(department.periodsPerDay, startPeriod)),
         dayIndex,
@@ -60,6 +66,7 @@ export const BreaksCard: React.FC<BreaksCardProps> = ({ department }) => {
       showToast('success', `Updated break "${name.trim()}".`);
     } else {
       state.addBreak({
+        departmentId: department.id,
         name: name.trim(),
         startPeriod: Math.max(0, Math.min(department.periodsPerDay, startPeriod)),
         dayIndex,
@@ -81,6 +88,7 @@ export const BreaksCard: React.FC<BreaksCardProps> = ({ department }) => {
   const handleAddPresetLunch = () => {
     const p4 = Math.min(4, department.periodsPerDay);
     state.addBreak({
+      departmentId: department.id,
       name: 'Lunch Break',
       startPeriod: p4,
       dayIndex: null,
@@ -94,6 +102,7 @@ export const BreaksCard: React.FC<BreaksCardProps> = ({ department }) => {
   const handleAddPresetMorningTea = () => {
     const p2 = Math.min(2, department.periodsPerDay);
     state.addBreak({
+      departmentId: department.id,
       name: 'Morning Recess',
       startPeriod: p2,
       dayIndex: null,

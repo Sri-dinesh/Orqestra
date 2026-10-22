@@ -254,6 +254,7 @@ export async function GET(request: Request): Promise<Response> {
 
     const domainBreaks: Break[] = breakRows.map((b) => ({
       id: b.id,
+      departmentId: b.departmentId ?? undefined,
       name: b.name,
       dayIndex: b.dayIndex,
       startPeriod: b.startPeriod,
@@ -876,6 +877,7 @@ export async function PUT(request: Request): Promise<Response> {
           id: b.id,
           userId: institutionId,
           termId,
+          departmentId: b.departmentId ?? null,
           name: b.name,
           dayIndex: b.dayIndex,
           startPeriod: b.startPeriod,
@@ -892,6 +894,7 @@ export async function PUT(request: Request): Promise<Response> {
           .onConflictDoUpdate({
             target: breaks.id,
             set: {
+              departmentId: sql`excluded.department_id`,
               name: sql`excluded.name`,
               dayIndex: sql`excluded.day_index`,
               startPeriod: sql`excluded.start_period`,

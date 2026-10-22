@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/primitives';
 import { useWorkspaceStore } from '@/state/stores/workspace-store';
-import { buildGridLayout } from '@/domain/scheduler/grid-layout';
+import { buildGridLayout, getDepartmentBreaks } from '@/domain/scheduler/grid-layout';
 import type {
   Department,
   Section,
@@ -144,7 +144,8 @@ export function SchedulePortalPage() {
   // Build grid layout for period timings and break columns
   const layout = useMemo(() => {
     if (!currentDept) return null;
-    return buildGridLayout(currentDept.periodsPerDay, breaks);
+    const deptBreaks = getDepartmentBreaks(breaks, currentDept.id);
+    return buildGridLayout(currentDept.periodsPerDay, deptBreaks);
   }, [currentDept, breaks]);
 
   // Entries for the chosen filter

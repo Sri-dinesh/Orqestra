@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   buildGridLayout,
+  getDepartmentBreaks,
   gridBreakSpansForDay,
   gridColumnLabel,
   gridSlotForTeaching,
@@ -83,5 +84,40 @@ describe('grid layout', () => {
     expect(dayBreak).toMatchObject({ startPeriod: 6, durationPeriods: 1 });
     // Out-of-range days are dropped.
     expect(toGridBreaks(layout, [lunch(0, 9)], 7).filter((b) => b.dayIndex === 9)).toHaveLength(0);
+  });
+
+  it('deduplicates multiple all-day breaks at the same startPeriod so columns are not repeated', () => {
+    const duplicateBreaks: Break[] = [
+      { id: 'b1', name: 'Break', dayIndex: null, startPeriod: 2, durationPeriods: 1 },
+      { id: 'b2', name: 'Break', dayIndex: null, startPeriod: 2, durationPeriods: 1 },
+      { id: 'b3', name: 'Break', dayIndex: null, startPeriod: 2, durationPeriods: 1 },
+      { id: 'l1', name: 'Lunch', dayIndex: null, startPeriod: 4, durationPeriods: 1 },
+      { id: 'l2', name: 'Lunch', dayIndex: null, startPeriod: 4, durationPeriods: 1 },
+      { id: 'l3', name: 'Lunch Break', dayIndex: null, startPeriod: 4, durationPeriods: 1 },
+      { id: 'l4', name: 'Lunch', dayIndex: null, startPeriod: 4, durationPeriods: 1 },
+    ];
+    const layout = buildGridLayout(7, duplicateBreaks);
+    // 7 teaching periods + 1 Break column (after P2) + 1 Lunch column (after P4) = 9 total columns
+    expect(layout.gridSlotsPerDay).toBe(9);
+    const breakColumns = layout.columns.filter((c) => c.kind === 'break');
+    expect(breakColumns).toHaveLength(2);
+    expect(breakColumns[0]).toMatchObject({ kind: 'break', name: 'Break' });
+    expect(breakColumns[1]).toMatchObject({ kind: 'break', name: 'Lunch' });
+  });
+
+  it('getDepartmentBreaks returns department-specific breaks when present, falling back to global breaks', () => {
+    const mixedBreaks: Break[] = [
+      { id: 'global1', name: 'Global Lunch', dayIndex: null, startPeriod: 4, durationPeriods: 1, departmentId: null },
+      { id: 'dept1_b', name: 'CSE Break', dayIndex: null, startPeriod: 2, durationPeriods: 1, departmentId: 'dept_cse' },
+      { id: 'dept1_l', name: 'CSE Lunch', dayIndex: null, startPeriod: 4, durationPeriods: 1, departmentId: 'dept_cse' },
+    ];
+
+    const cseBreaks = getDepartmentBreaks(mixedBreaks, 'dept_cse');
+    expect(cseBreaks).toHaveLength(2);
+    expect(cseBreaks.map((b) => b.name)).toEqual(['CSE Break', 'CSE Lunch']);
+
+    const otherBreaks = getDepartmentBreaks(mixedBreaks, 'dept_ece');
+    expect(otherBreaks).toHaveLength(1);
+    expect(otherBreaks[0].name).toBe('Global Lunch');
   });
 });

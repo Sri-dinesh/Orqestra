@@ -18,7 +18,7 @@ import { exportTimetable } from '@/application/export-service';
 import type { EditCommand } from '@/application/timetable-edit-commands';
 import { buildConfigurationSnapshot } from '@/domain/configuration/normalize';
 import { DEFAULT_GENERATION_SETTINGS, DEFAULT_HARD_CONSTRAINTS, DEFAULT_SOFT_WEIGHTS } from '@/domain/policies';
-import { buildGridLayout, gridColumnLabel } from '@/domain/scheduler/grid-layout';
+import { buildGridLayout, getDepartmentBreaks, gridColumnLabel } from '@/domain/scheduler/grid-layout';
 import type { TimetableConfiguration } from '@/domain/models';
 import { DepartmentNav } from '@/components/ui/DepartmentNav';
 import { publishTimetableToCloud } from '@/storage/cloud-sync';
@@ -105,6 +105,11 @@ export function TimetablePage() {
     }
   };
 
+  const deptBreaks = useMemo(
+    () => getDepartmentBreaks(breaks, departmentId),
+    [breaks, departmentId],
+  );
+
   const config: TimetableConfiguration | null = useMemo(() => {
     if (!department) return null;
     return {
@@ -115,19 +120,19 @@ export function TimetablePage() {
       subjects,
       faculty,
       rooms,
-      breaks,
+      breaks: deptBreaks,
       hardConstraints: DEFAULT_HARD_CONSTRAINTS,
       softWeights: DEFAULT_SOFT_WEIGHTS,
       generationSettings: { ...DEFAULT_GENERATION_SETTINGS },
     };
-  }, [department, sections, subjects, faculty, rooms, breaks]);
+  }, [department, sections, subjects, faculty, rooms, deptBreaks]);
 
   const editService = useMemo(() => (config ? new TimetableEditService(config) : null), [config]);
 
   // Grid columns: teaching periods plus inserted break columns (e.g. lunch).
   const layout = useMemo(
-    () => buildGridLayout(department?.periodsPerDay ?? 0, breaks),
-    [department?.periodsPerDay, breaks],
+    () => buildGridLayout(department?.periodsPerDay ?? 0, deptBreaks),
+    [department?.periodsPerDay, deptBreaks],
   );
 
   const activeSectionId = selectedSectionId ?? sections[0]?.id ?? null;

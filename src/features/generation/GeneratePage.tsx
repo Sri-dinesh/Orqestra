@@ -9,6 +9,7 @@ import { withVersion } from '@/application/timetable-versioning';
 import { ManualCancellationToken } from '@/scheduler-runtime/scheduler-runner';
 import { buildConfigurationSnapshot } from '@/domain/configuration/normalize';
 import { DEFAULT_GENERATION_SETTINGS, DEFAULT_HARD_CONSTRAINTS, DEFAULT_SOFT_WEIGHTS } from '@/domain/policies';
+import { getDepartmentBreaks } from '@/domain/scheduler/grid-layout';
 import type { TimetableConfiguration } from '@/domain/models';
 import { DepartmentNav } from '@/components/ui/DepartmentNav';
 import { PeriodTimingsModal } from '@/components/ui/PeriodTimingsModal';
@@ -44,7 +45,11 @@ export function GeneratePage() {
     () => state.rooms.filter((r) => !r.departmentId || r.departmentId === departmentId),
     [state.rooms, departmentId],
   );
-  const breaks = useWorkspaceStore((s) => s.breaks);
+  const allBreaks = useWorkspaceStore((s) => s.breaks);
+  const breaks = useMemo(
+    () => getDepartmentBreaks(allBreaks, departmentId),
+    [allBreaks, departmentId],
+  );
   const existingTimetable = useMemo(
     () => state.timetables.find((t) => t.departmentId === departmentId) ?? null,
     [state.timetables, departmentId],

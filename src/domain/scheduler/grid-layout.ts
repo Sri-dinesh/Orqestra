@@ -37,13 +37,36 @@ export interface GridLayout {
   columns: GridColumn[];
 }
 
-/** All-day breaks in stable position order. */
+/**
+ * Scopes breaks to a department: returns department-specific breaks if configured,
+ * otherwise falls back to global/unscoped breaks.
+ */
+export function getDepartmentBreaks(breaks: Break[], departmentId?: string | null): Break[] {
+  if (!breaks || breaks.length === 0) return [];
+  if (!departmentId) return breaks;
+  const deptBreaks = breaks.filter((b) => b.departmentId === departmentId);
+  if (deptBreaks.length > 0) return deptBreaks;
+  return breaks.filter((b) => !b.departmentId);
+}
+
+/** All-day breaks in stable position order with deduplication by startPeriod. */
 export function allDayBreaksSorted(breaks: Break[]): Break[] {
-  return breaks
+  const allDay = breaks
     .map((b, i) => ({ b, i }))
     .filter(({ b }) => b.dayIndex === null)
-    .sort((x, y) => x.b.startPeriod - y.b.startPeriod || x.i - y.i)
-    .map(({ b }) => b);
+    .sort((x, y) => x.b.startPeriod - y.b.startPeriod || x.i - y.i);
+
+  const seenPositions = new Set<number>();
+  const deduplicated: Break[] = [];
+
+  for (const { b } of allDay) {
+    if (!seenPositions.has(b.startPeriod)) {
+      seenPositions.add(b.startPeriod);
+      deduplicated.push(b);
+    }
+  }
+
+  return deduplicated;
 }
 
 /** Clamp a teaching-coordinate position into [0, teachingPerDay]. */

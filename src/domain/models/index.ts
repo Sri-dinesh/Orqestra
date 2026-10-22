@@ -150,6 +150,7 @@ export interface Room {
 
 export interface Break {
   id: BreakId;
+  departmentId?: DepartmentId | null;
   name: string;
   dayIndex: number | null; // null means everyday
   /**

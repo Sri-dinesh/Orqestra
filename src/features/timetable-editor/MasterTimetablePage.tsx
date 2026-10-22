@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Badge, Button, Card, PageHeader } from '@/components/ui/primitives';
 import { useWorkspaceStore } from '@/state/stores/workspace-store';
-import { buildGridLayout, gridColumnLabel } from '@/domain/scheduler/grid-layout';
+import { buildGridLayout, getDepartmentBreaks, gridColumnLabel } from '@/domain/scheduler/grid-layout';
 import { TimetableGridHeader } from '@/components/ui/TimetableGridHeader';
 import { ExportPreviewModal } from '@/components/ui/ExportPreviewModal';
 import { DepartmentNav } from '@/components/ui/DepartmentNav';
@@ -132,8 +132,9 @@ export function MasterTimetablePage() {
 
   const dayCount = department.workingDays.length;
   const ppd = department.periodsPerDay;
+  const deptBreaks = getDepartmentBreaks(breaks, department.id);
   // Grid columns: teaching periods plus inserted break columns (e.g. lunch).
-  const layout = buildGridLayout(ppd, breaks);
+  const layout = buildGridLayout(ppd, deptBreaks);
 
   const sectionTone = (sectionId: string) => {
     const idx = sections.findIndex((s) => s.id === sectionId);

@@ -2,7 +2,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import { ExportError } from '@/domain/errors';
-import { buildGridLayout, gridColumnLabel } from '@/domain/scheduler/grid-layout';
+import { buildGridLayout, getDepartmentBreaks, gridColumnLabel } from '@/domain/scheduler/grid-layout';
 import type { Break, CollegeDetails, Department, Faculty, Subject, Timetable } from '@/domain/models';
 
 export type ExportFormat = 'PDF' | 'XLSX' | 'WORD';
@@ -38,7 +38,7 @@ export function buildTimetableGrid(input: ExportInput): {
   const facultyById = new Map(faculty.map((f) => [f.id, f]));
   const entries = timetable.entries.filter((e) => e.sectionId === sectionId);
 
-  const layout = buildGridLayout(department.periodsPerDay, breaks);
+  const layout = buildGridLayout(department.periodsPerDay, getDepartmentBreaks(breaks, department.id));
   const dayLabels = department.workingDays;
   const breakById = new Map(breaks.map((b) => [b.id, b]));
   const timeRange = (start?: string, end?: string) =>
@@ -125,7 +125,7 @@ export function renderOfficialSectionTimetablePage(doc: jsPDF, input: ExportInpu
 
   const subjectById = new Map(subjects.map((s) => [s.id, s]));
   const facultyById = new Map(faculty.map((f) => [f.id, f]));
-  const layout = buildGridLayout(department.periodsPerDay, breaks);
+  const layout = buildGridLayout(department.periodsPerDay, getDepartmentBreaks(breaks, department.id));
   const entries = timetable.entries.filter((e) => e.sectionId === input.sectionId);
   const entryAt = (day: number, slot: number) =>
     entries.find((e) => e.dayIndex === day && slot >= e.startPeriod && slot < e.startPeriod + e.durationPeriods);
@@ -456,7 +456,7 @@ export function buildFacultyTimetablePdf(
 
   const subjectById = new Map(subjects.map((s) => [s.id, s]));
   const sectionById = new Map(sections.map((s) => [s.id, s]));
-  const layout = buildGridLayout(department.periodsPerDay, breaks);
+  const layout = buildGridLayout(department.periodsPerDay, getDepartmentBreaks(breaks, department.id));
   const entries = timetable.entries.filter((e) => e.facultyId === input.facultyId);
   const entryAt = (day: number, slot: number) =>
     entries.find((e) => e.dayIndex === day && slot >= e.startPeriod && slot < e.startPeriod + e.durationPeriods);
@@ -612,7 +612,7 @@ export function buildMasterTimetablePdf(input: Omit<ExportInput, 'sectionId'>): 
 
   const subjectById = new Map(subjects.map((s) => [s.id, s]));
   const facultyById = new Map(faculty.map((f) => [f.id, f]));
-  const layout = buildGridLayout(department.periodsPerDay, breaks);
+  const layout = buildGridLayout(department.periodsPerDay, getDepartmentBreaks(breaks, department.id));
 
   const collegeName = college?.name?.trim() || department.name;
   doc.setFont('helvetica', 'bold');
