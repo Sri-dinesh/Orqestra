@@ -133,7 +133,12 @@ export function FacultyPage() {
 
       <Card title={`Faculty (${members.length})`}>
         {members.length === 0 ? (
-          <p className="text-sm text-body-gray">No faculty yet.</p>
+          <div className="rounded-xl border border-dashed border-[#E5E8E0] bg-[#FAFBF9] p-6 text-center">
+            <p className="text-sm font-semibold text-[#111315]">No faculty members registered yet</p>
+            <p className="mt-1 text-xs text-body-gray">
+              Add your professors and teaching staff above, or use Bulk Import to load your roster from a CSV or Excel spreadsheet.
+            </p>
+          </div>
         ) : (
           <ul className="space-y-2">
             {members.map((f) => {
@@ -220,9 +225,26 @@ export function FacultyPage() {
           </ul>
         )}
       </Card>
-      <Link className="text-sm text-metric-blue underline" to={`/departments/${departmentId}/configuration`}>
-        Back to configuration
-      </Link>
+      {/* Guided Bottom Navigation Flow */}
+      <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+        <Link to={`/departments/${departmentId}/subjects`}>
+          <Button variant="secondary">
+            ← Step 2: Subjects
+          </Button>
+        </Link>
+        <div className="flex flex-wrap items-center gap-2">
+          <Link to={`/departments/${departmentId}/rooms`}>
+            <Button variant="secondary">
+              Rooms & Labs →
+            </Button>
+          </Link>
+          <Link to={`/departments/${departmentId}/generate`}>
+            <Button>
+              Next Step: Generate Timetable →
+            </Button>
+          </Link>
+        </div>
+      </div>
 
       {editing && editForm && (
         <EditModal

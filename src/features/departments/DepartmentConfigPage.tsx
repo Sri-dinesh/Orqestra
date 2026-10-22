@@ -1,12 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Badge, Button, Card, EditModal, Field, Input, PageHeader, Select } from '@/components/ui/primitives';
-import {
-  selectCurrentSections,
-  selectCurrentSubjects,
-  selectCurrentFaculty,
-  useWorkspaceStore,
-} from '@/state/stores/workspace-store';
+import { Badge, Button, Card, EditModal, Field, Input, PageHeader } from '@/components/ui/primitives';
+import { useWorkspaceStore } from '@/state/stores/workspace-store';
 import { WORKING_DAYS } from '@/domain/enums';
 import type { WorkingDay } from '@/domain/enums';
 import type { SubjectRequirement } from '@/domain/models';
@@ -20,9 +15,20 @@ export function DepartmentConfigPage() {
   const navigate = useNavigate();
   const state = useWorkspaceStore();
   const department = state.departments.find((d) => d.id === departmentId) ?? null;
-  const sections = useWorkspaceStore(selectCurrentSections);
-  const subjects = useWorkspaceStore(selectCurrentSubjects);
-  const faculty = useWorkspaceStore(selectCurrentFaculty);
+
+  // Department-scoped selectors to avoid activeDepartmentId mismatch
+  const sections = useMemo(
+    () => state.sections.filter((s) => s.departmentId === departmentId),
+    [state.sections, departmentId],
+  );
+  const subjects = useMemo(
+    () => state.subjects.filter((s) => s.departmentId === departmentId),
+    [state.subjects, departmentId],
+  );
+  const faculty = useMemo(
+    () => state.faculty.filter((f) => f.departmentId === departmentId),
+    [state.faculty, departmentId],
+  );
   const breaks = useWorkspaceStore((s) => s.breaks);
 
   const [sectionName, setSectionName] = useState('');
@@ -36,6 +42,12 @@ export function DepartmentConfigPage() {
   const [timingsModalOpen, setTimingsModalOpen] = useState(false);
 
   useEffect(() => {
+    if (departmentId && state.activeDepartmentId !== departmentId) {
+      state.setActiveDepartment(departmentId);
+    }
+  }, [departmentId, state.activeDepartmentId, state.setActiveDepartment]);
+
+  useEffect(() => {
     if (!departmentId && state.departments.length > 0) {
       const targetId = state.activeDepartmentId && state.departments.some((d) => d.id === state.activeDepartmentId)
         ? state.activeDepartmentId
@@ -47,6 +59,8 @@ export function DepartmentConfigPage() {
   if (!department) {
     return <DepartmentNotFound requestedId={departmentId} targetPage="configuration" />;
   }
+
+  const isReady = sections.length > 0 && subjects.length > 0 && faculty.length > 0;
 
   const updateDays = (day: WorkingDay, checked: boolean) => {
     const next = checked
@@ -98,16 +112,17 @@ export function DepartmentConfigPage() {
                 aria-label="Periods per day"
               />
             </Field>
-            <Field label="Status">
-              <Select
-                value={department.status}
-                onChange={(e) => state.updateDepartment(department.id, { status: e.target.value as 'DRAFT' | 'READY' | 'ARCHIVED' })}
-                aria-label="Department status"
-              >
-                <option value="DRAFT">DRAFT</option>
-                <option value="READY">READY</option>
-                <option value="ARCHIVED">ARCHIVED</option>
-              </Select>
+            <Field label="Configuration Status" hint="Auto-evaluated based on academic readiness">
+              <div className="flex items-center gap-2 pt-1.5">
+                <Badge tone={isReady ? 'green' : 'amber'}>
+                  {isReady ? 'READY TO GENERATE' : 'SETUP IN PROGRESS'}
+                </Badge>
+                <span className="text-xs text-body-gray">
+                  {sections.length > 0 ? '✓ Sections' : '○ Sections'} ·{' '}
+                  {subjects.length > 0 ? '✓ Subjects' : '○ Subjects'} ·{' '}
+                  {faculty.length > 0 ? '✓ Faculty' : '○ Faculty'}
+                </span>
+              </div>
             </Field>
             <Field label="Effective from" hint="Official exports">
               <Input
@@ -260,9 +275,25 @@ export function DepartmentConfigPage() {
 
       <Card title={`Section requirements — ${subjects.length} subjects, ${faculty.length} faculty available`}>
         {sections.length === 0 || subjects.length === 0 ? (
-          <p className="text-sm text-body-gray">
-            Add sections and subjects first, then assign weekly requirements here.
-          </p>
+          <div className="rounded-xl border border-dashed border-[#E5E8E0] bg-[#FAFBF9] p-6 text-center">
+            <p className="text-sm font-semibold text-[#111315]">
+              {sections.length === 0 && subjects.length === 0
+                ? 'Add sections above, then add subjects to define weekly curriculum hours.'
+                : sections.length === 0
+                ? 'Add at least one section in the card above to configure weekly hours.'
+                : 'No subjects created yet. Add subjects in the next step to assign weekly hours.'}
+            </p>
+            <p className="mt-1 text-xs text-body-gray">
+              Weekly hours dictate how many sessions the scheduler will place in the weekly timetable grid.
+            </p>
+            {subjects.length === 0 && sections.length > 0 && (
+              <div className="mt-4 flex justify-center">
+                <Button size="sm" onClick={() => navigate(`/departments/${department.id}/subjects`)}>
+                  Step 2: Add Subjects →
+                </Button>
+              </div>
+            )}
+          </div>
         ) : (
           <div className="grid gap-4 lg:grid-cols-2">
             {sections.map((section) => (
@@ -333,10 +364,19 @@ export function DepartmentConfigPage() {
         )}
       </Card>
 
-      <div className="flex flex-wrap gap-2">
-        <Button variant="secondary" onClick={() => navigate(`/departments/${department.id}/subjects`)}>Manage subjects</Button>
-        <Button variant="secondary" onClick={() => navigate(`/departments/${department.id}/faculty`)}>Manage faculty</Button>
-        <Button onClick={() => navigate(`/departments/${department.id}/generate`)}>Generate timetable</Button>
+      {/* Guided Bottom Navigation Flow */}
+      <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+        <Button variant="secondary" onClick={() => navigate('/dashboard')}>
+          ← Back to Dashboard
+        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button variant="secondary" onClick={() => navigate(`/departments/${department.id}/faculty`)}>
+            Manage Faculty
+          </Button>
+          <Button onClick={() => navigate(`/departments/${department.id}/subjects`)}>
+            Next Step: Subjects →
+          </Button>
+        </div>
       </div>
 
       {editingSectionId && (

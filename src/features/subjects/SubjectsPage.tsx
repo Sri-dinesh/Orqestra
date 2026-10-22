@@ -35,12 +35,14 @@ function CheckboxChips({
   options,
   selected,
   onToggle,
+  emptyMessage = 'None available yet.',
 }: {
   options: Array<{ id: string; label: string }>;
   selected: string[];
   onToggle: (id: string, checked: boolean) => void;
+  emptyMessage?: string;
 }) {
-  if (options.length === 0) return <p className="text-xs text-body-gray">None available yet.</p>;
+  if (options.length === 0) return <p className="text-xs text-body-gray italic">{emptyMessage}</p>;
   return (
     <div className="flex flex-wrap gap-2">
       {options.map((o) => (
@@ -168,6 +170,7 @@ export function SubjectsPage() {
             <CheckboxChips
               options={faculty.map((f) => ({ id: f.id, label: f.name }))}
               selected={eligibleFaculty}
+              emptyMessage="No faculty added yet. You can assign faculty in Step 3."
               onToggle={(id, checked) =>
                 setEligibleFaculty((prev) => (checked ? [...prev, id] : prev.filter((x) => x !== id)))
               }
@@ -179,7 +182,12 @@ export function SubjectsPage() {
 
       <Card title={`Subjects (${subjects.length})`}>
         {subjects.length === 0 ? (
-          <p className="text-sm text-body-gray">No subjects yet.</p>
+          <div className="rounded-xl border border-dashed border-[#E5E8E0] bg-[#FAFBF9] p-6 text-center">
+            <p className="text-sm font-semibold text-[#111315]">No subjects in catalogue yet</p>
+            <p className="mt-1 text-xs text-body-gray">
+              Add your department's theory and lab subjects above, or use Bulk Import to load from Excel or CSV.
+            </p>
+          </div>
         ) : (
           <ul className="space-y-2">
             {subjects.map((s) => (
@@ -223,9 +231,20 @@ export function SubjectsPage() {
           </ul>
         )}
       </Card>
-      <Link className="text-sm text-metric-blue underline" to={`/departments/${departmentId}/configuration`}>
-        Back to configuration
-      </Link>
+
+      {/* Guided Bottom Navigation Flow */}
+      <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+        <Link to={`/departments/${departmentId}/configuration`}>
+          <Button variant="secondary">
+            ← Step 1: Configuration
+          </Button>
+        </Link>
+        <Link to={`/departments/${departmentId}/faculty`}>
+          <Button>
+            Next Step: Faculty →
+          </Button>
+        </Link>
+      </div>
 
       {editing && editForm && (
         <EditModal

@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import {
   Building2,
   Plus,
@@ -393,6 +393,20 @@ export function RoomsPage() {
           </div>
         )}
       </Card>
+
+      {/* Guided Bottom Navigation Flow */}
+      <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+        <Link to={`/departments/${departmentId}/faculty`}>
+          <Button variant="secondary">
+            ← Step 3: Faculty
+          </Button>
+        </Link>
+        <Link to={`/departments/${departmentId}/generate`}>
+          <Button>
+            Next Step: Generate Timetable →
+          </Button>
+        </Link>
+      </div>
 
       {/* Add Room Modal */}
       {showAddModal && (
