@@ -100,7 +100,48 @@ export function usePersistence(namespace = 'anonymous'): LoadOutcome | null {
           useWorkspaceStore.getState().setMembership(cloudData.membership);
         }
 
-        if (hasCloudData) {
+        const localCurrentState = useWorkspaceStore.getState();
+        const localDeptCount = localCurrentState.departments.length;
+        const localSecCount = localCurrentState.sections.length;
+        const localSubCount = localCurrentState.subjects.length;
+        const localFacCount = localCurrentState.faculty.length;
+
+        const cloudDeptCount = cloudData.workspace.departments.length;
+        const cloudSecCount = cloudData.workspace.sections.length;
+        const cloudSubCount = cloudData.workspace.subjects.length;
+        const cloudFacCount = cloudData.workspace.faculty.length;
+
+        // If in-memory state has richer/more complete data than cloud (e.g. freshly applied preset with 9 sections & 8 subjects & 40 faculty,
+        // while cloud is empty or was partially saved during a network race), NEVER blow away local state!
+        // Instead, upload the complete local state to cloud.
+        const localIsMoreComplete =
+          localSecCount > cloudSecCount ||
+          localSubCount > cloudSubCount ||
+          localFacCount > cloudFacCount ||
+          localDeptCount > cloudDeptCount;
+
+        if (localIsMoreComplete && localDeptCount > 0) {
+          if (cloudData.membership?.role !== 'FACULTY') {
+            useWorkspaceStore.getState().setPersistenceStatus('SAVING');
+            saveCloudWorkspace(
+              {
+                departments: localCurrentState.departments,
+                sections: localCurrentState.sections,
+                subjects: localCurrentState.subjects,
+                faculty: localCurrentState.faculty,
+                timetables: localCurrentState.timetables,
+                rooms: localCurrentState.rooms,
+                breaks: localCurrentState.breaks,
+                activeDepartmentId: localCurrentState.activeDepartmentId,
+                generationSettingsOverrides: localCurrentState.generationSettingsOverrides,
+                collegeDetails: localCurrentState.collegeDetails,
+              },
+              cloudData.activeTermId,
+            ).then((res) => {
+              useWorkspaceStore.getState().setPersistenceStatus(res.ok ? 'SAVED' : 'ERROR');
+            });
+          }
+        } else if (hasCloudData) {
           // Cloud has authoritative data: update store and mirror to local cache
           useWorkspaceStore.getState().replaceAll({
             departments: cloudData.workspace.departments,
@@ -229,7 +270,7 @@ function getStoredCreatedAt(): string | null {
  * Immediately persist the current workspace to Local Storage and Neon Postgres,
  * bypassing debounce.
  */
-export function flushPersistence(): void {
+export async function flushPersistence(): Promise<{ ok: boolean }> {
   const state = useWorkspaceStore.getState();
   const service = getStorageService();
 
@@ -256,10 +297,11 @@ export function flushPersistence(): void {
   if (activeStorageNamespace !== 'anonymous') {
     const activeTermId = getActiveTermId();
     state.setPersistenceStatus('SAVING');
-    saveCloudWorkspace(payload, activeTermId).then((res) => {
-      state.setPersistenceStatus(res.ok ? 'SAVED' : 'OFFLINE');
-    });
+    const res = await saveCloudWorkspace(payload, activeTermId);
+    state.setPersistenceStatus(res.ok ? 'SAVED' : 'OFFLINE');
+    return res;
   }
+  return { ok: true };
 }
 
 export type { PersistedWorkspace };

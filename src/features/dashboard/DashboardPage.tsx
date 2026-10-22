@@ -85,7 +85,7 @@ export function DashboardPage() {
     setApplyingPresetId(preset.id);
     try {
       const deptId = await applyPresetWithTimetable(preset, useWorkspaceStore.getState());
-      flushPersistence();
+      await flushPersistence();
       showToast("success", `Blueprint applied: ${preset.department.code}. Conflict-free timetable generated!`);
       navigate(`/departments/${deptId}/timetable`);
     } catch (err) {

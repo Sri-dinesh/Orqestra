@@ -1,7 +1,8 @@
 import type { WorkingDay } from '@/domain/enums';
-import type { CollegeDetails, PeriodTiming, TimetableConfiguration } from '@/domain/models';
+import type { CollegeDetails, PeriodTiming, Timetable, TimetableConfiguration } from '@/domain/models';
 import { DEFAULT_HARD_CONSTRAINTS, DEFAULT_SOFT_WEIGHTS, DEFAULT_GENERATION_SETTINGS } from '@/domain/policies';
 import { GenerationService } from '@/application/generation-service';
+import { buildConfigurationSnapshot } from '@/domain/configuration/normalize';
 import { useWorkspaceStore } from '@/state/stores/workspace-store';
 
 export interface PresetSubject {
@@ -606,7 +607,13 @@ export async function applyPresetWithTimetable(
     });
 
     if (result.timetable) {
-      store.upsertTimetable(result.timetable);
+      const timetableToSave: Timetable = {
+        ...result.timetable,
+        departmentId,
+        configurationSnapshot:
+          result.timetable.configurationSnapshot ?? buildConfigurationSnapshot(config),
+      };
+      store.upsertTimetable(timetableToSave);
       store.updateDepartment(departmentId, { status: 'READY' });
     }
   } catch (error) {

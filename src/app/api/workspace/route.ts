@@ -1,4 +1,4 @@
-import { and, eq, ne, notInArray } from 'drizzle-orm';
+import { and, eq, ne, notInArray, sql } from 'drizzle-orm';
 import { getDatabase } from '@/db';
 import {
   academicTerms,
@@ -446,37 +446,39 @@ export async function PUT(request: Request): Promise<Response> {
     }
     const deptIds = depts.map((d) => d.id);
 
-    for (const d of depts) {
+    if (depts.length > 0) {
+      const deptRows = depts.map((d) => ({
+        id: d.id,
+        userId: institutionId,
+        termId,
+        code: d.code,
+        name: d.name,
+        workingDays: d.workingDays,
+        periodsPerDay: d.periodsPerDay,
+        periodTimings: d.periodTimings,
+        effectiveFrom: d.effectiveFrom,
+        mentors: d.mentors,
+        status: d.status,
+        generationSettingsOverrides: overrides[d.id] ?? null,
+        createdAt: d.createdAt ? new Date(d.createdAt) : now,
+        updatedAt: now,
+      }));
+
       await database
         .insert(departments)
-        .values({
-          id: d.id,
-          userId: institutionId,
-          termId,
-          code: d.code,
-          name: d.name,
-          workingDays: d.workingDays,
-          periodsPerDay: d.periodsPerDay,
-          periodTimings: d.periodTimings,
-          effectiveFrom: d.effectiveFrom,
-          mentors: d.mentors,
-          status: d.status,
-          generationSettingsOverrides: overrides[d.id] ?? null,
-          createdAt: d.createdAt ? new Date(d.createdAt) : now,
-          updatedAt: now,
-        })
+        .values(deptRows)
         .onConflictDoUpdate({
           target: departments.id,
           set: {
-            code: d.code,
-            name: d.name,
-            workingDays: d.workingDays,
-            periodsPerDay: d.periodsPerDay,
-            periodTimings: d.periodTimings,
-            effectiveFrom: d.effectiveFrom,
-            mentors: d.mentors,
-            status: d.status,
-            generationSettingsOverrides: overrides[d.id] ?? null,
+            code: sql`excluded.code`,
+            name: sql`excluded.name`,
+            workingDays: sql`excluded.working_days`,
+            periodsPerDay: sql`excluded.periods_per_day`,
+            periodTimings: sql`excluded.period_timings`,
+            effectiveFrom: sql`excluded.effective_from`,
+            mentors: sql`excluded.mentors`,
+            status: sql`excluded.status`,
+            generationSettingsOverrides: sql`excluded.generation_settings_overrides`,
             updatedAt: now,
           },
         });
@@ -512,36 +514,38 @@ export async function PUT(request: Request): Promise<Response> {
     }
     const secIds = secs.map((s) => s.id);
 
-    for (const s of secs) {
+    if (secs.length > 0) {
+      const sectionRows = secs.map((s) => ({
+        id: s.id,
+        userId: institutionId,
+        termId,
+        departmentId: s.departmentId,
+        name: s.name,
+        year: s.year,
+        semester: s.semester,
+        studentCount: s.studentCount,
+        subjectRequirements: s.subjectRequirements,
+        roomNo: s.roomNo,
+        classAdvisor: s.classAdvisor,
+        active: s.active,
+        createdAt: now,
+        updatedAt: now,
+      }));
+
       await database
         .insert(sections)
-        .values({
-          id: s.id,
-          userId: institutionId,
-          termId,
-          departmentId: s.departmentId,
-          name: s.name,
-          year: s.year,
-          semester: s.semester,
-          studentCount: s.studentCount,
-          subjectRequirements: s.subjectRequirements,
-          roomNo: s.roomNo,
-          classAdvisor: s.classAdvisor,
-          active: s.active,
-          createdAt: now,
-          updatedAt: now,
-        })
+        .values(sectionRows)
         .onConflictDoUpdate({
           target: sections.id,
           set: {
-            name: s.name,
-            year: s.year,
-            semester: s.semester,
-            studentCount: s.studentCount,
-            subjectRequirements: s.subjectRequirements,
-            roomNo: s.roomNo,
-            classAdvisor: s.classAdvisor,
-            active: s.active,
+            name: sql`excluded.name`,
+            year: sql`excluded.year`,
+            semester: sql`excluded.semester`,
+            studentCount: sql`excluded.student_count`,
+            subjectRequirements: sql`excluded.subject_requirements`,
+            roomNo: sql`excluded.room_no`,
+            classAdvisor: sql`excluded.class_advisor`,
+            active: sql`excluded.active`,
             updatedAt: now,
           },
         });
@@ -600,38 +604,40 @@ export async function PUT(request: Request): Promise<Response> {
     }
     const subIds = subs.map((s) => s.id);
 
-    for (const s of subs) {
+    if (subs.length > 0) {
+      const subRows = subs.map((s) => ({
+        id: s.id,
+        userId: institutionId,
+        termId,
+        departmentId: s.departmentId,
+        code: s.code,
+        name: s.name,
+        type: s.type,
+        courseCode: s.courseCode,
+        sessionsPerWeek: s.sessionsPerWeek,
+        durationPeriods: s.durationPeriods,
+        eligibleFacultyIds: s.eligibleFacultyIds,
+        eligibleSectionIds: s.eligibleSectionIds,
+        active: s.active,
+        createdAt: now,
+        updatedAt: now,
+      }));
+
       await database
         .insert(subjects)
-        .values({
-          id: s.id,
-          userId: institutionId,
-          termId,
-          departmentId: s.departmentId,
-          code: s.code,
-          name: s.name,
-          type: s.type,
-          courseCode: s.courseCode,
-          sessionsPerWeek: s.sessionsPerWeek,
-          durationPeriods: s.durationPeriods,
-          eligibleFacultyIds: s.eligibleFacultyIds,
-          eligibleSectionIds: s.eligibleSectionIds,
-          active: s.active,
-          createdAt: now,
-          updatedAt: now,
-        })
+        .values(subRows)
         .onConflictDoUpdate({
           target: subjects.id,
           set: {
-            code: s.code,
-            name: s.name,
-            type: s.type,
-            courseCode: s.courseCode,
-            sessionsPerWeek: s.sessionsPerWeek,
-            durationPeriods: s.durationPeriods,
-            eligibleFacultyIds: s.eligibleFacultyIds,
-            eligibleSectionIds: s.eligibleSectionIds,
-            active: s.active,
+            code: sql`excluded.code`,
+            name: sql`excluded.name`,
+            type: sql`excluded.type`,
+            courseCode: sql`excluded.course_code`,
+            sessionsPerWeek: sql`excluded.sessions_per_week`,
+            durationPeriods: sql`excluded.duration_periods`,
+            eligibleFacultyIds: sql`excluded.eligible_faculty_ids`,
+            eligibleSectionIds: sql`excluded.eligible_section_ids`,
+            active: sql`excluded.active`,
             updatedAt: now,
           },
         });
@@ -690,38 +696,40 @@ export async function PUT(request: Request): Promise<Response> {
     }
     const facIds = facs.map((f) => f.id);
 
-    for (const f of facs) {
+    if (facs.length > 0) {
+      const facRows = facs.map((f) => ({
+        id: f.id,
+        userId: institutionId,
+        termId,
+        departmentId: f.departmentId,
+        facultyCode: f.facultyCode,
+        name: f.name,
+        subjectIds: f.subjectIds,
+        sectionIds: f.sectionIds,
+        availability: f.availability,
+        preferredSlots: f.preferredSlots,
+        maxPeriodsPerDay: f.maxPeriodsPerDay,
+        maxPeriodsPerWeek: f.maxPeriodsPerWeek,
+        active: f.active,
+        createdAt: now,
+        updatedAt: now,
+      }));
+
       await database
         .insert(faculty)
-        .values({
-          id: f.id,
-          userId: institutionId,
-          termId,
-          departmentId: f.departmentId,
-          facultyCode: f.facultyCode,
-          name: f.name,
-          subjectIds: f.subjectIds,
-          sectionIds: f.sectionIds,
-          availability: f.availability,
-          preferredSlots: f.preferredSlots,
-          maxPeriodsPerDay: f.maxPeriodsPerDay,
-          maxPeriodsPerWeek: f.maxPeriodsPerWeek,
-          active: f.active,
-          createdAt: now,
-          updatedAt: now,
-        })
+        .values(facRows)
         .onConflictDoUpdate({
           target: faculty.id,
           set: {
-            facultyCode: f.facultyCode,
-            name: f.name,
-            subjectIds: f.subjectIds,
-            sectionIds: f.sectionIds,
-            availability: f.availability,
-            preferredSlots: f.preferredSlots,
-            maxPeriodsPerDay: f.maxPeriodsPerDay,
-            maxPeriodsPerWeek: f.maxPeriodsPerWeek,
-            active: f.active,
+            facultyCode: sql`excluded.faculty_code`,
+            name: sql`excluded.name`,
+            subjectIds: sql`excluded.subject_ids`,
+            sectionIds: sql`excluded.section_ids`,
+            availability: sql`excluded.availability`,
+            preferredSlots: sql`excluded.preferred_slots`,
+            maxPeriodsPerDay: sql`excluded.max_periods_per_day`,
+            maxPeriodsPerWeek: sql`excluded.max_periods_per_week`,
+            active: sql`excluded.active`,
             updatedAt: now,
           },
         });
@@ -780,31 +788,33 @@ export async function PUT(request: Request): Promise<Response> {
     }
     const rmIds = rms.map((r) => r.id);
 
-    for (const r of rms) {
+    if (rms.length > 0) {
+      const roomRows = rms.map((r) => ({
+        id: r.id,
+        userId: institutionId,
+        termId,
+        departmentId: r.departmentId ?? null,
+        code: r.code,
+        name: r.name,
+        capacity: r.capacity,
+        type: r.type,
+        active: r.active,
+        createdAt: now,
+        updatedAt: now,
+      }));
+
       await database
         .insert(rooms)
-        .values({
-          id: r.id,
-          userId: institutionId,
-          termId,
-          departmentId: r.departmentId ?? null,
-          code: r.code,
-          name: r.name,
-          capacity: r.capacity,
-          type: r.type,
-          active: r.active,
-          createdAt: now,
-          updatedAt: now,
-        })
+        .values(roomRows)
         .onConflictDoUpdate({
           target: rooms.id,
           set: {
-            departmentId: r.departmentId ?? null,
-            code: r.code,
-            name: r.name,
-            capacity: r.capacity,
-            type: r.type,
-            active: r.active,
+            departmentId: sql`excluded.department_id`,
+            code: sql`excluded.code`,
+            name: sql`excluded.name`,
+            capacity: sql`excluded.capacity`,
+            type: sql`excluded.type`,
+            active: sql`excluded.active`,
             updatedAt: now,
           },
         });
@@ -861,31 +871,33 @@ export async function PUT(request: Request): Promise<Response> {
       const brks = (payload.breaks as Break[]) ?? [];
       const brkIds = brks.map((b) => b.id);
 
-      for (const b of brks) {
+      if (brks.length > 0) {
+        const breakRows = brks.map((b) => ({
+          id: b.id,
+          userId: institutionId,
+          termId,
+          name: b.name,
+          dayIndex: b.dayIndex,
+          startPeriod: b.startPeriod,
+          durationPeriods: b.durationPeriods,
+          startTime: b.startTime,
+          endTime: b.endTime,
+          createdAt: now,
+          updatedAt: now,
+        }));
+
         await database
           .insert(breaks)
-          .values({
-            id: b.id,
-            userId: institutionId,
-            termId,
-            name: b.name,
-            dayIndex: b.dayIndex,
-            startPeriod: b.startPeriod,
-            durationPeriods: b.durationPeriods,
-            startTime: b.startTime,
-            endTime: b.endTime,
-            createdAt: now,
-            updatedAt: now,
-          })
+          .values(breakRows)
           .onConflictDoUpdate({
             target: breaks.id,
             set: {
-              name: b.name,
-              dayIndex: b.dayIndex,
-              startPeriod: b.startPeriod,
-              durationPeriods: b.durationPeriods,
-              startTime: b.startTime,
-              endTime: b.endTime,
+              name: sql`excluded.name`,
+              dayIndex: sql`excluded.day_index`,
+              startPeriod: sql`excluded.start_period`,
+              durationPeriods: sql`excluded.duration_periods`,
+              startTime: sql`excluded.start_time`,
+              endTime: sql`excluded.end_time`,
               updatedAt: now,
             },
           });
@@ -978,6 +990,19 @@ export async function PUT(request: Request): Promise<Response> {
           ),
         );
 
+      const snapshot = t.configurationSnapshot ?? {
+        fingerprint: 'fallback',
+        department: { id: t.departmentId, code: '', name: '', workingDays: [], periodsPerDay: 0 },
+        sections: [],
+        subjects: [],
+        faculty: [],
+        breaks: [],
+        rooms: [],
+        hardConstraints: {},
+        softWeights: {},
+        generationSettings: {},
+      };
+
       await database
         .insert(timetables)
         .values({
@@ -987,7 +1012,7 @@ export async function PUT(request: Request): Promise<Response> {
           departmentId: t.departmentId,
           status: t.status,
           revision: t.revision,
-          configurationSnapshot: t.configurationSnapshot,
+          configurationSnapshot: snapshot,
           entries: t.entries,
           validationSummary: t.validationSummary,
           generationMetadata: t.generationMetadata,
@@ -1000,7 +1025,7 @@ export async function PUT(request: Request): Promise<Response> {
           set: {
             status: t.status,
             revision: t.revision,
-            configurationSnapshot: t.configurationSnapshot,
+            configurationSnapshot: snapshot,
             entries: t.entries,
             validationSummary: t.validationSummary,
             generationMetadata: t.generationMetadata,
