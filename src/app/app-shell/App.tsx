@@ -22,12 +22,14 @@ import { MasterTimetablePage } from "@/features/timetable-editor/MasterTimetable
 import { SettingsPage } from "@/features/settings/SettingsPage";
 import { SchedulePortalPage } from "@/features/portal/SchedulePortalPage";
 import { NotFoundPage } from "@/components/ui/NotFoundPage";
-import { usePersistence } from "@/hooks/usePersistence";
 import { useWorkspaceStore } from "@/state/stores/workspace-store";
 import { Toast } from "@/components/ui/Toast";
 import { DashboardPage } from "@/features/dashboard/DashboardPage";
 import { SemesterSwitcherModal } from "@/components/ui/SemesterSwitcherModal";
 import { getActiveTerm } from "@/storage/term-manager";
+import { AuthPage } from "@/features/auth/AuthPage";
+import { RequireAuth } from "@/features/auth/RequireAuth";
+import { AccountMenu } from "@/features/auth/AccountMenu";
 
 const navLinkCls = ({ isActive }: { isActive: boolean }) =>
   `px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0047FF] ${
@@ -37,7 +39,6 @@ const navLinkCls = ({ isActive }: { isActive: boolean }) =>
   }`;
 
 export default function App() {
-  usePersistence();
   const location = useLocation();
   const navigate = useNavigate();
   const collegeName = useWorkspaceStore((s) => s.collegeDetails.name);
@@ -93,10 +94,11 @@ export default function App() {
   }, [location.pathname]);
 
   const isLanding = location.pathname === "/";
+  const isPublicRoute = isLanding || location.pathname.startsWith("/auth/");
 
   return (
     <div className="min-h-screen bg-[#F7F8F5] text-[#111315] font-sans">
-      {!isLanding && (
+      {!isPublicRoute && (
         <header className="sticky top-0 z-50">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-3">
             <div className="flex items-center justify-between">
@@ -154,6 +156,7 @@ export default function App() {
                 <NavLink className={navLinkCls} to="/settings">
                   Settings
                 </NavLink>
+                <AccountMenu />
               </nav>
             </div>
           </div>
@@ -161,53 +164,60 @@ export default function App() {
       )}
 
       <main
-        className={`w-full ${isLanding ? "" : "mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8"}`}
+        className={`w-full ${isPublicRoute ? "" : "mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8"}`}
         aria-live="polite"
       >
         <ErrorBoundary area="application">
           <Routes location={location}>
             <Route path="/" element={<LandingPage />} />
-            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/auth/sign-in" element={<AuthPage pathname="SIGN_IN" />} />
+            <Route path="/auth/sign-up" element={<AuthPage pathname="SIGN_UP" />} />
+            <Route path="/auth/forgot-password" element={<AuthPage pathname="FORGOT_PASSWORD" />} />
+            <Route path="/auth/reset-password" element={<AuthPage pathname="RESET_PASSWORD" />} />
 
-            <Route path="/departments" element={<DepartmentConfigPage />} />
-            <Route
-              path="/departments/:departmentId"
-              element={<Navigate to="configuration" replace />}
-            />
-            <Route
-              path="/departments/:departmentId/configuration"
-              element={<DepartmentConfigPage />}
-            />
-            <Route
-              path="/departments/:departmentId/subjects"
-              element={<SubjectsPage />}
-            />
-            <Route
-              path="/departments/:departmentId/faculty"
-              element={<FacultyPage />}
-            />
-            <Route
-              path="/departments/:departmentId/rooms"
-              element={<RoomsPage />}
-            />
-            <Route
-              path="/departments/:departmentId/generate"
-              element={<GeneratePage />}
-            />
-            <Route
-              path="/departments/:departmentId/timetable"
-              element={<TimetablePage />}
-            />
-            <Route
-              path="/departments/:departmentId/faculty-timetable"
-              element={<FacultyTimetablePage />}
-            />
-            <Route
-              path="/departments/:departmentId/master-timetable"
-              element={<MasterTimetablePage />}
-            />
-            <Route path="/schedule-portal" element={<SchedulePortalPage />} />
-            <Route path="/settings" element={<SettingsPage />} />
+            <Route element={<RequireAuth />}>
+              <Route path="/dashboard" element={<DashboardPage />} />
+
+              <Route path="/departments" element={<DepartmentConfigPage />} />
+              <Route
+                path="/departments/:departmentId"
+                element={<Navigate to="configuration" replace />}
+              />
+              <Route
+                path="/departments/:departmentId/configuration"
+                element={<DepartmentConfigPage />}
+              />
+              <Route
+                path="/departments/:departmentId/subjects"
+                element={<SubjectsPage />}
+              />
+              <Route
+                path="/departments/:departmentId/faculty"
+                element={<FacultyPage />}
+              />
+              <Route
+                path="/departments/:departmentId/rooms"
+                element={<RoomsPage />}
+              />
+              <Route
+                path="/departments/:departmentId/generate"
+                element={<GeneratePage />}
+              />
+              <Route
+                path="/departments/:departmentId/timetable"
+                element={<TimetablePage />}
+              />
+              <Route
+                path="/departments/:departmentId/faculty-timetable"
+                element={<FacultyTimetablePage />}
+              />
+              <Route
+                path="/departments/:departmentId/master-timetable"
+                element={<MasterTimetablePage />}
+              />
+              <Route path="/schedule-portal" element={<SchedulePortalPage />} />
+              <Route path="/settings" element={<SettingsPage />} />
+            </Route>
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </ErrorBoundary>
