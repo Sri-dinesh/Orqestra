@@ -1,6 +1,7 @@
 import { createRemoteJWKSet, jwtVerify, type JWTPayload } from 'jose';
-import { sql } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 import { getDatabase } from '../../src/db';
+import { institutionMembers, userProfiles, type InstitutionRole } from '../../src/db/schema';
 
 export interface AuthenticatedUser {
   id: string;
@@ -145,5 +146,165 @@ export async function requireAuthenticatedUser(request: Request): Promise<Authen
   throw new Response(
     JSON.stringify({ error: 'Invalid or expired authentication session.' }),
     { status: 401, headers: { 'Content-Type': 'application/json' } },
+  );
+}
+
+export interface InstitutionalContext {
+  user: AuthenticatedUser;
+  institutionId: string;
+  role: InstitutionRole;
+  departmentId: string | null;
+  facultyId: string | null;
+  isOwner: boolean;
+}
+
+export async function resolveInstitutionalContext(
+  request: Request,
+  targetInstitutionId?: string | null,
+): Promise<InstitutionalContext> {
+  const user = await requireAuthenticatedUser(request);
+  const database = getDatabase();
+
+  // If a specific institution is requested, check membership there
+  if (targetInstitutionId) {
+    const [membership] = await database
+      .select()
+      .from(institutionMembers)
+      .where(
+        and(
+          eq(institutionMembers.userId, user.id),
+          eq(institutionMembers.institutionId, targetInstitutionId),
+          eq(institutionMembers.status, 'ACTIVE'),
+        ),
+      );
+
+    if (membership) {
+      return {
+        user,
+        institutionId: membership.institutionId,
+        role: membership.role,
+        departmentId: membership.departmentId,
+        facultyId: membership.facultyId,
+        isOwner: membership.institutionId === user.id,
+      };
+    }
+
+    if (targetInstitutionId === user.id) {
+      return {
+        user,
+        institutionId: user.id,
+        role: 'ADMIN',
+        departmentId: null,
+        facultyId: null,
+        isOwner: true,
+      };
+    }
+
+    throw new Response(
+      JSON.stringify({ error: 'You are not an authorized member of this institution.' }),
+      { status: 403, headers: { 'Content-Type': 'application/json' } },
+    );
+  }
+
+  // Otherwise find the active memberships for this user
+  const memberships = await database
+    .select()
+    .from(institutionMembers)
+    .where(
+      and(
+        eq(institutionMembers.userId, user.id),
+        eq(institutionMembers.status, 'ACTIVE'),
+      ),
+    );
+
+  if (memberships.length > 0) {
+    // Prefer admin membership if available, otherwise first active membership
+    const membership = memberships.find((m) => m.role === 'ADMIN') || memberships[0];
+    return {
+      user,
+      institutionId: membership.institutionId,
+      role: membership.role,
+      departmentId: membership.departmentId,
+      facultyId: membership.facultyId,
+      isOwner: membership.institutionId === user.id,
+    };
+  }
+
+  // Default: user is primary owner/ADMIN of their own institution
+  return {
+    user,
+    institutionId: user.id,
+    role: 'ADMIN',
+    departmentId: null,
+    facultyId: null,
+    isOwner: true,
+  };
+}
+
+export function requireRole(
+  context: InstitutionalContext,
+  allowedRoles: InstitutionRole[],
+): void {
+  if (!allowedRoles.includes(context.role)) {
+    throw new Response(
+      JSON.stringify({
+        error: `Access denied. Requires one of: ${allowedRoles.join(', ')} (your role is ${context.role}).`,
+        code: 'INSUFFICIENT_PERMISSIONS',
+      }),
+      { status: 403, headers: { 'Content-Type': 'application/json' } },
+    );
+  }
+}
+
+export function assertDepartmentAccess(
+  context: InstitutionalContext,
+  departmentId: string,
+): void {
+  if (context.role === 'ADMIN') return;
+
+  if (context.role === 'HOD') {
+    if (context.departmentId === departmentId) return;
+    throw new Response(
+      JSON.stringify({
+        error: 'Access denied. You may only manage configurations and timetables for your assigned department.',
+        code: 'DEPARTMENT_ACCESS_DENIED',
+      }),
+      { status: 403, headers: { 'Content-Type': 'application/json' } },
+    );
+  }
+
+  throw new Response(
+    JSON.stringify({
+      error: 'Access denied. Department administration requires ADMIN or HOD role.',
+      code: 'DEPARTMENT_ADMIN_REQUIRED',
+    }),
+    { status: 403, headers: { 'Content-Type': 'application/json' } },
+  );
+}
+
+export function assertFacultyAccess(
+  context: InstitutionalContext,
+  facultyId: string,
+): void {
+  if (context.role === 'ADMIN') return;
+  if (context.role === 'HOD') return;
+
+  if (context.role === 'FACULTY') {
+    if (context.facultyId === facultyId) return;
+    throw new Response(
+      JSON.stringify({
+        error: 'Access denied. You may only view and modify your own faculty profile and availability.',
+        code: 'FACULTY_ACCESS_DENIED',
+      }),
+      { status: 403, headers: { 'Content-Type': 'application/json' } },
+    );
+  }
+
+  throw new Response(
+    JSON.stringify({
+      error: 'Access denied. Unauthorized role.',
+      code: 'UNAUTHORIZED_ROLE',
+    }),
+    { status: 403, headers: { 'Content-Type': 'application/json' } },
   );
 }
