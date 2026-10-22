@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { Suspense, useEffect, useState, type ReactNode } from 'react';
 import { Navigate, Outlet, useLocation, Link } from 'react-router-dom';
 import { RefreshCw, LogIn, ShieldAlert } from 'lucide-react';
 import { syncCurrentUser } from '@/auth/server-api';
@@ -58,14 +58,16 @@ function AuthBootstrap({ userId, children }: { userId: string; children: ReactNo
   return <>{children}</>;
 }
 
-export function RequireAuth() {
+function RequireAuthContent({ children }: { children: ReactNode }) {
   const location = useLocation();
   const { data, isPending, error, refetch } = useAuthSession();
 
   if (isPending) return <AuthLoading />;
 
   if (error) {
-    const isMissingEnv = !import.meta.env.VITE_NEON_AUTH_URL;
+    const isMissingEnv =
+      !process.env.NEXT_PUBLIC_NEON_AUTH_URL &&
+      !(typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_NEON_AUTH_URL);
 
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#F7F8F5] px-4 py-12">
@@ -114,7 +116,23 @@ export function RequireAuth() {
 
   return (
     <AuthBootstrap key={data.user.id} userId={data.user.id}>
-      <Outlet />
+      {children}
     </AuthBootstrap>
+  );
+}
+
+export function RequireAuthWrapper({ children }: { children: ReactNode }) {
+  return (
+    <Suspense fallback={<AuthLoading />}>
+      <RequireAuthContent>{children}</RequireAuthContent>
+    </Suspense>
+  );
+}
+
+export function RequireAuth() {
+  return (
+    <RequireAuthWrapper>
+      <Outlet />
+    </RequireAuthWrapper>
   );
 }

@@ -1,7 +1,11 @@
 import { createInternalNeonAuth } from '@neondatabase/neon-js/auth';
 import { BetterAuthReactAdapter } from '@neondatabase/neon-js/auth/react/adapters';
 
-const neonAuthUrl = import.meta.env.VITE_NEON_AUTH_URL ?? '';
+const neonAuthUrl =
+  process.env.NEXT_PUBLIC_NEON_AUTH_URL ??
+  process.env.VITE_NEON_AUTH_URL ??
+  (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_NEON_AUTH_URL) ??
+  '';
 
 /**
  * Browser-side Neon Auth client.
