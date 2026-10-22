@@ -16,7 +16,7 @@ import type { WorkingDay } from "@/domain/enums";
 import { BUILT_IN_PRESETS, applyPresetWithTimetable } from "@/application/presets";
 import { useEditorStore } from "@/state/stores/editor-store";
 import { flushPersistence } from "@/hooks/usePersistence";
-import { CheckCircle2, Circle, Sparkles } from "lucide-react";
+import { CheckCircle2, Circle, Sparkles, Trash2 } from "lucide-react";
 
 type DeptStatus =
   | "NOT_CONFIGURED"
@@ -80,6 +80,28 @@ export function DashboardPage() {
   const showToast = useEditorStore((s) => s.showToast);
   const [showCreate, setShowCreate] = useState(false);
   const [applyingPresetId, setApplyingPresetId] = useState<string | null>(null);
+  const [deletingTimetable, setDeletingTimetable] = useState<{
+    id: string;
+    deptName: string;
+    deptCode: string;
+  } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDeleteTimetable = async () => {
+    if (!deletingTimetable) return;
+    setIsDeleting(true);
+    try {
+      state.removeTimetable(deletingTimetable.id);
+      await flushPersistence();
+      showToast("success", `Timetable for ${deletingTimetable.deptCode} deleted.`);
+      setDeletingTimetable(null);
+    } catch (err) {
+      console.error(err);
+      showToast("error", "Failed to delete timetable.");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   const handleApplyPreset = async (preset: (typeof BUILT_IN_PRESETS)[0]) => {
     setApplyingPresetId(preset.id);
@@ -447,6 +469,24 @@ export function DashboardPage() {
                           {secondaryLabel}
                         </Button>
                       )}
+                      {hasTimetable && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() =>
+                            setDeletingTimetable({
+                              id: timetable!.id,
+                              deptName: department.name,
+                              deptCode: department.code,
+                            })
+                          }
+                          className="text-red-500 hover:text-red-700 hover:bg-red-50 px-2.5"
+                          title="Delete timetable"
+                          aria-label={`Delete timetable for ${department.code}`}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -504,6 +544,49 @@ export function DashboardPage() {
           ))}
         </div>
       </Card>
+
+      {deletingTimetable && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-[#E5E8E0] space-y-4 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center gap-3 text-red-600">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 shrink-0">
+                <Trash2 className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-[#111315]">Delete Timetable</h3>
+                <p className="text-xs text-body-gray">This schedule will be permanently deleted</p>
+              </div>
+            </div>
+
+            <p className="text-sm text-ink leading-relaxed">
+              Are you sure you want to delete the active timetable for{" "}
+              <strong>
+                {deletingTimetable.deptName} ({deletingTimetable.deptCode})
+              </strong>
+              ? The generated schedule and its revision history will be removed from your workspace and cloud storage.
+            </p>
+
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#E5E8E0]">
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => setDeletingTimetable(null)}
+                disabled={isDeleting}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="danger"
+                size="sm"
+                onClick={handleDeleteTimetable}
+                disabled={isDeleting}
+              >
+                {isDeleting ? "Deleting…" : "Yes, Delete Timetable"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

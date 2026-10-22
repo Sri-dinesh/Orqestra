@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Share2 } from 'lucide-react';
+import { Share2, Trash2 } from 'lucide-react';
 import { Badge, Button, Card, EditModal, Field, PageHeader, Select } from '@/components/ui/primitives';
 import { ConflictModal } from '@/components/ui/ConflictModal';
 import { ExportPreviewModal } from '@/components/ui/ExportPreviewModal';
@@ -23,6 +23,7 @@ import type { TimetableConfiguration } from '@/domain/models';
 import { DepartmentNav } from '@/components/ui/DepartmentNav';
 import { publishTimetableToCloud } from '@/storage/cloud-sync';
 import { getActiveTermId } from '@/storage/term-manager';
+import { flushPersistence } from '@/hooks/usePersistence';
 
 interface CellVm {
   dayIndex: number;
@@ -82,6 +83,24 @@ export function TimetablePage() {
   const [substituteModalOpen, setSubstituteModalOpen] = useState(false);
   const [substituteTargetEntryId, setSubstituteTargetEntryId] = useState<string | null>(null);
   const [publishing, setPublishing] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDeleteTimetable = async () => {
+    if (!timetable) return;
+    setDeleting(true);
+    try {
+      state.removeTimetable(timetable.id);
+      await flushPersistence();
+      editor.showToast('success', `Timetable for ${department?.code ?? 'department'} has been deleted.`);
+      setShowDeleteConfirm(false);
+    } catch (err) {
+      console.error(err);
+      editor.showToast('error', 'Failed to delete timetable.');
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   const handlePublish = async () => {
     if (!timetable) return;
@@ -597,6 +616,15 @@ export function TimetablePage() {
             <Link to={`/departments/${departmentId}/generate`}>
               <Button size="sm">Regenerate</Button>
             </Link>
+            <Button
+              variant="danger"
+              size="sm"
+              onClick={() => setShowDeleteConfirm(true)}
+              className="inline-flex items-center gap-1.5"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>Delete timetable</span>
+            </Button>
           </>
         }
       />
@@ -1058,6 +1086,46 @@ export function TimetablePage() {
           });
         }}
       />
+
+      {showDeleteConfirm && timetable && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-[#E5E8E0] space-y-4 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center gap-3 text-red-600">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 shrink-0">
+                <Trash2 className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-[#111315]">Delete Timetable</h3>
+                <p className="text-xs text-body-gray">This schedule will be permanently deleted</p>
+              </div>
+            </div>
+
+            <p className="text-sm text-ink leading-relaxed">
+              Are you sure you want to delete the active timetable for{' '}
+              <strong>{department.name} ({department.code})</strong>? The generated schedule and its revision history will be removed.
+            </p>
+
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#E5E8E0]">
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={deleting}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="danger"
+                size="sm"
+                onClick={handleDeleteTimetable}
+                disabled={deleting}
+              >
+                {deleting ? 'Deleting…' : 'Yes, Delete Timetable'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <Card title={`Version history (${versionHistory.length})`}>
         {versionHistory.length === 0 ? (

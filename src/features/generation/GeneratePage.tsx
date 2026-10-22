@@ -14,9 +14,10 @@ import type { TimetableConfiguration } from '@/domain/models';
 import { DepartmentNav } from '@/components/ui/DepartmentNav';
 import { PeriodTimingsModal } from '@/components/ui/PeriodTimingsModal';
 import { DepartmentNotFound } from '@/components/ui/DepartmentNotFound';
-import { Clock, Sparkles, AlertTriangle, ArrowRight } from 'lucide-react';
+import { Clock, Sparkles, AlertTriangle, ArrowRight, Trash2 } from 'lucide-react';
 import { saveTimetableToCloud } from '@/storage/cloud-sync';
 import { getActiveTermId } from '@/storage/term-manager';
+import { flushPersistence } from '@/hooks/usePersistence';
 
 export function GeneratePage() {
   const { departmentId } = useParams();
@@ -60,6 +61,24 @@ export function GeneratePage() {
 
   const [seedInput, setSeedInput] = useState('');
   const [showRegenConfirm, setShowRegenConfirm] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDeleteTimetable = async () => {
+    if (!existingTimetable || !department) return;
+    setDeleting(true);
+    try {
+      state.removeTimetable(existingTimetable.id);
+      await flushPersistence();
+      editor.showToast('success', `Timetable for ${department.code} has been deleted.`);
+      setShowDeleteModal(false);
+    } catch (err) {
+      console.error(err);
+      editor.showToast('error', 'Failed to delete timetable.');
+    } finally {
+      setDeleting(false);
+    }
+  };
   const [timingsModalOpen, setTimingsModalOpen] = useState(false);
   const departmentEarly = state.departments.find((d) => d.id === departmentId);
   const overrides = departmentEarly ? state.generationSettingsOverrides[departmentEarly.id] : undefined;
@@ -523,10 +542,25 @@ export function GeneratePage() {
             </div>
           )}
 
-          <div className="mt-5 flex gap-2">
+          <div className="mt-5 flex flex-wrap items-center gap-2">
             <Button onClick={handleStartClick} disabled={running || preflight.verdict !== 'READY'} aria-busy={running}>
               {running ? 'Generating…' : existingTimetable ? 'Regenerate timetable' : 'Generate timetable'}
             </Button>
+            {existingTimetable && !running && (
+              <>
+                <Link to={`/departments/${department.id}/timetable`}>
+                  <Button variant="secondary">View active timetable →</Button>
+                </Link>
+                <Button
+                  variant="danger"
+                  onClick={() => setShowDeleteModal(true)}
+                  className="inline-flex items-center gap-1.5"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Delete timetable</span>
+                </Button>
+              </>
+            )}
             {running && (
               <Button
                 variant="danger"
@@ -538,6 +572,46 @@ export function GeneratePage() {
               </Button>
             )}
           </div>
+
+          {showDeleteModal && existingTimetable && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+              <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-[#E5E8E0] space-y-4 animate-in fade-in zoom-in-95 duration-150">
+                <div className="flex items-center gap-3 text-red-600">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 shrink-0">
+                    <Trash2 className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-[#111315]">Delete Timetable</h3>
+                    <p className="text-xs text-body-gray">This schedule will be permanently deleted</p>
+                  </div>
+                </div>
+
+                <p className="text-sm text-ink leading-relaxed">
+                  Are you sure you want to delete the active timetable for{' '}
+                  <strong>{department.name} ({department.code})</strong>? The generated schedule and its revision history will be removed.
+                </p>
+
+                <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#E5E8E0]">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => setShowDeleteModal(false)}
+                    disabled={deleting}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    onClick={handleDeleteTimetable}
+                    disabled={deleting}
+                  >
+                    {deleting ? 'Deleting…' : 'Yes, Delete Timetable'}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
         </Card>
 
         <Card title="Generation state">

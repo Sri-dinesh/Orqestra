@@ -64,6 +64,7 @@ export interface WorkspaceState {
   upsertTimetable: (timetable: Timetable) => void;
   setTimetableStatus: (id: string, status: Timetable['status']) => void;
   updateTimetable: (id: string, patch: Partial<Timetable>) => void;
+  removeTimetable: (idOrDepartmentId: string) => void;
 
   addRoom: (input: Omit<Room, 'id' | 'active'>) => Room;
   updateRoom: (id: string, patch: Partial<Room>) => void;
@@ -216,6 +217,26 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
         t.id === id ? ({ ...t, ...patch, updatedAt: new Date().toISOString() } as unknown as Timetable) : t,
       ),
     })),
+
+  removeTimetable: (idOrDepartmentId) =>
+    set((s) => {
+      const target = s.timetables.find(
+        (t) => t.id === idOrDepartmentId || t.departmentId === idOrDepartmentId,
+      );
+      const nextTimetables = s.timetables.filter(
+        (t) => t.id !== idOrDepartmentId && t.departmentId !== idOrDepartmentId,
+      );
+      const deptId = target?.departmentId ?? idOrDepartmentId;
+      const nextDepartments = s.departments.map((d) =>
+        d.id === deptId && d.status !== 'ARCHIVED'
+          ? { ...d, status: 'READY' as const }
+          : d,
+      );
+      return {
+        timetables: nextTimetables,
+        departments: nextDepartments,
+      };
+    }),
 
   addRoom: (input) => {
     const room = { ...input, id: generateId('room'), active: true };
