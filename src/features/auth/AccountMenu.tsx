@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { LogOut, Settings, Calendar, ChevronDown, ShieldCheck } from 'lucide-react';
+import { LogOut, Settings, Calendar, ChevronDown, ShieldCheck, Users } from 'lucide-react';
 import { authClient } from '@/auth/client';
 import { useAuthSession, notifyAuthChange } from '@/auth/session';
 import { clearInMemoryWorkspace } from '@/hooks/usePersistence';
+import { useWorkspaceStore } from '@/state/stores/workspace-store';
 
 export function AccountMenu() {
   const navigate = useNavigate();
@@ -11,6 +12,14 @@ export function AccountMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  const membership = useWorkspaceStore((s) => s.membership);
+  const departments = useWorkspaceStore((s) => s.departments);
+  const role = membership?.role ?? 'ADMIN';
+  const assignedDept = membership?.departmentId
+    ? departments.find((d) => d.id === membership.departmentId)
+    : null;
+  const deptLabel = assignedDept ? assignedDept.code || assignedDept.name : null;
 
   const userName = data?.user?.name || '';
   const userEmail = data?.user?.email || '';
@@ -97,6 +106,19 @@ export function AccountMenu() {
         <span className="hidden max-w-[130px] truncate text-left text-xs font-medium text-[#111315] sm:inline">
           {displayName}
         </span>
+        {role === 'ADMIN' ? (
+          <span className="hidden rounded-md bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-semibold text-amber-700 border border-amber-500/20 sm:inline">
+            Admin
+          </span>
+        ) : role === 'HOD' ? (
+          <span className="hidden rounded-md bg-blue-500/10 px-1.5 py-0.5 text-[10px] font-semibold text-blue-700 border border-blue-500/20 sm:inline">
+            HOD {deptLabel ? `· ${deptLabel}` : ''}
+          </span>
+        ) : (
+          <span className="hidden rounded-md bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-700 border border-emerald-500/20 sm:inline">
+            Faculty
+          </span>
+        )}
         <ChevronDown
           className={`h-3.5 w-3.5 text-[#71767B] transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
           aria-hidden="true"
@@ -128,14 +150,36 @@ export function AccountMenu() {
                 )}
               </div>
             </div>
-            <div className="mt-2.5 flex items-center gap-1.5 border-t border-[#E5E8E0] pt-2 text-[10px] font-medium text-emerald-700">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span>Institutional Workspace Active</span>
+            <div className="mt-2.5 flex items-center justify-between border-t border-[#E5E8E0] pt-2 text-[10px] font-medium text-[#71767B]">
+              <div className="flex items-center gap-1.5">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="font-semibold text-emerald-800">
+                  {role === 'ADMIN'
+                    ? 'Institution Admin'
+                    : role === 'HOD'
+                    ? `HOD · ${deptLabel || 'Dept'}`
+                    : 'Teaching Faculty'}
+                </span>
+                <span className="hidden sm:inline">· Institutional Workspace Active</span>
+              </div>
+              <span className="text-[10px] uppercase tracking-wide text-[#71767B]">{role}</span>
             </div>
           </div>
 
           {/* Quick Links */}
           <div className="mt-1 space-y-0.5">
+            {role === 'ADMIN' && (
+              <Link
+                to="/settings?tab=team"
+                onClick={() => setIsOpen(false)}
+                role="menuitem"
+                className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-medium text-[#30363D] hover:bg-black/5 hover:text-[#111315] transition-colors"
+              >
+                <Users className="h-4 w-4 text-[#71767B]" />
+                <span>Team & Access Control</span>
+              </Link>
+            )}
+
             <Link
               to="/settings"
               onClick={() => setIsOpen(false)}

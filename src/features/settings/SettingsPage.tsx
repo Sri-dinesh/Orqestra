@@ -1,4 +1,5 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Button, Card, Field, Input, PageHeader } from '@/components/ui/primitives';
 import { Calendar, Copy } from 'lucide-react';
 import { getStorageService } from '@/hooks/usePersistence';
@@ -9,6 +10,7 @@ import { EMPTY_COLLEGE_DETAILS } from '@/domain/models';
 import type { CollegeDetails } from '@/domain/models';
 import { SemesterSwitcherModal } from '@/components/ui/SemesterSwitcherModal';
 import { getActiveTerm, listTerms } from '@/storage/term-manager';
+import { TeamAccessSection } from './TeamAccessSection';
 
 export function SettingsPage() {
   const state = useWorkspaceStore();
@@ -20,6 +22,16 @@ export function SettingsPage() {
   const [semesterModalOpen, setSemesterModalOpen] = useState(false);
   const activeTerm = getActiveTerm();
   const terms = listTerms();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.hash === '#team' || location.search.includes('tab=team')) {
+      const el = document.getElementById('team');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  }, [location]);
 
   const details = state.collegeDetails;
   const setField = (key: keyof CollegeDetails, value: string) =>
@@ -288,6 +300,8 @@ export function SettingsPage() {
           </div>
         </div>
       </Card>
+
+      <TeamAccessSection />
 
       <div className="grid items-start gap-4 lg:grid-cols-2">
         <Card title="Export / Import">

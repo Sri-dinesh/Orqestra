@@ -10,6 +10,7 @@ import {
   UserCheck,
   Grid3X3,
   ArrowLeft,
+  Lock,
 } from 'lucide-react';
 import { useWorkspaceStore } from '@/state/stores/workspace-store';
 
@@ -19,6 +20,14 @@ export const DepartmentNav: React.FC = () => {
   const department = state.departments.find((d) => d.id === departmentId);
 
   if (!department || !departmentId) return null;
+
+  const membership = state.membership;
+  const isForeignDeptForHod =
+    membership?.role === 'HOD' &&
+    Boolean(membership.departmentId) &&
+    membership.departmentId !== departmentId;
+  const isFaculty = membership?.role === 'FACULTY';
+  const isReadOnly = Boolean(isForeignDeptForHod || isFaculty);
 
   const sectionsCount = state.sections.filter((s) => s.departmentId === departmentId).length;
   const subjectsCount = state.subjects.filter((s) => s.departmentId === departmentId).length;
@@ -51,12 +60,16 @@ export const DepartmentNav: React.FC = () => {
       icon: Building2,
       count: roomsCount > 0 ? roomsCount : undefined,
     },
-    {
-      to: `/departments/${departmentId}/generate`,
-      label: 'Generate',
-      icon: Sparkles,
-      highlight: true,
-    },
+    ...(!isReadOnly
+      ? [
+          {
+            to: `/departments/${departmentId}/generate`,
+            label: 'Generate',
+            icon: Sparkles,
+            highlight: true,
+          },
+        ]
+      : []),
     {
       to: `/departments/${departmentId}/timetable`,
       label: 'Timetable',
@@ -122,6 +135,12 @@ export const DepartmentNav: React.FC = () => {
       </div>
 
       <div className="hidden lg:flex items-center gap-2 pr-3 text-xs text-[#71767B]">
+        {isReadOnly && (
+          <span className="inline-flex items-center gap-1 rounded-md bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold text-amber-700 border border-amber-500/20">
+            <Lock className="w-2.5 h-2.5" />
+            <span>Read-Only View</span>
+          </span>
+        )}
         <span className="font-bold text-[#111315]">{department.code}</span>
         <span>•</span>
         <span className="truncate max-w-[200px]">{department.name}</span>

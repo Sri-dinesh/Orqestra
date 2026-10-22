@@ -96,6 +96,10 @@ export function usePersistence(namespace = 'anonymous'): LoadOutcome | null {
 
         const hasLocalData = (outcome.workspace?.payload.departments.length ?? 0) > 0;
 
+        if (cloudData.membership) {
+          useWorkspaceStore.getState().setMembership(cloudData.membership);
+        }
+
         if (hasCloudData) {
           // Cloud has authoritative data: update store and mirror to local cache
           useWorkspaceStore.getState().replaceAll({
@@ -109,20 +113,25 @@ export function usePersistence(namespace = 'anonymous'): LoadOutcome | null {
             activeDepartmentId: cloudData.workspace.activeDepartmentId,
             generationSettingsOverrides: cloudData.workspace.generationSettingsOverrides,
             collegeDetails: cloudData.workspace.collegeDetails,
+            membership: cloudData.membership ?? null,
           });
 
           service.save(cloudData.workspace);
           useWorkspaceStore.getState().setPersistenceStatus('SAVED');
         } else if (hasLocalData && outcome.workspace) {
-          // Local has data from pre-login/preset: automatically migrate to cloud!
-          useWorkspaceStore.getState().setPersistenceStatus('SAVING');
-          saveCloudWorkspace(outcome.workspace.payload, cloudData.activeTermId).then(
-            (res) => {
-              useWorkspaceStore
-                .getState()
-                .setPersistenceStatus(res.ok ? 'SAVED' : 'ERROR');
-            },
-          );
+          // Local has data from pre-login/preset: automatically migrate to cloud (unless read-only faculty)!
+          if (cloudData.membership?.role !== 'FACULTY') {
+            useWorkspaceStore.getState().setPersistenceStatus('SAVING');
+            saveCloudWorkspace(outcome.workspace.payload, cloudData.activeTermId).then(
+              (res) => {
+                useWorkspaceStore
+                  .getState()
+                  .setPersistenceStatus(res.ok ? 'SAVED' : 'ERROR');
+              },
+            );
+          } else {
+            useWorkspaceStore.getState().setPersistenceStatus('SAVED');
+          }
         } else {
           useWorkspaceStore.getState().setPersistenceStatus('SAVED');
         }
@@ -160,8 +169,14 @@ export function usePersistence(namespace = 'anonymous'): LoadOutcome | null {
         console.warn('Local storage cache save failed:', e);
       }
 
-      // B. Write to Neon Postgres if authenticated
+      // B. Write to Neon Postgres if authenticated (and role is not read-only faculty)
+      const currentRole = useWorkspaceStore.getState().membership?.role;
       if (namespace !== 'anonymous') {
+        if (currentRole === 'FACULTY') {
+          useWorkspaceStore.getState().setPersistenceStatus('SAVED');
+          return;
+        }
+
         const activeTermId = getActiveTermId();
         saveCloudWorkspace(payload, activeTermId)
           .then((res) => {

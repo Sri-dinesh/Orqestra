@@ -1,18 +1,19 @@
 import type { PersistedWorkspacePayload } from './workspace-document';
 import type { AcademicTerm, CloneTermOptions } from './term-manager';
-import type { GenerationMetrics, Timetable } from '@/domain/models';
+import type { GenerationMetrics, InstitutionalMembership, Timetable } from '@/domain/models';
 import { getAuthToken, authClient } from '@/auth/client';
 
 export interface CloudWorkspaceResponse {
   workspace: PersistedWorkspacePayload;
   terms: AcademicTerm[];
   activeTermId: string;
+  membership?: InstitutionalMembership;
 }
 
 /**
  * Helper to retrieve Authorization header for requests from the browser to Next.js API.
  */
-async function getAuthHeaders(): Promise<Record<string, string>> {
+export async function getAuthHeaders(): Promise<Record<string, string>> {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
   };

@@ -5,6 +5,7 @@ import type {
   Department,
   Faculty,
   GenerationMetadata,
+  InstitutionalMembership,
   PeriodTiming,
   Section,
   Subject,
@@ -40,6 +41,8 @@ export interface WorkspaceState {
   generationSettingsOverrides: Record<string, Partial<GenerationSettingsOverrides>>;
   /** Institution profile (Settings). Descriptive metadata only. */
   collegeDetails: CollegeDetails;
+  /** Current institutional user membership & role (§RBAC). */
+  membership: InstitutionalMembership | null;
 
   setActiveDepartment: (id: string | null) => void;
   addDepartment: (input: { code: string; name: string; workingDays: WorkingDay[]; periodsPerDay: number; periodTimings?: PeriodTiming[] }) => Department;
@@ -81,7 +84,9 @@ export interface WorkspaceState {
     activeDepartmentId: string | null;
     generationSettingsOverrides?: Record<string, Partial<GenerationSettingsOverrides>>;
     collegeDetails?: CollegeDetails;
+    membership?: InstitutionalMembership | null;
   }) => void;
+  setMembership: (membership: InstitutionalMembership | null) => void;
   setPersistenceStatus: (status: WorkspaceState['persistenceStatus']) => void;
   setCollegeDetails: (details: CollegeDetails) => void;
   setGenerationSettingsOverrides: (
@@ -102,6 +107,7 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
   persistenceStatus: 'IDLE',
   generationSettingsOverrides: {},
   collegeDetails: EMPTY_COLLEGE_DETAILS,
+  membership: null,
 
   setActiveDepartment: (id) => set({ activeDepartmentId: id }),
 
@@ -230,7 +236,7 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
   removeBreak: (id) => set((state) => ({ breaks: state.breaks.filter((b) => b.id !== id) })),
 
   replaceAll: (payload) =>
-    set({
+    set((s) => ({
       ...payload,
       departments: payload.departments ?? [],
       sections: payload.sections ?? [],
@@ -241,8 +247,10 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
       breaks: payload.breaks ?? [],
       generationSettingsOverrides: payload.generationSettingsOverrides ?? {},
       collegeDetails: payload.collegeDetails ?? EMPTY_COLLEGE_DETAILS,
+      membership: payload.membership !== undefined ? payload.membership : s.membership,
       persistenceStatus: 'IDLE',
-    }),
+    })),
+  setMembership: (membership) => set({ membership }),
   setPersistenceStatus: (persistenceStatus) => set({ persistenceStatus }),
 
   setCollegeDetails: (collegeDetails) => set({ collegeDetails }),

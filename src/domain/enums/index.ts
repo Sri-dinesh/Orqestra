@@ -89,3 +89,6 @@ export const WORKING_DAYS = [
   'SUNDAY',
 ] as const;
 export type WorkingDay = (typeof WORKING_DAYS)[number];
+
+export const INSTITUTIONAL_ROLES = ['ADMIN', 'HOD', 'FACULTY'] as const;
+export type InstitutionalRole = (typeof INSTITUTIONAL_ROLES)[number];

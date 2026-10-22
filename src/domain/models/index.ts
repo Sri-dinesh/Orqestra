@@ -15,6 +15,7 @@ import type {
   ConflictType,
   DepartmentStatus,
   EntrySource,
+  InstitutionalRole,
   SubjectType,
   TimetableStatus,
   WorkingDay,
@@ -366,4 +367,11 @@ export interface TimetableVersion {
   generationMetadata: GenerationMetadata | null;
   /** Human-readable note, e.g. what edit produced this version. */
   label: string;
+}
+
+export interface InstitutionalMembership {
+  role: InstitutionalRole;
+  departmentId: string | null;
+  facultyId: string | null;
+  institutionId: string;
 }
