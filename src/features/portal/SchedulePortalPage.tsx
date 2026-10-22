@@ -107,6 +107,19 @@ export function SchedulePortalPage() {
   const [selectedSectionId, setSelectedSectionId] = useState<string>(sections[0]?.id ?? '');
   const [selectedFacultyId, setSelectedFacultyId] = useState<string>(faculty[0]?.id ?? '');
 
+  // Keep selected target synchronized when sections or faculty load asynchronously
+  useEffect(() => {
+    if (sections.length > 0 && (!selectedSectionId || !sections.some((s) => s.id === selectedSectionId))) {
+      setSelectedSectionId(sections[0].id);
+    }
+  }, [sections, selectedSectionId]);
+
+  useEffect(() => {
+    if (faculty.length > 0 && (!selectedFacultyId || !faculty.some((f) => f.id === selectedFacultyId))) {
+      setSelectedFacultyId(faculty[0].id);
+    }
+  }, [faculty, selectedFacultyId]);
+
   // Day filter (0-indexed according to workingDays)
   // Auto-detect current weekday
   const currentWeekdayIndex = useMemo(() => {
@@ -358,7 +371,7 @@ export function SchedulePortalPage() {
               <label className="flex items-center gap-2 text-xs font-semibold text-[#4B5259]">
                 Select Class Section:
                 <select
-                  value={selectedSectionId}
+                  value={selectedSectionId || sections[0]?.id || ''}
                   onChange={(e) => setSelectedSectionId(e.target.value)}
                   className="rounded-lg border border-[#D0D5DD] bg-white px-3 py-1.5 text-xs font-bold text-[#111315] focus:outline-none focus:ring-2 focus:ring-[#0047FF]"
                 >
@@ -373,7 +386,7 @@ export function SchedulePortalPage() {
               <label className="flex items-center gap-2 text-xs font-semibold text-[#4B5259]">
                 Select Faculty Member:
                 <select
-                  value={selectedFacultyId}
+                  value={selectedFacultyId || faculty[0]?.id || ''}
                   onChange={(e) => setSelectedFacultyId(e.target.value)}
                   className="rounded-lg border border-[#D0D5DD] bg-white px-3 py-1.5 text-xs font-bold text-[#111315] focus:outline-none focus:ring-2 focus:ring-[#0047FF]"
                 >

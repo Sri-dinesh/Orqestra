@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { Share2 } from 'lucide-react';
 import { Badge, Button, Card, EditModal, Field, PageHeader, Select } from '@/components/ui/primitives';
 import { ConflictModal } from '@/components/ui/ConflictModal';
 import { ExportPreviewModal } from '@/components/ui/ExportPreviewModal';
@@ -553,8 +554,15 @@ export function TimetablePage() {
             <Button variant="secondary" size="sm" onClick={() => setPreviewModalOpen(true)}>
               Preview & Export
             </Button>
-            <Button variant="secondary" size="sm" onClick={handlePublish} disabled={publishing}>
-              {publishing ? 'Publishing…' : 'Share Portal Link'}
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={handlePublish}
+              disabled={publishing}
+              className="inline-flex items-center gap-1.5"
+            >
+              <Share2 className="w-3.5 h-3.5 text-[#0047FF]" />
+              <span>{publishing ? 'Publishing…' : 'Share Portal Link'}</span>
             </Button>
             <Button variant="secondary" size="sm" onClick={doExportPdf}>PDF</Button>
             <Button variant="secondary" size="sm" onClick={doExportExcel}>Excel</Button>
