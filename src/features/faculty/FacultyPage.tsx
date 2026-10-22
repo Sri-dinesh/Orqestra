@@ -1,15 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Button, Card, EditModal, Field, Input, PageHeader } from '@/components/ui/primitives';
 import { AvailabilityGrid } from '@/components/ui/AvailabilityGrid';
 import type { FacultyAvailability } from '@/domain/models';
 import { useEditorStore } from '@/state/stores/editor-store';
-import {
-  selectCurrentSections,
-  selectCurrentSubjects,
-  selectTimetableForActiveDepartment,
-  useWorkspaceStore,
-} from '@/state/stores/workspace-store';
+import { useWorkspaceStore } from '@/state/stores/workspace-store';
 import { computeFacultyWorkload } from '@/domain/scheduler/feasibility';
 import type { Faculty } from '@/domain/models';
 import { BulkImportModal } from '@/components/ui/BulkImportModal';
@@ -35,12 +30,31 @@ function facultyFormFrom(f: Faculty): FacultyFormState {
 export function FacultyPage() {
   const { departmentId } = useParams();
   const state = useWorkspaceStore();
-  const subjects = useWorkspaceStore(selectCurrentSubjects);
-  const sections = useWorkspaceStore(selectCurrentSections);
-  const timetable = useWorkspaceStore(selectTimetableForActiveDepartment);
-  const showToast = useEditorStore((s) => s.showToast);
-  const members = state.faculty.filter((f) => f.departmentId === departmentId);
+
+  useEffect(() => {
+    if (departmentId && state.activeDepartmentId !== departmentId) {
+      state.setActiveDepartment(departmentId);
+    }
+  }, [departmentId, state.activeDepartmentId, state.setActiveDepartment]);
+
   const department = state.departments.find((d) => d.id === departmentId);
+  const subjects = useMemo(
+    () => state.subjects.filter((s) => s.departmentId === departmentId),
+    [state.subjects, departmentId],
+  );
+  const sections = useMemo(
+    () => state.sections.filter((s) => s.departmentId === departmentId),
+    [state.sections, departmentId],
+  );
+  const timetable = useMemo(
+    () => state.timetables.find((t) => t.departmentId === departmentId) ?? null,
+    [state.timetables, departmentId],
+  );
+  const showToast = useEditorStore((s) => s.showToast);
+  const members = useMemo(
+    () => state.faculty.filter((f) => f.departmentId === departmentId),
+    [state.faculty, departmentId],
+  );
 
   const [code, setCode] = useState('');
   const [name, setName] = useState('');

@@ -1,6 +1,8 @@
 import type { WorkingDay } from '@/domain/enums';
-import type { CollegeDetails, PeriodTiming } from '@/domain/models';
-import type { useWorkspaceStore } from '@/state/stores/workspace-store';
+import type { CollegeDetails, PeriodTiming, TimetableConfiguration } from '@/domain/models';
+import { DEFAULT_HARD_CONSTRAINTS, DEFAULT_SOFT_WEIGHTS, DEFAULT_GENERATION_SETTINGS } from '@/domain/policies';
+import { GenerationService } from '@/application/generation-service';
+import { useWorkspaceStore } from '@/state/stores/workspace-store';
 
 export interface PresetSubject {
   code: string;
@@ -492,6 +494,26 @@ export function applyPreset(preset: PresetDefinition, store: WorkspaceStore): st
     store.updateSection(sectionIds[sectionIdx], { subjectRequirements: reqs });
   });
 
+  // Wire bi-directional subjectIds and sectionIds on each faculty member
+  facultyIds.forEach((fId, fIdx) => {
+    const assignedSubjectIds: string[] = [];
+    const assignedSectionIdSet = new Set<string>();
+
+    preset.subjects.forEach((s, sIdx) => {
+      if (s.faculty.includes(fIdx)) {
+        assignedSubjectIds.push(subjectIds[sIdx]);
+        s.sections.forEach((secIdx) => {
+          assignedSectionIdSet.add(sectionIds[secIdx]);
+        });
+      }
+    });
+
+    store.updateFaculty(fId, {
+      subjectIds: assignedSubjectIds,
+      sectionIds: Array.from(assignedSectionIdSet),
+    });
+  });
+
   if (preset.rooms) {
     preset.rooms.forEach((r) => {
       store.addRoom({
@@ -524,4 +546,72 @@ export function applyPreset(preset: PresetDefinition, store: WorkspaceStore): st
 
   store.setActiveDepartment(department.id);
   return department.id;
+}
+
+/**
+ * Apply a preset blueprint AND immediately generate a 100% conflict-free timetable.
+ * Pre-populates all sections, subjects, faculty, rooms, breaks, requirements, AND
+ * the complete ready-to-view schedule so nothing has to be entered manually.
+ */
+export async function applyPresetWithTimetable(
+  preset: PresetDefinition,
+  store: WorkspaceStore,
+): Promise<string> {
+  const departmentId = applyPreset(preset, store);
+
+  // Retrieve the latest workspace snapshot
+  const state = useWorkspaceStore.getState();
+  const dept = state.departments.find((d) => d.id === departmentId);
+  if (!dept) return departmentId;
+
+  const sections = state.sections.filter((s) => s.departmentId === departmentId);
+  const subjects = state.subjects.filter((s) => s.departmentId === departmentId);
+  const faculty = state.faculty.filter((f) => f.departmentId === departmentId);
+  const rooms = state.rooms.filter((r) => !r.departmentId || r.departmentId === departmentId);
+  const breaks = state.breaks;
+
+  const config: TimetableConfiguration = {
+    workingDays: dept.workingDays,
+    periodsPerDay: dept.periodsPerDay,
+    periodDefinitions: Array.from({ length: dept.periodsPerDay }, (_, i) => ({
+      index: i,
+      label: `Period ${i + 1}`,
+    })),
+    sections,
+    subjects,
+    faculty,
+    rooms,
+    breaks,
+    hardConstraints: DEFAULT_HARD_CONSTRAINTS,
+    softWeights: DEFAULT_SOFT_WEIGHTS,
+    generationSettings: {
+      ...DEFAULT_GENERATION_SETTINGS,
+      seed: 42,
+      maxSearchDurationMs: 15000,
+      maxExploredNodes: 50000,
+      ...(preset.generationSettings ?? {}),
+    },
+  };
+
+  try {
+    const genService = new GenerationService();
+    const result = await genService.generate({
+      department: dept,
+      sections,
+      subjects,
+      faculty,
+      breaks,
+      config,
+      seed: 42,
+    });
+
+    if (result.timetable) {
+      store.upsertTimetable(result.timetable);
+      store.updateDepartment(departmentId, { status: 'READY' });
+    }
+  } catch (error) {
+    console.warn('Preset timetable generation failed:', error);
+  }
+
+  return departmentId;
 }

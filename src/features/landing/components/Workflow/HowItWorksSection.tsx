@@ -6,7 +6,7 @@ const STEPS = [
   {
     n: "01",
     title: "Create a department — or apply a preset",
-    text: "Start from scratch on the dashboard, or apply one of 6 built-in presets (from a 1-section Quick Start to a 9-section Enterprise setup) that wires up sections, subjects, faculty, and requirements in one click.",
+    text: "Start from scratch on the dashboard, or apply one of 3 institutional blueprints (from Standard School to a 9-section B.Tech Enterprise setup) that wires up sections, subjects, faculty, and requirements in one click.",
   },
   {
     n: "02",

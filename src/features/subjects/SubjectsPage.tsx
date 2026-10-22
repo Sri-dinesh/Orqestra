@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Button, Card, EditModal, Field, Input, PageHeader, Select } from '@/components/ui/primitives';
 import { useEditorStore } from '@/state/stores/editor-store';
-import { selectCurrentFaculty, selectCurrentSections, useWorkspaceStore } from '@/state/stores/workspace-store';
+import { useWorkspaceStore } from '@/state/stores/workspace-store';
 import type { SubjectType } from '@/domain/enums';
 import type { Subject } from '@/domain/models';
 import { BulkImportModal } from '@/components/ui/BulkImportModal';
@@ -66,11 +66,27 @@ function CheckboxChips({
 export function SubjectsPage() {
   const { departmentId } = useParams();
   const state = useWorkspaceStore();
+
+  useEffect(() => {
+    if (departmentId && state.activeDepartmentId !== departmentId) {
+      state.setActiveDepartment(departmentId);
+    }
+  }, [departmentId, state.activeDepartmentId, state.setActiveDepartment]);
+
   const department = state.departments.find((d) => d.id === departmentId);
-  const sections = useWorkspaceStore(selectCurrentSections);
-  const faculty = useWorkspaceStore(selectCurrentFaculty);
+  const sections = useMemo(
+    () => state.sections.filter((s) => s.departmentId === departmentId),
+    [state.sections, departmentId],
+  );
+  const faculty = useMemo(
+    () => state.faculty.filter((f) => f.departmentId === departmentId),
+    [state.faculty, departmentId],
+  );
   const showToast = useEditorStore((s) => s.showToast);
-  const subjects = state.subjects.filter((s) => s.departmentId === departmentId);
+  const subjects = useMemo(
+    () => state.subjects.filter((s) => s.departmentId === departmentId),
+    [state.subjects, departmentId],
+  );
 
   const [code, setCode] = useState('');
   const [name, setName] = useState('');

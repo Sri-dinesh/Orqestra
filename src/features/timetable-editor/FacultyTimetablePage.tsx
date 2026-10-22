@@ -1,13 +1,7 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Badge, Button, Card, PageHeader, Select } from '@/components/ui/primitives';
-import {
-  selectCurrentFaculty,
-  selectCurrentSections,
-  selectCurrentSubjects,
-  selectTimetableForActiveDepartment,
-  useWorkspaceStore,
-} from '@/state/stores/workspace-store';
+import { useWorkspaceStore } from '@/state/stores/workspace-store';
 import { buildGridLayout, gridColumnLabel } from '@/domain/scheduler/grid-layout';
 import { TimetableGridHeader } from '@/components/ui/TimetableGridHeader';
 import { ExportPreviewModal } from '@/components/ui/ExportPreviewModal';
@@ -40,13 +34,32 @@ const SECTION_TONES = [
 export function FacultyTimetablePage() {
   const { departmentId } = useParams();
   const state = useWorkspaceStore();
-  const sections = useWorkspaceStore(selectCurrentSections);
-  const subjects = useWorkspaceStore(selectCurrentSubjects);
-  const faculty = useWorkspaceStore(selectCurrentFaculty);
-  const timetable = useWorkspaceStore(selectTimetableForActiveDepartment);
-  const breaks = useWorkspaceStore((s) => s.breaks);
+
+  useEffect(() => {
+    if (departmentId && state.activeDepartmentId !== departmentId) {
+      state.setActiveDepartment(departmentId);
+    }
+  }, [departmentId, state.activeDepartmentId, state.setActiveDepartment]);
 
   const department = state.departments.find((d) => d.id === departmentId);
+  const sections = useMemo(
+    () => state.sections.filter((s) => s.departmentId === departmentId),
+    [state.sections, departmentId],
+  );
+  const subjects = useMemo(
+    () => state.subjects.filter((s) => s.departmentId === departmentId),
+    [state.subjects, departmentId],
+  );
+  const faculty = useMemo(
+    () => state.faculty.filter((f) => f.departmentId === departmentId),
+    [state.faculty, departmentId],
+  );
+  const timetable = useMemo(
+    () => state.timetables.find((t) => t.departmentId === departmentId) ?? null,
+    [state.timetables, departmentId],
+  );
+  const breaks = useWorkspaceStore((s) => s.breaks);
+
   const [selectedFacultyId, setSelectedFacultyId] = useState<string | null>(null);
   const [previewModalOpen, setPreviewModalOpen] = useState(false);
   const [substituteModalOpen, setSubstituteModalOpen] = useState(false);

@@ -13,10 +13,10 @@ import { useWorkspaceStore } from "@/state/stores/workspace-store";
 import type { Timetable } from "@/domain/models";
 import { WORKING_DAYS } from "@/domain/enums";
 import type { WorkingDay } from "@/domain/enums";
-import { BUILT_IN_PRESETS, applyPreset } from "@/application/presets";
+import { BUILT_IN_PRESETS, applyPresetWithTimetable } from "@/application/presets";
 import { useEditorStore } from "@/state/stores/editor-store";
 import { flushPersistence } from "@/hooks/usePersistence";
-import { CheckCircle2, Circle } from "lucide-react";
+import { CheckCircle2, Circle, Sparkles } from "lucide-react";
 
 type DeptStatus =
   | "NOT_CONFIGURED"
@@ -79,6 +79,22 @@ export function DashboardPage() {
   const navigate = useNavigate();
   const showToast = useEditorStore((s) => s.showToast);
   const [showCreate, setShowCreate] = useState(false);
+  const [applyingPresetId, setApplyingPresetId] = useState<string | null>(null);
+
+  const handleApplyPreset = async (preset: (typeof BUILT_IN_PRESETS)[0]) => {
+    setApplyingPresetId(preset.id);
+    try {
+      const deptId = await applyPresetWithTimetable(preset, useWorkspaceStore.getState());
+      flushPersistence();
+      showToast("success", `Blueprint applied: ${preset.department.code}. Conflict-free timetable generated!`);
+      navigate(`/departments/${deptId}/timetable`);
+    } catch (err) {
+      console.error(err);
+      showToast("error", "Failed to apply blueprint.");
+    } finally {
+      setApplyingPresetId(null);
+    }
+  };
   const [code, setCode] = useState("");
   const [name, setName] = useState("");
   const [periods, setPeriods] = useState(6);
@@ -245,22 +261,66 @@ export function DashboardPage() {
 
       {/* Empty state for brand new users */}
       {isNewUser ? (
-        <div className="rounded-2xl border border-[#E5E8E0] bg-white p-10 text-center shadow-panel">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#EBF1FF]">
-            <svg className="h-6 w-6 text-metric-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-            </svg>
+        <div className="rounded-2xl border border-[#E5E8E0] bg-white p-6 sm:p-10 shadow-panel">
+          <div className="text-center max-w-xl mx-auto mb-8">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#EBF1FF]">
+              <Sparkles className="h-6 w-6 text-metric-blue" />
+            </div>
+            <h2 className="text-xl font-bold text-ink">Welcome to Orqestra</h2>
+            <p className="mt-2 text-sm text-body-gray">
+              Start with a fully predefined institutional blueprint where all sections, subjects, faculty, and conflict-free schedules are pre-configured, or create a custom department from scratch.
+            </p>
           </div>
-          <p className="text-base font-semibold text-ink">No departments yet</p>
-          <p className="mx-auto mt-1.5 max-w-sm text-sm text-body-gray">
-            Create your first department or apply a ready-made blueprint to get started in seconds.
-          </p>
-          <div className="mt-5 flex flex-wrap justify-center gap-3">
-            <Button onClick={() => setShowCreate(true)}>Create Department</Button>
-            <Button variant="secondary" onClick={() => {
-              document.getElementById('presets-section')?.scrollIntoView({ behavior: 'smooth' });
-            }}>
-              Browse Blueprints ↓
+
+          <div className="grid gap-4 sm:grid-cols-3 mb-8">
+            {BUILT_IN_PRESETS.map((preset) => {
+              const isEnterprise = preset.id === 'enterprise';
+              return (
+                <div
+                  key={preset.id}
+                  className={`flex flex-col justify-between rounded-xl border p-5 transition-all duration-200 ${
+                    isEnterprise
+                      ? 'border-metric-blue/40 bg-blue-50/40 ring-1 ring-metric-blue/30'
+                      : 'border-[#E5E8E0] bg-[#FAFBF9] hover:border-metric-blue/30'
+                  }`}
+                >
+                  <div>
+                    <div className="flex items-center justify-between gap-2 mb-2">
+                      <span className="text-xs font-mono font-bold text-metric-blue uppercase">
+                        {preset.department.code}
+                      </span>
+                      {isEnterprise && (
+                        <span className="rounded-full bg-metric-blue px-2 py-0.5 text-[10px] font-bold text-white uppercase tracking-wider">
+                          Recommended
+                        </span>
+                      )}
+                    </div>
+                    <h3 className="text-sm font-bold text-ink mb-1">{preset.label}</h3>
+                    <p className="text-xs leading-relaxed text-body-gray mb-3">{preset.description}</p>
+                    <div className="text-[11px] font-mono text-body-gray/80 space-y-0.5 mb-4">
+                      <p>• {preset.sections.length} sections ({preset.sections.map((s) => s.name).slice(0, 3).join(', ')}{preset.sections.length > 3 ? ` ... ${preset.sections[preset.sections.length - 1].name}` : ''})</p>
+                      <p>• {preset.subjects.length} subjects ({preset.subjects.filter((s) => s.type === 'THEORY').length} Theory + {preset.subjects.filter((s) => s.type === 'LAB').length} Lab)</p>
+                      <p>• {preset.faculty.length} real faculty members</p>
+                      <p>• {preset.workingDays.length} days × {preset.periodsPerDay} periods</p>
+                    </div>
+                  </div>
+                  <Button
+                    size="sm"
+                    className="w-full"
+                    disabled={applyingPresetId !== null}
+                    onClick={() => handleApplyPreset(preset)}
+                  >
+                    {applyingPresetId === preset.id ? "Applying & generating..." : "Apply Blueprint & View Schedule →"}
+                  </Button>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="border-t border-[#E5E8E0] pt-6 flex flex-wrap items-center justify-between gap-3 text-xs text-body-gray">
+            <span>Prefer starting with an empty department?</span>
+            <Button variant="secondary" size="sm" onClick={() => setShowCreate(true)}>
+              + Create Empty Department
             </Button>
           </div>
         </div>
@@ -403,34 +463,43 @@ export function DashboardPage() {
           <span className="text-xs font-mono text-body-gray">Apply a preset to get started instantly</span>
         }
       >
-        <div id="presets-section" className="grid gap-4 sm:grid-cols-2">
+        <div id="presets-section" className="grid gap-4 sm:grid-cols-3">
           {BUILT_IN_PRESETS.map((preset) => (
             <div
               key={preset.id}
-              className="flex flex-col rounded-xl bg-surface-1 border border-[#E5E8E0] p-4 transition-all duration-200 hover:border-metric-blue/30"
+              className={`flex flex-col justify-between rounded-xl border p-4 transition-all duration-200 ${
+                preset.id === 'enterprise'
+                  ? 'border-metric-blue/40 bg-blue-50/30'
+                  : 'border-[#E5E8E0] bg-surface-1 hover:border-metric-blue/30'
+              }`}
             >
-              <div className="flex items-start justify-between gap-2">
-                <h3 className="text-sm font-bold text-ink">{preset.label}</h3>
+              <div>
+                <div className="flex items-start justify-between gap-2">
+                  <h3 className="text-sm font-bold text-ink">{preset.label}</h3>
+                  {preset.id === 'enterprise' && (
+                    <span className="shrink-0 rounded-full bg-metric-blue/10 px-2 py-0.5 text-[10px] font-bold text-metric-blue uppercase">
+                      Recommended
+                    </span>
+                  )}
+                </div>
+                <p className="mt-1.5 text-xs leading-relaxed text-body-gray">{preset.description}</p>
+                <p className="mt-3 text-[11px] font-mono text-body-gray/80">
+                  {preset.sections.length} sections · {preset.subjects.length} subjects · {preset.faculty.length} faculty ·{" "}
+                  {preset.workingDays.length} days × {preset.periodsPerDay} periods
+                  {(preset.breaks?.length ?? 0) > 0
+                    ? ` + ${preset.breaks!.map((b) => b.name.toLowerCase()).join(", ")}`
+                    : ""}
+                </p>
+              </div>
+              <div className="mt-4 pt-3 border-t border-[#E5E8E0]/70 flex items-center justify-end">
                 <Button
                   size="sm"
-                  onClick={() => {
-                    const deptId = applyPreset(preset, useWorkspaceStore.getState());
-                    flushPersistence();
-                    showToast("success", `Blueprint applied: ${preset.department.code}. Review your configuration.`);
-                    navigate(`/departments/${deptId}/configuration`);
-                  }}
+                  disabled={applyingPresetId !== null}
+                  onClick={() => handleApplyPreset(preset)}
                 >
-                  Apply Blueprint
+                  {applyingPresetId === preset.id ? "Applying & generating..." : "Apply Blueprint & View Schedule →"}
                 </Button>
               </div>
-              <p className="mt-1.5 text-xs leading-relaxed text-body-gray">{preset.description}</p>
-              <p className="mt-3 text-[11px] font-mono text-body-gray/80">
-                {preset.sections.length} sections · {preset.subjects.length} subjects · {preset.faculty.length} faculty ·{" "}
-                {preset.workingDays.length} days × {preset.periodsPerDay} periods
-                {(preset.breaks?.length ?? 0) > 0
-                  ? ` + ${preset.breaks!.map((b) => b.name.toLowerCase()).join(", ")}`
-                  : ""}
-              </p>
             </div>
           ))}
         </div>

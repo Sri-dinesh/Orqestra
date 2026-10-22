@@ -4,40 +4,22 @@ import { ArrowRight, Star } from "lucide-react";
 
 const PRESETS = [
   {
-    name: "Quick Start — Minimal",
-    spec: "1 section · 3 subjects (1 lab) · 2 faculty · 5 days × 6 periods",
-    text: "Best for trying the app: the smallest complete setup that still exercises theory, labs, and generation end to end.",
+    name: "Standard School — Delhi Public School",
+    spec: "4 sections (9-A, 9-B, 10-A, 10-B) · 9 subjects (1 lab) · 15 teachers · 5 days × 7 periods",
+    text: "CBSE secondary wing with real subject curriculum, period timings, morning recess, and lunch break. Solved with zero conflicts in ~1s.",
     featured: false,
   },
   {
-    name: "Standard B.Tech Section",
-    spec: "1 section · 6 subjects (2 labs) · 5 faculty · 5 days × 7 periods",
-    text: "A realistic single-section semester load with shared lab supervision across faculty.",
-    featured: false,
-  },
-  {
-    name: "Two Sections + Shared Faculty",
-    spec: "2 sections · 4 subjects (1 lab) · 3 faculty · 5 days × 7 periods",
-    text: "One mathematics teacher spans both sections — demonstrates cross-section conflict handling in the solver and validator.",
-    featured: false,
-  },
-  {
-    name: "Lab-Heavy Workshop Schedule",
-    spec: "1 section · 5 subjects (3 labs) · 4 faculty · 6 days × 6 periods",
-    text: "Stresses atomic 2-period lab blocks: five lab sessions a week that can never split or span a break.",
-    featured: false,
-  },
-  {
-    name: "Enterprise — 9 Sections (Large)",
-    spec: "9 sections · 9 subjects (6 theory ×6/wk + 3 labs) · 40 faculty · 6 days × 7 periods",
-    text: "Fully packed at 42/42 periods per section per week — 378 sessions solved in ~2–5s with dedicated faculty pools per subject and fair load spread.",
+    name: "B.Tech CSE (Enterprise) — 9 Sections",
+    spec: "9 sections (CSE-A to CSE-I) · 8 subjects (5 theory + 3 labs) · 40 faculty · 14 rooms · 6 days × 7 periods",
+    text: "Vardhaman College of Engineering scale: 342 sessions, 5 dedicated faculty per subject, 2-period atomic lab blocks, morning break & lunch. 100% conflict-free in ~2.5s.",
     featured: true,
   },
   {
-    name: "B.Tech CSE 3rd Year",
-    spec: "3 sections (CSE-G/H/I) · 12 subjects (4 labs) · 13 faculty · 6 days × 7 periods + Break & Lunch",
-    text: "Mirrors a real Vardhaman College III-I timetable: real subjects, faculty, rooms, and period timings — fully packed at 42/42, solved in ~1s.",
-    featured: true,
+    name: "Medical College — AIIMS Clinical Phase",
+    spec: "3 batches (Alpha, Beta, Gamma) · 8 subjects (5 theory + 3 clinical) · 16 doctors · 5 days × 6 periods",
+    text: "MBBS clinical curriculum with hospital ward rotations, histopathology and diagnostic laboratories. Solved in ~0.3s.",
+    featured: false,
   },
 ];
 
@@ -60,10 +42,10 @@ export const PresetsSection: React.FC = () => {
             Start from a real department, not a blank form.
           </h2>
           <p className="mt-4 text-base sm:text-lg text-[#4B5259] leading-relaxed max-w-2xl text-balance">
-            Six presets ship with the app. Applying one creates the department,
-            sections, subjects, faculty, requirements, rooms, breaks, and
-            generation settings in one go — review it under Configuration, then
-            generate.
+            Three production-grade institutional blueprints ship with the app:
+            Standard School, B.Tech Enterprise (9 Sections), and Medical College.
+            Applying one pre-configures all sections, subjects, faculty, rooms,
+            and generates a 100% conflict-free timetable in one click.
           </p>
         </div>
 

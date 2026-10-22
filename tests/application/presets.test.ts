@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { BUILT_IN_PRESETS, applyPreset } from '@/application/presets';
+import { BUILT_IN_PRESETS, applyPreset, applyPresetWithTimetable } from '@/application/presets';
 import { useWorkspaceStore } from '@/state/stores/workspace-store';
 import { analyzeFeasibility } from '@/domain/scheduler/feasibility';
 import { generateTimetable } from '@/domain/scheduler/engine';
@@ -42,6 +42,8 @@ describe('built-in presets', () => {
       expect(faculty.length).toBe(preset.faculty.length);
       expect(subjects.every((s) => s.eligibleFacultyIds.length > 0)).toBe(true);
       expect(sections.every((s) => s.subjectRequirements.length > 0)).toBe(true);
+      expect(faculty.every((f) => f.subjectIds.length > 0)).toBe(true);
+      expect(faculty.every((f) => f.sectionIds.length > 0)).toBe(true);
 
       const config: TimetableConfiguration = {
         workingDays: department.workingDays,
@@ -91,4 +93,19 @@ describe('built-in presets', () => {
       }
     }, 70_000);
   }
+
+  it('applyPresetWithTimetable attaches a pre-generated 100% valid timetable to the department', async () => {
+    const preset = BUILT_IN_PRESETS.find((p) => p.id === 'enterprise')!;
+    const deptId = await applyPresetWithTimetable(preset, useWorkspaceStore.getState());
+    const store = useWorkspaceStore.getState();
+
+    const dept = store.departments.find((d) => d.id === deptId)!;
+    expect(dept.status).toBe('READY');
+
+    const timetable = store.timetables.find((t) => t.departmentId === deptId);
+    expect(timetable).toBeDefined();
+    expect(timetable!.entries.length).toBe(342); // 9 sections × (5*7 + 3*2) - 9*1 free period = 342 sessions
+    expect(timetable!.validationSummary?.isValid).toBe(true);
+    expect(timetable!.validationSummary?.conflicts.length).toBe(0);
+  }, 30_000);
 });

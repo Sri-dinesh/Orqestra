@@ -3,13 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { Badge, Button, Card, Field, Input, PageHeader } from '@/components/ui/primitives';
 import { useEditorStore } from '@/state/stores/editor-store';
 import { useGenerationStore } from '@/state/stores/generation-store';
-import {
-  selectCurrentFaculty,
-  selectCurrentSections,
-  selectCurrentSubjects,
-  selectTimetableForActiveDepartment,
-  useWorkspaceStore,
-} from '@/state/stores/workspace-store';
+import { useWorkspaceStore } from '@/state/stores/workspace-store';
 import { GenerationService } from '@/application/generation-service';
 import { withVersion } from '@/application/timetable-versioning';
 import { ManualCancellationToken } from '@/scheduler-runtime/scheduler-runner';
@@ -26,12 +20,35 @@ import { getActiveTermId } from '@/storage/term-manager';
 export function GeneratePage() {
   const { departmentId } = useParams();
   const state = useWorkspaceStore();
-  const sections = useWorkspaceStore(selectCurrentSections);
-  const subjects = useWorkspaceStore(selectCurrentSubjects);
-  const faculty = useWorkspaceStore(selectCurrentFaculty);
-  const rooms = useWorkspaceStore((s) => s.rooms);
+
+  useEffect(() => {
+    if (departmentId && state.activeDepartmentId !== departmentId) {
+      state.setActiveDepartment(departmentId);
+    }
+  }, [departmentId, state.activeDepartmentId, state.setActiveDepartment]);
+
+  const department = state.departments.find((d) => d.id === departmentId);
+  const sections = useMemo(
+    () => state.sections.filter((s) => s.departmentId === departmentId),
+    [state.sections, departmentId],
+  );
+  const subjects = useMemo(
+    () => state.subjects.filter((s) => s.departmentId === departmentId),
+    [state.subjects, departmentId],
+  );
+  const faculty = useMemo(
+    () => state.faculty.filter((f) => f.departmentId === departmentId),
+    [state.faculty, departmentId],
+  );
+  const rooms = useMemo(
+    () => state.rooms.filter((r) => !r.departmentId || r.departmentId === departmentId),
+    [state.rooms, departmentId],
+  );
   const breaks = useWorkspaceStore((s) => s.breaks);
-  const existingTimetable = useWorkspaceStore(selectTimetableForActiveDepartment);
+  const existingTimetable = useMemo(
+    () => state.timetables.find((t) => t.departmentId === departmentId) ?? null,
+    [state.timetables, departmentId],
+  );
   const gen = useGenerationStore();
   const editor = useEditorStore();
   const cancelToken = useRef<ManualCancellationToken | null>(null);
@@ -67,7 +84,6 @@ export function GeneratePage() {
       : '',
   );
 
-  const department = state.departments.find((d) => d.id === departmentId);
   const config: TimetableConfiguration | null = useMemo(() => {
     if (!department) return null;
     return {

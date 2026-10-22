@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { NavLink, Link, useParams } from 'react-router-dom';
 import {
   Settings,
@@ -18,6 +18,13 @@ import { useWorkspaceStore } from '@/state/stores/workspace-store';
 export const DepartmentNav: React.FC = () => {
   const { departmentId } = useParams();
   const state = useWorkspaceStore();
+
+  useEffect(() => {
+    if (departmentId && state.activeDepartmentId !== departmentId) {
+      state.setActiveDepartment(departmentId);
+    }
+  }, [departmentId, state.activeDepartmentId, state.setActiveDepartment]);
+
   const department = state.departments.find((d) => d.id === departmentId);
 
   if (!department || !departmentId) return null;
