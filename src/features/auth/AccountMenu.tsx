@@ -65,6 +65,17 @@ export function AccountMenu() {
     }
   }
 
+  if (!data?.session || !data?.user) {
+    return (
+      <Link
+        to="/auth/sign-in"
+        className="inline-flex items-center gap-1.5 rounded-xl bg-[#111315] px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-black focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0047FF]"
+      >
+        <span>Sign In</span>
+      </Link>
+    );
+  }
+
   return (
     <div className="relative inline-block text-left" ref={menuRef}>
       {/* Trigger Button */}

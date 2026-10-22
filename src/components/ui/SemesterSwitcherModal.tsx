@@ -27,6 +27,12 @@ import {
 import { useWorkspaceStore } from '@/state/stores/workspace-store';
 import { useEditorStore } from '@/state/stores/editor-store';
 import { flushPersistence } from '@/hooks/usePersistence';
+import {
+  createCloudTerm,
+  deleteCloudTerm,
+  fetchCloudWorkspace,
+  setActiveCloudTerm,
+} from '@/storage/cloud-sync';
 
 interface SemesterSwitcherModalProps {
   isOpen: boolean;
@@ -113,6 +119,22 @@ export const SemesterSwitcherModal: React.FC<SemesterSwitcherModalProps> = ({
       });
     }
 
+    // Background authoritative sync from Neon Postgres for the selected term
+    void fetchCloudWorkspace(targetTerm.id).then((cloud) => {
+      if (cloud?.workspace) {
+        state.replaceAll({
+          ...cloud.workspace,
+          collegeDetails:
+            cloud.workspace.collegeDetails ?? {
+              ...state.collegeDetails,
+              academicYear: targetTerm.academicYear,
+            },
+        });
+        saveTermWorkspace(targetTerm.id, cloud.workspace);
+      }
+    });
+    void setActiveCloudTerm(targetTerm.id);
+
     showToast('success', `Switched to ${targetTerm.name}`);
     onClose();
   };
@@ -137,6 +159,7 @@ export const SemesterSwitcherModal: React.FC<SemesterSwitcherModalProps> = ({
     });
 
     const newTerm = cloneTerm(sourceTermId, cloneForm);
+    void createCloudTerm(cloneForm.name, cloneForm.academicYear, sourceTermId, cloneForm);
     setTerms(listTerms());
     handleSwitchTerm(newTerm);
     showToast('success', `Cloned semester "${newTerm.name}" successfully.`);
@@ -161,6 +184,7 @@ export const SemesterSwitcherModal: React.FC<SemesterSwitcherModalProps> = ({
     });
 
     const newTerm = createTerm(newTermName, newAcademicYear);
+    void createCloudTerm(newTermName, newAcademicYear);
     setTerms(listTerms());
     handleSwitchTerm(newTerm);
     showToast('success', `Created new semester "${newTerm.name}".`);
@@ -173,6 +197,7 @@ export const SemesterSwitcherModal: React.FC<SemesterSwitcherModalProps> = ({
     }
     if (confirm(`Are you sure you want to delete "${name}"? All department configurations and timetables in this semester will be permanently erased.`)) {
       deleteTerm(termId);
+      void deleteCloudTerm(termId);
       const updated = listTerms();
       setTerms(updated);
       if (activeId === termId) {

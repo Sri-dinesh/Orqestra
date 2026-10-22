@@ -1,12 +1,12 @@
 'use client';
 
-import { RequireAuthWrapper } from '@/features/auth/RequireAuth';
+import { Suspense } from 'react';
 import { SchedulePortalPage } from '@/features/portal/SchedulePortalPage';
 
 export default function SchedulePortalRoute() {
   return (
-    <RequireAuthWrapper>
+    <Suspense fallback={<div className="min-h-screen bg-[#F7F8F5]" />}>
       <SchedulePortalPage />
-    </RequireAuthWrapper>
+    </Suspense>
   );
 }

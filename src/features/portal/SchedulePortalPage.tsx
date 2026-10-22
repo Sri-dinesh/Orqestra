@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useMemo, useEffect } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import {
   Calendar,
   User,
@@ -12,32 +12,95 @@ import {
 import { Button } from '@/components/ui/primitives';
 import { useWorkspaceStore } from '@/state/stores/workspace-store';
 import { buildGridLayout } from '@/domain/scheduler/grid-layout';
+import type {
+  Department,
+  Section,
+  Subject,
+  Faculty,
+  Room,
+  Break,
+  Timetable,
+} from '@/domain/models';
+
+interface PortalData {
+  timetable: Timetable;
+  department: Department;
+  term?: any;
+  college?: any;
+  sections: Section[];
+  subjects: Subject[];
+  faculty: Faculty[];
+  rooms: Room[];
+  breaks: Break[];
+}
 
 export function SchedulePortalPage() {
+  const [searchParams] = useSearchParams();
+  const slug = searchParams.get('slug');
+
+  const [portalData, setPortalData] = useState<PortalData | null>(null);
+  const [loadingPortal, setLoadingPortal] = useState(Boolean(slug));
+  const [portalError, setPortalError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!slug) return;
+    setLoadingPortal(true);
+    fetch(`/api/portal/${encodeURIComponent(slug)}`)
+      .then(async (res) => {
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.error || 'Published schedule not found.');
+        }
+        return res.json();
+      })
+      .then((data: PortalData) => {
+        setPortalData(data);
+        setLoadingPortal(false);
+      })
+      .catch((err: Error) => {
+        setPortalError(err.message);
+        setLoadingPortal(false);
+      });
+  }, [slug]);
+
   const state = useWorkspaceStore();
-  const departments = state.departments;
+
+  const isPublicSlugMode = Boolean(slug && portalData);
+
+  const departments: Department[] = isPublicSlugMode
+    ? (portalData?.department ? [portalData.department] : [])
+    : state.departments;
 
   // Active department selection
   const [selectedDeptId, setSelectedDeptId] = useState<string>(
     state.activeDepartmentId ?? departments[0]?.id ?? '',
   );
 
-  const currentDept = departments.find((d) => d.id === selectedDeptId) ?? departments[0];
+  const currentDept: Department | undefined = isPublicSlugMode
+    ? portalData?.department
+    : (departments.find((d) => d.id === selectedDeptId) ?? departments[0]);
 
-  const sections = useWorkspaceStore(
-    (s) => s.sections.filter((sec) => sec.departmentId === currentDept?.id),
-  );
-  const subjects = useWorkspaceStore(
-    (s) => s.subjects.filter((sub) => sub.departmentId === currentDept?.id),
-  );
-  const faculty = useWorkspaceStore(
-    (s) => s.faculty.filter((f) => f.departmentId === currentDept?.id),
-  );
-  const rooms = useWorkspaceStore(
-    (s) => s.rooms.filter((r) => r.departmentId === currentDept?.id),
-  );
-  const breaks = state.breaks;
-  const timetable = state.timetables.find((t) => t.departmentId === currentDept?.id);
+  const sections: Section[] = isPublicSlugMode
+    ? (portalData?.sections ?? [])
+    : state.sections.filter((sec) => sec.departmentId === currentDept?.id);
+
+  const subjects: Subject[] = isPublicSlugMode
+    ? (portalData?.subjects ?? [])
+    : state.subjects.filter((sub) => sub.departmentId === currentDept?.id);
+
+  const faculty: Faculty[] = isPublicSlugMode
+    ? (portalData?.faculty ?? [])
+    : state.faculty.filter((f) => f.departmentId === currentDept?.id);
+
+  const rooms: Room[] = isPublicSlugMode
+    ? (portalData?.rooms ?? [])
+    : state.rooms.filter((r) => r.departmentId === currentDept?.id);
+
+  const breaks: Break[] = isPublicSlugMode ? (portalData?.breaks ?? []) : state.breaks;
+
+  const timetable: Timetable | undefined = isPublicSlugMode
+    ? portalData?.timetable
+    : state.timetables.find((t) => t.departmentId === currentDept?.id);
 
   // Portal view mode: STUDENT (by Section) or FACULTY (by Teacher)
   const [role, setRole] = useState<'STUDENT' | 'FACULTY'>('STUDENT');
@@ -149,6 +212,38 @@ export function SchedulePortalPage() {
 
     return timelineItems;
   }, [currentDept, layout, relevantEntries, selectedDayIndex, breaks]);
+
+  if (loadingPortal) {
+    return (
+      <div className="flex min-h-[60vh] flex-col items-center justify-center p-8 text-center">
+        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#111315] text-white">
+          <Calendar className="h-6 w-6 animate-pulse text-[#0047FF]" />
+        </div>
+        <h2 className="mt-4 text-sm font-semibold text-[#111315]">Loading published institutional schedule…</h2>
+        <p className="mt-1 text-xs text-[#71767B]">Fetching the latest verified timetable from Neon Cloud</p>
+      </div>
+    );
+  }
+
+  if (slug && portalError) {
+    return (
+      <div className="flex min-h-[60vh] flex-col items-center justify-center p-8 text-center">
+        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 border border-amber-200">
+          <Calendar className="h-6 w-6" />
+        </div>
+        <h2 className="mt-4 text-base font-bold text-[#111315]">Schedule Not Available</h2>
+        <p className="mt-1 max-w-sm text-xs text-[#4B5259]">
+          {portalError || 'This timetable is either unpublished, expired, or the link is invalid.'}
+        </p>
+        <Link
+          to="/"
+          className="mt-5 inline-flex items-center gap-1.5 rounded-xl bg-[#111315] px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-black transition"
+        >
+          Return to Home
+        </Link>
+      </div>
+    );
+  }
 
   if (!currentDept) {
     return (

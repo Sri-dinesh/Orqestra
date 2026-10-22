@@ -26,6 +26,7 @@ import { DEFAULT_GENERATION_SETTINGS, DEFAULT_HARD_CONSTRAINTS, DEFAULT_SOFT_WEI
 import { buildGridLayout, gridColumnLabel } from '@/domain/scheduler/grid-layout';
 import type { TimetableConfiguration } from '@/domain/models';
 import { DepartmentNav } from '@/components/ui/DepartmentNav';
+import { publishTimetableToCloud } from '@/storage/cloud-sync';
 
 interface CellVm {
   dayIndex: number;
@@ -61,6 +62,24 @@ export function TimetablePage() {
   const [timingsModalOpen, setTimingsModalOpen] = useState(false);
   const [substituteModalOpen, setSubstituteModalOpen] = useState(false);
   const [substituteTargetEntryId, setSubstituteTargetEntryId] = useState<string | null>(null);
+  const [publishing, setPublishing] = useState(false);
+
+  const handlePublish = async () => {
+    if (!timetable) return;
+    setPublishing(true);
+    try {
+      const res = await publishTimetableToCloud(timetable.id, true);
+      if (res.ok && res.shareUrl) {
+        const fullUrl = `${window.location.origin}${res.shareUrl}`;
+        await navigator.clipboard.writeText(fullUrl).catch(() => {});
+        editor.showToast('success', 'Timetable published! Schedule Portal link copied to clipboard.');
+      } else {
+        editor.showToast('error', res.error || 'Failed to publish timetable.');
+      }
+    } finally {
+      setPublishing(false);
+    }
+  };
 
   const department = state.departments.find((d) => d.id === departmentId);
   const config: TimetableConfiguration | null = useMemo(() => {
@@ -527,6 +546,9 @@ export function TimetablePage() {
             </Button>
             <Button variant="secondary" size="sm" onClick={() => setPreviewModalOpen(true)}>
               Preview & Export
+            </Button>
+            <Button variant="secondary" size="sm" onClick={handlePublish} disabled={publishing}>
+              {publishing ? 'Publishing…' : 'Share Portal Link'}
             </Button>
             <Button variant="secondary" size="sm" onClick={doExportPdf}>PDF</Button>
             <Button variant="secondary" size="sm" onClick={doExportExcel}>Excel</Button>

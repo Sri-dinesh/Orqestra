@@ -8,6 +8,7 @@ import { useWorkspaceStore } from '@/state/stores/workspace-store';
 import { getActiveTerm } from '@/storage/term-manager';
 import { AccountMenu } from '@/features/auth/AccountMenu';
 import { SemesterSwitcherModal } from '@/components/ui/SemesterSwitcherModal';
+import { CloudSyncBadge } from '@/components/ui/CloudSyncBadge';
 import { Toast } from '@/components/ui/Toast';
 import { ErrorBoundary } from './ErrorBoundary';
 
@@ -83,6 +84,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 <Link className={navLinkCls('/settings')} href="/settings">
                   Settings
                 </Link>
+                <div className="ml-1 sm:ml-2 mr-1">
+                  <CloudSyncBadge />
+                </div>
                 <AccountMenu />
               </nav>
             </div>
