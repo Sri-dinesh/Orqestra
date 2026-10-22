@@ -1,6 +1,6 @@
 import { getDatabase } from '@/db';
 import { userProfiles } from '@/db/schema';
-import { requireAuthenticatedUser } from '../../../../../api/_lib/auth';
+import { requireAuthenticatedUser } from '@/auth/server';
 
 async function handleProfileSync(request: Request): Promise<Response> {
   try {
