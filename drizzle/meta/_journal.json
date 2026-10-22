@@ -15,6 +15,13 @@
       "when": 1792657662084,
       "tag": "0001_bored_payback",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792664574123,
+      "tag": "0002_dashing_the_stranger",
+      "breakpoints": true
     }
   ]
 }

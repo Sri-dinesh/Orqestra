@@ -11,6 +11,8 @@ import {
   breaks,
   timetables,
   generationAuditLogs,
+  institutionMembers,
+  memberInvitations,
 } from '@/db/schema';
 import { getTableColumns } from 'drizzle-orm';
 
@@ -27,6 +29,8 @@ describe('Relational Database Schema (Neon Postgres + Drizzle ORM)', () => {
     expect(breaks).toBeDefined();
     expect(timetables).toBeDefined();
     expect(generationAuditLogs).toBeDefined();
+    expect(institutionMembers).toBeDefined();
+    expect(memberInvitations).toBeDefined();
   });
 
   it('configures userProfiles with enterprise profile columns', () => {
@@ -120,5 +124,33 @@ describe('Relational Database Schema (Neon Postgres + Drizzle ORM)', () => {
     const breakCols = getTableColumns(breaks);
     expect(breakCols.startPeriod).toBeDefined();
     expect(breakCols.durationPeriods).toBeDefined();
+  });
+
+  it('configures institutionMembers with tenant scoping and role mappings', () => {
+    const cols = getTableColumns(institutionMembers);
+    expect(cols.id).toBeDefined();
+    expect(cols.institutionId).toBeDefined();
+    expect(cols.userId).toBeDefined();
+    expect(cols.role).toBeDefined();
+    expect(cols.departmentId).toBeDefined();
+    expect(cols.facultyId).toBeDefined();
+    expect(cols.status).toBeDefined();
+    expect(cols.createdAt).toBeDefined();
+    expect(cols.updatedAt).toBeDefined();
+  });
+
+  it('configures memberInvitations with secure tokens, roles, and expiry', () => {
+    const cols = getTableColumns(memberInvitations);
+    expect(cols.id).toBeDefined();
+    expect(cols.institutionId).toBeDefined();
+    expect(cols.email).toBeDefined();
+    expect(cols.role).toBeDefined();
+    expect(cols.departmentId).toBeDefined();
+    expect(cols.facultyId).toBeDefined();
+    expect(cols.invitedBy).toBeDefined();
+    expect(cols.token).toBeDefined();
+    expect(cols.status).toBeDefined();
+    expect(cols.expiresAt).toBeDefined();
+    expect(cols.createdAt).toBeDefined();
   });
 });

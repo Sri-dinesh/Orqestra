@@ -372,3 +372,69 @@ export const generationAuditLogs = pgTable(
 
 export type GenerationAuditLogRecord = typeof generationAuditLogs.$inferSelect;
 export type NewGenerationAuditLogRecord = typeof generationAuditLogs.$inferInsert;
+
+export type InstitutionRole = 'ADMIN' | 'HOD' | 'FACULTY';
+
+/**
+ * Institutional members connecting users to a tenant workspace with assigned roles.
+ */
+export const institutionMembers = pgTable(
+  'institution_members',
+  {
+    id: text('id').primaryKey(),
+    institutionId: text('institution_id')
+      .notNull()
+      .references(() => userProfiles.id, { onDelete: 'cascade' }),
+    userId: text('user_id')
+      .notNull()
+      .references(() => userProfiles.id, { onDelete: 'cascade' }),
+    role: text('role').$type<InstitutionRole>().default('FACULTY').notNull(),
+    departmentId: text('department_id').references(() => departments.id, { onDelete: 'set null' }),
+    facultyId: text('faculty_id').references(() => faculty.id, { onDelete: 'set null' }),
+    status: text('status').$type<'ACTIVE' | 'SUSPENDED'>().default('ACTIVE').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('members_inst_user_idx').on(table.institutionId, table.userId),
+    index('members_user_id_idx').on(table.userId),
+    index('members_dept_id_idx').on(table.departmentId),
+  ],
+);
+
+export type InstitutionMember = typeof institutionMembers.$inferSelect;
+export type NewInstitutionMember = typeof institutionMembers.$inferInsert;
+
+/**
+ * Invitations sent to users to join an institution workspace with a specific role.
+ */
+export const memberInvitations = pgTable(
+  'member_invitations',
+  {
+    id: text('id').primaryKey(),
+    institutionId: text('institution_id')
+      .notNull()
+      .references(() => userProfiles.id, { onDelete: 'cascade' }),
+    email: text('email').notNull(),
+    role: text('role').$type<InstitutionRole>().default('FACULTY').notNull(),
+    departmentId: text('department_id').references(() => departments.id, { onDelete: 'cascade' }),
+    facultyId: text('faculty_id').references(() => faculty.id, { onDelete: 'cascade' }),
+    invitedBy: text('invited_by')
+      .notNull()
+      .references(() => userProfiles.id, { onDelete: 'cascade' }),
+    token: text('token').notNull().unique(),
+    status: text('status')
+      .$type<'PENDING' | 'ACCEPTED' | 'REVOKED' | 'EXPIRED'>()
+      .default('PENDING')
+      .notNull(),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('invitations_inst_email_idx').on(table.institutionId, table.email),
+    index('invitations_token_idx').on(table.token),
+  ],
+);
+
+export type MemberInvitation = typeof memberInvitations.$inferSelect;
+export type NewMemberInvitation = typeof memberInvitations.$inferInsert;
