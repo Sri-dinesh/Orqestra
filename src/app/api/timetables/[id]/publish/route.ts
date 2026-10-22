@@ -1,6 +1,11 @@
-import { and, eq } from 'drizzle-orm';
+import { and, eq, ne } from 'drizzle-orm';
 import { getDatabase } from '@/db';
-import { timetables } from '@/db/schema';
+import {
+  academicTerms,
+  departments,
+  timetables,
+  userProfiles,
+} from '@/db/schema';
 import { requireAuthenticatedUser } from '@/auth/server';
 
 export const dynamic = 'force-dynamic';
@@ -17,27 +22,97 @@ export async function POST(
 
     const timetableId = params.id;
     const publish = body.publish !== undefined ? Boolean(body.publish) : true;
+    const now = new Date();
 
-    // Check if timetable exists and belongs to user
+    // 1. Ensure user profile exists to satisfy foreign key constraints
+    await database
+      .insert(userProfiles)
+      .values({
+        id: user.id,
+        email: user.email,
+        name: user.name,
+      })
+      .onConflictDoNothing();
+
+    // 2. Check if timetable exists and belongs to user
     let [existing] = await database
       .select()
       .from(timetables)
       .where(and(eq(timetables.userId, user.id), eq(timetables.id, timetableId)));
 
-    const now = new Date();
     const publicSlug =
       existing?.publicSlug ||
       `tt-${(existing?.departmentId || body.timetable?.departmentId || 'schedule').toLowerCase()}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
 
     if (!existing && body.timetable) {
       const tb = body.timetable;
+      const termId = body.termId || 'default';
+      const departmentId = tb.departmentId;
+
+      // Ensure term exists
+      const [existingTerm] = await database
+        .select({ id: academicTerms.id })
+        .from(academicTerms)
+        .where(and(eq(academicTerms.userId, user.id), eq(academicTerms.id, termId)));
+
+      if (!existingTerm) {
+        await database
+          .insert(academicTerms)
+          .values({
+            id: termId,
+            userId: user.id,
+            name: 'Academic Year 2026-27 (Odd Sem)',
+            academicYear: '2026-27',
+            isDefault: termId === 'default',
+            createdAt: now,
+            updatedAt: now,
+          })
+          .onConflictDoNothing();
+      }
+
+      // Ensure department exists
+      const [existingDept] = await database
+        .select({ id: departments.id })
+        .from(departments)
+        .where(and(eq(departments.userId, user.id), eq(departments.id, departmentId)));
+
+      if (!existingDept) {
+        await database
+          .insert(departments)
+          .values({
+            id: departmentId,
+            userId: user.id,
+            termId,
+            code: departmentId.toUpperCase().slice(0, 10),
+            name: `Department ${departmentId}`,
+            workingDays: ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY'],
+            periodsPerDay: 6,
+            status: 'CONFIGURED',
+            createdAt: now,
+            updatedAt: now,
+          })
+          .onConflictDoNothing();
+      }
+
+      // Remove any other timetable for the same department with a different ID
+      await database
+        .delete(timetables)
+        .where(
+          and(
+            eq(timetables.userId, user.id),
+            eq(timetables.termId, termId),
+            eq(timetables.departmentId, departmentId),
+            ne(timetables.id, timetableId),
+          ),
+        );
+
       const [inserted] = await database
         .insert(timetables)
         .values({
           id: timetableId,
           userId: user.id,
-          termId: body.termId || 'default',
-          departmentId: tb.departmentId,
+          termId,
+          departmentId,
           status: tb.status,
           revision: tb.revision ?? 1,
           configurationSnapshot: tb.configurationSnapshot,
@@ -63,11 +138,12 @@ export async function POST(
     } else if (!existing) {
       return Response.json({ error: 'Timetable not found' }, { status: 404 });
     } else {
+      const resolvedSlug = publish ? (existing.publicSlug || publicSlug) : existing.publicSlug;
       const [updated] = await database
         .update(timetables)
         .set({
           isPublished: publish,
-          publicSlug: publish ? publicSlug : existing.publicSlug,
+          publicSlug: resolvedSlug,
           updatedAt: now,
         })
         .where(and(eq(timetables.userId, user.id), eq(timetables.id, timetableId)))

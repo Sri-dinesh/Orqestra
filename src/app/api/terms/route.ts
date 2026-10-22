@@ -9,6 +9,7 @@ import {
   sections,
   subjects,
   timetables,
+  userProfiles,
 } from '@/db/schema';
 import { requireAuthenticatedUser } from '@/auth/server';
 import type { CloneTermOptions } from '@/storage/term-manager';
@@ -63,24 +64,30 @@ export async function POST(request: Request): Promise<Response> {
     const newTermId = `term-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 6)}`;
     const now = new Date();
 
-    let createdTerm: any = null;
+    // Ensure user profile exists
+    await database
+      .insert(userProfiles)
+      .values({
+        id: user.id,
+        email: user.email,
+        name: user.name,
+      })
+      .onConflictDoNothing();
 
-    await database.transaction(async (tx) => {
-      // 1. Create the new term
-      const [term] = await tx
-        .insert(academicTerms)
-        .values({
-          id: newTermId,
-          userId: user.id,
-          name: name.trim(),
-          academicYear: academicYear.trim(),
-          isDefault: false,
-          stats: { departments: 0, sections: 0, faculty: 0, rooms: 0 },
-          createdAt: now,
-          updatedAt: now,
-        })
-        .returning();
-      createdTerm = term;
+    // 1. Create the new term
+    const [createdTerm] = await database
+      .insert(academicTerms)
+      .values({
+        id: newTermId,
+        userId: user.id,
+        name: name.trim(),
+        academicYear: academicYear.trim(),
+        isDefault: false,
+        stats: { departments: 0, sections: 0, faculty: 0, rooms: 0 },
+        createdAt: now,
+        updatedAt: now,
+      })
+      .returning();
 
       // 2. Clone from source term if requested
       if (cloneFromTermId && cloneOptions) {
@@ -90,7 +97,7 @@ export async function POST(request: Request): Promise<Response> {
         let rmsCount = 0;
 
         if (cloneOptions.includeDepartments) {
-          const sourceDepts = await tx
+          const sourceDepts = await database
             .select()
             .from(departments)
             .where(
@@ -102,7 +109,7 @@ export async function POST(request: Request): Promise<Response> {
           deptsCount = sourceDepts.length;
 
           for (const d of sourceDepts) {
-            await tx.insert(departments).values({
+            await database.insert(departments).values({
               ...d,
               termId: newTermId,
               createdAt: now,
@@ -111,7 +118,7 @@ export async function POST(request: Request): Promise<Response> {
           }
 
           if (cloneOptions.includeSubjects) {
-            const sourceSubs = await tx
+            const sourceSubs = await database
               .select()
               .from(subjects)
               .where(
@@ -121,7 +128,7 @@ export async function POST(request: Request): Promise<Response> {
                 ),
               );
             for (const s of sourceSubs) {
-              await tx.insert(subjects).values({
+              await database.insert(subjects).values({
                 ...s,
                 termId: newTermId,
                 createdAt: now,
@@ -129,7 +136,7 @@ export async function POST(request: Request): Promise<Response> {
               });
             }
 
-            const sourceSecs = await tx
+            const sourceSecs = await database
               .select()
               .from(sections)
               .where(
@@ -140,7 +147,7 @@ export async function POST(request: Request): Promise<Response> {
               );
             secsCount = sourceSecs.length;
             for (const sec of sourceSecs) {
-              await tx.insert(sections).values({
+              await database.insert(sections).values({
                 ...sec,
                 termId: newTermId,
                 createdAt: now,
@@ -151,7 +158,7 @@ export async function POST(request: Request): Promise<Response> {
         }
 
         if (cloneOptions.includeFaculty) {
-          const sourceFac = await tx
+          const sourceFac = await database
             .select()
             .from(faculty)
             .where(
@@ -162,7 +169,7 @@ export async function POST(request: Request): Promise<Response> {
             );
           facsCount = sourceFac.length;
           for (const f of sourceFac) {
-            await tx.insert(faculty).values({
+            await database.insert(faculty).values({
               ...f,
               termId: newTermId,
               createdAt: now,
@@ -172,7 +179,7 @@ export async function POST(request: Request): Promise<Response> {
         }
 
         if (cloneOptions.includeRooms) {
-          const sourceRooms = await tx
+          const sourceRooms = await database
             .select()
             .from(rooms)
             .where(
@@ -183,7 +190,7 @@ export async function POST(request: Request): Promise<Response> {
             );
           rmsCount = sourceRooms.length;
           for (const r of sourceRooms) {
-            await tx.insert(rooms).values({
+            await database.insert(rooms).values({
               ...r,
               termId: newTermId,
               createdAt: now,
@@ -192,7 +199,7 @@ export async function POST(request: Request): Promise<Response> {
           }
         }
 
-        const sourceBreaks = await tx
+        const sourceBreaks = await database
           .select()
           .from(breaks)
           .where(
@@ -202,7 +209,7 @@ export async function POST(request: Request): Promise<Response> {
             ),
           );
         for (const b of sourceBreaks) {
-          await tx.insert(breaks).values({
+          await database.insert(breaks).values({
             ...b,
             termId: newTermId,
             createdAt: now,
@@ -211,7 +218,7 @@ export async function POST(request: Request): Promise<Response> {
         }
 
         if (cloneOptions.includeTimetables && cloneOptions.includeDepartments) {
-          const sourceTT = await tx
+          const sourceTT = await database
             .select()
             .from(timetables)
             .where(
@@ -221,7 +228,7 @@ export async function POST(request: Request): Promise<Response> {
               ),
             );
           for (const t of sourceTT) {
-            await tx.insert(timetables).values({
+            await database.insert(timetables).values({
               ...t,
               termId: newTermId,
               createdAt: now,
@@ -230,7 +237,7 @@ export async function POST(request: Request): Promise<Response> {
           }
         }
 
-        await tx
+        await database
           .update(academicTerms)
           .set({
             stats: {
@@ -248,7 +255,6 @@ export async function POST(request: Request): Promise<Response> {
             ),
           );
       }
-    });
 
     return Response.json({ term: createdTerm });
   } catch (error) {
@@ -272,24 +278,22 @@ export async function PUT(request: Request): Promise<Response> {
       return Response.json({ error: 'termId is required' }, { status: 400 });
     }
 
-    await database.transaction(async (tx) => {
-      // Clear previous default
-      await tx
-        .update(academicTerms)
-        .set({ isDefault: false })
-        .where(eq(academicTerms.userId, user.id));
+    // Clear previous default
+    await database
+      .update(academicTerms)
+      .set({ isDefault: false })
+      .where(eq(academicTerms.userId, user.id));
 
-      // Set new default
-      await tx
-        .update(academicTerms)
-        .set({ isDefault: true, updatedAt: new Date() })
-        .where(
-          and(
-            eq(academicTerms.userId, user.id),
-            eq(academicTerms.id, termId),
-          ),
-        );
-    });
+    // Set new default
+    await database
+      .update(academicTerms)
+      .set({ isDefault: true, updatedAt: new Date() })
+      .where(
+        and(
+          eq(academicTerms.userId, user.id),
+          eq(academicTerms.id, termId),
+        ),
+      );
 
     return Response.json({ ok: true, activeTermId: termId });
   } catch (error) {

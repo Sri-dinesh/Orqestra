@@ -1,5 +1,12 @@
+import { and, eq, ne } from 'drizzle-orm';
 import { getDatabase } from '@/db';
-import { generationAuditLogs, timetables } from '@/db/schema';
+import {
+  academicTerms,
+  departments,
+  generationAuditLogs,
+  timetables,
+  userProfiles,
+} from '@/db/schema';
 import { requireAuthenticatedUser } from '@/auth/server';
 import type { GenerationMetrics, Timetable } from '@/domain/models';
 
@@ -30,6 +37,74 @@ export async function POST(request: Request): Promise<Response> {
 
     const now = new Date();
 
+    // 1. Ensure user profile exists to satisfy foreign key constraints
+    await database
+      .insert(userProfiles)
+      .values({
+        id: user.id,
+        email: user.email,
+        name: user.name,
+      })
+      .onConflictDoNothing();
+
+    // 2. Ensure academic term exists
+    const [existingTerm] = await database
+      .select({ id: academicTerms.id })
+      .from(academicTerms)
+      .where(and(eq(academicTerms.userId, user.id), eq(academicTerms.id, termId)));
+
+    if (!existingTerm) {
+      await database
+        .insert(academicTerms)
+        .values({
+          id: termId,
+          userId: user.id,
+          name: 'Academic Year 2026-27 (Odd Sem)',
+          academicYear: '2026-27',
+          isDefault: termId === 'default',
+          createdAt: now,
+          updatedAt: now,
+        })
+        .onConflictDoNothing();
+    }
+
+    // 3. Ensure department exists to satisfy foreign key constraint
+    const [existingDept] = await database
+      .select({ id: departments.id })
+      .from(departments)
+      .where(and(eq(departments.userId, user.id), eq(departments.id, timetable.departmentId)));
+
+    if (!existingDept) {
+      await database
+        .insert(departments)
+        .values({
+          id: timetable.departmentId,
+          userId: user.id,
+          termId,
+          code: timetable.departmentId.toUpperCase().slice(0, 10),
+          name: `Department ${timetable.departmentId}`,
+          workingDays: ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY'],
+          periodsPerDay: 6,
+          status: 'CONFIGURED',
+          createdAt: now,
+          updatedAt: now,
+        })
+        .onConflictDoNothing();
+    }
+
+    // 4. Remove any other timetable for the same department with a different ID to prevent unique index collisions
+    await database
+      .delete(timetables)
+      .where(
+        and(
+          eq(timetables.userId, user.id),
+          eq(timetables.termId, termId),
+          eq(timetables.departmentId, timetable.departmentId),
+          ne(timetables.id, timetable.id),
+        ),
+      );
+
+    // 5. Upsert the current timetable
     const [saved] = await database
       .insert(timetables)
       .values({
@@ -62,7 +137,7 @@ export async function POST(request: Request): Promise<Response> {
       })
       .returning();
 
-    // Optionally record audit log
+    // 6. Optionally record audit log
     if (auditMetrics) {
       try {
         await database.insert(generationAuditLogs).values({

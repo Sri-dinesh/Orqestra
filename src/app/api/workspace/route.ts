@@ -1,4 +1,4 @@
-import { and, eq, notInArray } from 'drizzle-orm';
+import { and, eq, ne, notInArray } from 'drizzle-orm';
 import { getDatabase } from '@/db';
 import {
   academicTerms,
@@ -10,6 +10,7 @@ import {
   sections,
   subjects,
   timetables,
+  userProfiles,
 } from '@/db/schema';
 import { requireAuthenticatedUser } from '@/auth/server';
 import type {
@@ -32,6 +33,16 @@ export async function GET(request: Request): Promise<Response> {
     const user = await requireAuthenticatedUser(request);
     const database = getDatabase();
     const url = new URL(request.url);
+
+    // 0. Ensure user profile exists
+    await database
+      .insert(userProfiles)
+      .values({
+        id: user.id,
+        email: user.email,
+        name: user.name,
+      })
+      .onConflictDoNothing();
 
     // 1. Fetch user's academic terms
     let terms = await database
@@ -323,16 +334,33 @@ export async function PUT(request: Request): Promise<Response> {
 
     const now = new Date();
 
-    // Execute atomic sync
-    await database.transaction(async (tx) => {
-      // 1. Ensure target term exists
-      const [existingTerm] = await tx
-        .select()
-        .from(academicTerms)
-        .where(and(eq(academicTerms.userId, user.id), eq(academicTerms.id, termId)));
+    // 0. Ensure user profile exists to satisfy foreign key constraints
+    await database
+      .insert(userProfiles)
+      .values({
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        createdAt: now,
+        updatedAt: now,
+      })
+      .onConflictDoUpdate({
+        target: userProfiles.id,
+        set: {
+          email: user.email,
+          name: user.name,
+          updatedAt: now,
+        },
+      });
 
-      if (!existingTerm) {
-        await tx.insert(academicTerms).values({
+    // 1. Ensure target term exists
+    const [existingTerm] = await database
+      .select()
+      .from(academicTerms)
+      .where(and(eq(academicTerms.userId, user.id), eq(academicTerms.id, termId)));
+
+    if (!existingTerm) {
+      await database.insert(academicTerms).values({
           id: termId,
           userId: user.id,
           name: 'Academic Year 2026-27 (Odd Sem)',
@@ -346,7 +374,7 @@ export async function PUT(request: Request): Promise<Response> {
       // 2. Sync College Details
       if (payload.collegeDetails) {
         const cd = payload.collegeDetails as CollegeDetails;
-        await tx
+        await database
           .insert(collegeProfiles)
           .values({
             id: `col_${user.id}`,
@@ -395,7 +423,7 @@ export async function PUT(request: Request): Promise<Response> {
       const deptIds = depts.map((d) => d.id);
 
       for (const d of depts) {
-        await tx
+        await database
           .insert(departments)
           .values({
             id: d.id,
@@ -431,7 +459,7 @@ export async function PUT(request: Request): Promise<Response> {
       }
 
       if (deptIds.length > 0) {
-        await tx
+        await database
           .delete(departments)
           .where(
             and(
@@ -441,7 +469,7 @@ export async function PUT(request: Request): Promise<Response> {
             ),
           );
       } else {
-        await tx
+        await database
           .delete(departments)
           .where(
             and(
@@ -456,7 +484,7 @@ export async function PUT(request: Request): Promise<Response> {
       const secIds = secs.map((s) => s.id);
 
       for (const s of secs) {
-        await tx
+        await database
           .insert(sections)
           .values({
             id: s.id,
@@ -491,7 +519,7 @@ export async function PUT(request: Request): Promise<Response> {
       }
 
       if (secIds.length > 0) {
-        await tx
+        await database
           .delete(sections)
           .where(
             and(
@@ -501,7 +529,7 @@ export async function PUT(request: Request): Promise<Response> {
             ),
           );
       } else {
-        await tx
+        await database
           .delete(sections)
           .where(
             and(
@@ -516,7 +544,7 @@ export async function PUT(request: Request): Promise<Response> {
       const subIds = subs.map((s) => s.id);
 
       for (const s of subs) {
-        await tx
+        await database
           .insert(subjects)
           .values({
             id: s.id,
@@ -553,7 +581,7 @@ export async function PUT(request: Request): Promise<Response> {
       }
 
       if (subIds.length > 0) {
-        await tx
+        await database
           .delete(subjects)
           .where(
             and(
@@ -563,7 +591,7 @@ export async function PUT(request: Request): Promise<Response> {
             ),
           );
       } else {
-        await tx
+        await database
           .delete(subjects)
           .where(
             and(
@@ -578,7 +606,7 @@ export async function PUT(request: Request): Promise<Response> {
       const facIds = facs.map((f) => f.id);
 
       for (const f of facs) {
-        await tx
+        await database
           .insert(faculty)
           .values({
             id: f.id,
@@ -615,7 +643,7 @@ export async function PUT(request: Request): Promise<Response> {
       }
 
       if (facIds.length > 0) {
-        await tx
+        await database
           .delete(faculty)
           .where(
             and(
@@ -625,7 +653,7 @@ export async function PUT(request: Request): Promise<Response> {
             ),
           );
       } else {
-        await tx
+        await database
           .delete(faculty)
           .where(
             and(
@@ -640,7 +668,7 @@ export async function PUT(request: Request): Promise<Response> {
       const rmIds = rms.map((r) => r.id);
 
       for (const r of rms) {
-        await tx
+        await database
           .insert(rooms)
           .values({
             id: r.id,
@@ -670,7 +698,7 @@ export async function PUT(request: Request): Promise<Response> {
       }
 
       if (rmIds.length > 0) {
-        await tx
+        await database
           .delete(rooms)
           .where(
             and(
@@ -680,7 +708,7 @@ export async function PUT(request: Request): Promise<Response> {
             ),
           );
       } else {
-        await tx
+        await database
           .delete(rooms)
           .where(
             and(
@@ -695,7 +723,7 @@ export async function PUT(request: Request): Promise<Response> {
       const brkIds = brks.map((b) => b.id);
 
       for (const b of brks) {
-        await tx
+        await database
           .insert(breaks)
           .values({
             id: b.id,
@@ -725,7 +753,7 @@ export async function PUT(request: Request): Promise<Response> {
       }
 
       if (brkIds.length > 0) {
-        await tx
+        await database
           .delete(breaks)
           .where(
             and(
@@ -735,7 +763,7 @@ export async function PUT(request: Request): Promise<Response> {
             ),
           );
       } else {
-        await tx
+        await database
           .delete(breaks)
           .where(
             and(
@@ -749,8 +777,43 @@ export async function PUT(request: Request): Promise<Response> {
       const tts = (payload.timetables as Timetable[]) ?? [];
       const ttIds = tts.map((t) => t.id);
 
+      // Clean up stale timetables before upserting to avoid unique constraint collisions
+      // on (user_id, term_id, department_id)
+      if (ttIds.length > 0) {
+        await database
+          .delete(timetables)
+          .where(
+            and(
+              eq(timetables.userId, user.id),
+              eq(timetables.termId, termId),
+              notInArray(timetables.id, ttIds),
+            ),
+          );
+      } else {
+        await database
+          .delete(timetables)
+          .where(
+            and(
+              eq(timetables.userId, user.id),
+              eq(timetables.termId, termId),
+            ),
+          );
+      }
+
       for (const t of tts) {
-        await tx
+        // Also remove any existing timetable for the same department with a different ID
+        await database
+          .delete(timetables)
+          .where(
+            and(
+              eq(timetables.userId, user.id),
+              eq(timetables.termId, termId),
+              eq(timetables.departmentId, t.departmentId),
+              ne(timetables.id, t.id),
+            ),
+          );
+
+        await database
           .insert(timetables)
           .values({
             id: t.id,
@@ -782,29 +845,8 @@ export async function PUT(request: Request): Promise<Response> {
           });
       }
 
-      if (ttIds.length > 0) {
-        await tx
-          .delete(timetables)
-          .where(
-            and(
-              eq(timetables.userId, user.id),
-              eq(timetables.termId, termId),
-              notInArray(timetables.id, ttIds),
-            ),
-          );
-      } else {
-        await tx
-          .delete(timetables)
-          .where(
-            and(
-              eq(timetables.userId, user.id),
-              eq(timetables.termId, termId),
-            ),
-          );
-      }
-
       // 10. Update Term Statistics
-      await tx
+      await database
         .update(academicTerms)
         .set({
           stats: {
@@ -816,7 +858,6 @@ export async function PUT(request: Request): Promise<Response> {
           updatedAt: now,
         })
         .where(and(eq(academicTerms.userId, user.id), eq(academicTerms.id, termId)));
-    });
 
     return Response.json({
       ok: true,
