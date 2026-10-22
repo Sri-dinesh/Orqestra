@@ -14,7 +14,7 @@ describe('official pdf export', () => {
     useWorkspaceStore.getState().replaceAll({
       departments: [], sections: [], subjects: [], faculty: [], timetables: [], activeDepartmentId: null,
     });
-    const preset = BUILT_IN_PRESETS.find((p) => p.id === 'btech-cse-3rd-year')!;
+    const preset = BUILT_IN_PRESETS.find((p) => p.id === 'enterprise')!;
     applyPreset(preset, useWorkspaceStore.getState());
     const s = useWorkspaceStore.getState();
     const deptId = s.activeDepartmentId!;

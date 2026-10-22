@@ -19,10 +19,10 @@ describe('built-in presets', () => {
     });
   });
 
-  it('exposes six presets with unique ids and codes', () => {
-    expect(BUILT_IN_PRESETS.length).toBe(6);
-    expect(new Set(BUILT_IN_PRESETS.map((p) => p.id)).size).toBe(6);
-    expect(new Set(BUILT_IN_PRESETS.map((p) => p.department.code)).size).toBe(6);
+  it('exposes three presets with unique ids and codes', () => {
+    expect(BUILT_IN_PRESETS.length).toBe(3);
+    expect(new Set(BUILT_IN_PRESETS.map((p) => p.id)).size).toBe(3);
+    expect(new Set(BUILT_IN_PRESETS.map((p) => p.department.code)).size).toBe(3);
   });
 
   for (const preset of BUILT_IN_PRESETS) {
@@ -65,17 +65,7 @@ describe('built-in presets', () => {
       // Presets must be feasible (they are realistic configurations)
       const feasibility = analyzeFeasibility({ department, sections, subjects, faculty, breaks: store.breaks });
       expect(feasibility.verdict).toBe('READY');
-      if (preset.id === 'btech-cse-3rd-year') {
-        // 6 days × 7 teaching periods = 42 teachable; break + lunch add
-        // their own columns, so preflight must be completely clean.
-        expect(feasibility.diagnostics).toEqual([]);
-        for (const report of feasibility.sectionReports) {
-          expect(report.requiredPeriods).toBe(42);
-          expect(report.weeklyCapacity).toBe(42);
-        }
-      }
-
-      const isLarge = preset.id === 'enterprise' || preset.id === 'btech-cse-3rd-year';
+      const isLarge = preset.id === 'enterprise';
       const result = generateTimetable({
         department,
         sections,

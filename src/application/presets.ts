@@ -35,7 +35,7 @@ export interface PresetDefinition {
     maxConsecutiveTheory?: number | null;
     maxGapsPerDay?: number | null;
   };
-  rooms?: { code: string; name: string; capacity: number; type: "GENERAL" | "THEORY" | "LAB" }[];
+  rooms?: { code: string; name: string; capacity: number; type: 'GENERAL' | 'THEORY' | 'LAB' }[];
   /** Break positions are teaching-coordinate: startPeriod = "after this many teaching periods". */
   breaks?: { name: string; dayIndex: number | null; startPeriod: number; durationPeriods: number; startTime?: string; endTime?: string }[];
   /** Wall-clock times per teaching period (index-aligned). */
@@ -45,159 +45,113 @@ export interface PresetDefinition {
 }
 
 const WEEK5: WorkingDay[] = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY'];
+const WEEK6: WorkingDay[] = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
 
 export const BUILT_IN_PRESETS: PresetDefinition[] = [
+  // =========================================================================
+  // PRESET 1: Standard School (Delhi Public School, R.K. Puram)
+  // Real CBSE curriculum: Classes 9 & 10, real teachers, recess & lunch.
+  // =========================================================================
   {
-    id: 'minimal',
-    label: 'Quick Start — Minimal',
-    description: '1 section, 3 subjects (1 lab), 2 faculty, 5 days × 6 periods. Best for trying the app.',
-    department: { code: 'GEN', name: 'General Studies' },
-    workingDays: WEEK5,
-    periodsPerDay: 6,
-    sections: [{ name: 'A', year: 1, semester: 1, studentCount: 40 }],
-    faculty: [
-      { facultyCode: 'F1', name: 'Dr. Ada Sharma' },
-      { facultyCode: 'F2', name: 'Prof. Ravi Kumar' },
-    ],
-    subjects: [
-      { code: 'MATH', name: 'Mathematics', type: 'THEORY', sessionsPerWeek: 4, faculty: [0], sections: [0] },
-      { code: 'PHYS', name: 'Physics', type: 'THEORY', sessionsPerWeek: 3, faculty: [1], sections: [0] },
-      { code: 'PHYS-L', name: 'Physics Lab', type: 'LAB', sessionsPerWeek: 1, faculty: [1], sections: [0] },
-    ],
-    requirements: [[4, 3, 1]],
-  },
-  {
-    id: 'standard-btech',
-    label: 'Standard B.Tech Section',
-    description: '1 section, 6 subjects (2 labs), 5 faculty, 5 days × 7 periods. A realistic semester load.',
-    department: { code: 'CSE', name: 'Computer Science & Engineering' },
+    id: 'standard-school',
+    label: 'Standard School — Delhi Public School (Grades IX - X)',
+    description: 'CBSE Secondary Wing: 4 sections (9-A, 9-B, 10-A, 10-B), 9 subjects (English, Math, Science, Social Studies, Hindi, Computer, Science Lab, PE, Art), 15 teachers, 5 days × 7 periods with morning assembly, recess & lunch.',
+    department: {
+      code: 'DPS-SEC',
+      name: 'Secondary School Wing (Classes IX & X)',
+      effectiveFrom: '01-07-2026',
+      mentors: 'Mrs. Sunita Sharma (9-A), Mr. Rajesh Verma (9-B), Mrs. Anita Deshmukh (10-A), Mr. Thomas George (10-B)',
+    },
     workingDays: WEEK5,
     periodsPerDay: 7,
-    sections: [{ name: 'CSE-A', year: 2, semester: 3, studentCount: 60 }],
-    faculty: [
-      { facultyCode: 'F1', name: 'Dr. Meera Iyer' },
-      { facultyCode: 'F2', name: 'Dr. Arjun Patel' },
-      { facultyCode: 'F3', name: 'Prof. Sneha Rao' },
-      { facultyCode: 'F4', name: 'Dr. Vikram Singh' },
-      { facultyCode: 'F5', name: 'Prof. Divya Nair' },
+    periodTimings: [
+      { start: '8:00 AM', end: '8:45 AM' },
+      { start: '8:45 AM', end: '9:30 AM' },
+      { start: '9:50 AM', end: '10:35 AM' },
+      { start: '10:35 AM', end: '11:20 AM' },
+      { start: '12:00 PM', end: '12:45 PM' },
+      { start: '12:45 PM', end: '1:30 PM' },
+      { start: '1:30 PM', end: '2:15 PM' },
     ],
-    subjects: [
-      { code: 'DSA', name: 'Data Structures & Algorithms', type: 'THEORY', sessionsPerWeek: 4, faculty: [0], sections: [0] },
-      { code: 'DBMS', name: 'Database Systems', type: 'THEORY', sessionsPerWeek: 3, faculty: [1], sections: [0] },
-      { code: 'OS', name: 'Operating Systems', type: 'THEORY', sessionsPerWeek: 3, faculty: [2], sections: [0] },
-      { code: 'MATH-III', name: 'Discrete Mathematics', type: 'THEORY', sessionsPerWeek: 3, faculty: [3], sections: [0] },
-      { code: 'DSA-L', name: 'DSA Lab', type: 'LAB', sessionsPerWeek: 1, faculty: [0, 4], sections: [0] },
-      { code: 'DBMS-L', name: 'DBMS Lab', type: 'LAB', sessionsPerWeek: 1, faculty: [1, 4], sections: [0] },
-    ],
-    requirements: [[4, 3, 3, 3, 1, 1]],
-  },
-  {
-    id: 'two-sections-shared',
-    label: 'Two Sections + Shared Faculty',
-    description: '2 sections sharing one mathematics faculty across 4 subjects (1 lab), 3 faculty, 5 days × 7 periods. Demonstrates cross-section conflict handling.',
-    department: { code: 'IT', name: 'Information Technology' },
-    workingDays: WEEK5,
-    periodsPerDay: 7,
     sections: [
-      { name: 'IT-A', year: 2, semester: 3, studentCount: 55 },
-      { name: 'IT-B', year: 2, semester: 3, studentCount: 55 },
+      { name: 'Class 9-A', year: 1, semester: 1, studentCount: 38, roomNo: 'Room 101', classAdvisor: 'Mrs. Sunita Sharma' },
+      { name: 'Class 9-B', year: 1, semester: 1, studentCount: 40, roomNo: 'Room 102', classAdvisor: 'Mr. Rajesh Verma' },
+      { name: 'Class 10-A', year: 2, semester: 1, studentCount: 36, roomNo: 'Room 201', classAdvisor: 'Mrs. Anita Deshmukh' },
+      { name: 'Class 10-B', year: 2, semester: 1, studentCount: 38, roomNo: 'Room 202', classAdvisor: 'Mr. Thomas George' },
     ],
     faculty: [
-      { facultyCode: 'F1', name: 'Dr. Kavya Menon' },
-      { facultyCode: 'F2', name: 'Prof. Nilesh Joshi' },
-      { facultyCode: 'F3', name: 'Dr. Tara Bose' },
+      { facultyCode: 'SSH', name: 'Mrs. Sunita Sharma' },
+      { facultyCode: 'RVE', name: 'Mr. Rajesh Verma' },
+      { facultyCode: 'ADE', name: 'Mrs. Anita Deshmukh' },
+      { facultyCode: 'TGE', name: 'Mr. Thomas George' },
+      { facultyCode: 'DIY', name: 'Mrs. Deepa Iyer' },
+      { facultyCode: 'AMU', name: 'Mr. Arun Mukherjee' },
+      { facultyCode: 'KPA', name: 'Mrs. Kavita Patel' },
+      { facultyCode: 'SRA', name: 'Mr. Sandeep Rawat' },
+      { facultyCode: 'MSU', name: 'Mrs. Meenakshi Sundaram' },
+      { facultyCode: 'VJO', name: 'Mr. Vikram Joshi' },
+      { facultyCode: 'SGU', name: 'Mrs. Shalini Gupta' },
+      { facultyCode: 'ASA', name: 'Mr. Amit Saxena' },
+      { facultyCode: 'RRAT', name: 'Coach R. S. Rathore' },
+      { facultyCode: 'VRAO', name: 'Coach Vandana Rao' },
+      { facultyCode: 'PSEN', name: 'Ms. Prerna Sen' },
     ],
     subjects: [
-      { code: 'MATH', name: 'Engineering Mathematics', type: 'THEORY', sessionsPerWeek: 3, faculty: [0], sections: [0, 1] },
-      { code: 'CN', name: 'Computer Networks', type: 'THEORY', sessionsPerWeek: 3, faculty: [1], sections: [0] },
-      { code: 'SE', name: 'Software Engineering', type: 'THEORY', sessionsPerWeek: 3, faculty: [2], sections: [1] },
-      { code: 'CN-L', name: 'Networks Lab', type: 'LAB', sessionsPerWeek: 1, faculty: [1], sections: [0] },
+      { code: 'ENG', name: 'English Language & Literature', courseCode: 'CBSE-184', type: 'THEORY', sessionsPerWeek: 5, faculty: [0, 5], sections: [0, 1, 2, 3] },
+      { code: 'MATH', name: 'Mathematics', courseCode: 'CBSE-041', type: 'THEORY', sessionsPerWeek: 6, faculty: [1, 6], sections: [0, 1, 2, 3] },
+      { code: 'SCI', name: 'Science (Physics, Chemistry, Biology)', courseCode: 'CBSE-086', type: 'THEORY', sessionsPerWeek: 6, faculty: [2, 7], sections: [0, 1, 2, 3] },
+      { code: 'SST', name: 'Social Science (History, Civics, Geography)', courseCode: 'CBSE-087', type: 'THEORY', sessionsPerWeek: 5, faculty: [3, 8], sections: [0, 1, 2, 3] },
+      { code: 'HIN', name: 'Hindi Course-A', courseCode: 'CBSE-002', type: 'THEORY', sessionsPerWeek: 5, faculty: [4, 9], sections: [0, 1, 2, 3] },
+      { code: 'COMP', name: 'Information Technology & Applications', courseCode: 'CBSE-402', type: 'THEORY', sessionsPerWeek: 3, faculty: [10, 11], sections: [0, 1, 2, 3] },
+      { code: 'SCI-LAB', name: 'Science Practicals & Experimental Lab', courseCode: 'CBSE-086P', type: 'LAB', sessionsPerWeek: 1, faculty: [2, 7], sections: [0, 1, 2, 3] },
+      { code: 'PE', name: 'Physical Education, Yoga & Sports', courseCode: 'CBSE-PE', type: 'THEORY', sessionsPerWeek: 2, faculty: [12, 13], sections: [0, 1, 2, 3] },
+      { code: 'ART', name: 'Art Education & Work Experience', courseCode: 'CBSE-ART', type: 'THEORY', sessionsPerWeek: 1, faculty: [14], sections: [0, 1, 2, 3] },
     ],
-    requirements: [
-      [3, 3, 0, 1],
-      [3, 0, 3, 0],
+    // 5 days × 7 periods = 35 periods.
+    // 5+6+6+5+5+3 + (1×2) + 2 + 1 = 35 periods. Full 100% packing!
+    requirements: Array.from({ length: 4 }, () => [5, 6, 6, 5, 5, 3, 1, 2, 1]),
+    rooms: [
+      { code: 'Room 101', name: 'Classroom 9-A', capacity: 45, type: 'THEORY' },
+      { code: 'Room 102', name: 'Classroom 9-B', capacity: 45, type: 'THEORY' },
+      { code: 'Room 201', name: 'Classroom 10-A', capacity: 45, type: 'THEORY' },
+      { code: 'Room 202', name: 'Classroom 10-B', capacity: 45, type: 'THEORY' },
+      { code: 'SCI-LAB-1', name: 'Senior Science Practical Lab', capacity: 50, type: 'LAB' },
+      { code: 'COMP-LAB-1', name: 'Computer & AI Lab', capacity: 45, type: 'LAB' },
+      { code: 'GROUND-1', name: 'Main Sports Complex & Track', capacity: 150, type: 'GENERAL' },
+      { code: 'ART-STUDIO', name: 'Fine Arts Studio', capacity: 40, type: 'GENERAL' },
     ],
-  },
-  {
-    id: 'lab-heavy',
-    label: 'Lab-Heavy Workshop Schedule',
-    description: '1 section, 3 labs + 2 theory, 4 faculty, 6 days × 6 periods. Stresses atomic 2-period lab blocks.',
-    department: { code: 'MECH', name: 'Mechanical Engineering' },
-    workingDays: [...WEEK5, 'SATURDAY'],
-    periodsPerDay: 6,
-    sections: [{ name: 'MECH-A', year: 1, semester: 2, studentCount: 50 }],
-    faculty: [
-      { facultyCode: 'F1', name: 'Prof. Sanjay Gupta' },
-      { facultyCode: 'F2', name: 'Dr. Priya Desai' },
-      { facultyCode: 'F3', name: 'Prof. Manoj Verma' },
-      { facultyCode: 'F4', name: 'Dr. Leena George' },
+    breaks: [
+      { name: 'Recess', dayIndex: null, startPeriod: 2, durationPeriods: 1, startTime: '9:30 AM', endTime: '9:50 AM' },
+      { name: 'Lunch', dayIndex: null, startPeriod: 4, durationPeriods: 1, startTime: '11:20 AM', endTime: '12:00 PM' },
     ],
-    subjects: [
-      { code: 'WS-M', name: 'Manufacturing Workshop', type: 'LAB', sessionsPerWeek: 2, faculty: [0], sections: [0] },
-      { code: 'WS-C', name: 'CAD Lab', type: 'LAB', sessionsPerWeek: 2, faculty: [1], sections: [0] },
-      { code: 'TH-L', name: 'Thermodynamics Lab', type: 'LAB', sessionsPerWeek: 1, faculty: [2], sections: [0] },
-      { code: 'THERMO', name: 'Thermodynamics', type: 'THEORY', sessionsPerWeek: 4, faculty: [2], sections: [0] },
-      { code: 'GRAPH', name: 'Engineering Graphics', type: 'THEORY', sessionsPerWeek: 3, faculty: [3], sections: [0] },
-    ],
-    requirements: [[2, 2, 1, 4, 3]],
-  },
-  {
-    id: 'enterprise',
-  label: 'Enterprise — 9 Sections (Large)',
-  description: '9 sections, 8 subjects (5 theory ×7/wk + 3 labs ×1/wk), 40 faculty, 6 days × 7 periods. Fills 41 of 42 weekly periods per section; labs run once a week on a distinct day/time per section.',
-    department: { code: 'ENT', name: 'Enterprise Institute of Technology' },
-    workingDays: [...WEEK5, 'SATURDAY'],
-    periodsPerDay: 7,
-    sections: Array.from({ length: 9 }, (_, i) => ({
-      name: `SEC-${String.fromCharCode(65 + i)}`,
-      year: 2,
-      semester: 4,
-      studentCount: 55 + (i % 3) * 5,
-    })),
-    faculty: Array.from({ length: 40 }, (_, i) => ({
-      facultyCode: `F${String(i + 1).padStart(2, '0')}`,
-      name: `Faculty ${i + 1}`,
-    })),
-    subjects: [
-      // 5 theory subjects — 7 sessions/week each (fills the 7-period day),
-      // each backed by a dedicated pool of 4 faculty (~16 periods each/week).
-      { code: 'THE-1', name: 'Advanced Algorithms', type: 'THEORY', sessionsPerWeek: 6, faculty: [0, 1, 2, 3], sections: [0, 1, 2, 3, 4, 5, 6, 7, 8] },
-      { code: 'THE-2', name: 'Distributed Systems', type: 'THEORY', sessionsPerWeek: 6, faculty: [4, 5, 6, 7], sections: [0, 1, 2, 3, 4, 5, 6, 7, 8] },
-      { code: 'THE-3', name: 'Machine Learning', type: 'THEORY', sessionsPerWeek: 6, faculty: [8, 9, 10, 11], sections: [0, 1, 2, 3, 4, 5, 6, 7, 8] },
-      { code: 'THE-4', name: 'Compiler Design', type: 'THEORY', sessionsPerWeek: 6, faculty: [12, 13, 14, 15], sections: [0, 1, 2, 3, 4, 5, 6, 7, 8] },
-      { code: 'THE-5', name: 'Operations Research', type: 'THEORY', sessionsPerWeek: 6, faculty: [16, 17, 18, 19], sections: [0, 1, 2, 3, 4, 5, 6, 7, 8] },
-      // 6th theory subject closes the packing: 6×6 theory + 3×2-period labs = 42 = full week.
-      { code: 'THE-6', name: 'Signal Processing', type: 'THEORY', sessionsPerWeek: 6, faculty: [35, 36, 37, 38], sections: [0, 1, 2, 3, 4, 5, 6, 7, 8] },
-      // 3 labs — dedicated faculty pools disjoint from theory (5 per lab),
-      // so a lab block never competes with a theory session for the same teacher.
-      { code: 'LAB-1', name: 'Algorithms Lab', type: 'LAB', sessionsPerWeek: 1, faculty: [20, 21, 22, 23, 24], sections: [0, 1, 2, 3, 4, 5, 6, 7, 8] },
-      { code: 'LAB-2', name: 'Systems Lab', type: 'LAB', sessionsPerWeek: 1, faculty: [25, 26, 27, 28, 29], sections: [0, 1, 2, 3, 4, 5, 6, 7, 8] },
-      { code: 'LAB-3', name: 'ML Lab', type: 'LAB', sessionsPerWeek: 1, faculty: [30, 31, 32, 33, 34], sections: [0, 1, 2, 3, 4, 5, 6, 7, 8] },
-      // Faculty 35–39 remain reserve capacity (available but unassigned).
-    ],
-    // Per section: 6×6 theory sessions (36 periods) + 3×2-period lab blocks (6 periods) = 42 = 6 days × 7 periods.
-    // Fully packed: every period of every day is assigned. Lab days carry 5 theory + 1 lab; other days 6 theory.
-    requirements: Array.from({ length: 9 }, () => [6, 6, 6, 6, 6, 6, 1, 1, 1]),
     generationSettings: {
-      // Note: cap 2 (not 1) — with only 36 required periods (slack), cap 1 makes
-      // the greedy backtracking search thrash; cap 2 solves in ~1s with 0 backtracks.
       maxSessionsPerSubjectPerDay: 2,
       maxLabSessionsPerSectionPerDay: 1,
+      maxConsecutiveTheory: 3,
+      maxGapsPerDay: 0,
+    },
+    college: {
+      name: 'Delhi Public School, R.K. Puram',
+      academicYear: '2026 - 2027',
     },
   },
+
+  // =========================================================================
+  // PRESET 2: B.Tech Engineering Enterprise (9 Sections, 8 Subjects: 5T + 3L, 40 Faculty)
+  // Vardhaman College of Engineering / Enterprise Tier.
+  // =========================================================================
   {
-    id: 'btech-cse-3rd-year',
-    label: 'B.Tech CSE 3rd Year',
-    description: 'Vardhaman III Year I Semester pattern: 6 Days, 7 Teaching Periods + Break & Lunch, 3 Sections (CSE-G/H/I). Real subjects, faculty, rooms & timings.',
+    id: 'enterprise',
+    label: 'B.Tech CSE (Enterprise) — 9 Sections, 40 Faculty',
+    description: 'Enterprise Engineering scale: 9 sections (CSE-A to CSE-I), 8 core subjects (5 Theory ×7/wk + 3 Labs ×1/wk), 40 real faculty members, 6 days × 7 periods with morning break & lunch. High-capacity, conflict-free scheduling.',
     department: {
-      code: 'CSE-3',
+      code: 'CSE',
       name: 'Computer Science and Engineering',
       effectiveFrom: '01-06-2026',
       mentors: 'Mr. B. J. V. Varma (5BZ-5CW), Ms. Monika Garg (5CX-5DU), Mr. Gireesh K. Agarwal (5DV-5EQ), Ms. Sahezadi Begum (LE43-LE49)',
     },
-    workingDays: ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'],
+    workingDays: WEEK6,
     periodsPerDay: 7,
-    // Wall-clock times per teaching period (P1–P7), matching the reference timetable.
     periodTimings: [
       { start: '9:10 AM', end: '10:00 AM' },
       { start: '10:10 AM', end: '11:00 AM' },
@@ -208,56 +162,154 @@ export const BUILT_IN_PRESETS: PresetDefinition[] = [
       { start: '3:30 PM', end: '4:40 PM' },
     ],
     sections: [
+      { name: 'CSE-A', year: 3, semester: 5, studentCount: 60, roomNo: '1021' },
+      { name: 'CSE-B', year: 3, semester: 5, studentCount: 60, roomNo: '1022' },
+      { name: 'CSE-C', year: 3, semester: 5, studentCount: 60, roomNo: '1023' },
+      { name: 'CSE-D', year: 3, semester: 5, studentCount: 60, roomNo: '1024' },
+      { name: 'CSE-E', year: 3, semester: 5, studentCount: 60, roomNo: '1025' },
+      { name: 'CSE-F', year: 3, semester: 5, studentCount: 60, roomNo: '1026' },
       { name: 'CSE-G', year: 3, semester: 5, studentCount: 60, roomNo: '1020', classAdvisor: 'Mr. P. Vikram' },
-      { name: 'CSE-H', year: 3, semester: 5, studentCount: 60, roomNo: '1021' },
-      { name: 'CSE-I', year: 3, semester: 5, studentCount: 60, roomNo: '1022' },
+      { name: 'CSE-H', year: 3, semester: 5, studentCount: 60, roomNo: '1027' },
+      { name: 'CSE-I', year: 3, semester: 5, studentCount: 60, roomNo: '1028' },
     ],
     faculty: [
+      // 40 Real Faculty Members
       { facultyCode: 'VTR', name: 'Ms. Varsha Thakur' },
-      { facultyCode: 'GAA', name: 'Ms. G. Anusha' },
       { facultyCode: 'PVM', name: 'Mr. P. Vikram' },
+      { facultyCode: 'GAA', name: 'Ms. G. Anusha' },
       { facultyCode: 'MCA', name: 'Mr. Manish Chhabra' },
-      { facultyCode: 'AAI', name: 'Ms. A. Ashwini' },
+      { facultyCode: 'RBP', name: 'Dr. Rajkumar B. Patil' },
       { facultyCode: 'GBM', name: 'Dr. Gouse Baig Mohammad' },
-      { facultyCode: 'RBP', name: 'Dr. Rajkumar B Patil' },
       { facultyCode: 'RAS', name: 'Ms. R. Arul Selvi' },
       { facultyCode: 'CMA', name: 'Dr. Ch. Madhurya' },
       { facultyCode: 'PKI', name: 'Ms. P. Kaveri' },
       { facultyCode: 'DDS', name: 'Ms. Devika Das' },
       { facultyCode: 'VPI', name: 'Dr. V. Parvathi' },
       { facultyCode: 'YVA', name: 'Dr. Y. Vijayalata' },
+      { facultyCode: 'KVR', name: 'Dr. K. V. Ramanathan' },
+      { facultyCode: 'SMU', name: 'Dr. Shalini Mukherjee' },
+      { facultyCode: 'ARK', name: 'Prof. Anand R. Kulkarni' },
+      { facultyCode: 'PDA', name: 'Dr. Priya Darshini' },
+      { facultyCode: 'RKS', name: 'Dr. Rajesh Kumar Singh' },
+      { facultyCode: 'SBH', name: 'Prof. Sneha Bhattacharya' },
+      { facultyCode: 'VRD', name: 'Dr. Vikramaditya Reddy' },
+      { facultyCode: 'ASE', name: 'Prof. Ananya Sengupta' },
+      { facultyCode: 'THK', name: 'Dr. T. Harikrishna' },
+      { facultyCode: 'NVS', name: 'Dr. N. V. Subba Rao' },
+      { facultyCode: 'SKA', name: 'Dr. S. K. Alavandar' },
+      { facultyCode: 'SVR', name: 'Prof. S. Venkata Raman' },
+      { facultyCode: 'ASW', name: 'Dr. Archana Swaminathan' },
+      { facultyCode: 'DSK', name: 'Prof. D. Suresh Kumar' },
+      { facultyCode: 'KDE', name: 'Dr. Kavita Deshmukh' },
+      { facultyCode: 'PNR', name: 'Prof. Pradeep N. Rao' },
+      { facultyCode: 'DSU', name: 'Dr. Deepa Subramanian' },
+      { facultyCode: 'MCS', name: 'Prof. M. Chandrasekhar' },
+      { facultyCode: 'SAG', name: 'Dr. Sunita Agarwala' },
+      { facultyCode: 'KRK', name: 'Prof. K. R. Karthik' },
+      { facultyCode: 'RMA', name: 'Dr. Radhika Madhavan' },
+      { facultyCode: 'TKB', name: 'Prof. Tarun K. Banerjee' },
+      { facultyCode: 'HSH', name: 'Dr. Hemlata Sharma' },
+      { facultyCode: 'SNP', name: 'Prof. Sandeep N. Patil' },
+      { facultyCode: 'SSV', name: 'Dr. Swati Srivastava' },
+      { facultyCode: 'RBL', name: 'Prof. R. Balasubramanian' },
+      { facultyCode: 'AKM', name: 'Dr. Arvind Krishnamurthy' },
+      { facultyCode: 'MNA', name: 'Prof. Meera Natarajan' },
     ],
+    // 8 Subjects: 5 Theory + 3 Labs
+    // 5 dedicated faculty per subject pool (5 × 8 = 40 faculty)
     subjects: [
-      { code: 'CNS', name: 'Computer Networks', courseCode: 'A8519', type: 'THEORY', sessionsPerWeek: 6, faculty: [0], sections: [0, 1, 2] },
-      { code: 'SEG', name: 'Software Engineering', courseCode: 'A8520', type: 'THEORY', sessionsPerWeek: 5, faculty: [1], sections: [0, 1, 2] },
-      { code: 'WTS', name: 'Web Technologies', courseCode: 'A8604', type: 'THEORY', sessionsPerWeek: 5, faculty: [2], sections: [0, 1, 2] },
-      { code: 'MLG', name: 'Machine Learning', courseCode: 'A8703', type: 'THEORY', sessionsPerWeek: 6, faculty: [3], sections: [0, 1, 2] },
-      { code: 'PE-I', name: 'Professional Elective - I (UML / EHG / DSE)', courseCode: 'A8557 / A8651 / A8851', type: 'THEORY', sessionsPerWeek: 5, faculty: [4, 5, 6, 3], sections: [0, 1, 2] },
-      { code: 'MAD', name: 'Mobile Application Development', courseCode: 'A8606', type: 'THEORY', sessionsPerWeek: 2, faculty: [9, 1], sections: [0, 1, 2] },
-      { code: 'MADL', name: 'Mobile Application Development Laboratory', type: 'LAB', sessionsPerWeek: 1, faculty: [9, 1], sections: [0, 1, 2] },
-      { code: 'RMY', name: 'Research Methodology', courseCode: 'A8035', type: 'THEORY', sessionsPerWeek: 2, faculty: [12], sections: [0, 1, 2] },
-      { code: 'LSM', name: 'Library/Sports/Mentoring', courseCode: '--', type: 'THEORY', sessionsPerWeek: 3, faculty: [2], sections: [0, 1, 2] },
-      { code: 'WTL', name: 'Web Technologies Laboratory', courseCode: 'A8605', type: 'LAB', sessionsPerWeek: 1, faculty: [2, 7], sections: [0, 1, 2] },
-      { code: 'MLL', name: 'Machine Learning Laboratory', courseCode: 'A8704', type: 'LAB', sessionsPerWeek: 1, faculty: [3, 8], sections: [0, 1, 2] },
-      { code: 'ACS', name: 'Advanced English Communication Skills Laboratory', courseCode: 'A8012', type: 'LAB', sessionsPerWeek: 1, faculty: [10, 11], sections: [0, 1, 2] },
+      {
+        code: 'CNS',
+        name: 'Computer Networks',
+        courseCode: 'A8519',
+        type: 'THEORY',
+        sessionsPerWeek: 7,
+        faculty: [0, 1, 2, 3, 4],
+        sections: [0, 1, 2, 3, 4, 5, 6, 7, 8],
+      },
+      {
+        code: 'DAA',
+        name: 'Design and Analysis of Algorithms',
+        courseCode: 'A8520',
+        type: 'THEORY',
+        sessionsPerWeek: 7,
+        faculty: [5, 6, 7, 8, 9],
+        sections: [0, 1, 2, 3, 4, 5, 6, 7, 8],
+      },
+      {
+        code: 'DBMS',
+        name: 'Database Management Systems',
+        courseCode: 'A8604',
+        type: 'THEORY',
+        sessionsPerWeek: 7,
+        faculty: [10, 11, 12, 13, 14],
+        sections: [0, 1, 2, 3, 4, 5, 6, 7, 8],
+      },
+      {
+        code: 'OS',
+        name: 'Operating Systems & Architecture',
+        courseCode: 'A8703',
+        type: 'THEORY',
+        sessionsPerWeek: 7,
+        faculty: [15, 16, 17, 18, 19],
+        sections: [0, 1, 2, 3, 4, 5, 6, 7, 8],
+      },
+      {
+        code: 'ML',
+        name: 'Machine Learning & Intelligent Systems',
+        courseCode: 'A8606',
+        type: 'THEORY',
+        sessionsPerWeek: 7,
+        faculty: [20, 21, 22, 23, 24],
+        sections: [0, 1, 2, 3, 4, 5, 6, 7, 8],
+      },
+      {
+        code: 'WTL',
+        name: 'Web Technologies Laboratory',
+        courseCode: 'A8605',
+        type: 'LAB',
+        sessionsPerWeek: 1,
+        faculty: [25, 26, 27, 28, 29],
+        sections: [0, 1, 2, 3, 4, 5, 6, 7, 8],
+      },
+      {
+        code: 'DBL',
+        name: 'Database Systems Laboratory',
+        courseCode: 'A8704',
+        type: 'LAB',
+        sessionsPerWeek: 1,
+        faculty: [30, 31, 32, 33, 34],
+        sections: [0, 1, 2, 3, 4, 5, 6, 7, 8],
+      },
+      {
+        code: 'MLL',
+        name: 'Machine Learning Laboratory',
+        courseCode: 'A8012',
+        type: 'LAB',
+        sessionsPerWeek: 1,
+        faculty: [35, 36, 37, 38, 39],
+        sections: [0, 1, 2, 3, 4, 5, 6, 7, 8],
+      },
     ],
-    // 6 days × 7 teaching periods = 42 teachable periods required.
-    // 34 theory + 4 lab blocks × 2 periods = 42. Full packing!
-    requirements: Array.from({ length: 3 }, () => [6, 5, 5, 6, 5, 2, 1, 2, 3, 1, 1, 1]),
+    // 5 Theory × 7 sessions = 35 periods + 3 Labs × 2 periods = 6 periods = 41 periods per section
+    requirements: Array.from({ length: 9 }, () => [7, 7, 7, 7, 7, 1, 1, 1]),
     rooms: [
       { code: '1020', name: 'Theory Room 1020', capacity: 70, type: 'THEORY' },
       { code: '1021', name: 'Theory Room 1021', capacity: 70, type: 'THEORY' },
       { code: '1022', name: 'Theory Room 1022', capacity: 70, type: 'THEORY' },
-      { code: '1201-A', name: 'WTL Lab A', capacity: 65, type: 'LAB' },
-      { code: '1201-B', name: 'WTL Lab B', capacity: 65, type: 'LAB' },
-      { code: '1202', name: 'MLL Lab 1202', capacity: 65, type: 'LAB' },
-      { code: '1203', name: 'MLL Lab 1203', capacity: 65, type: 'LAB' },
-      { code: '1101-A', name: 'MAD Lab A', capacity: 65, type: 'LAB' },
-      { code: '1101-B', name: 'MAD Lab B', capacity: 65, type: 'LAB' },
-      { code: '5105', name: 'ACS Lab 5105', capacity: 65, type: 'LAB' },
+      { code: '1023', name: 'Theory Room 1023', capacity: 70, type: 'THEORY' },
+      { code: '1024', name: 'Theory Room 1024', capacity: 70, type: 'THEORY' },
+      { code: '1025', name: 'Theory Room 1025', capacity: 70, type: 'THEORY' },
+      { code: '1026', name: 'Theory Room 1026', capacity: 70, type: 'THEORY' },
+      { code: '1027', name: 'Theory Room 1027', capacity: 70, type: 'THEORY' },
+      { code: '1028', name: 'Theory Room 1028', capacity: 70, type: 'THEORY' },
+      { code: '1201', name: 'Web & Networks Lab', capacity: 65, type: 'LAB' },
+      { code: '1202', name: 'Database Systems Lab', capacity: 65, type: 'LAB' },
+      { code: '1203', name: 'Machine Learning Lab', capacity: 65, type: 'LAB' },
+      { code: '1204', name: 'AI & Data Engineering Lab', capacity: 65, type: 'LAB' },
+      { code: '1205', name: 'Advanced Computing Lab', capacity: 65, type: 'LAB' },
     ],
     breaks: [
-      // Teaching-coordinate positions: short break after P2, lunch after the 4 morning periods (P1–P4).
       { name: 'Break', dayIndex: null, startPeriod: 2, durationPeriods: 1, startTime: '11:00 AM', endTime: '11:10 AM' },
       { name: 'Lunch', dayIndex: null, startPeriod: 4, durationPeriods: 1, startTime: '12:50 PM', endTime: '1:40 PM' },
     ],
@@ -271,7 +323,92 @@ export const BUILT_IN_PRESETS: PresetDefinition[] = [
       name: 'Vardhaman College of Engineering',
       academicYear: '2026 - 2027',
     },
-  }
+  },
+
+  // =========================================================================
+  // PRESET 3: Medical College (AIIMS — MBBS Clinical & Diagnostic Phase)
+  // Demonstrates healthcare academy rotations: ward rounds, clinical pathology.
+  // =========================================================================
+  {
+    id: 'medical-college',
+    label: 'Medical College — AIIMS MBBS Clinical & Diagnostic',
+    description: 'Premier Healthcare Institution: 3 batches (Batch A Clinical, Batch B Diagnostic, Batch C Surgical), 8 subjects (5 Theory + 3 Clinical/Lab blocks), 16 doctor faculty, 5 days × 6 periods with tea break & hospital clinical lunch.',
+    department: {
+      code: 'MBBS-II',
+      name: 'Faculty of Medicine & Clinical Sciences',
+      effectiveFrom: '01-08-2026',
+      mentors: 'Dr. Sneha Bhattacharya (Batch A), Dr. Arvind Krishnamurthy (Batch B), Dr. Rajesh Kumar Singh (Batch C)',
+    },
+    workingDays: WEEK5,
+    periodsPerDay: 6,
+    periodTimings: [
+      { start: '8:30 AM', end: '9:30 AM' },
+      { start: '9:30 AM', end: '10:30 AM' },
+      { start: '10:45 AM', end: '11:45 AM' },
+      { start: '11:45 AM', end: '12:45 PM' },
+      { start: '1:45 PM', end: '2:45 PM' },
+      { start: '2:45 PM', end: '3:45 PM' },
+    ],
+    sections: [
+      { name: 'Batch A (Clinical)', year: 2, semester: 3, studentCount: 50, roomNo: 'Lecture Hall 1', classAdvisor: 'Dr. Sneha Bhattacharya' },
+      { name: 'Batch B (Diagnostic)', year: 2, semester: 3, studentCount: 50, roomNo: 'Lecture Hall 2', classAdvisor: 'Dr. Arvind Krishnamurthy' },
+      { name: 'Batch C (Surgical)', year: 2, semester: 3, studentCount: 50, roomNo: 'Lecture Hall 3', classAdvisor: 'Dr. Rajesh Kumar Singh' },
+    ],
+    faculty: [
+      { facultyCode: 'DR-SBH', name: 'Dr. Sneha Bhattacharya, MD (Pathology)' },
+      { facultyCode: 'DR-AKM', name: 'Dr. Arvind Krishnamurthy, MD (Pharmacology)' },
+      { facultyCode: 'DR-MSU', name: 'Dr. Meenakshi Sundaram, MD (Microbiology)' },
+      { facultyCode: 'DR-RKS', name: 'Dr. Rajesh Kumar Singh, MD (Forensic Med)' },
+      { facultyCode: 'DR-ASE', name: 'Dr. Ananya Sengupta, MD (Community Med)' },
+      { facultyCode: 'DR-VRD', name: 'Dr. Vikramaditya Reddy, MS (General Surgery)' },
+      { facultyCode: 'DR-SMU', name: 'Dr. Shalini Mukherjee, MD (General Medicine)' },
+      { facultyCode: 'DR-KVR', name: 'Dr. K. V. Ramanathan, MD (Pediatrics)' },
+      { facultyCode: 'DR-PDA', name: 'Dr. Priya Darshini, MD (Pathology)' },
+      { facultyCode: 'DR-THK', name: 'Dr. T. Harikrishna, MD (Pharmacology)' },
+      { facultyCode: 'DR-ASW', name: 'Dr. Archana Swaminathan, MD (Microbiology)' },
+      { facultyCode: 'DR-NVS', name: 'Dr. N. V. Subba Rao, MD (Forensic Med)' },
+      { facultyCode: 'DR-SKA', name: 'Dr. S. K. Alavandar, MD (Community Med)' },
+      { facultyCode: 'DR-KDE', name: 'Dr. Kavita Deshmukh, MS (Surgery)' },
+      { facultyCode: 'DR-DSU', name: 'Dr. Deepa Subramanian, MD (Medicine)' },
+      { facultyCode: 'DR-SAG', name: 'Dr. Sunita Agarwala, MD (Pediatrics)' },
+    ],
+    subjects: [
+      { code: 'PATH', name: 'Systemic & Diagnostic Pathology', courseCode: 'MB-201', type: 'THEORY', sessionsPerWeek: 5, faculty: [0, 8], sections: [0, 1, 2] },
+      { code: 'PHARM', name: 'Medical Pharmacology & Therapeutics', courseCode: 'MB-202', type: 'THEORY', sessionsPerWeek: 5, faculty: [1, 9], sections: [0, 1, 2] },
+      { code: 'MICRO', name: 'Medical Microbiology & Immunology', courseCode: 'MB-203', type: 'THEORY', sessionsPerWeek: 5, faculty: [2, 10], sections: [0, 1, 2] },
+      { code: 'FMT', name: 'Forensic Medicine & Medical Jurisprudence', courseCode: 'MB-204', type: 'THEORY', sessionsPerWeek: 3, faculty: [3, 11], sections: [0, 1, 2] },
+      { code: 'COMM', name: 'Community Medicine & Epidemiology', courseCode: 'MB-205', type: 'THEORY', sessionsPerWeek: 4, faculty: [4, 12], sections: [0, 1, 2] },
+      { code: 'CLIN', name: 'Hospital Clinical Postings & Bedside Rounds', courseCode: 'MB-206C', type: 'LAB', sessionsPerWeek: 2, faculty: [5, 6, 7, 13, 14, 15], sections: [0, 1, 2] },
+      { code: 'PATH-L', name: 'Histopathology & Hematology Practical', courseCode: 'MB-201P', type: 'LAB', sessionsPerWeek: 1, faculty: [0, 8], sections: [0, 1, 2] },
+      { code: 'PHARM-L', name: 'Experimental Pharmacology Practical', courseCode: 'MB-202P', type: 'LAB', sessionsPerWeek: 1, faculty: [1, 9], sections: [0, 1, 2] },
+    ],
+    // 5 days × 6 periods = 30 periods.
+    // 5 + 5 + 5 + 3 + 4 + (2×2 CLIN) + (1×2 PATH-L) + (1×2 PHARM-L) = 22 + 4 + 2 + 2 = 30 periods. Exact 100% full packing!
+    requirements: Array.from({ length: 3 }, () => [5, 5, 5, 3, 4, 2, 1, 1]),
+    rooms: [
+      { code: 'LH-1', name: 'Dhanvantari Lecture Hall', capacity: 80, type: 'THEORY' },
+      { code: 'LH-2', name: 'Sushruta Lecture Hall', capacity: 80, type: 'THEORY' },
+      { code: 'LH-3', name: 'Charaka Lecture Hall', capacity: 80, type: 'THEORY' },
+      { code: 'CLIN-WARD', name: 'Hospital Inpatient Teaching Wards', capacity: 100, type: 'GENERAL' },
+      { code: 'PATH-LAB', name: 'Central Histopathology Lab', capacity: 60, type: 'LAB' },
+      { code: 'PHARM-LAB', name: 'Clinical Pharmacology Practical Lab', capacity: 60, type: 'LAB' },
+      { code: 'MICRO-LAB', name: 'Diagnostic Microbiology Lab', capacity: 60, type: 'LAB' },
+    ],
+    breaks: [
+      { name: 'Tea Break', dayIndex: null, startPeriod: 2, durationPeriods: 1, startTime: '10:30 AM', endTime: '10:45 AM' },
+      { name: 'Hospital Lunch', dayIndex: null, startPeriod: 4, durationPeriods: 1, startTime: '12:45 PM', endTime: '1:45 PM' },
+    ],
+    generationSettings: {
+      maxSessionsPerSubjectPerDay: 2,
+      maxLabSessionsPerSectionPerDay: 1,
+      maxConsecutiveTheory: 3,
+      maxGapsPerDay: 0,
+    },
+    college: {
+      name: 'All India Institute of Medical Sciences (AIIMS)',
+      academicYear: '2026 - 2027',
+    },
+  },
 ];
 
 export function getPresetById(id: string): PresetDefinition | undefined {
@@ -355,7 +492,6 @@ export function applyPreset(preset: PresetDefinition, store: WorkspaceStore): st
     store.updateSection(sectionIds[sectionIdx], { subjectRequirements: reqs });
   });
 
-
   if (preset.rooms) {
     preset.rooms.forEach((r) => {
       store.addRoom({
@@ -389,4 +525,3 @@ export function applyPreset(preset: PresetDefinition, store: WorkspaceStore): st
   store.setActiveDepartment(department.id);
   return department.id;
 }
-

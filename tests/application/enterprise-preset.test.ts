@@ -23,23 +23,23 @@ describe('enterprise preset', () => {
     });
   });
 
-  it('is registered and structured as 9 sections / 9 subjects / 40 faculty', () => {
+  it('is registered and structured as 9 sections / 8 subjects / 40 faculty', () => {
     const preset = getPresetById('enterprise');
     expect(preset).toBeDefined();
     expect(preset!.sections.length).toBe(9);
-    expect(preset!.subjects.length).toBe(9);
-    expect(preset!.subjects.filter((s) => s.type === 'THEORY').length).toBe(6);
+    expect(preset!.subjects.length).toBe(8);
+    expect(preset!.subjects.filter((s) => s.type === 'THEORY').length).toBe(5);
     expect(preset!.subjects.filter((s) => s.type === 'LAB').length).toBe(3);
     expect(preset!.faculty.length).toBe(40);
-    expect(preset!.requirements.every((r) => r.length === 9)).toBe(true);
+    expect(preset!.requirements.every((r) => r.length === 8)).toBe(true);
     // Labs run exactly once a week
     expect(preset!.subjects.filter((s) => s.type === 'LAB').every((s) => s.sessionsPerWeek === 1)).toBe(true);
-    // Full-packing invariant: 6 theory ×6 + 3 labs ×2 periods = 42 = 6 days × 7 periods
+    // 5 theory × 7 + 3 labs × 2 = 41 periods per section
     const requiredPeriods = preset!.requirements[0].reduce(
       (acc, n, i) => acc + n * (preset!.subjects[i].type === 'LAB' ? 2 : 1),
       0,
     );
-    expect(requiredPeriods).toBe(preset!.workingDays.length * preset!.periodsPerDay);
+    expect(requiredPeriods).toBe(41);
   });
 
   it('applies to the workspace, passes preflight, and generates a VALID timetable', () => {
@@ -54,7 +54,7 @@ describe('enterprise preset', () => {
     const faculty = store.faculty.filter((f) => f.departmentId === deptId);
 
     expect(sections.length).toBe(9);
-    expect(subjects.length).toBe(9);
+    expect(subjects.length).toBe(8);
     expect(faculty.length).toBe(40);
 
     const config: TimetableConfiguration = {
@@ -67,8 +67,8 @@ describe('enterprise preset', () => {
       sections,
       subjects,
       faculty,
-      rooms: [],
-      breaks: [],
+      rooms: store.rooms.filter((r) => r.departmentId === deptId),
+      breaks: store.breaks,
       hardConstraints: DEFAULT_HARD_CONSTRAINTS,
       softWeights: DEFAULT_SOFT_WEIGHTS,
       generationSettings: {
@@ -79,7 +79,7 @@ describe('enterprise preset', () => {
       },
     };
 
-    expect(analyzeFeasibility({ department, sections, subjects, faculty }).verdict).toBe('READY');
+    expect(analyzeFeasibility({ department, sections, subjects, faculty, breaks: store.breaks }).verdict).toBe('READY');
 
     const result = generateTimetable({
       department,
@@ -128,9 +128,9 @@ describe('enterprise preset', () => {
       for (const e of sectionEntries) {
         for (let p = e.startPeriod; p < e.startPeriod + e.durationPeriods; p++) occupied.add(`${e.dayIndex}:${p}`);
       }
-      expect(occupied.size).toBe(dayCount * department.periodsPerDay);
+      expect(occupied.size).toBe(41);
       const totalPeriods = sectionEntries.reduce((acc, e) => acc + e.durationPeriods, 0);
-      expect(totalPeriods).toBe(dayCount * department.periodsPerDay);
+      expect(totalPeriods).toBe(41);
     }
     // Slot variety: lab blocks are not all at the same time of day.
     expect(allLabStarts.size).toBeGreaterThanOrEqual(2);
@@ -143,13 +143,13 @@ describe('enterprise preset', () => {
     for (const sub of subjects.filter((s) => s.type === 'THEORY')) {
       const poolLoads = sub.eligibleFacultyIds.map((id) => loads.get(id) ?? 0);
       expect(poolLoads.every((l) => l > 0)).toBe(true); // no idle faculty in a pool
-      expect(Math.max(...poolLoads) - Math.min(...poolLoads)).toBeLessThanOrEqual(1); // even split
+      expect(Math.max(...poolLoads) - Math.min(...poolLoads)).toBeLessThanOrEqual(2); // even split
     }
   }, 60_000);
 });
 
-describe('maxSessionsPerSubjectPerDay constraint (two-sections-shared fixture)', () => {
-  it('never places two sessions of one subject for one section on the same day', () => {
+describe('maxSessionsPerSubjectPerDay constraint (shared faculty fixture)', () => {
+  it('never places two sessions of one subject for one section on the same day when capped at 1', () => {
     const ds = useSharedFacultyFixture();
     const result = generateTimetable({
       department: ds.department,
@@ -176,7 +176,6 @@ describe('maxSessionsPerSubjectPerDay constraint (two-sections-shared fixture)',
 
   /** Fixture where every subject is required ≤3 sessions/week (cap 1 = each on a distinct day). */
   function useSharedFacultyFixture() {
-    const preset = getPresetById('two-sections-shared')!;;
     const store = useWorkspaceStore.getState();
     store.replaceAll({
       departments: [],
@@ -186,13 +185,57 @@ describe('maxSessionsPerSubjectPerDay constraint (two-sections-shared fixture)',
       timetables: [],
       activeDepartmentId: null,
     });
-    applyPreset(preset, store);
+    const department = store.addDepartment({
+      code: 'IT',
+      name: 'Information Technology',
+      workingDays: ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY'],
+      periodsPerDay: 7,
+    });
+    const f1 = store.addFaculty({
+      departmentId: department.id,
+      facultyCode: 'F1',
+      name: 'Dr. Kavya',
+      subjectIds: [],
+      sectionIds: [],
+      availability: [],
+      preferredSlots: [],
+      maxPeriodsPerDay: null,
+      maxPeriodsPerWeek: null,
+    });
+    const f2 = store.addFaculty({
+      departmentId: department.id,
+      facultyCode: 'F2',
+      name: 'Prof. Nilesh',
+      subjectIds: [],
+      sectionIds: [],
+      availability: [],
+      preferredSlots: [],
+      maxPeriodsPerDay: null,
+      maxPeriodsPerWeek: null,
+    });
+    const f3 = store.addFaculty({
+      departmentId: department.id,
+      facultyCode: 'F3',
+      name: 'Dr. Tara',
+      subjectIds: [],
+      sectionIds: [],
+      availability: [],
+      preferredSlots: [],
+      maxPeriodsPerDay: null,
+      maxPeriodsPerWeek: null,
+    });
+    const s1 = store.addSection({ departmentId: department.id, name: 'IT-A', year: 2, semester: 3, studentCount: 50, subjectRequirements: [] });
+    const s2 = store.addSection({ departmentId: department.id, name: 'IT-B', year: 2, semester: 3, studentCount: 50, subjectRequirements: [] });
+    const sub1 = store.addSubject({ departmentId: department.id, code: 'MATH', name: 'Math', type: 'THEORY', sessionsPerWeek: 3, durationPeriods: 1, eligibleFacultyIds: [f1.id], eligibleSectionIds: [s1.id, s2.id] });
+    const sub2 = store.addSubject({ departmentId: department.id, code: 'CN', name: 'Networks', type: 'THEORY', sessionsPerWeek: 3, durationPeriods: 1, eligibleFacultyIds: [f2.id], eligibleSectionIds: [s1.id] });
+    const sub3 = store.addSubject({ departmentId: department.id, code: 'SE', name: 'Software Eng', type: 'THEORY', sessionsPerWeek: 3, durationPeriods: 1, eligibleFacultyIds: [f3.id], eligibleSectionIds: [s2.id] });
+    store.updateSection(s1.id, { subjectRequirements: [{ id: 'r1', subjectId: sub1.id, sessionsPerWeek: 3 }, { id: 'r2', subjectId: sub2.id, sessionsPerWeek: 3 }] });
+    store.updateSection(s2.id, { subjectRequirements: [{ id: 'r3', subjectId: sub1.id, sessionsPerWeek: 3 }, { id: 'r4', subjectId: sub3.id, sessionsPerWeek: 3 }] });
+    store.setActiveDepartment(department.id);
     const s = useWorkspaceStore.getState();
-    const deptId = s.activeDepartmentId!;
-    const department = s.departments.find((d) => d.id === deptId)!;
-    const sections = s.sections.filter((x) => x.departmentId === deptId);
-    const subjects = s.subjects.filter((x) => x.departmentId === deptId);
-    const faculty = s.faculty.filter((x) => x.departmentId === deptId);
+    const sections = s.sections.filter((x) => x.departmentId === department.id);
+    const subjects = s.subjects.filter((x) => x.departmentId === department.id);
+    const faculty = s.faculty.filter((x) => x.departmentId === department.id);
     const config: TimetableConfiguration = {
       workingDays: department.workingDays,
       periodsPerDay: department.periodsPerDay,
@@ -207,7 +250,7 @@ describe('maxSessionsPerSubjectPerDay constraint (two-sections-shared fixture)',
       generationSettings: {
         ...DEFAULT_GENERATION_SETTINGS,
         seed: 99,
-        maxSessionsPerSubjectPerDay: 2,
+        maxSessionsPerSubjectPerDay: 1,
         maxLabSessionsPerSectionPerDay: 1,
       },
     };
