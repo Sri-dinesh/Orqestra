@@ -202,7 +202,6 @@ export function solveSchedule(
     facultyLoad.set(entry.facultyId, Math.max(0, (facultyLoad.get(entry.facultyId) ?? 0) - entry.durationPeriods));
   }
   const deadline = start + input.maxDurationMs;
-  let searchStart = 0;
 
   const checkCancellationAndBudget = (): void => {
     metrics.exploredNodes++;
@@ -217,7 +216,7 @@ export function solveSchedule(
     }
   };
 
-  searchStart = Date.now();
+  const searchStart = Date.now();
 
   /**
    * MRV (minimum remaining values) dynamic ordering (§7/§77): among the next
@@ -426,7 +425,7 @@ export function solveSchedule(
   }
 
   /** Re-select most constrained remaining session each step (dynamic ordering). */
-  let searchOrder: SessionUnit[] = sessions;
+  const searchOrder: SessionUnit[] = sessions;
 
   function generateCandidates(session: SessionUnit): Candidate[] {
     const candidates: Candidate[] = [];

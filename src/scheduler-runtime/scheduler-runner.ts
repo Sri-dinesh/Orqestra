@@ -76,7 +76,8 @@ export class WebWorkerSchedulerRunner implements SchedulerRunner {
       };
 
       // Exclude cancellation token as it can't be cloned
-      const { cancellation, ...cloneableRequest } = request;
+      const { cancellation: _cancellation, ...cloneableRequest } = request;
+      void _cancellation;
       worker.postMessage({
         jobId,
         command: 'GENERATE',

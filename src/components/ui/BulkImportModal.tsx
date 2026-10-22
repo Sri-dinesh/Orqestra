@@ -26,39 +26,41 @@ export const BulkImportModal: React.FC<BulkImportModalProps> = ({
   if (!isOpen) return null;
 
   const handleDownloadTemplate = () => {
-    let headers: string[] = [];
-    let sampleData: any[][] = [];
-    let filename = '';
+    const template = type === 'FACULTY'
+      ? {
+          filename: 'faculty-import-template.xlsx',
+          headers: ['Faculty Code', 'Full Name', 'Max Periods Per Day', 'Max Periods Per Week'],
+          sampleData: [
+            ['VTR', 'Ms. Varsha Thakur', 3, 14],
+            ['PVM', 'Mr. P. Vikram', 4, 16],
+            ['MCA', 'Mr. Manish Chhabra', 3, 12],
+            ['GAA', 'Ms. G. Anusha', 4, 15],
+          ],
+        }
+      : type === 'SUBJECTS'
+        ? {
+            filename: 'subjects-import-template.xlsx',
+            headers: ['Short Code', 'Subject Title', 'Course Code', 'Type (THEORY/LAB)', 'Weekly Periods'],
+            sampleData: [
+              ['CNS', 'Computer Networks', 'A8519', 'THEORY', 4],
+              ['SEG', 'Software Engineering', 'A8520', 'THEORY', 4],
+              ['WTL', 'Web Technologies Laboratory', 'A8605', 'LAB', 2],
+              ['MLL', 'Machine Learning Laboratory', 'A8704', 'LAB', 2],
+            ],
+          }
+        : {
+            filename: 'rooms-import-template.xlsx',
+            headers: ['Room Code', 'Room Name', 'Capacity', 'Type (GENERAL/THEORY/LAB)'],
+            sampleData: [
+              ['LH-101', 'Lecture Hall 101', 60, 'GENERAL'],
+              ['LH-102', 'Lecture Hall 102', 60, 'THEORY'],
+              ['LAB-CN', 'Computer Networks Lab', 40, 'LAB'],
+              ['LAB-AI', 'Artificial Intelligence Lab', 35, 'LAB'],
+              ['LAB-HW', 'Hardware & IoT Lab', 35, 'LAB'],
+            ],
+          };
 
-    if (type === 'FACULTY') {
-      filename = 'faculty-import-template.xlsx';
-      headers = ['Faculty Code', 'Full Name', 'Max Periods Per Day', 'Max Periods Per Week'];
-      sampleData = [
-        ['VTR', 'Ms. Varsha Thakur', 3, 14],
-        ['PVM', 'Mr. P. Vikram', 4, 16],
-        ['MCA', 'Mr. Manish Chhabra', 3, 12],
-        ['GAA', 'Ms. G. Anusha', 4, 15],
-      ];
-    } else if (type === 'SUBJECTS') {
-      filename = 'subjects-import-template.xlsx';
-      headers = ['Short Code', 'Subject Title', 'Course Code', 'Type (THEORY/LAB)', 'Weekly Periods'];
-      sampleData = [
-        ['CNS', 'Computer Networks', 'A8519', 'THEORY', 4],
-        ['SEG', 'Software Engineering', 'A8520', 'THEORY', 4],
-        ['WTL', 'Web Technologies Laboratory', 'A8605', 'LAB', 2],
-        ['MLL', 'Machine Learning Laboratory', 'A8704', 'LAB', 2],
-      ];
-    } else {
-      filename = 'rooms-import-template.xlsx';
-      headers = ['Room Code', 'Room Name', 'Capacity', 'Type (GENERAL/THEORY/LAB)'];
-      sampleData = [
-        ['LH-101', 'Lecture Hall 101', 60, 'GENERAL'],
-        ['LH-102', 'Lecture Hall 102', 60, 'THEORY'],
-        ['LAB-CN', 'Computer Networks Lab', 40, 'LAB'],
-        ['LAB-AI', 'Artificial Intelligence Lab', 35, 'LAB'],
-        ['LAB-HW', 'Hardware & IoT Lab', 35, 'LAB'],
-      ];
-    }
+    const { filename, headers, sampleData } = template;
 
     const ws = XLSX.utils.aoa_to_sheet([headers, ...sampleData]);
     ws['!cols'] = headers.map(() => ({ wch: 22 }));

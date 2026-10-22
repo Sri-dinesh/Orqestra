@@ -497,12 +497,9 @@ export function validateFatigueAndGaps(ctx: ValidationContext): Conflict[] {
   const subjectById = new Map(config.subjects.map((s) => [s.id, s]));
 
   // Evaluate per section, per day
-  let sectionIdsToCheck: Set<string> | null = null;
-  if (affectedEntryIds) {
-    sectionIdsToCheck = new Set(timetable.entries.filter(e => affectedEntryIds.includes(e.id)).map(e => e.sectionId));
-  } else {
-    sectionIdsToCheck = new Set(config.sections.map(s => s.id));
-  }
+  const sectionIdsToCheck = affectedEntryIds
+    ? new Set(timetable.entries.filter(e => affectedEntryIds.includes(e.id)).map(e => e.sectionId))
+    : new Set(config.sections.map(s => s.id));
 
   for (const sectionId of sectionIdsToCheck) {
     for (let day = 0; day < config.workingDays.length; day++) {
@@ -600,12 +597,9 @@ export function validateFatigueAndGaps(ctx: ValidationContext): Conflict[] {
 
   // Faculty Burnout Guard: check continuous teaching across sections per day
   if (maxConsecutiveTheory !== null) {
-    let facultyIdsToCheck: Set<string> | null = null;
-    if (affectedEntryIds) {
-      facultyIdsToCheck = new Set(timetable.entries.filter(e => affectedEntryIds.includes(e.id)).map(e => e.facultyId));
-    } else {
-      facultyIdsToCheck = new Set(config.faculty.map(f => f.id));
-    }
+    const facultyIdsToCheck = affectedEntryIds
+      ? new Set(timetable.entries.filter(e => affectedEntryIds.includes(e.id)).map(e => e.facultyId))
+      : new Set(config.faculty.map(f => f.id));
 
     for (const facultyId of facultyIdsToCheck) {
       for (let day = 0; day < config.workingDays.length; day++) {

@@ -65,8 +65,7 @@ const MIGRATIONS: Record<number, MigrationFn> = {
 
     const allDay = rawBreaks
       .map((b, i) => ({ b, i }))
-      // eslint-disable-next-line eqeqeq -- stored JSON may omit dayIndex; treat missing as all-day
-      .filter(({ b }) => b['dayIndex'] == null)
+      .filter(({ b }) => b['dayIndex'] === null || b['dayIndex'] === undefined)
       .sort((x, y) => num(x.b['startPeriod']) - num(y.b['startPeriod']) || x.i - y.i);
 
     // Teaching-coordinate position per all-day break (stable order).
@@ -78,8 +77,7 @@ const MIGRATIONS: Record<number, MigrationFn> = {
     }
 
     const migratedBreaks = rawBreaks.map((b) => {
-      // eslint-disable-next-line eqeqeq -- see above
-      if (b['dayIndex'] == null) {
+      if (b['dayIndex'] === null || b['dayIndex'] === undefined) {
         return { ...b, startPeriod: Math.max(0, allDayPos.get(b) ?? num(b['startPeriod'])) };
       }
       const s = num(b['startPeriod']);
