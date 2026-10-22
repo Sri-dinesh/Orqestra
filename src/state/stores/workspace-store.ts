@@ -35,7 +35,7 @@ export interface WorkspaceState {
   rooms: Room[];
   breaks: Break[];
   activeDepartmentId: string | null;
-  persistenceStatus: 'IDLE' | 'SAVING' | 'SAVED' | 'ERROR';
+  persistenceStatus: 'IDLE' | 'SAVING' | 'SAVED' | 'ERROR' | 'OFFLINE';
   /** Per-department generation settings overrides (keyed by department ID). */
   generationSettingsOverrides: Record<string, Partial<GenerationSettingsOverrides>>;
   /** Institution profile (Settings). Descriptive metadata only. */

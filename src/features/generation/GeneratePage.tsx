@@ -20,6 +20,8 @@ import { DepartmentNav } from '@/components/ui/DepartmentNav';
 import { PeriodTimingsModal } from '@/components/ui/PeriodTimingsModal';
 import { DepartmentNotFound } from '@/components/ui/DepartmentNotFound';
 import { Clock } from 'lucide-react';
+import { saveTimetableToCloud } from '@/storage/cloud-sync';
+import { getActiveTermId } from '@/storage/term-manager';
 
 export function GeneratePage() {
   const { departmentId } = useParams();
@@ -171,36 +173,37 @@ export function GeneratePage() {
       if (result.status === 'COMPLETED' && result.timetable) {
         const snapshot = buildConfigurationSnapshot(config);
         const timetable = { ...result.timetable, configurationSnapshot: snapshot, departmentId: department.id };
-        if (existingTimetable) {
-          // Versioning: snapshot the outgoing timetable before the regeneration replaces it.
-          const versioned = withVersion(
-            { ...existingTimetable, updatedAt: existingTimetable.updatedAt },
-            'GENERATED',
-            `Regenerated — replaced by seed ${result.metadata?.seed ?? 'auto'}`,
-          );
-          state.upsertTimetable({
-            ...timetable,
-            id: existingTimetable.id,
-            revision: existingTimetable.revision + 1,
-            versionHistory: [...(versioned.versionHistory ?? [])],
-          });
-        } else {
-          state.upsertTimetable({
-            ...timetable,
-            versionHistory: [
-              {
-                version: 0,
-                origin: 'GENERATED',
-                recordedAt: new Date().toISOString(),
-                entries: timetable.entries.map((e) => ({ ...e })),
-                status: timetable.status,
-                validationSummary: timetable.validationSummary,
-                generationMetadata: timetable.generationMetadata,
-                label: `Initial generation — seed ${result.metadata?.seed ?? 'auto'}`,
-              },
-            ],
-          });
-        }
+        const finalTimetable = existingTimetable
+          ? {
+              ...timetable,
+              id: existingTimetable.id,
+              revision: existingTimetable.revision + 1,
+              versionHistory: [
+                ...(withVersion(
+                  { ...existingTimetable, updatedAt: existingTimetable.updatedAt },
+                  'GENERATED',
+                  `Regenerated — replaced by seed ${result.metadata?.seed ?? 'auto'}`,
+                ).versionHistory ?? []),
+              ],
+            }
+          : {
+              ...timetable,
+              versionHistory: [
+                {
+                  version: 0,
+                  origin: 'GENERATED' as const,
+                  recordedAt: new Date().toISOString(),
+                  entries: timetable.entries.map((e) => ({ ...e })),
+                  status: timetable.status,
+                  validationSummary: timetable.validationSummary,
+                  generationMetadata: timetable.generationMetadata,
+                  label: `Initial generation — seed ${result.metadata?.seed ?? 'auto'}`,
+                },
+              ],
+            };
+
+        state.upsertTimetable(finalTimetable);
+        void saveTimetableToCloud(finalTimetable, getActiveTermId(), result.metrics);
         gen.complete(result.metrics!);
         editor.showToast(
           'success',

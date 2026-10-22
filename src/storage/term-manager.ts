@@ -258,3 +258,13 @@ export function deleteTerm(termId: string): boolean {
   }
   return true;
 }
+
+export function syncTermsFromCloud(terms: AcademicTerm[], activeTermId?: string): void {
+  if (!terms || terms.length === 0) return;
+  const backing = getBacking();
+  backing.setItem(TERMS_STORAGE_KEY, JSON.stringify(terms));
+  if (activeTermId) {
+    backing.setItem(ACTIVE_TERM_STORAGE_KEY, activeTermId);
+  }
+}
+
