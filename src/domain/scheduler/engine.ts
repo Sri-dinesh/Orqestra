@@ -97,6 +97,7 @@ export function generateTimetable(request: SchedulerRequest): GenerationResult {
     faculty: request.faculty,
     breaks: gridBreaks,
     rooms: request.config.rooms,
+    maxSessionsPerSubjectPerDay: request.config.generationSettings.maxSessionsPerSubjectPerDay ?? null,
     maxDurationMs: Math.min(2_000, Math.max(250, request.maxDurationMs >> 5)),
     maxEvaluations: 150_000,
     seed,

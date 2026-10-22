@@ -236,7 +236,7 @@ export const BUILT_IN_PRESETS: PresetDefinition[] = [
         name: 'Design and Analysis of Algorithms',
         courseCode: 'A8520',
         type: 'THEORY',
-        sessionsPerWeek: 7,
+        sessionsPerWeek: 8,
         faculty: [5, 6, 7, 8, 9],
         sections: [0, 1, 2, 3, 4, 5, 6, 7, 8],
       },
@@ -295,8 +295,9 @@ export const BUILT_IN_PRESETS: PresetDefinition[] = [
         sections: [0, 1, 2, 3, 4, 5, 6, 7, 8],
       },
     ],
-    // 5 Theory × 7 sessions = 35 periods + 3 Labs × 2 periods = 6 periods = 41 periods per section
-    requirements: Array.from({ length: 9 }, () => [7, 7, 7, 7, 7, 1, 1, 1]),
+    // 5 Theory (7 + 8 + 7 + 7 + 7 = 36 periods) + 3 Labs × 2 periods = 6 periods = 42 periods per section.
+    // 6 days × 7 periods = 42 periods. Exact 100% full packing (0 empty periods)!
+    requirements: Array.from({ length: 9 }, () => [7, 8, 7, 7, 7, 1, 1, 1]),
     rooms: [
       { code: '1020', name: 'Theory Room 1020', capacity: 70, type: 'THEORY' },
       { code: '1021', name: 'Theory Room 1021', capacity: 70, type: 'THEORY' },

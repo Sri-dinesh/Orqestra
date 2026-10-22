@@ -104,7 +104,7 @@ describe('built-in presets', () => {
 
     const timetable = store.timetables.find((t) => t.departmentId === deptId);
     expect(timetable).toBeDefined();
-    expect(timetable!.entries.length).toBe(342); // 9 sections × (5*7 + 3*2) - 9*1 free period = 342 sessions
+    expect(timetable!.entries.length).toBe(351); // 9 sections × (36 theory + 3 labs = 39 sessions) = 351 sessions (378 periods, 100% full packing)
     expect(timetable!.validationSummary?.isValid).toBe(true);
     expect(timetable!.validationSummary?.conflicts.length).toBe(0);
   }, 30_000);

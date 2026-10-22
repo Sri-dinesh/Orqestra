@@ -13,6 +13,8 @@ export interface PostPassInput {
   breaks?: Break[];
   /** When rooms are in play, moves must keep room occupancy collision-free. */
   rooms?: Room[];
+  /** Optional cap: max sessions of one subject for a section per day. */
+  maxSessionsPerSubjectPerDay?: number | null;
   /** Wall-clock budget in ms (checked every sweep). */
   maxDurationMs: number;
   /** Hard cap on evaluated neighbor moves. */
@@ -116,6 +118,24 @@ export function improveSchedule(input: PostPassInput): PostPassResult {
         other.facultyId === entry.facultyId && startPeriod < otherEnd && otherStart < myEnd;
       if (overlapsSection || overlapsFaculty) return false;
     }
+    // Respect maxSessionsPerSubjectPerDay cap
+    if (input.maxSessionsPerSubjectPerDay !== null && input.maxSessionsPerSubjectPerDay !== undefined) {
+      let sameSubjectCount = 0;
+      for (const other of entries) {
+        if (other.id === ignoreId || other.id === entry.id) continue;
+        if (
+          other.sectionId === entry.sectionId &&
+          other.subjectId === entry.subjectId &&
+          other.dayIndex === day
+        ) {
+          sameSubjectCount++;
+        }
+      }
+      if (sameSubjectCount >= input.maxSessionsPerSubjectPerDay) {
+        return false;
+      }
+    }
+
     // Room occupancy is not covered above: the entry keeps its room, so the
     // target slot must be free in that room (ignoring the moved entry itself).
     if (roomsEnabled && entry.roomId) {

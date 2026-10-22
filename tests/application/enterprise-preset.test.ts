@@ -34,12 +34,12 @@ describe('enterprise preset', () => {
     expect(preset!.requirements.every((r) => r.length === 8)).toBe(true);
     // Labs run exactly once a week
     expect(preset!.subjects.filter((s) => s.type === 'LAB').every((s) => s.sessionsPerWeek === 1)).toBe(true);
-    // 5 theory × 7 + 3 labs × 2 = 41 periods per section
+    // 5 theory (7+8+7+7+7 = 36) + 3 labs × 2 = 42 periods per section (100% full packing)
     const requiredPeriods = preset!.requirements[0].reduce(
       (acc, n, i) => acc + n * (preset!.subjects[i].type === 'LAB' ? 2 : 1),
       0,
     );
-    expect(requiredPeriods).toBe(41);
+    expect(requiredPeriods).toBe(42);
   });
 
   it('applies to the workspace, passes preflight, and generates a VALID timetable', () => {
@@ -128,9 +128,9 @@ describe('enterprise preset', () => {
       for (const e of sectionEntries) {
         for (let p = e.startPeriod; p < e.startPeriod + e.durationPeriods; p++) occupied.add(`${e.dayIndex}:${p}`);
       }
-      expect(occupied.size).toBe(41);
+      expect(occupied.size).toBe(42);
       const totalPeriods = sectionEntries.reduce((acc, e) => acc + e.durationPeriods, 0);
-      expect(totalPeriods).toBe(41);
+      expect(totalPeriods).toBe(42);
     }
     // Slot variety: lab blocks are not all at the same time of day.
     expect(allLabStarts.size).toBeGreaterThanOrEqual(2);
