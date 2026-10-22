@@ -19,7 +19,7 @@ import type { TimetableConfiguration } from '@/domain/models';
 import { DepartmentNav } from '@/components/ui/DepartmentNav';
 import { PeriodTimingsModal } from '@/components/ui/PeriodTimingsModal';
 import { DepartmentNotFound } from '@/components/ui/DepartmentNotFound';
-import { Clock } from 'lucide-react';
+import { Clock, Sparkles, AlertTriangle, ArrowRight } from 'lucide-react';
 import { saveTimetableToCloud } from '@/storage/cloud-sync';
 import { getActiveTermId } from '@/storage/term-manager';
 
@@ -37,7 +37,7 @@ export function GeneratePage() {
   const cancelToken = useRef<ManualCancellationToken | null>(null);
 
   const [seedInput, setSeedInput] = useState('');
-  const [regenerate, setRegenerate] = useState(false);
+  const [showRegenConfirm, setShowRegenConfirm] = useState(false);
   const [timingsModalOpen, setTimingsModalOpen] = useState(false);
   const departmentEarly = state.departments.find((d) => d.id === departmentId);
   const overrides = departmentEarly ? state.generationSettingsOverrides[departmentEarly.id] : undefined;
@@ -144,14 +144,8 @@ export function GeneratePage() {
     return <DepartmentNotFound requestedId={departmentId} targetPage="generate" />;
   }
 
-  const start = async () => {
-    const hasExisting = Boolean(existingTimetable);
-    if (hasExisting && !regenerate) {
-      setRegenerate(true);
-      editor.showToast('warning', 'A timetable already exists. Click Generate again to confirm regeneration.');
-      return;
-    }
-    setRegenerate(false);
+  const executeGeneration = async () => {
+    setShowRegenConfirm(false);
     const service = new GenerationService();
     const token = new ManualCancellationToken();
     cancelToken.current = token;
@@ -234,6 +228,14 @@ export function GeneratePage() {
         },
       ]);
       editor.showToast('error', `Generation failed: ${err?.message || 'Engine error'}`);
+    }
+  };
+
+  const handleStartClick = () => {
+    if (existingTimetable) {
+      setShowRegenConfirm(true);
+    } else {
+      void executeGeneration();
     }
   };
 
@@ -385,94 +387,123 @@ export function GeneratePage() {
             </details>
           )}
 
-          <div className="mt-4 grid gap-4 sm:grid-cols-2">
-            <Field label="Seed" hint="Optional — same input + same seed = same schedule.">
-              <Input value={seedInput} onChange={(e) => setSeedInput(e.target.value)} placeholder="e.g. 123456" aria-label="Generation seed" />
-            </Field>
-            <Field label="Max sessions / subject / day" hint="Empty = no cap">
-              <Input
-                type="number"
-                min={1}
-                value={maxSubjectPerDayInput}
-                placeholder="none"
-                aria-label="Max sessions per subject per day"
-                onChange={(e) => {
-                  setMaxSubjectPerDayInput(e.target.value);
-                  state.setGenerationSettingsOverrides(department.id, {
-                    maxSessionsPerSubjectPerDay: e.target.value.trim() ? Number(e.target.value) : null,
-                  });
-                }}
-              />
-            </Field>
-            <Field label="Max labs / section / day" hint="Empty = no cap">
-              <Input
-                type="number"
-                min={1}
-                value={maxLabPerDayInput}
-                placeholder="none"
-                aria-label="Max labs per section per day"
-                onChange={(e) => {
-                  setMaxLabPerDayInput(e.target.value);
-                  state.setGenerationSettingsOverrides(department.id, {
-                    maxLabSessionsPerSectionPerDay: e.target.value.trim() ? Number(e.target.value) : null,
-                  });
-                }}
-              />
-            </Field>
-            <Field label="Burnout Guard (Max consecutive teaching)" hint="Limit back-to-back periods (e.g. 3). Empty = unbounded.">
-              <Input
-                type="number"
-                min={1}
-                max={8}
-                value={maxConsecutiveInput}
-                placeholder="e.g. 3"
-                aria-label="Max consecutive teaching periods"
-                onChange={(e) => {
-                  setMaxConsecutiveInput(e.target.value);
-                  state.setGenerationSettingsOverrides(department.id, {
-                    maxConsecutiveTheory: e.target.value.trim() ? Number(e.target.value) : null,
-                  });
-                }}
-              />
-            </Field>
-            <Field label="Time budget (ms)" hint={`Default ${DEFAULT_GENERATION_SETTINGS.maxSearchDurationMs.toLocaleString()}.`}>
-              <Input
-                type="number"
-                min={1000}
-                step={1000}
-                value={durationBudgetInput}
-                placeholder="default"
-                aria-label="Search time budget in milliseconds"
-                onChange={(e) => {
-                  setDurationBudgetInput(e.target.value);
-                  state.setGenerationSettingsOverrides(department.id, {
-                    maxSearchDurationMs: e.target.value.trim() ? Number(e.target.value) : null,
-                  });
-                }}
-              />
-            </Field>
-            <div className="sm:col-span-2">
-              <Field label="Node budget" hint={`Default ${DEFAULT_GENERATION_SETTINGS.maxExploredNodes.toLocaleString()}.`}>
-              <Input
-                type="number"
-                min={1000}
-                step={100000}
-                value={nodeBudgetInput}
-                placeholder="default"
-                aria-label="Search node budget"
-                onChange={(e) => {
-                  setNodeBudgetInput(e.target.value);
-                  state.setGenerationSettingsOverrides(department.id, {
-                    maxExploredNodes: e.target.value.trim() ? Number(e.target.value) : null,
-                  });
-                }}
-              />
+          <details className="mt-4 rounded-xl border border-[#E5E8E0] bg-surface-1 p-3">
+            <summary className="cursor-pointer text-xs font-semibold text-ink">
+              Advanced generation settings (budgets, seed & limits)
+            </summary>
+            <div className="mt-3 grid gap-4 sm:grid-cols-2">
+              <Field label="Seed" hint="Optional — same input + same seed = same schedule.">
+                <Input value={seedInput} onChange={(e) => setSeedInput(e.target.value)} placeholder="e.g. 123456" aria-label="Generation seed" />
               </Field>
+              <Field label="Max sessions / subject / day" hint="Empty = no cap">
+                <Input
+                  type="number"
+                  min={1}
+                  value={maxSubjectPerDayInput}
+                  placeholder="none"
+                  aria-label="Max sessions per subject per day"
+                  onChange={(e) => {
+                    setMaxSubjectPerDayInput(e.target.value);
+                    state.setGenerationSettingsOverrides(department.id, {
+                      maxSessionsPerSubjectPerDay: e.target.value.trim() ? Number(e.target.value) : null,
+                    });
+                  }}
+                />
+              </Field>
+              <Field label="Max labs / section / day" hint="Empty = no cap">
+                <Input
+                  type="number"
+                  min={1}
+                  value={maxLabPerDayInput}
+                  placeholder="none"
+                  aria-label="Max labs per section per day"
+                  onChange={(e) => {
+                    setMaxLabPerDayInput(e.target.value);
+                    state.setGenerationSettingsOverrides(department.id, {
+                      maxLabSessionsPerSectionPerDay: e.target.value.trim() ? Number(e.target.value) : null,
+                    });
+                  }}
+                />
+              </Field>
+              <Field label="Burnout Guard (Max consecutive teaching)" hint="Limit back-to-back periods (e.g. 3). Empty = unbounded.">
+                <Input
+                  type="number"
+                  min={1}
+                  max={8}
+                  value={maxConsecutiveInput}
+                  placeholder="e.g. 3"
+                  aria-label="Max consecutive teaching periods"
+                  onChange={(e) => {
+                    setMaxConsecutiveInput(e.target.value);
+                    state.setGenerationSettingsOverrides(department.id, {
+                      maxConsecutiveTheory: e.target.value.trim() ? Number(e.target.value) : null,
+                    });
+                  }}
+                />
+              </Field>
+              <Field label="Time budget (ms)" hint={`Default ${DEFAULT_GENERATION_SETTINGS.maxSearchDurationMs.toLocaleString()}.`}>
+                <Input
+                  type="number"
+                  min={1000}
+                  step={1000}
+                  value={durationBudgetInput}
+                  placeholder="default"
+                  aria-label="Search time budget in milliseconds"
+                  onChange={(e) => {
+                    setDurationBudgetInput(e.target.value);
+                    state.setGenerationSettingsOverrides(department.id, {
+                      maxSearchDurationMs: e.target.value.trim() ? Number(e.target.value) : null,
+                    });
+                  }}
+                />
+              </Field>
+              <div className="sm:col-span-2">
+                <Field label="Node budget" hint={`Default ${DEFAULT_GENERATION_SETTINGS.maxExploredNodes.toLocaleString()}.`}>
+                <Input
+                  type="number"
+                  min={1000}
+                  step={100000}
+                  value={nodeBudgetInput}
+                  placeholder="default"
+                  aria-label="Search node budget"
+                  onChange={(e) => {
+                    setNodeBudgetInput(e.target.value);
+                    state.setGenerationSettingsOverrides(department.id, {
+                      maxExploredNodes: e.target.value.trim() ? Number(e.target.value) : null,
+                    });
+                  }}
+                />
+                </Field>
+              </div>
             </div>
-          </div>
+          </details>
+
+          {showRegenConfirm && existingTimetable && (
+            <div className="mt-4 rounded-xl border border-amber-300 bg-amber-50 p-4 text-xs">
+              <div className="flex items-start gap-2.5">
+                <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <p className="font-bold text-amber-900">
+                    Confirm Timetable Regeneration (Current: v{existingTimetable.revision})
+                  </p>
+                  <p className="mt-1 text-amber-800">
+                    A timetable already exists for {department.code}. Generating again will archive version {existingTimetable.revision} into history and replace the active timetable.
+                  </p>
+                  <div className="mt-3 flex gap-2">
+                    <Button size="sm" onClick={() => void executeGeneration()}>
+                      Confirm & Regenerate
+                    </Button>
+                    <Button variant="secondary" size="sm" onClick={() => setShowRegenConfirm(false)}>
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="mt-5 flex gap-2">
-            <Button onClick={start} disabled={running || preflight.verdict !== 'READY'} aria-busy={running}>
+            <Button onClick={handleStartClick} disabled={running || preflight.verdict !== 'READY'} aria-busy={running}>
               {running ? 'Generating…' : existingTimetable ? 'Regenerate timetable' : 'Generate timetable'}
             </Button>
             {running && (
@@ -489,7 +520,21 @@ export function GeneratePage() {
         </Card>
 
         <Card title="Generation state">
-          {!running && gen.status === 'IDLE' && <p className="text-sm text-body-gray">Not running.</p>}
+          {!running && gen.status === 'IDLE' && (
+            <div className="flex flex-col items-center justify-center py-8 text-center">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#EBF1FF] text-metric-blue mb-3">
+                <Sparkles className="w-6 h-6" />
+              </div>
+              <p className="text-sm font-semibold text-ink">
+                {preflight.verdict === 'READY' ? 'Ready to Generate' : 'Action Required'}
+              </p>
+              <p className="mt-1 max-w-xs text-xs text-body-gray">
+                {preflight.verdict === 'READY'
+                  ? 'All sections, subjects, and faculty are configured. Click Generate timetable to run the engine.'
+                  : 'Resolve the constraint diagnostics on the left before running the scheduling engine.'}
+              </p>
+            </div>
+          )}
           {running && (
             <div aria-live="polite" className="flex items-center gap-3">
               <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-metric-blue" aria-hidden="true" />
@@ -503,17 +548,25 @@ export function GeneratePage() {
           )}
           {gen.status === 'COMPLETED' && gen.metrics && (
             <div className="text-sm">
-              <p className="font-medium text-success">Generation completed.</p>
-              <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
-                <dt className="text-body-gray">Duration</dt><dd className="text-right tabular-nums text-ink">{gen.metrics.durationMs} ms</dd>
-                <dt className="text-body-gray">Explored nodes</dt><dd className="text-right tabular-nums text-ink">{gen.metrics.exploredNodes.toLocaleString()}</dd>
-                <dt className="text-body-gray">Backtracks</dt><dd className="text-right tabular-nums text-ink">{gen.metrics.backtrackCount.toLocaleString()}</dd>
-                <dt className="text-body-gray">Sessions scheduled</dt><dd className="text-right tabular-nums text-ink">{gen.metrics.sessionsScheduled}</dd>
-                <dt className="text-body-gray">Final score</dt><dd className="text-right tabular-nums text-ink">{gen.metrics.finalScore}</dd>
+              <div className="flex items-center gap-2">
+                <span className="flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
+                <p className="font-semibold text-success">Generation Completed Successfully</p>
+              </div>
+              <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2 text-xs rounded-xl bg-surface-1 border border-[#E5E8E0] p-3">
+                <dt className="text-body-gray">Duration</dt><dd className="text-right tabular-nums font-semibold text-ink">{gen.metrics.durationMs} ms</dd>
+                <dt className="text-body-gray">Explored nodes</dt><dd className="text-right tabular-nums font-semibold text-ink">{gen.metrics.exploredNodes.toLocaleString()}</dd>
+                <dt className="text-body-gray">Backtracks</dt><dd className="text-right tabular-nums font-semibold text-ink">{gen.metrics.backtrackCount.toLocaleString()}</dd>
+                <dt className="text-body-gray">Sessions scheduled</dt><dd className="text-right tabular-nums font-semibold text-ink">{gen.metrics.sessionsScheduled}</dd>
+                <dt className="text-body-gray">Final score</dt><dd className="text-right tabular-nums font-semibold text-ink">{gen.metrics.finalScore}</dd>
               </dl>
-              <Link to={`/departments/${departmentId}/timetable`}>
-                <Button variant="secondary" size="sm" className="mt-4">Open timetable →</Button>
-              </Link>
+              <div className="mt-4">
+                <Link to={`/departments/${departmentId}/timetable`} className="block">
+                  <Button className="w-full flex items-center justify-center gap-1.5">
+                    <span>View Generated Timetable</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </Button>
+                </Link>
+              </div>
             </div>
           )}
           {(gen.status === 'IMPOSSIBLE' || gen.status === 'FAILED' || gen.status === 'TIMEOUT') && (
@@ -523,7 +576,7 @@ export function GeneratePage() {
               </p>
               {gen.status === 'TIMEOUT' && (
                 <p className="mt-1 text-xs text-body-gray">
-                  Tip: raise the time or node budget below the summary, then try again.
+                  Tip: raise the time or node budget in Advanced Settings, then try again.
                 </p>
               )}
               {gen.diagnostics.length > 0 && (
