@@ -20,6 +20,12 @@ function getBacking(): Pick<Storage, 'getItem' | 'setItem' | 'removeItem'> {
 }
 
 export class LocalStorageAdapter implements StorageAdapter {
+  constructor(private readonly namespace = 'anonymous') {}
+
+  private getWorkspaceKey(): string {
+    return `${STORAGE_KEYS.workspace}:${encodeURIComponent(this.namespace)}`;
+  }
+
   loadWorkspace(): PersistedWorkspace | null {
     const raw = this.getRawPayload();
     if (raw === null) return null;
@@ -32,7 +38,7 @@ export class LocalStorageAdapter implements StorageAdapter {
 
   saveWorkspace(workspace: PersistedWorkspace): void {
     try {
-      getBacking().setItem(STORAGE_KEYS.workspace, JSON.stringify(workspace));
+      getBacking().setItem(this.getWorkspaceKey(), JSON.stringify(workspace));
     } catch (error) {
       throw new PersistenceError('Failed to save workspace to local storage.', {
         cause: String(error),
@@ -42,13 +48,13 @@ export class LocalStorageAdapter implements StorageAdapter {
 
   clearWorkspace(): void {
     try {
-      getBacking().removeItem(STORAGE_KEYS.workspace);
+      getBacking().removeItem(this.getWorkspaceKey());
     } catch (error) {
       throw new PersistenceError('Failed to clear workspace.', { cause: String(error) });
     }
   }
 
   getRawPayload(): string | null {
-    return getBacking().getItem(STORAGE_KEYS.workspace);
+    return getBacking().getItem(this.getWorkspaceKey());
   }
 }

@@ -3,28 +3,49 @@ import { useWorkspaceStore } from '@/state/stores/workspace-store';
 import { StorageService } from '@/storage';
 import type { PersistedWorkspace } from '@/storage/workspace-document';
 import type { LoadOutcome } from '@/storage';
+import { LocalStorageAdapter } from '@/storage/adapters/local-storage-adapter';
 
-let storageService: StorageService | null = null;
+const storageServices = new Map<string, StorageService>();
+let activeStorageNamespace = 'anonymous';
 
-export function getStorageService(): StorageService {
-  if (!storageService) storageService = new StorageService();
-  return storageService;
+export function clearInMemoryWorkspace() {
+  useWorkspaceStore.getState().replaceAll({
+    departments: [],
+    sections: [],
+    subjects: [],
+    faculty: [],
+    timetables: [],
+    rooms: [],
+    breaks: [],
+    activeDepartmentId: null,
+  });
+}
+
+export function getStorageService(namespace = activeStorageNamespace): StorageService {
+  const existing = storageServices.get(namespace);
+  if (existing) return existing;
+
+  const service = new StorageService(new LocalStorageAdapter(namespace));
+  storageServices.set(namespace, service);
+  return service;
 }
 
 /**
  * Load-on-mount and debounced save on committed state changes (§37.3, §88).
  * Corrupted storage surfaces recovery state instead of crashing.
  */
-export function usePersistence(): LoadOutcome | null {
+export function usePersistence(namespace = 'anonymous'): LoadOutcome | null {
   const outcomeRef = useRef<LoadOutcome | null>(null);
   const state = useWorkspaceStore();
   const firstRun = useRef(true);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  activeStorageNamespace = namespace;
+
   useEffect(() => {
     if (!firstRun.current) return;
     firstRun.current = false;
-    const service = getStorageService();
+    const service = getStorageService(namespace);
     const outcome = service.load();
     outcomeRef.current = outcome;
     if (outcome.workspace) {
@@ -40,6 +61,19 @@ export function usePersistence(): LoadOutcome | null {
         generationSettingsOverrides: outcome.workspace.payload.generationSettingsOverrides,
         collegeDetails: outcome.workspace.payload.collegeDetails,
       });
+    } else {
+      // Never leave another authenticated user's in-memory workspace visible
+      // while a fresh or corrupted namespace is being initialized.
+      useWorkspaceStore.getState().replaceAll({
+        departments: [],
+        sections: [],
+        subjects: [],
+        faculty: [],
+        timetables: [],
+        rooms: [],
+        breaks: [],
+        activeDepartmentId: null,
+      });
     }
   }, []);
 
@@ -48,7 +82,7 @@ export function usePersistence(): LoadOutcome | null {
     if (state.persistenceStatus === 'SAVING') return;
     if (timer.current) clearTimeout(timer.current);
     timer.current = setTimeout(() => {
-      const service = getStorageService();
+      const service = getStorageService(namespace);
       useWorkspaceStore.getState().setPersistenceStatus('SAVING');
       try {
         service.save(
@@ -74,7 +108,7 @@ export function usePersistence(): LoadOutcome | null {
     return () => {
       if (timer.current) clearTimeout(timer.current);
     };
-  }, [state.departments, state.sections, state.subjects, state.faculty, state.timetables, state.rooms, state.breaks, state.activeDepartmentId, state.generationSettingsOverrides, state.collegeDetails, state.persistenceStatus]);
+  }, [namespace, state.departments, state.sections, state.subjects, state.faculty, state.timetables, state.rooms, state.breaks, state.activeDepartmentId, state.generationSettingsOverrides, state.collegeDetails, state.persistenceStatus]);
 
   return outcomeRef.current;
 }
