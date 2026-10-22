@@ -12,7 +12,7 @@ import {
   timetables,
   userProfiles,
 } from '@/db/schema';
-import { requireAuthenticatedUser } from '@/auth/server';
+import { resolveInstitutionalContext } from '@/auth/server';
 import type {
   Break,
   CollegeDetails,
@@ -30,7 +30,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request): Promise<Response> {
   try {
-    const user = await requireAuthenticatedUser(request);
+    const context = await resolveInstitutionalContext(request);
     const database = getDatabase();
     const url = new URL(request.url);
 
@@ -38,17 +38,17 @@ export async function GET(request: Request): Promise<Response> {
     await database
       .insert(userProfiles)
       .values({
-        id: user.id,
-        email: user.email,
-        name: user.name,
+        id: context.user.id,
+        email: context.user.email,
+        name: context.user.name,
       })
       .onConflictDoNothing();
 
-    // 1. Fetch user's academic terms
+    // 1. Fetch academic terms for this institution
     let terms = await database
       .select()
       .from(academicTerms)
-      .where(eq(academicTerms.userId, user.id));
+      .where(eq(academicTerms.userId, context.institutionId));
 
     // If user has no terms yet, initialize a default term
     let targetTermId = url.searchParams.get('termId');
@@ -58,7 +58,7 @@ export async function GET(request: Request): Promise<Response> {
         .insert(academicTerms)
         .values({
           id: 'default',
-          userId: user.id,
+          userId: context.institutionId,
           name: 'Academic Year 2026-27 (Odd Sem)',
           academicYear: '2026-27',
           isDefault: true,
@@ -78,7 +78,7 @@ export async function GET(request: Request): Promise<Response> {
     const [collegeProfile] = await database
       .select()
       .from(collegeProfiles)
-      .where(eq(collegeProfiles.userId, user.id));
+      .where(eq(collegeProfiles.userId, context.institutionId));
 
     const collegeDetails: CollegeDetails = collegeProfile
       ? {
@@ -116,7 +116,7 @@ export async function GET(request: Request): Promise<Response> {
           .from(departments)
           .where(
             and(
-              eq(departments.userId, user.id),
+              eq(departments.userId, context.institutionId),
               eq(departments.termId, targetTermId),
             ),
           ),
@@ -125,7 +125,7 @@ export async function GET(request: Request): Promise<Response> {
           .from(sections)
           .where(
             and(
-              eq(sections.userId, user.id),
+              eq(sections.userId, context.institutionId),
               eq(sections.termId, targetTermId),
             ),
           ),
@@ -134,7 +134,7 @@ export async function GET(request: Request): Promise<Response> {
           .from(subjects)
           .where(
             and(
-              eq(subjects.userId, user.id),
+              eq(subjects.userId, context.institutionId),
               eq(subjects.termId, targetTermId),
             ),
           ),
@@ -143,7 +143,7 @@ export async function GET(request: Request): Promise<Response> {
           .from(faculty)
           .where(
             and(
-              eq(faculty.userId, user.id),
+              eq(faculty.userId, context.institutionId),
               eq(faculty.termId, targetTermId),
             ),
           ),
@@ -152,7 +152,7 @@ export async function GET(request: Request): Promise<Response> {
           .from(rooms)
           .where(
             and(
-              eq(rooms.userId, user.id),
+              eq(rooms.userId, context.institutionId),
               eq(rooms.termId, targetTermId),
             ),
           ),
@@ -161,7 +161,7 @@ export async function GET(request: Request): Promise<Response> {
           .from(breaks)
           .where(
             and(
-              eq(breaks.userId, user.id),
+              eq(breaks.userId, context.institutionId),
               eq(breaks.termId, targetTermId),
             ),
           ),
@@ -170,7 +170,7 @@ export async function GET(request: Request): Promise<Response> {
           .from(timetables)
           .where(
             and(
-              eq(timetables.userId, user.id),
+              eq(timetables.userId, context.institutionId),
               eq(timetables.termId, targetTermId),
             ),
           ),
@@ -286,6 +286,11 @@ export async function GET(request: Request): Promise<Response> {
       updatedAt: t.updatedAt.toISOString(),
     }));
 
+    const activeDeptId =
+      context.role === 'HOD' && context.departmentId
+        ? context.departmentId
+        : (domainDepartments[0]?.id ?? null);
+
     return Response.json(
       {
         workspace: {
@@ -296,12 +301,18 @@ export async function GET(request: Request): Promise<Response> {
           rooms: domainRooms,
           breaks: domainBreaks,
           timetables: domainTimetables,
-          activeDepartmentId: domainDepartments[0]?.id ?? null,
+          activeDepartmentId: activeDeptId,
           generationSettingsOverrides,
           collegeDetails,
         },
         terms: formattedTerms,
         activeTermId: targetTermId,
+        membership: {
+          role: context.role,
+          departmentId: context.departmentId,
+          facultyId: context.facultyId,
+          institutionId: context.institutionId,
+        },
       },
       {
         headers: {
@@ -321,7 +332,14 @@ export async function GET(request: Request): Promise<Response> {
 
 export async function PUT(request: Request): Promise<Response> {
   try {
-    const user = await requireAuthenticatedUser(request);
+    const context = await resolveInstitutionalContext(request);
+    if (context.role === 'FACULTY') {
+      return Response.json(
+        { error: 'Faculty members have read-only access to workspace configurations' },
+        { status: 403 },
+      );
+    }
+
     const database = getDatabase();
     const body = await request.json();
 
@@ -333,22 +351,25 @@ export async function PUT(request: Request): Promise<Response> {
     }
 
     const now = new Date();
+    const institutionId = context.institutionId;
+    const isHod = context.role === 'HOD';
+    const hodDeptId = context.departmentId;
 
     // 0. Ensure user profile exists to satisfy foreign key constraints
     await database
       .insert(userProfiles)
       .values({
-        id: user.id,
-        email: user.email,
-        name: user.name,
+        id: context.user.id,
+        email: context.user.email,
+        name: context.user.name,
         createdAt: now,
         updatedAt: now,
       })
       .onConflictDoUpdate({
         target: userProfiles.id,
         set: {
-          email: user.email,
-          name: user.name,
+          email: context.user.email,
+          name: context.user.name,
           updatedAt: now,
         },
       });
@@ -357,28 +378,45 @@ export async function PUT(request: Request): Promise<Response> {
     const [existingTerm] = await database
       .select()
       .from(academicTerms)
-      .where(and(eq(academicTerms.userId, user.id), eq(academicTerms.id, termId)));
+      .where(and(eq(academicTerms.userId, institutionId), eq(academicTerms.id, termId)));
 
     if (!existingTerm) {
       await database.insert(academicTerms).values({
-          id: termId,
-          userId: user.id,
-          name: 'Academic Year 2026-27 (Odd Sem)',
-          academicYear: '2026-27',
-          isDefault: termId === 'default',
+        id: termId,
+        userId: institutionId,
+        name: 'Academic Year 2026-27 (Odd Sem)',
+        academicYear: '2026-27',
+        isDefault: termId === 'default',
+        createdAt: now,
+        updatedAt: now,
+      });
+    }
+
+    // 2. Sync College Details (Admin only)
+    if (context.role === 'ADMIN' && payload.collegeDetails) {
+      const cd = payload.collegeDetails as CollegeDetails;
+      await database
+        .insert(collegeProfiles)
+        .values({
+          id: `col_${institutionId}`,
+          userId: institutionId,
+          name: cd.name ?? '',
+          code: cd.code ?? '',
+          address: cd.address ?? '',
+          city: cd.city ?? '',
+          state: cd.state ?? '',
+          pincode: cd.pincode ?? '',
+          website: cd.website ?? '',
+          contactEmail: cd.contactEmail ?? '',
+          contactPhone: cd.contactPhone ?? '',
+          academicYear: cd.academicYear ?? '',
+          logoDataUrl: cd.logoDataUrl ?? '',
           createdAt: now,
           updatedAt: now,
-        });
-      }
-
-      // 2. Sync College Details
-      if (payload.collegeDetails) {
-        const cd = payload.collegeDetails as CollegeDetails;
-        await database
-          .insert(collegeProfiles)
-          .values({
-            id: `col_${user.id}`,
-            userId: user.id,
+        })
+        .onConflictDoUpdate({
+          target: collegeProfiles.userId,
+          set: {
             name: cd.name ?? '',
             code: cd.code ?? '',
             address: cd.address ?? '',
@@ -390,45 +428,46 @@ export async function PUT(request: Request): Promise<Response> {
             contactPhone: cd.contactPhone ?? '',
             academicYear: cd.academicYear ?? '',
             logoDataUrl: cd.logoDataUrl ?? '',
-            createdAt: now,
             updatedAt: now,
-          })
-          .onConflictDoUpdate({
-            target: collegeProfiles.userId,
-            set: {
-              name: cd.name ?? '',
-              code: cd.code ?? '',
-              address: cd.address ?? '',
-              city: cd.city ?? '',
-              state: cd.state ?? '',
-              pincode: cd.pincode ?? '',
-              website: cd.website ?? '',
-              contactEmail: cd.contactEmail ?? '',
-              contactPhone: cd.contactPhone ?? '',
-              academicYear: cd.academicYear ?? '',
-              logoDataUrl: cd.logoDataUrl ?? '',
-              updatedAt: now,
-            },
-          });
-      }
+          },
+        });
+    }
 
-      const overrides =
-        (payload.generationSettingsOverrides as Record<
-          string,
-          Partial<GenerationSettingsOverrides>
-        >) ?? {};
+    const overrides =
+      (payload.generationSettingsOverrides as Record<
+        string,
+        Partial<GenerationSettingsOverrides>
+      >) ?? {};
 
-      // 3. Sync Departments
-      const depts = (payload.departments as Department[]) ?? [];
-      const deptIds = depts.map((d) => d.id);
+    // 3. Sync Departments
+    let depts = (payload.departments as Department[]) ?? [];
+    if (isHod && hodDeptId) {
+      depts = depts.filter((d) => d.id === hodDeptId);
+    }
+    const deptIds = depts.map((d) => d.id);
 
-      for (const d of depts) {
-        await database
-          .insert(departments)
-          .values({
-            id: d.id,
-            userId: user.id,
-            termId,
+    for (const d of depts) {
+      await database
+        .insert(departments)
+        .values({
+          id: d.id,
+          userId: institutionId,
+          termId,
+          code: d.code,
+          name: d.name,
+          workingDays: d.workingDays,
+          periodsPerDay: d.periodsPerDay,
+          periodTimings: d.periodTimings,
+          effectiveFrom: d.effectiveFrom,
+          mentors: d.mentors,
+          status: d.status,
+          generationSettingsOverrides: overrides[d.id] ?? null,
+          createdAt: d.createdAt ? new Date(d.createdAt) : now,
+          updatedAt: now,
+        })
+        .onConflictDoUpdate({
+          target: departments.id,
+          set: {
             code: d.code,
             name: d.name,
             workingDays: d.workingDays,
@@ -438,32 +477,18 @@ export async function PUT(request: Request): Promise<Response> {
             mentors: d.mentors,
             status: d.status,
             generationSettingsOverrides: overrides[d.id] ?? null,
-            createdAt: d.createdAt ? new Date(d.createdAt) : now,
             updatedAt: now,
-          })
-          .onConflictDoUpdate({
-            target: departments.id,
-            set: {
-              code: d.code,
-              name: d.name,
-              workingDays: d.workingDays,
-              periodsPerDay: d.periodsPerDay,
-              periodTimings: d.periodTimings,
-              effectiveFrom: d.effectiveFrom,
-              mentors: d.mentors,
-              status: d.status,
-              generationSettingsOverrides: overrides[d.id] ?? null,
-              updatedAt: now,
-            },
-          });
-      }
+          },
+        });
+    }
 
+    if (!isHod) {
       if (deptIds.length > 0) {
         await database
           .delete(departments)
           .where(
             and(
-              eq(departments.userId, user.id),
+              eq(departments.userId, institutionId),
               eq(departments.termId, termId),
               notInArray(departments.id, deptIds),
             ),
@@ -473,24 +498,42 @@ export async function PUT(request: Request): Promise<Response> {
           .delete(departments)
           .where(
             and(
-              eq(departments.userId, user.id),
+              eq(departments.userId, institutionId),
               eq(departments.termId, termId),
             ),
           );
       }
+    }
 
-      // 4. Sync Sections
-      const secs = (payload.sections as Section[]) ?? [];
-      const secIds = secs.map((s) => s.id);
+    // 4. Sync Sections
+    let secs = (payload.sections as Section[]) ?? [];
+    if (isHod && hodDeptId) {
+      secs = secs.filter((s) => s.departmentId === hodDeptId);
+    }
+    const secIds = secs.map((s) => s.id);
 
-      for (const s of secs) {
-        await database
-          .insert(sections)
-          .values({
-            id: s.id,
-            userId: user.id,
-            termId,
-            departmentId: s.departmentId,
+    for (const s of secs) {
+      await database
+        .insert(sections)
+        .values({
+          id: s.id,
+          userId: institutionId,
+          termId,
+          departmentId: s.departmentId,
+          name: s.name,
+          year: s.year,
+          semester: s.semester,
+          studentCount: s.studentCount,
+          subjectRequirements: s.subjectRequirements,
+          roomNo: s.roomNo,
+          classAdvisor: s.classAdvisor,
+          active: s.active,
+          createdAt: now,
+          updatedAt: now,
+        })
+        .onConflictDoUpdate({
+          target: sections.id,
+          set: {
             name: s.name,
             year: s.year,
             semester: s.semester,
@@ -499,31 +542,41 @@ export async function PUT(request: Request): Promise<Response> {
             roomNo: s.roomNo,
             classAdvisor: s.classAdvisor,
             active: s.active,
-            createdAt: now,
             updatedAt: now,
-          })
-          .onConflictDoUpdate({
-            target: sections.id,
-            set: {
-              name: s.name,
-              year: s.year,
-              semester: s.semester,
-              studentCount: s.studentCount,
-              subjectRequirements: s.subjectRequirements,
-              roomNo: s.roomNo,
-              classAdvisor: s.classAdvisor,
-              active: s.active,
-              updatedAt: now,
-            },
-          });
-      }
+          },
+        });
+    }
 
+    if (isHod && hodDeptId) {
       if (secIds.length > 0) {
         await database
           .delete(sections)
           .where(
             and(
-              eq(sections.userId, user.id),
+              eq(sections.userId, institutionId),
+              eq(sections.termId, termId),
+              eq(sections.departmentId, hodDeptId),
+              notInArray(sections.id, secIds),
+            ),
+          );
+      } else {
+        await database
+          .delete(sections)
+          .where(
+            and(
+              eq(sections.userId, institutionId),
+              eq(sections.termId, termId),
+              eq(sections.departmentId, hodDeptId),
+            ),
+          );
+      }
+    } else {
+      if (secIds.length > 0) {
+        await database
+          .delete(sections)
+          .where(
+            and(
+              eq(sections.userId, institutionId),
               eq(sections.termId, termId),
               notInArray(sections.id, secIds),
             ),
@@ -533,24 +586,43 @@ export async function PUT(request: Request): Promise<Response> {
           .delete(sections)
           .where(
             and(
-              eq(sections.userId, user.id),
+              eq(sections.userId, institutionId),
               eq(sections.termId, termId),
             ),
           );
       }
+    }
 
-      // 5. Sync Subjects
-      const subs = (payload.subjects as Subject[]) ?? [];
-      const subIds = subs.map((s) => s.id);
+    // 5. Sync Subjects
+    let subs = (payload.subjects as Subject[]) ?? [];
+    if (isHod && hodDeptId) {
+      subs = subs.filter((s) => s.departmentId === hodDeptId);
+    }
+    const subIds = subs.map((s) => s.id);
 
-      for (const s of subs) {
-        await database
-          .insert(subjects)
-          .values({
-            id: s.id,
-            userId: user.id,
-            termId,
-            departmentId: s.departmentId,
+    for (const s of subs) {
+      await database
+        .insert(subjects)
+        .values({
+          id: s.id,
+          userId: institutionId,
+          termId,
+          departmentId: s.departmentId,
+          code: s.code,
+          name: s.name,
+          type: s.type,
+          courseCode: s.courseCode,
+          sessionsPerWeek: s.sessionsPerWeek,
+          durationPeriods: s.durationPeriods,
+          eligibleFacultyIds: s.eligibleFacultyIds,
+          eligibleSectionIds: s.eligibleSectionIds,
+          active: s.active,
+          createdAt: now,
+          updatedAt: now,
+        })
+        .onConflictDoUpdate({
+          target: subjects.id,
+          set: {
             code: s.code,
             name: s.name,
             type: s.type,
@@ -560,32 +632,41 @@ export async function PUT(request: Request): Promise<Response> {
             eligibleFacultyIds: s.eligibleFacultyIds,
             eligibleSectionIds: s.eligibleSectionIds,
             active: s.active,
-            createdAt: now,
             updatedAt: now,
-          })
-          .onConflictDoUpdate({
-            target: subjects.id,
-            set: {
-              code: s.code,
-              name: s.name,
-              type: s.type,
-              courseCode: s.courseCode,
-              sessionsPerWeek: s.sessionsPerWeek,
-              durationPeriods: s.durationPeriods,
-              eligibleFacultyIds: s.eligibleFacultyIds,
-              eligibleSectionIds: s.eligibleSectionIds,
-              active: s.active,
-              updatedAt: now,
-            },
-          });
-      }
+          },
+        });
+    }
 
+    if (isHod && hodDeptId) {
       if (subIds.length > 0) {
         await database
           .delete(subjects)
           .where(
             and(
-              eq(subjects.userId, user.id),
+              eq(subjects.userId, institutionId),
+              eq(subjects.termId, termId),
+              eq(subjects.departmentId, hodDeptId),
+              notInArray(subjects.id, subIds),
+            ),
+          );
+      } else {
+        await database
+          .delete(subjects)
+          .where(
+            and(
+              eq(subjects.userId, institutionId),
+              eq(subjects.termId, termId),
+              eq(subjects.departmentId, hodDeptId),
+            ),
+          );
+      }
+    } else {
+      if (subIds.length > 0) {
+        await database
+          .delete(subjects)
+          .where(
+            and(
+              eq(subjects.userId, institutionId),
               eq(subjects.termId, termId),
               notInArray(subjects.id, subIds),
             ),
@@ -595,24 +676,43 @@ export async function PUT(request: Request): Promise<Response> {
           .delete(subjects)
           .where(
             and(
-              eq(subjects.userId, user.id),
+              eq(subjects.userId, institutionId),
               eq(subjects.termId, termId),
             ),
           );
       }
+    }
 
-      // 6. Sync Faculty
-      const facs = (payload.faculty as Faculty[]) ?? [];
-      const facIds = facs.map((f) => f.id);
+    // 6. Sync Faculty
+    let facs = (payload.faculty as Faculty[]) ?? [];
+    if (isHod && hodDeptId) {
+      facs = facs.filter((f) => f.departmentId === hodDeptId);
+    }
+    const facIds = facs.map((f) => f.id);
 
-      for (const f of facs) {
-        await database
-          .insert(faculty)
-          .values({
-            id: f.id,
-            userId: user.id,
-            termId,
-            departmentId: f.departmentId,
+    for (const f of facs) {
+      await database
+        .insert(faculty)
+        .values({
+          id: f.id,
+          userId: institutionId,
+          termId,
+          departmentId: f.departmentId,
+          facultyCode: f.facultyCode,
+          name: f.name,
+          subjectIds: f.subjectIds,
+          sectionIds: f.sectionIds,
+          availability: f.availability,
+          preferredSlots: f.preferredSlots,
+          maxPeriodsPerDay: f.maxPeriodsPerDay,
+          maxPeriodsPerWeek: f.maxPeriodsPerWeek,
+          active: f.active,
+          createdAt: now,
+          updatedAt: now,
+        })
+        .onConflictDoUpdate({
+          target: faculty.id,
+          set: {
             facultyCode: f.facultyCode,
             name: f.name,
             subjectIds: f.subjectIds,
@@ -622,32 +722,41 @@ export async function PUT(request: Request): Promise<Response> {
             maxPeriodsPerDay: f.maxPeriodsPerDay,
             maxPeriodsPerWeek: f.maxPeriodsPerWeek,
             active: f.active,
-            createdAt: now,
             updatedAt: now,
-          })
-          .onConflictDoUpdate({
-            target: faculty.id,
-            set: {
-              facultyCode: f.facultyCode,
-              name: f.name,
-              subjectIds: f.subjectIds,
-              sectionIds: f.sectionIds,
-              availability: f.availability,
-              preferredSlots: f.preferredSlots,
-              maxPeriodsPerDay: f.maxPeriodsPerDay,
-              maxPeriodsPerWeek: f.maxPeriodsPerWeek,
-              active: f.active,
-              updatedAt: now,
-            },
-          });
-      }
+          },
+        });
+    }
 
+    if (isHod && hodDeptId) {
       if (facIds.length > 0) {
         await database
           .delete(faculty)
           .where(
             and(
-              eq(faculty.userId, user.id),
+              eq(faculty.userId, institutionId),
+              eq(faculty.termId, termId),
+              eq(faculty.departmentId, hodDeptId),
+              notInArray(faculty.id, facIds),
+            ),
+          );
+      } else {
+        await database
+          .delete(faculty)
+          .where(
+            and(
+              eq(faculty.userId, institutionId),
+              eq(faculty.termId, termId),
+              eq(faculty.departmentId, hodDeptId),
+            ),
+          );
+      }
+    } else {
+      if (facIds.length > 0) {
+        await database
+          .delete(faculty)
+          .where(
+            and(
+              eq(faculty.userId, institutionId),
               eq(faculty.termId, termId),
               notInArray(faculty.id, facIds),
             ),
@@ -657,52 +766,80 @@ export async function PUT(request: Request): Promise<Response> {
           .delete(faculty)
           .where(
             and(
-              eq(faculty.userId, user.id),
+              eq(faculty.userId, institutionId),
               eq(faculty.termId, termId),
             ),
           );
       }
+    }
 
-      // 7. Sync Rooms
-      const rms = (payload.rooms as Room[]) ?? [];
-      const rmIds = rms.map((r) => r.id);
+    // 7. Sync Rooms
+    let rms = (payload.rooms as Room[]) ?? [];
+    if (isHod && hodDeptId) {
+      rms = rms.filter((r) => r.departmentId === hodDeptId);
+    }
+    const rmIds = rms.map((r) => r.id);
 
-      for (const r of rms) {
-        await database
-          .insert(rooms)
-          .values({
-            id: r.id,
-            userId: user.id,
-            termId,
+    for (const r of rms) {
+      await database
+        .insert(rooms)
+        .values({
+          id: r.id,
+          userId: institutionId,
+          termId,
+          departmentId: r.departmentId ?? null,
+          code: r.code,
+          name: r.name,
+          capacity: r.capacity,
+          type: r.type,
+          active: r.active,
+          createdAt: now,
+          updatedAt: now,
+        })
+        .onConflictDoUpdate({
+          target: rooms.id,
+          set: {
             departmentId: r.departmentId ?? null,
             code: r.code,
             name: r.name,
             capacity: r.capacity,
             type: r.type,
             active: r.active,
-            createdAt: now,
             updatedAt: now,
-          })
-          .onConflictDoUpdate({
-            target: rooms.id,
-            set: {
-              departmentId: r.departmentId ?? null,
-              code: r.code,
-              name: r.name,
-              capacity: r.capacity,
-              type: r.type,
-              active: r.active,
-              updatedAt: now,
-            },
-          });
-      }
+          },
+        });
+    }
 
+    if (isHod && hodDeptId) {
       if (rmIds.length > 0) {
         await database
           .delete(rooms)
           .where(
             and(
-              eq(rooms.userId, user.id),
+              eq(rooms.userId, institutionId),
+              eq(rooms.termId, termId),
+              eq(rooms.departmentId, hodDeptId),
+              notInArray(rooms.id, rmIds),
+            ),
+          );
+      } else {
+        await database
+          .delete(rooms)
+          .where(
+            and(
+              eq(rooms.userId, institutionId),
+              eq(rooms.termId, termId),
+              eq(rooms.departmentId, hodDeptId),
+            ),
+          );
+      }
+    } else {
+      if (rmIds.length > 0) {
+        await database
+          .delete(rooms)
+          .where(
+            and(
+              eq(rooms.userId, institutionId),
               eq(rooms.termId, termId),
               notInArray(rooms.id, rmIds),
             ),
@@ -712,13 +849,15 @@ export async function PUT(request: Request): Promise<Response> {
           .delete(rooms)
           .where(
             and(
-              eq(rooms.userId, user.id),
+              eq(rooms.userId, institutionId),
               eq(rooms.termId, termId),
             ),
           );
       }
+    }
 
-      // 8. Sync Breaks
+    // 8. Sync Breaks (Admin only)
+    if (!isHod) {
       const brks = (payload.breaks as Break[]) ?? [];
       const brkIds = brks.map((b) => b.id);
 
@@ -727,7 +866,7 @@ export async function PUT(request: Request): Promise<Response> {
           .insert(breaks)
           .values({
             id: b.id,
-            userId: user.id,
+            userId: institutionId,
             termId,
             name: b.name,
             dayIndex: b.dayIndex,
@@ -757,7 +896,7 @@ export async function PUT(request: Request): Promise<Response> {
           .delete(breaks)
           .where(
             and(
-              eq(breaks.userId, user.id),
+              eq(breaks.userId, institutionId),
               eq(breaks.termId, termId),
               notInArray(breaks.id, brkIds),
             ),
@@ -767,24 +906,50 @@ export async function PUT(request: Request): Promise<Response> {
           .delete(breaks)
           .where(
             and(
-              eq(breaks.userId, user.id),
+              eq(breaks.userId, institutionId),
               eq(breaks.termId, termId),
             ),
           );
       }
+    }
 
-      // 9. Sync Timetables
-      const tts = (payload.timetables as Timetable[]) ?? [];
-      const ttIds = tts.map((t) => t.id);
+    // 9. Sync Timetables
+    let tts = (payload.timetables as Timetable[]) ?? [];
+    if (isHod && hodDeptId) {
+      tts = tts.filter((t) => t.departmentId === hodDeptId);
+    }
+    const ttIds = tts.map((t) => t.id);
 
-      // Clean up stale timetables before upserting to avoid unique constraint collisions
-      // on (user_id, term_id, department_id)
+    if (isHod && hodDeptId) {
       if (ttIds.length > 0) {
         await database
           .delete(timetables)
           .where(
             and(
-              eq(timetables.userId, user.id),
+              eq(timetables.userId, institutionId),
+              eq(timetables.termId, termId),
+              eq(timetables.departmentId, hodDeptId),
+              notInArray(timetables.id, ttIds),
+            ),
+          );
+      } else {
+        await database
+          .delete(timetables)
+          .where(
+            and(
+              eq(timetables.userId, institutionId),
+              eq(timetables.termId, termId),
+              eq(timetables.departmentId, hodDeptId),
+            ),
+          );
+      }
+    } else {
+      if (ttIds.length > 0) {
+        await database
+          .delete(timetables)
+          .where(
+            and(
+              eq(timetables.userId, institutionId),
               eq(timetables.termId, termId),
               notInArray(timetables.id, ttIds),
             ),
@@ -794,32 +959,45 @@ export async function PUT(request: Request): Promise<Response> {
           .delete(timetables)
           .where(
             and(
-              eq(timetables.userId, user.id),
+              eq(timetables.userId, institutionId),
               eq(timetables.termId, termId),
             ),
           );
       }
+    }
 
-      for (const t of tts) {
-        // Also remove any existing timetable for the same department with a different ID
-        await database
-          .delete(timetables)
-          .where(
-            and(
-              eq(timetables.userId, user.id),
-              eq(timetables.termId, termId),
-              eq(timetables.departmentId, t.departmentId),
-              ne(timetables.id, t.id),
-            ),
-          );
+    for (const t of tts) {
+      await database
+        .delete(timetables)
+        .where(
+          and(
+            eq(timetables.userId, institutionId),
+            eq(timetables.termId, termId),
+            eq(timetables.departmentId, t.departmentId),
+            ne(timetables.id, t.id),
+          ),
+        );
 
-        await database
-          .insert(timetables)
-          .values({
-            id: t.id,
-            userId: user.id,
-            termId,
-            departmentId: t.departmentId,
+      await database
+        .insert(timetables)
+        .values({
+          id: t.id,
+          userId: institutionId,
+          termId,
+          departmentId: t.departmentId,
+          status: t.status,
+          revision: t.revision,
+          configurationSnapshot: t.configurationSnapshot,
+          entries: t.entries,
+          validationSummary: t.validationSummary,
+          generationMetadata: t.generationMetadata,
+          versionHistory: t.versionHistory ?? [],
+          createdAt: t.createdAt ? new Date(t.createdAt) : now,
+          updatedAt: now,
+        })
+        .onConflictDoUpdate({
+          target: timetables.id,
+          set: {
             status: t.status,
             revision: t.revision,
             configurationSnapshot: t.configurationSnapshot,
@@ -827,25 +1005,13 @@ export async function PUT(request: Request): Promise<Response> {
             validationSummary: t.validationSummary,
             generationMetadata: t.generationMetadata,
             versionHistory: t.versionHistory ?? [],
-            createdAt: t.createdAt ? new Date(t.createdAt) : now,
             updatedAt: now,
-          })
-          .onConflictDoUpdate({
-            target: timetables.id,
-            set: {
-              status: t.status,
-              revision: t.revision,
-              configurationSnapshot: t.configurationSnapshot,
-              entries: t.entries,
-              validationSummary: t.validationSummary,
-              generationMetadata: t.generationMetadata,
-              versionHistory: t.versionHistory ?? [],
-              updatedAt: now,
-            },
-          });
-      }
+          },
+        });
+    }
 
-      // 10. Update Term Statistics
+    // 10. Update Term Statistics (Admin only)
+    if (!isHod) {
       await database
         .update(academicTerms)
         .set({
@@ -857,7 +1023,8 @@ export async function PUT(request: Request): Promise<Response> {
           },
           updatedAt: now,
         })
-        .where(and(eq(academicTerms.userId, user.id), eq(academicTerms.id, termId)));
+        .where(and(eq(academicTerms.userId, institutionId), eq(academicTerms.id, termId)));
+    }
 
     return Response.json({
       ok: true,

@@ -6,7 +6,10 @@ import {
   timetables,
   userProfiles,
 } from '@/db/schema';
-import { requireAuthenticatedUser } from '@/auth/server';
+import {
+  resolveInstitutionalContext,
+  assertDepartmentAccess,
+} from '@/auth/server';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,7 +19,7 @@ export async function POST(
 ): Promise<Response> {
   try {
     const params = await props.params;
-    const user = await requireAuthenticatedUser(request);
+    const context = await resolveInstitutionalContext(request);
     const database = getDatabase();
     const body = await request.json().catch(() => ({}));
 
@@ -28,17 +31,22 @@ export async function POST(
     await database
       .insert(userProfiles)
       .values({
-        id: user.id,
-        email: user.email,
-        name: user.name,
+        id: context.institutionId,
+        email: context.user.email,
+        name: context.user.name,
       })
       .onConflictDoNothing();
 
-    // 2. Check if timetable exists and belongs to user
+    // 2. Check if timetable exists and belongs to this institution
     let [existing] = await database
       .select()
       .from(timetables)
-      .where(and(eq(timetables.userId, user.id), eq(timetables.id, timetableId)));
+      .where(and(eq(timetables.userId, context.institutionId), eq(timetables.id, timetableId)));
+
+    const targetDeptId = existing?.departmentId || body.timetable?.departmentId;
+    if (targetDeptId) {
+      assertDepartmentAccess(context, targetDeptId);
+    }
 
     const publicSlug =
       existing?.publicSlug ||
@@ -53,14 +61,14 @@ export async function POST(
       const [existingTerm] = await database
         .select({ id: academicTerms.id })
         .from(academicTerms)
-        .where(and(eq(academicTerms.userId, user.id), eq(academicTerms.id, termId)));
+        .where(and(eq(academicTerms.userId, context.institutionId), eq(academicTerms.id, termId)));
 
       if (!existingTerm) {
         await database
           .insert(academicTerms)
           .values({
             id: termId,
-            userId: user.id,
+            userId: context.institutionId,
             name: 'Academic Year 2026-27 (Odd Sem)',
             academicYear: '2026-27',
             isDefault: termId === 'default',
@@ -74,14 +82,14 @@ export async function POST(
       const [existingDept] = await database
         .select({ id: departments.id })
         .from(departments)
-        .where(and(eq(departments.userId, user.id), eq(departments.id, departmentId)));
+        .where(and(eq(departments.userId, context.institutionId), eq(departments.id, departmentId)));
 
       if (!existingDept) {
         await database
           .insert(departments)
           .values({
             id: departmentId,
-            userId: user.id,
+            userId: context.institutionId,
             termId,
             code: departmentId.toUpperCase().slice(0, 10),
             name: `Department ${departmentId}`,
@@ -99,7 +107,7 @@ export async function POST(
         .delete(timetables)
         .where(
           and(
-            eq(timetables.userId, user.id),
+            eq(timetables.userId, context.institutionId),
             eq(timetables.termId, termId),
             eq(timetables.departmentId, departmentId),
             ne(timetables.id, timetableId),
@@ -110,7 +118,7 @@ export async function POST(
         .insert(timetables)
         .values({
           id: timetableId,
-          userId: user.id,
+          userId: context.institutionId,
           termId,
           departmentId,
           status: tb.status,
@@ -146,7 +154,7 @@ export async function POST(
           publicSlug: resolvedSlug,
           updatedAt: now,
         })
-        .where(and(eq(timetables.userId, user.id), eq(timetables.id, timetableId)))
+        .where(and(eq(timetables.userId, context.institutionId), eq(timetables.id, timetableId)))
         .returning();
       existing = updated;
     }

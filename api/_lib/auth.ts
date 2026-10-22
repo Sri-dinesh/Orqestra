@@ -1,7 +1,7 @@
 import { createRemoteJWKSet, jwtVerify, type JWTPayload } from 'jose';
 import { and, eq, sql } from 'drizzle-orm';
 import { getDatabase } from '../../src/db';
-import { institutionMembers, userProfiles, type InstitutionRole } from '../../src/db/schema';
+import { institutionMembers, type InstitutionRole } from '../../src/db/schema';
 
 export interface AuthenticatedUser {
   id: string;

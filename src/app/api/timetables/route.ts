@@ -7,14 +7,17 @@ import {
   timetables,
   userProfiles,
 } from '@/db/schema';
-import { requireAuthenticatedUser } from '@/auth/server';
+import {
+  resolveInstitutionalContext,
+  assertDepartmentAccess,
+} from '@/auth/server';
 import type { GenerationMetrics, Timetable } from '@/domain/models';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request): Promise<Response> {
   try {
-    const user = await requireAuthenticatedUser(request);
+    const context = await resolveInstitutionalContext(request);
     const database = getDatabase();
     const body = await request.json();
 
@@ -35,15 +38,18 @@ export async function POST(request: Request): Promise<Response> {
       );
     }
 
+    // Enforce role-based departmental access
+    assertDepartmentAccess(context, timetable.departmentId);
+
     const now = new Date();
 
     // 1. Ensure user profile exists to satisfy foreign key constraints
     await database
       .insert(userProfiles)
       .values({
-        id: user.id,
-        email: user.email,
-        name: user.name,
+        id: context.institutionId,
+        email: context.user.email,
+        name: context.user.name,
       })
       .onConflictDoNothing();
 
@@ -51,14 +57,14 @@ export async function POST(request: Request): Promise<Response> {
     const [existingTerm] = await database
       .select({ id: academicTerms.id })
       .from(academicTerms)
-      .where(and(eq(academicTerms.userId, user.id), eq(academicTerms.id, termId)));
+      .where(and(eq(academicTerms.userId, context.institutionId), eq(academicTerms.id, termId)));
 
     if (!existingTerm) {
       await database
         .insert(academicTerms)
         .values({
           id: termId,
-          userId: user.id,
+          userId: context.institutionId,
           name: 'Academic Year 2026-27 (Odd Sem)',
           academicYear: '2026-27',
           isDefault: termId === 'default',
@@ -72,14 +78,14 @@ export async function POST(request: Request): Promise<Response> {
     const [existingDept] = await database
       .select({ id: departments.id })
       .from(departments)
-      .where(and(eq(departments.userId, user.id), eq(departments.id, timetable.departmentId)));
+      .where(and(eq(departments.userId, context.institutionId), eq(departments.id, timetable.departmentId)));
 
     if (!existingDept) {
       await database
         .insert(departments)
         .values({
           id: timetable.departmentId,
-          userId: user.id,
+          userId: context.institutionId,
           termId,
           code: timetable.departmentId.toUpperCase().slice(0, 10),
           name: `Department ${timetable.departmentId}`,
@@ -97,7 +103,7 @@ export async function POST(request: Request): Promise<Response> {
       .delete(timetables)
       .where(
         and(
-          eq(timetables.userId, user.id),
+          eq(timetables.userId, context.institutionId),
           eq(timetables.termId, termId),
           eq(timetables.departmentId, timetable.departmentId),
           ne(timetables.id, timetable.id),
@@ -109,7 +115,7 @@ export async function POST(request: Request): Promise<Response> {
       .insert(timetables)
       .values({
         id: timetable.id,
-        userId: user.id,
+        userId: context.institutionId,
         termId,
         departmentId: timetable.departmentId,
         status: timetable.status,
@@ -142,7 +148,7 @@ export async function POST(request: Request): Promise<Response> {
       try {
         await database.insert(generationAuditLogs).values({
           id: `genlog_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`,
-          userId: user.id,
+          userId: context.institutionId,
           termId,
           departmentId: timetable.departmentId,
           seed: auditMetrics.seed,
