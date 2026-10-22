@@ -151,7 +151,7 @@ export default function App() {
                   Dashboard
                 </NavLink>
                 <NavLink className={navLinkCls} to="/departments">
-                  Configuration
+                  Departments
                 </NavLink>
                 <NavLink className={navLinkCls} to="/schedule-portal">
                   My Schedule

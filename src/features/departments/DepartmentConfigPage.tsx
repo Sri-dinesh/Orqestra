@@ -48,11 +48,15 @@ export function DepartmentConfigPage() {
   }, [departmentId, state.activeDepartmentId, state.setActiveDepartment]);
 
   useEffect(() => {
-    if (!departmentId && state.departments.length > 0) {
-      const targetId = state.activeDepartmentId && state.departments.some((d) => d.id === state.activeDepartmentId)
-        ? state.activeDepartmentId
-        : state.departments[0].id;
-      navigate(`/departments/${targetId}/configuration`, { replace: true });
+    if (!departmentId) {
+      if (state.departments.length > 0) {
+        const targetId = state.activeDepartmentId && state.departments.some((d) => d.id === state.activeDepartmentId)
+          ? state.activeDepartmentId
+          : state.departments[0].id;
+        navigate(`/departments/${targetId}/configuration`, { replace: true });
+      } else {
+        navigate('/dashboard', { replace: true });
+      }
     }
   }, [departmentId, state.departments, state.activeDepartmentId, navigate]);
 

@@ -80,7 +80,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   Dashboard
                 </Link>
                 <Link className={navLinkCls('/departments')} href="/departments">
-                  Configuration
+                  Departments
                 </Link>
                 <Link className={navLinkCls('/schedule-portal')} href="/schedule-portal">
                   My Schedule
@@ -126,7 +126,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 href="/departments"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                Configuration
+                Departments
               </Link>
               <Link
                 className={`block w-full ${navLinkCls('/schedule-portal')}`}
