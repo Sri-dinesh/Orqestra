@@ -2,6 +2,7 @@
 node_modules/
 
 # build output
+.next/
 /dist/
 build/
 out/
@@ -23,6 +24,7 @@ pnpm-debug.log*
 .vscode/
 .DS_Store
 Thumbs.db
+AGENTS.md
 
 # local artifacts
 .cache/
