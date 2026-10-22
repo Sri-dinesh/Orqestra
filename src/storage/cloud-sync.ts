@@ -1,11 +1,37 @@
 import type { PersistedWorkspacePayload } from './workspace-document';
 import type { AcademicTerm, CloneTermOptions } from './term-manager';
 import type { GenerationMetrics, Timetable } from '@/domain/models';
+import { getAuthToken, authClient } from '@/auth/client';
 
 export interface CloudWorkspaceResponse {
   workspace: PersistedWorkspacePayload;
   terms: AcademicTerm[];
   activeTermId: string;
+}
+
+/**
+ * Helper to retrieve Authorization header for requests from the browser to Next.js API.
+ */
+async function getAuthHeaders(): Promise<Record<string, string>> {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+
+  try {
+    let token = await getAuthToken().catch(() => null);
+    if (!token) {
+      const sessionResult = await authClient.getSession().catch(() => null);
+      token = sessionResult?.data?.session?.token ?? null;
+    }
+
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+  } catch (error) {
+    console.warn('Could not retrieve auth token for cloud request:', error);
+  }
+
+  return headers;
 }
 
 /**
@@ -16,11 +42,12 @@ export async function fetchCloudWorkspace(
 ): Promise<CloudWorkspaceResponse | null> {
   try {
     const url = termId ? `/api/workspace?termId=${encodeURIComponent(termId)}` : '/api/workspace';
+    const headers = await getAuthHeaders();
+
     const res = await fetch(url, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
+      credentials: 'include',
       cache: 'no-store',
     });
 
@@ -47,11 +74,11 @@ export async function saveCloudWorkspace(
   termId = 'default',
 ): Promise<{ ok: boolean; syncedAt?: string; error?: string }> {
   try {
+    const headers = await getAuthHeaders();
     const res = await fetch('/api/workspace', {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
+      credentials: 'include',
       body: JSON.stringify({ termId, payload }),
     });
 
@@ -78,11 +105,11 @@ export async function saveTimetableToCloud(
   auditMetrics?: GenerationMetrics | null,
 ): Promise<{ ok: boolean; timetable?: any; error?: string }> {
   try {
+    const headers = await getAuthHeaders();
     const res = await fetch('/api/timetables', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
+      credentials: 'include',
       body: JSON.stringify({ timetable, termId, auditMetrics }),
     });
 
@@ -106,14 +133,16 @@ export async function saveTimetableToCloud(
 export async function publishTimetableToCloud(
   timetableId: string,
   publish = true,
+  timetable?: Timetable,
+  termId?: string,
 ): Promise<{ ok: boolean; publicSlug?: string; shareUrl?: string; error?: string }> {
   try {
+    const headers = await getAuthHeaders();
     const res = await fetch(`/api/timetables/${encodeURIComponent(timetableId)}/publish`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ publish }),
+      headers,
+      credentials: 'include',
+      body: JSON.stringify({ publish, timetable, termId }),
     });
 
     if (!res.ok) {
@@ -140,11 +169,11 @@ export async function createCloudTerm(
   cloneOptions?: CloneTermOptions,
 ): Promise<{ ok: boolean; term?: AcademicTerm; error?: string }> {
   try {
+    const headers = await getAuthHeaders();
     const res = await fetch('/api/terms', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
+      credentials: 'include',
       body: JSON.stringify({ name, academicYear, cloneFromTermId, cloneOptions }),
     });
 
@@ -170,8 +199,11 @@ export async function deleteCloudTerm(
   termId: string,
 ): Promise<{ ok: boolean; error?: string }> {
   try {
+    const headers = await getAuthHeaders();
     const res = await fetch(`/api/terms/${encodeURIComponent(termId)}`, {
       method: 'DELETE',
+      headers,
+      credentials: 'include',
     });
 
     if (!res.ok) {
@@ -195,11 +227,11 @@ export async function setActiveCloudTerm(
   termId: string,
 ): Promise<{ ok: boolean; error?: string }> {
   try {
+    const headers = await getAuthHeaders();
     const res = await fetch('/api/terms', {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
+      credentials: 'include',
       body: JSON.stringify({ termId }),
     });
 

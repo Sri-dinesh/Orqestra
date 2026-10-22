@@ -27,6 +27,7 @@ import { buildGridLayout, gridColumnLabel } from '@/domain/scheduler/grid-layout
 import type { TimetableConfiguration } from '@/domain/models';
 import { DepartmentNav } from '@/components/ui/DepartmentNav';
 import { publishTimetableToCloud } from '@/storage/cloud-sync';
+import { getActiveTermId } from '@/storage/term-manager';
 
 interface CellVm {
   dayIndex: number;
@@ -68,11 +69,16 @@ export function TimetablePage() {
     if (!timetable) return;
     setPublishing(true);
     try {
-      const res = await publishTimetableToCloud(timetable.id, true);
+      const activeTermId = getActiveTermId();
+      const res = await publishTimetableToCloud(timetable.id, true, timetable, activeTermId);
       if (res.ok && res.shareUrl) {
         const fullUrl = `${window.location.origin}${res.shareUrl}`;
-        await navigator.clipboard.writeText(fullUrl).catch(() => {});
-        editor.showToast('success', 'Timetable published! Schedule Portal link copied to clipboard.');
+        try {
+          await navigator.clipboard.writeText(fullUrl);
+          editor.showToast('success', 'Timetable published! Schedule Portal link copied to clipboard.');
+        } catch {
+          editor.showToast('success', `Timetable published! Portal link: ${fullUrl}`);
+        }
       } else {
         editor.showToast('error', res.error || 'Failed to publish timetable.');
       }

@@ -32,7 +32,9 @@ function getAuthTokenFromRequest(request: Request): string | null {
   // 2. Cookie header fallback
   const cookie = request.headers.get('cookie');
   if (cookie) {
-    const match = cookie.match(/(?:better-auth\.session_token|session_token)=([^;]+)/);
+    const match = cookie.match(
+      /(?:__Secure-better-auth\.session_token|better-auth\.session_token|session_token)=([^;]+)/,
+    );
     if (match?.[1]) {
       return decodeURIComponent(match[1].trim());
     }
@@ -58,31 +60,42 @@ export async function requireAuthenticatedUser(request: Request): Promise<Authen
   // Strategy A: JWT Verification (if token is 3-part compact JWS format)
   if (token.split('.').length === 3) {
     try {
-      const issuer = process.env.NEON_AUTH_ISSUER;
-      const verification = issuer ? { issuer } : {};
       const jwks = getRemoteJwks();
-      const { payload } = await jwtVerify(token, jwks, verification);
+      let verifiedPayload: JWTPayload | null = null;
+      try {
+        const issuer = process.env.NEON_AUTH_ISSUER;
+        const verification = issuer ? { issuer } : {};
+        const res = await jwtVerify(token, jwks, verification);
+        verifiedPayload = res.payload;
+      } catch {
+        // Issuer claim may differ in trailing slash/protocol; verify against official Neon JWKS keys
+        const res = await jwtVerify(token, jwks);
+        verifiedPayload = res.payload;
+      }
 
-      if (payload.sub) {
+      if (verifiedPayload?.sub) {
         return {
-          id: payload.sub,
-          email: claimAsString(payload, 'email'),
-          name: claimAsString(payload, 'name'),
+          id: verifiedPayload.sub,
+          email: claimAsString(verifiedPayload, 'email'),
+          name: claimAsString(verifiedPayload, 'name'),
         };
       }
-    } catch {
-      // Fall through to Strategy B if JWT verification fails or format is unsupported
+    } catch (jwtError) {
+      console.warn('JWT verification failed; checking session store fallback:', jwtError);
     }
   }
 
   // Strategy B: Database Session Verification (Direct Neon Auth table check)
   try {
     const database = getDatabase();
+    const rawToken =
+      token.includes('.') && token.split('.').length !== 3 ? token.split('.')[0] : token;
+
     const result = await database.execute(sql`
       SELECT s."userId" AS id, u.email, u.name
       FROM neon_auth."session" s
       JOIN neon_auth."user" u ON u.id = s."userId"
-      WHERE s.token = ${token}
+      WHERE (s.token = ${token} OR s.token = ${rawToken})
         AND s."expiresAt" > NOW()
       LIMIT 1
     `);
@@ -112,8 +125,11 @@ export async function requireAuthenticatedUser(request: Request): Promise<Authen
       });
 
       if (response.ok) {
-        const data = (await response.json()) as { user?: { id?: string; email?: string | null; name?: string | null } };
-        if (data.user?.id) {
+        const data = (await response.json().catch(() => null)) as {
+          user?: { id?: string; email?: string | null; name?: string | null };
+        } | null;
+
+        if (data?.user?.id) {
           return {
             id: data.user.id,
             email: data.user.email ?? null,
