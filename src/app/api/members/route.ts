@@ -8,6 +8,7 @@ import {
 import {
   resolveInstitutionalContext,
 } from '@/auth/server';
+import { createErrorResponse } from '@/lib/api-security';
 
 export const dynamic = 'force-dynamic';
 
@@ -40,8 +41,8 @@ export async function GET(request: Request): Promise<Response> {
         ),
       );
 
-    // 2. Fetch pending invitations
-    const invitations = await database
+    // 2. Fetch pending invitations (only ADMIN can see invitation tokens; others see sanitized data)
+    const rawInvitations = await database
       .select()
       .from(memberInvitations)
       .where(
@@ -50,6 +51,13 @@ export async function GET(request: Request): Promise<Response> {
           eq(memberInvitations.status, 'PENDING'),
         ),
       );
+
+    const isAdmin = context.role === 'ADMIN';
+    const invitations = rawInvitations.map((inv) => ({
+      ...inv,
+      // Strip token if user is not an institutional admin
+      token: isAdmin ? inv.token : undefined,
+    }));
 
     // If owner is not yet in institutionMembers, represent them as primary Admin
     const ownerIncluded = membersData.some((m) => m.userId === context.institutionId);
@@ -79,17 +87,21 @@ export async function GET(request: Request): Promise<Response> {
       ];
     }
 
-    return Response.json({
-      context,
-      members: allMembers,
-      invitations,
-    });
+    return Response.json(
+      {
+        context,
+        members: allMembers,
+        invitations,
+      },
+      {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, private',
+          Pragma: 'no-cache',
+        },
+      },
+    );
   } catch (error) {
     if (error instanceof Response) return error;
-    console.error('Failed to list members:', error);
-    return Response.json(
-      { error: error instanceof Error ? error.message : 'Failed to list members' },
-      { status: 500 },
-    );
+    return createErrorResponse(error, 'Failed to list members');
   }
 }

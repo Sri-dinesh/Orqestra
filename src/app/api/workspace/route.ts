@@ -13,6 +13,7 @@ import {
   userProfiles,
 } from '@/db/schema';
 import { resolveInstitutionalContext } from '@/auth/server';
+import { parseJsonBody, createErrorResponse } from '@/lib/api-security';
 import type {
   Break,
   CollegeDetails,
@@ -323,11 +324,7 @@ export async function GET(request: Request): Promise<Response> {
     );
   } catch (error) {
     if (error instanceof Response) return error;
-    console.error('Failed to load workspace:', error);
-    return Response.json(
-      { error: error instanceof Error ? error.message : 'Failed to load workspace' },
-      { status: 500 },
-    );
+    return createErrorResponse(error, 'Failed to load workspace');
   }
 }
 
@@ -337,12 +334,15 @@ export async function PUT(request: Request): Promise<Response> {
     if (context.role === 'FACULTY') {
       return Response.json(
         { error: 'Faculty members have read-only access to workspace configurations' },
-        { status: 403 },
+        { status: 403, headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate, private' } },
       );
     }
 
     const database = getDatabase();
-    const body = await request.json();
+    const body = await parseJsonBody<{
+      termId?: string;
+      payload?: any;
+    }>(request, 15 * 1024 * 1024); // 15MB max workspace payload
 
     const termId = body.termId || 'default';
     const payload = body.payload;
@@ -1054,16 +1054,20 @@ export async function PUT(request: Request): Promise<Response> {
         .where(and(eq(academicTerms.userId, institutionId), eq(academicTerms.id, termId)));
     }
 
-    return Response.json({
-      ok: true,
-      syncedAt: now.toISOString(),
-    });
+    return Response.json(
+      {
+        ok: true,
+        syncedAt: now.toISOString(),
+      },
+      {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, private',
+          Pragma: 'no-cache',
+        },
+      },
+    );
   } catch (error) {
     if (error instanceof Response) return error;
-    console.error('Failed to sync workspace:', error);
-    return Response.json(
-      { error: error instanceof Error ? error.message : 'Failed to sync workspace' },
-      { status: 500 },
-    );
+    return createErrorResponse(error, 'Failed to sync workspace');
   }
 }

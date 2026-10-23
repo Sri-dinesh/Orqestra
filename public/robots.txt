@@ -1,7 +1,10 @@
-# Robots.txt for Orqestra
+# Robots.txt for Orqestra Timetable Platform
 # https://orqestra.app
 
 User-agent: *
 Allow: /
+Allow: /schedule-portal
+Disallow: /api/
+Disallow: /auth/reset-password
 
 Sitemap: https://orqestra.app/sitemap.xml

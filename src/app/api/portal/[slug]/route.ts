@@ -11,20 +11,28 @@ import {
   subjects,
   timetables,
 } from '@/db/schema';
+import { enforceRateLimit, createErrorResponse } from '@/lib/api-security';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(
-  _request: Request,
+  request: Request,
   props: { params: Promise<{ slug: string }> },
 ): Promise<Response> {
   try {
+    // 1. Enforce rate limiting to prevent DDoS & scraping
+    enforceRateLimit(request, { maxRequests: 60, windowSeconds: 60, keyPrefix: 'portal' });
+
     const params = await props.params;
     const database = getDatabase();
     const slug = params.slug;
 
-    if (!slug) {
-      return Response.json({ error: 'Slug is required' }, { status: 400 });
+    // 2. Validate slug format (alphanumeric, underscores, hyphens, 3-128 chars)
+    if (!slug || typeof slug !== 'string' || !/^[a-zA-Z0-9_-]{3,128}$/.test(slug)) {
+      return Response.json(
+        { error: 'Invalid schedule portal identifier format.' },
+        { status: 400, headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate, private' } },
+      );
     }
 
     // Find the published timetable
@@ -201,10 +209,7 @@ export async function GET(
       },
     );
   } catch (error) {
-    console.error('Portal lookup failed:', error);
-    return Response.json(
-      { error: error instanceof Error ? error.message : 'Portal lookup failed' },
-      { status: 500 },
-    );
+    if (error instanceof Response) return error;
+    return createErrorResponse(error, 'Published schedule portal lookup failed.');
   }
 }

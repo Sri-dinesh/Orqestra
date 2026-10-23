@@ -10,33 +10,39 @@ import {
   resolveInstitutionalContext,
   requireRole,
 } from '@/auth/server';
+import { enforceRateLimit, parseJsonBody, createErrorResponse } from '@/lib/api-security';
 
 export const dynamic = 'force-dynamic';
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export async function POST(request: Request): Promise<Response> {
   try {
+    // 1. Rate limiting: max 20 invites per minute per IP
+    enforceRateLimit(request, { maxRequests: 20, windowSeconds: 60, keyPrefix: 'invite' });
+
     const context = await resolveInstitutionalContext(request);
     requireRole(context, ['ADMIN']);
 
     const database = getDatabase();
-    const body = await request.json();
+    const body = await parseJsonBody<{
+      email?: string;
+      role?: InstitutionRole;
+      departmentId?: string | null;
+      facultyId?: string | null;
+    }>(request, 512 * 1024);
 
     const {
       email,
       role = 'FACULTY',
       departmentId = null,
       facultyId = null,
-    }: {
-      email: string;
-      role: InstitutionRole;
-      departmentId?: string | null;
-      facultyId?: string | null;
     } = body;
 
     const trimmedEmail = email?.trim().toLowerCase();
-    if (!trimmedEmail || !trimmedEmail.includes('@')) {
+    if (!trimmedEmail || !EMAIL_REGEX.test(trimmedEmail)) {
       return Response.json(
-        { error: 'Valid recipient email address is required.' },
+        { error: 'A valid recipient email address is required.' },
         { status: 400 },
       );
     }
@@ -143,10 +149,6 @@ export async function POST(request: Request): Promise<Response> {
     });
   } catch (error) {
     if (error instanceof Response) return error;
-    console.error('Failed to invite member:', error);
-    return Response.json(
-      { error: error instanceof Error ? error.message : 'Failed to send invitation' },
-      { status: 500 },
-    );
+    return createErrorResponse(error, 'Failed to send invitation');
   }
 }

@@ -10,6 +10,7 @@ import {
   resolveInstitutionalContext,
   assertDepartmentAccess,
 } from '@/auth/server';
+import { enforceRateLimit, parseJsonBody, createErrorResponse } from '@/lib/api-security';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,12 +19,23 @@ export async function POST(
   props: { params: Promise<{ id: string }> },
 ): Promise<Response> {
   try {
+    enforceRateLimit(request, { maxRequests: 30, windowSeconds: 60, keyPrefix: 'tt-pub' });
+
     const params = await props.params;
+    const timetableId = params.id;
+
+    if (!timetableId || typeof timetableId !== 'string' || timetableId.length > 128) {
+      return Response.json({ error: 'Valid timetable identifier is required.' }, { status: 400 });
+    }
+
     const context = await resolveInstitutionalContext(request);
     const database = getDatabase();
-    const body = await request.json().catch(() => ({}));
+    const body = await parseJsonBody<{
+      publish?: boolean;
+      termId?: string;
+      timetable?: any;
+    }>(request, 512 * 1024).catch((): { publish?: boolean; termId?: string; timetable?: any } => ({ publish: true }));
 
-    const timetableId = params.id;
     const publish = body.publish !== undefined ? Boolean(body.publish) : true;
     const now = new Date();
 
@@ -159,18 +171,22 @@ export async function POST(
       existing = updated;
     }
 
-    return Response.json({
-      ok: true,
-      isPublished: existing.isPublished,
-      publicSlug: existing.publicSlug,
-      shareUrl: existing.publicSlug ? `/schedule-portal?slug=${existing.publicSlug}` : null,
-    });
+    return Response.json(
+      {
+        ok: true,
+        isPublished: existing.isPublished,
+        publicSlug: existing.publicSlug,
+        shareUrl: existing.publicSlug ? `/schedule-portal?slug=${existing.publicSlug}` : null,
+      },
+      {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, private',
+          Pragma: 'no-cache',
+        },
+      },
+    );
   } catch (error) {
     if (error instanceof Response) return error;
-    console.error('Failed to toggle publish status:', error);
-    return Response.json(
-      { error: error instanceof Error ? error.message : 'Failed to update publish status' },
-      { status: 500 },
-    );
+    return createErrorResponse(error, 'Failed to update publish status');
   }
 }

@@ -9,6 +9,7 @@ import {
   resolveInstitutionalContext,
   requireRole,
 } from '@/auth/server';
+import { parseJsonBody, createErrorResponse } from '@/lib/api-security';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,6 +24,10 @@ export async function DELETE(
 
     const database = getDatabase();
     const id = params.id;
+
+    if (!id || typeof id !== 'string' || id.length > 128) {
+      return Response.json({ error: 'Valid member identifier is required.' }, { status: 400 });
+    }
 
     if (id === context.institutionId || id === `owner_${context.institutionId}`) {
       return Response.json(
@@ -57,11 +62,7 @@ export async function DELETE(
     return Response.json({ ok: true, deleted: 'member' });
   } catch (error) {
     if (error instanceof Response) return error;
-    console.error('Failed to remove member:', error);
-    return Response.json(
-      { error: error instanceof Error ? error.message : 'Failed to remove member' },
-      { status: 500 },
-    );
+    return createErrorResponse(error, 'Failed to remove member');
   }
 }
 
@@ -76,17 +77,26 @@ export async function PATCH(
 
     const database = getDatabase();
     const id = params.id;
-    const body = await request.json();
+
+    if (!id || typeof id !== 'string' || id.length > 128) {
+      return Response.json({ error: 'Valid member identifier is required.' }, { status: 400 });
+    }
+
+    const body = await parseJsonBody<{
+      role?: InstitutionRole;
+      departmentId?: string | null;
+      facultyId?: string | null;
+    }>(request, 256 * 1024);
 
     const {
       role,
       departmentId,
       facultyId,
-    }: {
-      role?: InstitutionRole;
-      departmentId?: string | null;
-      facultyId?: string | null;
     } = body;
+
+    if (role && !['ADMIN', 'HOD', 'FACULTY'].includes(role)) {
+      return Response.json({ error: 'Invalid role specified.' }, { status: 400 });
+    }
 
     const [updated] = await database
       .update(institutionMembers)
@@ -111,10 +121,6 @@ export async function PATCH(
     return Response.json({ ok: true, member: updated });
   } catch (error) {
     if (error instanceof Response) return error;
-    console.error('Failed to update member:', error);
-    return Response.json(
-      { error: error instanceof Error ? error.message : 'Failed to update member' },
-      { status: 500 },
-    );
+    return createErrorResponse(error, 'Failed to update member');
   }
 }

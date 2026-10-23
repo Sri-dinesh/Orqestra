@@ -9,6 +9,7 @@ import {
   requireAuthenticatedUser,
   resolveInstitutionalContext,
 } from '@/auth/server';
+import { createErrorResponse } from '@/lib/api-security';
 
 export const dynamic = 'force-dynamic';
 
@@ -83,18 +84,22 @@ export async function GET(request: Request): Promise<Response> {
       department = deptRecord || null;
     }
 
-    return Response.json({
-      ok: true,
-      context,
-      user,
-      department,
-    });
+    return Response.json(
+      {
+        ok: true,
+        context,
+        user,
+        department,
+      },
+      {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, private',
+          Pragma: 'no-cache',
+        },
+      },
+    );
   } catch (error) {
     if (error instanceof Response) return error;
-    console.error('Failed to get member profile:', error);
-    return Response.json(
-      { error: error instanceof Error ? error.message : 'Failed to retrieve profile' },
-      { status: 500 },
-    );
+    return createErrorResponse(error, 'Failed to retrieve profile');
   }
 }

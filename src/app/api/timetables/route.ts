@@ -12,23 +12,26 @@ import {
   assertDepartmentAccess,
 } from '@/auth/server';
 import type { GenerationMetrics, Timetable } from '@/domain/models';
+import { enforceRateLimit, parseJsonBody, createErrorResponse } from '@/lib/api-security';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request): Promise<Response> {
   try {
+    enforceRateLimit(request, { maxRequests: 60, windowSeconds: 60, keyPrefix: 'tt-save' });
+
     const context = await resolveInstitutionalContext(request);
     const database = getDatabase();
-    const body = await request.json();
+    const body = await parseJsonBody<{
+      timetable?: Timetable;
+      termId?: string;
+      auditMetrics?: GenerationMetrics | null;
+    }>(request, 8 * 1024 * 1024);
 
     const {
       timetable,
       termId = 'default',
       auditMetrics,
-    }: {
-      timetable: Timetable;
-      termId?: string;
-      auditMetrics?: GenerationMetrics | null;
     } = body;
 
     if (!timetable || !timetable.departmentId) {
@@ -163,13 +166,17 @@ export async function POST(request: Request): Promise<Response> {
       }
     }
 
-    return Response.json({ ok: true, timetable: saved });
+    return Response.json(
+      { ok: true, timetable: saved },
+      {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, private',
+          Pragma: 'no-cache',
+        },
+      },
+    );
   } catch (error) {
     if (error instanceof Response) return error;
-    console.error('Failed to save timetable:', error);
-    return Response.json(
-      { error: error instanceof Error ? error.message : 'Failed to save timetable' },
-      { status: 500 },
-    );
+    return createErrorResponse(error, 'Failed to save timetable');
   }
 }
