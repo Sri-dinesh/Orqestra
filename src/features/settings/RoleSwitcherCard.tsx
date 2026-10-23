@@ -52,8 +52,9 @@ export function RoleSwitcherCard() {
   const userEmail = authData?.user?.email || '';
 
   return (
-    <Card
-      title="My Institutional Role & Operational Mode"
+    <div id="role">
+      <Card
+        title="My Institutional Role & Operational Mode"
       actions={
         <span
           className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-bold ${
@@ -272,5 +273,6 @@ export function RoleSwitcherCard() {
         </div>
       </div>
     </Card>
-  );
+  </div>
+);
 }

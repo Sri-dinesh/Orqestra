@@ -36,6 +36,12 @@ export function SettingsPage() {
         el.scrollIntoView({ behavior: 'smooth' });
       }
     }
+    if (location.hash === '#role' || location.search.includes('tab=role')) {
+      const el = document.getElementById('role');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
   }, [location]);
 
   const details = state.collegeDetails;

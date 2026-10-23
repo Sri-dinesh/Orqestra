@@ -168,6 +168,16 @@ export function AccountMenu() {
 
           {/* Quick Links */}
           <div className="mt-1 space-y-0.5">
+            <Link
+              to="/settings#role"
+              onClick={() => setIsOpen(false)}
+              role="menuitem"
+              className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-medium text-[#30363D] hover:bg-black/5 hover:text-[#111315] transition-colors"
+            >
+              <ShieldCheck className="h-4 w-4 text-[#0047FF]" />
+              <span>Adjust Role & Permissions</span>
+            </Link>
+
             {role === 'ADMIN' && (
               <Link
                 to="/settings?tab=team"
