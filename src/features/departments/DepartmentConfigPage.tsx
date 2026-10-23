@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { Lock } from 'lucide-react';
 import { Badge, Button, Card, EditModal, Field, Input, PageHeader } from '@/components/ui/primitives';
 import { useWorkspaceStore } from '@/state/stores/workspace-store';
 import { WORKING_DAYS } from '@/domain/enums';
@@ -69,9 +70,18 @@ export function DepartmentConfigPage() {
     return <DepartmentNotFound requestedId={departmentId} targetPage="configuration" />;
   }
 
+  const membership = state.membership;
+  const isForeignDeptForHod =
+    membership?.role === 'HOD' &&
+    Boolean(membership.departmentId) &&
+    membership.departmentId !== departmentId;
+  const isFaculty = membership?.role === 'FACULTY';
+  const isReadOnly = Boolean(isForeignDeptForHod || isFaculty);
+
   const isReady = sections.length > 0 && subjects.length > 0 && faculty.length > 0;
 
   const updateDays = (day: WorkingDay, checked: boolean) => {
+    if (isReadOnly) return;
     const next = checked
       ? Array.from(new Set([...department.workingDays, day]))
       : department.workingDays.filter((d) => d !== day);
@@ -85,21 +95,33 @@ export function DepartmentConfigPage() {
   return (
     <div className="space-y-6">
       <DepartmentNav />
+
+      {isReadOnly && (
+        <div className="rounded-xl border border-amber-200 bg-amber-50/80 p-3.5 flex items-center gap-2.5 text-xs text-amber-900">
+          <Lock className="w-4 h-4 text-amber-700 shrink-0" />
+          <span>
+            You are viewing this department in <strong>read-only mode</strong> ({isFaculty ? 'Teaching Faculty' : 'Different Department HOD'}). Configuration, timings, and sections cannot be modified.
+          </span>
+        </div>
+      )}
+
       <PageHeader
         eyebrow="Department setup"
         title={`${department.code} — Configuration`}
         actions={
           <>
             <Badge tone={department.status === 'READY' ? 'green' : 'amber'}>{department.status}</Badge>
-            <Button
-              variant="secondary"
-              onClick={() => {
-                setDepartmentEditForm({ code: department.code, name: department.name });
-                setEditingDepartment(true);
-              }}
-            >
-              Edit details
-            </Button>
+            {!isReadOnly && (
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  setDepartmentEditForm({ code: department.code, name: department.name });
+                  setEditingDepartment(true);
+                }}
+              >
+                Edit details
+              </Button>
+            )}
           </>
         }
       />
@@ -113,6 +135,7 @@ export function DepartmentConfigPage() {
                 min={1}
                 max={12}
                 value={department.periodsPerDay}
+                disabled={isReadOnly}
                 onChange={(e) =>
                   state.updateDepartment(department.id, {
                     periodsPerDay: Math.max(1, Math.min(12, Number(e.target.value) || 1)),
@@ -136,6 +159,7 @@ export function DepartmentConfigPage() {
             <Field label="Effective from" hint="Official exports">
               <Input
                 value={department.effectiveFrom ?? ''}
+                disabled={isReadOnly}
                 onChange={(e) =>
                   state.updateDepartment(department.id, {
                     effectiveFrom: e.target.value.trim() ? e.target.value.trim() : undefined,
@@ -148,6 +172,7 @@ export function DepartmentConfigPage() {
             <Field label="Mentors" hint="Official exports, free text">
               <Input
                 value={department.mentors ?? ''}
+                disabled={isReadOnly}
                 onChange={(e) =>
                   state.updateDepartment(department.id, {
                     mentors: e.target.value.trim() ? e.target.value : undefined,
@@ -161,11 +186,12 @@ export function DepartmentConfigPage() {
               <span className="mb-1.5 block text-xs font-medium text-body-gray">Working days</span>
               <div className="flex flex-wrap gap-2">
                 {WORKING_DAYS.map((day) => (
-                  <label key={day} className="flex cursor-pointer items-center gap-1.5 rounded-full bg-[#F1F3ED] px-3 py-1.5 text-xs font-medium text-[#111315] transition-colors duration-150 hover:bg-[#E5E8E0] has-checked:bg-blue-100">
+                  <label key={day} className={`flex cursor-pointer items-center gap-1.5 rounded-full bg-[#F1F3ED] px-3 py-1.5 text-xs font-medium text-[#111315] transition-colors duration-150 hover:bg-[#E5E8E0] has-checked:bg-blue-100 ${isReadOnly ? 'opacity-60 cursor-not-allowed' : ''}`}>
                     <input
                       type="checkbox"
                       className="accent-metric-blue"
                       checked={department.workingDays.includes(day)}
+                      disabled={isReadOnly}
                       onChange={(e) => updateDays(day, e.target.checked)}
                     />
                     {day.slice(0, 3)}
@@ -181,20 +207,23 @@ export function DepartmentConfigPage() {
             <p className="text-xs text-body-gray">
               Wall-clock times for each teaching period, shown in timetable grids and exports. Leave blank to show period numbers only.
             </p>
-            <Button
-              type="button"
-              variant="secondary"
-              size="sm"
-              onClick={() => setTimingsModalOpen(true)}
-              className="shrink-0 text-xs"
-            >
-              Quick Schedule Assistant
-            </Button>
+            {!isReadOnly && (
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() => setTimingsModalOpen(true)}
+                className="shrink-0 text-xs"
+              >
+                Quick Schedule Assistant
+              </Button>
+            )}
           </div>
           <ul className="grid gap-2 sm:grid-cols-2">
             {Array.from({ length: department.periodsPerDay }, (_, i) => {
               const current = department.periodTimings?.[i] ?? { start: '', end: '' };
               const setTiming = (patch: { start?: string; end?: string }) => {
+                if (isReadOnly) return;
                 const next = Array.from({ length: department.periodsPerDay }, (_, j) =>
                   j === i
                     ? { start: patch.start ?? department.periodTimings?.[j]?.start ?? '', end: patch.end ?? department.periodTimings?.[j]?.end ?? '' }
@@ -207,6 +236,7 @@ export function DepartmentConfigPage() {
                   <span className="w-7 shrink-0 text-xs font-semibold text-ink">P{i + 1}</span>
                   <Input
                     value={current.start}
+                    disabled={isReadOnly}
                     onChange={(e) => setTiming({ start: e.target.value })}
                     placeholder="9:10 AM"
                     aria-label={`Period ${i + 1} start time`}
@@ -215,6 +245,7 @@ export function DepartmentConfigPage() {
                   <span className="shrink-0 text-xs text-body-gray">–</span>
                   <Input
                     value={current.end}
+                    disabled={isReadOnly}
                     onChange={(e) => setTiming({ end: e.target.value })}
                     placeholder="10:00 AM"
                     aria-label={`Period ${i + 1} end time`}
@@ -226,33 +257,35 @@ export function DepartmentConfigPage() {
           </ul>
         </Card>
 
-        <BreaksCard department={department} />
+        <BreaksCard department={department} readOnly={isReadOnly} />
 
         <Card title={`Sections (${sections.length})`}>
-          <form
-            className="mb-5 grid gap-3 sm:grid-cols-2"
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (!sectionName.trim()) return;
-              state.addSection({
-                departmentId: department.id,
-                name: sectionName,
-                year,
-                semester,
-                studentCount,
-                subjectRequirements: [],
-              });
-              setSectionName('');
-            }}
-          >
-            <Field label="Name"><Input value={sectionName} onChange={(e) => setSectionName(e.target.value)} required aria-label="Section name" /></Field>
-            <div className="grid grid-cols-3 gap-3">
-              <Field label="Year"><Input type="number" min={1} max={8} value={year} onChange={(e) => setYear(Number(e.target.value))} aria-label="Year" /></Field>
-              <Field label="Sem"><Input type="number" min={1} max={12} value={semester} onChange={(e) => setSemester(Number(e.target.value))} aria-label="Semester" /></Field>
-              <Field label="Students"><Input type="number" min={0} value={studentCount} onChange={(e) => setStudentCount(Number(e.target.value))} aria-label="Student count" /></Field>
-            </div>
-            <div className="sm:col-span-2"><Button type="submit" size="sm">Add section</Button></div>
-          </form>
+          {!isReadOnly && (
+            <form
+              className="mb-5 grid gap-3 sm:grid-cols-2"
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (!sectionName.trim()) return;
+                state.addSection({
+                  departmentId: department.id,
+                  name: sectionName,
+                  year,
+                  semester,
+                  studentCount,
+                  subjectRequirements: [],
+                });
+                setSectionName('');
+              }}
+            >
+              <Field label="Name"><Input value={sectionName} onChange={(e) => setSectionName(e.target.value)} required aria-label="Section name" /></Field>
+              <div className="grid grid-cols-3 gap-3">
+                <Field label="Year"><Input type="number" min={1} max={8} value={year} onChange={(e) => setYear(Number(e.target.value))} aria-label="Year" /></Field>
+                <Field label="Sem"><Input type="number" min={1} max={12} value={semester} onChange={(e) => setSemester(Number(e.target.value))} aria-label="Semester" /></Field>
+                <Field label="Students"><Input type="number" min={0} value={studentCount} onChange={(e) => setStudentCount(Number(e.target.value))} aria-label="Student count" /></Field>
+              </div>
+              <div className="sm:col-span-2"><Button type="submit" size="sm">Add section</Button></div>
+            </form>
+          )}
           <ul className="space-y-2">
             {sections.map((s) => (
               <li key={s.id} className="flex items-center justify-between gap-2 rounded-xl bg-[#FAFBF9] px-3 py-2 border border-[#E5E8E0]">
@@ -260,21 +293,23 @@ export function DepartmentConfigPage() {
                   <strong>{s.name}</strong>
                   <span className="ml-2 text-xs text-body-gray">Y{s.year} S{s.semester} · {s.studentCount} students</span>
                 </span>
-                <div className="flex shrink-0 gap-1.5">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      setEditingSectionId(s.id);
-                      setSectionEditForm({ name: s.name, year: s.year, semester: s.semester, studentCount: s.studentCount, roomNo: s.roomNo ?? '', classAdvisor: s.classAdvisor ?? '' });
-                    }}
-                  >
-                    Edit
-                  </Button>
-                  <Button variant="danger" size="sm" onClick={() => state.removeSection(s.id)} aria-label={`Remove section ${s.name}`}>
-                    Remove
-                  </Button>
-                </div>
+                {!isReadOnly && (
+                  <div className="flex shrink-0 gap-1.5">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setEditingSectionId(s.id);
+                        setSectionEditForm({ name: s.name, year: s.year, semester: s.semester, studentCount: s.studentCount, roomNo: s.roomNo ?? '', classAdvisor: s.classAdvisor ?? '' });
+                      }}
+                    >
+                      Edit
+                    </Button>
+                    <Button variant="danger" size="sm" onClick={() => state.removeSection(s.id)} aria-label={`Remove section ${s.name}`}>
+                      Remove
+                    </Button>
+                  </div>
+                )}
               </li>
             ))}
             {sections.length === 0 && <li className="text-xs text-body-gray">No sections yet.</li>}
@@ -295,7 +330,7 @@ export function DepartmentConfigPage() {
             <p className="mt-1 text-xs text-body-gray">
               Weekly hours dictate how many sessions the scheduler will place in the weekly timetable grid.
             </p>
-            {subjects.length === 0 && sections.length > 0 && (
+            {subjects.length === 0 && sections.length > 0 && !isReadOnly && (
               <div className="mt-4 flex justify-center">
                 <Button size="sm" onClick={() => navigate(`/departments/${department.id}/subjects`)}>
                   Step 2: Add Subjects →
@@ -325,7 +360,7 @@ export function DepartmentConfigPage() {
                           <td className="py-1.5 pr-2 border-b border-[#E5E8E0]">
                             <span className="font-medium text-[#111315]">{sub.code}</span>
                             <span className="ml-1.5 text-xs text-[#71767B]">{sub.type === 'LAB' ? 'Lab' : 'Theory'}</span>
-                            {!applicable && value > 0 && (
+                            {!applicable && value > 0 && !isReadOnly && (
                               <button
                                 type="button"
                                 className="ml-2 cursor-pointer text-[11px] text-metric-blue underline focus-visible:outline-2 focus-visible:outline-metric-blue"
@@ -345,9 +380,11 @@ export function DepartmentConfigPage() {
                               min={0}
                               max={12}
                               value={value}
+                              disabled={isReadOnly}
                               aria-label={`Sessions per week for ${sub.code} in ${section.name}`}
                               className="w-20"
                               onChange={(e) => {
+                                if (isReadOnly) return;
                                 const n = Math.max(0, Number(e.target.value) || 0);
                                 const reqs = requirementsForSection(section.id).filter((r) => r.subjectId !== sub.id);
                                 if (n > 0) {

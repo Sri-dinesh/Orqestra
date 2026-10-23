@@ -72,6 +72,8 @@ export function TimetablePage() {
     [state.timetables, departmentId],
   );
   const editor = useEditorStore();
+  const role = state.membership?.role ?? 'ADMIN';
+  const isFaculty = role === 'FACULTY';
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null);
   const [focusConflictId, setFocusConflictId] = useState<string | null>(null);
   const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
@@ -572,59 +574,79 @@ export function TimetablePage() {
             <Badge tone={isStale ? 'amber' : timetable.validationSummary?.isValid ? 'green' : 'red'}>
               {isStale ? 'STALE' : timetable.status}
             </Badge>
-            <Button variant="secondary" size="sm" onClick={handleUndo} disabled={editor.undoStack.length === 0}>
-              Undo
-            </Button>
-            <Button variant="secondary" size="sm" onClick={handleRedo} disabled={editor.redoStack.length === 0}>
-              Redo
-            </Button>
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => {
-                setSubstituteTargetEntryId(editor.selectedEntryId);
-                setSubstituteModalOpen(true);
-              }}
-            >
-              Substitute Assistant
-            </Button>
-            <Button variant="secondary" size="sm" onClick={() => setTimingsModalOpen(true)}>
-              Adjust Timings
-            </Button>
+
+            {isFaculty ? (
+              <span className="inline-flex items-center gap-1 rounded-md bg-emerald-500/10 px-2 py-1 text-xs font-bold text-emerald-800 border border-emerald-500/20">
+                Faculty Read-Only
+              </span>
+            ) : (
+              <>
+                <Button variant="secondary" size="sm" onClick={handleUndo} disabled={editor.undoStack.length === 0}>
+                  Undo
+                </Button>
+                <Button variant="secondary" size="sm" onClick={handleRedo} disabled={editor.redoStack.length === 0}>
+                  Redo
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => {
+                    setSubstituteTargetEntryId(editor.selectedEntryId);
+                    setSubstituteModalOpen(true);
+                  }}
+                >
+                  Substitute Assistant
+                </Button>
+                <Button variant="secondary" size="sm" onClick={() => setTimingsModalOpen(true)}>
+                  Adjust Timings
+                </Button>
+              </>
+            )}
+
             <Button variant="secondary" size="sm" onClick={() => setPreviewModalOpen(true)}>
               Preview & Export
             </Button>
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={handlePublish}
-              disabled={publishing}
-              className="inline-flex items-center gap-1.5"
-            >
-              <Share2 className="w-3.5 h-3.5 text-[#0047FF]" />
-              <span>{publishing ? 'Publishing…' : 'Share Portal Link'}</span>
-            </Button>
+
+            {!isFaculty && (
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={handlePublish}
+                disabled={publishing}
+                className="inline-flex items-center gap-1.5"
+              >
+                <Share2 className="w-3.5 h-3.5 text-[#0047FF]" />
+                <span>{publishing ? 'Publishing…' : 'Share Portal Link'}</span>
+              </Button>
+            )}
+
             <Button variant="secondary" size="sm" onClick={doExportPdf}>PDF</Button>
             <Button variant="secondary" size="sm" onClick={doExportExcel}>Excel</Button>
             <Button variant="secondary" size="sm" onClick={() => window.print()}>Print</Button>
+
             <Link to={`/departments/${departmentId}/faculty-timetable`}>
               <Button variant="secondary" size="sm">Faculty view</Button>
             </Link>
             <Link to={`/departments/${departmentId}/master-timetable`}>
               <Button variant="secondary" size="sm">Master view</Button>
             </Link>
-            <Link to={`/departments/${departmentId}/generate`}>
-              <Button size="sm">Regenerate</Button>
-            </Link>
-            <Button
-              variant="danger"
-              size="sm"
-              onClick={() => setShowDeleteConfirm(true)}
-              className="inline-flex items-center gap-1.5"
-            >
-              <Trash2 className="w-3.5 h-3.5" />
-              <span>Delete timetable</span>
-            </Button>
+
+            {!isFaculty && (
+              <>
+                <Link to={`/departments/${departmentId}/generate`}>
+                  <Button size="sm">Regenerate</Button>
+                </Link>
+                <Button
+                  variant="danger"
+                  size="sm"
+                  onClick={() => setShowDeleteConfirm(true)}
+                  className="inline-flex items-center gap-1.5"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Delete timetable</span>
+                </Button>
+              </>
+            )}
           </>
         }
       />
@@ -815,9 +837,11 @@ export function TimetablePage() {
                         {occupied && cell.isStart ? (
                           <button
                             type="button"
-                            className="w-full cursor-grab rounded-md p-1.5 text-left active:cursor-grabbing focus-visible:outline-2 focus-visible:outline-metric-blue"
+                            className={`w-full rounded-md p-1.5 text-left focus-visible:outline-2 focus-visible:outline-metric-blue ${
+                              isFaculty ? 'cursor-default' : 'cursor-grab active:cursor-grabbing'
+                            }`}
                             onClick={() => onCellClick(cell)}
-                            onDoubleClick={() => setEditingEntryId(cell.entryId)}
+                            onDoubleClick={!isFaculty ? () => setEditingEntryId(cell.entryId) : undefined}
                             aria-label={`${cell.subjectCode} ${cell.facultyName} day ${cell.dayIndex + 1} ${gridColumnLabel(layout, cell.periodIndex)}`}
                           >
                             <span className="block text-xs font-semibold text-ink">{cell.subjectCode}</span>
@@ -825,7 +849,13 @@ export function TimetablePage() {
                             {cell.type === 'LAB' && <span className="block text-[10px] font-medium text-[#5b3fb8]">LAB (2p)</span>}
                           </button>
                         ) : occupied && cell.isContinuation ? (
-                          <span className="block cursor-grab p-1.5 text-[10px] text-[#71767B]">↳ {cell.subjectCode}</span>
+                          <span className={`block p-1.5 text-[10px] text-[#71767B] ${isFaculty ? 'cursor-default' : 'cursor-grab'}`}>
+                            ↳ {cell.subjectCode}
+                          </span>
+                        ) : isFaculty ? (
+                          <div className="h-12 w-full flex items-center justify-center rounded-md text-[10px] text-[#71767B]/30 font-mono">
+                            —
+                          </div>
                         ) : (
                           <button
                             type="button"

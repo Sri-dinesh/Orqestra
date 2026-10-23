@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { Lock } from 'lucide-react';
 import { Button, Card, EditModal, Field, Input, PageHeader, Select } from '@/components/ui/primitives';
 import { useEditorStore } from '@/state/stores/editor-store';
 import { useWorkspaceStore } from '@/state/stores/workspace-store';
@@ -102,6 +103,14 @@ export function SubjectsPage() {
 
   if (!department || !departmentId) return <DepartmentNotFound requestedId={departmentId} targetPage="subjects" />;
 
+  const membership = state.membership;
+  const isForeignDeptForHod =
+    membership?.role === 'HOD' &&
+    Boolean(membership.departmentId) &&
+    membership.departmentId !== departmentId;
+  const isFaculty = membership?.role === 'FACULTY';
+  const isReadOnly = Boolean(isForeignDeptForHod || isFaculty);
+
   const handleBulkImport = (items: any[]) => {
     let count = 0;
     for (const item of items) {
@@ -125,76 +134,90 @@ export function SubjectsPage() {
   return (
     <div className="space-y-6">
       <DepartmentNav />
+
+      {isReadOnly && (
+        <div className="rounded-xl border border-amber-200 bg-amber-50/80 p-3.5 flex items-center gap-2.5 text-xs text-amber-900">
+          <Lock className="w-4 h-4 text-amber-700 shrink-0" />
+          <span>
+            You are viewing this department's course catalogue in <strong>read-only mode</strong> ({isFaculty ? 'Teaching Faculty' : 'Different Department HOD'}). Catalogue subjects cannot be added, modified, or removed.
+          </span>
+        </div>
+      )}
+
       <PageHeader
         eyebrow="Course catalogue"
         title="Subjects"
         actions={
-          <Button variant="secondary" size="sm" onClick={() => setImportModalOpen(true)}>
-            Bulk Import (Excel/CSV)
-          </Button>
+          !isReadOnly ? (
+            <Button variant="secondary" size="sm" onClick={() => setImportModalOpen(true)}>
+              Bulk Import (Excel/CSV)
+            </Button>
+          ) : undefined
         }
       />
 
-      <Card title="Add subject">
-        <form
-          className="grid gap-4 sm:grid-cols-2"
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (!code.trim() || !name.trim()) return;
-            if (subjects.some((s) => s.code === code.trim().toUpperCase())) {
-              showToast('error', `Subject code ${code} already exists in this department.`);
-              return;
-            }
-            state.addSubject({
-              departmentId,
-              code,
-              name,
-              type,
-              sessionsPerWeek: Math.max(1, sessions),
-              durationPeriods: type === 'LAB' ? 2 : 1,
-              eligibleFacultyIds: eligibleFaculty,
-              eligibleSectionIds: eligibleSections,
-            });
-            showToast('success', `Subject ${code} added.`);
-            setCode('');
-            setName('');
-            setEligibleSections([]);
-            setEligibleFaculty([]);
-          }}
-        >
-          <Field label="Code"><Input value={code} onChange={(e) => setCode(e.target.value)} required aria-label="Subject code" /></Field>
-          <Field label="Name"><Input value={name} onChange={(e) => setName(e.target.value)} required aria-label="Subject name" /></Field>
-          <Field label="Type" hint="Lab = 2 consecutive periods; theory = 1 period.">
-            <Select value={type} onChange={(e) => setType(e.target.value as SubjectType)} aria-label="Subject type">
-              <option value="THEORY">Theory</option>
-              <option value="LAB">Laboratory</option>
-            </Select>
-          </Field>
-          <Field label="Sessions per week">
-            <Input type="number" min={1} max={12} value={sessions} onChange={(e) => setSessions(Number(e.target.value))} aria-label="Sessions per week" />
-          </Field>
-          <Field label="Applicable sections">
-            <CheckboxChips
-              options={sections.map((s) => ({ id: s.id, label: s.name }))}
-              selected={eligibleSections}
-              onToggle={(id, checked) =>
-                setEligibleSections((prev) => (checked ? [...prev, id] : prev.filter((x) => x !== id)))
+      {!isReadOnly && (
+        <Card title="Add subject">
+          <form
+            className="grid gap-4 sm:grid-cols-2"
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (!code.trim() || !name.trim()) return;
+              if (subjects.some((s) => s.code === code.trim().toUpperCase())) {
+                showToast('error', `Subject code ${code} already exists in this department.`);
+                return;
               }
-            />
-          </Field>
-          <Field label="Eligible faculty">
-            <CheckboxChips
-              options={faculty.map((f) => ({ id: f.id, label: f.name }))}
-              selected={eligibleFaculty}
-              emptyMessage="No faculty added yet. You can assign faculty in Step 3."
-              onToggle={(id, checked) =>
-                setEligibleFaculty((prev) => (checked ? [...prev, id] : prev.filter((x) => x !== id)))
-              }
-            />
-          </Field>
-          <div className="sm:col-span-2"><Button type="submit" size="sm">Add subject</Button></div>
-        </form>
-      </Card>
+              state.addSubject({
+                departmentId,
+                code,
+                name,
+                type,
+                sessionsPerWeek: Math.max(1, sessions),
+                durationPeriods: type === 'LAB' ? 2 : 1,
+                eligibleFacultyIds: eligibleFaculty,
+                eligibleSectionIds: eligibleSections,
+              });
+              showToast('success', `Subject ${code} added.`);
+              setCode('');
+              setName('');
+              setEligibleSections([]);
+              setEligibleFaculty([]);
+            }}
+          >
+            <Field label="Code"><Input value={code} onChange={(e) => setCode(e.target.value)} required aria-label="Subject code" /></Field>
+            <Field label="Name"><Input value={name} onChange={(e) => setName(e.target.value)} required aria-label="Subject name" /></Field>
+            <Field label="Type" hint="Lab = 2 consecutive periods; theory = 1 period.">
+              <Select value={type} onChange={(e) => setType(e.target.value as SubjectType)} aria-label="Subject type">
+                <option value="THEORY">Theory</option>
+                <option value="LAB">Laboratory</option>
+              </Select>
+            </Field>
+            <Field label="Sessions per week">
+              <Input type="number" min={1} max={12} value={sessions} onChange={(e) => setSessions(Number(e.target.value))} aria-label="Sessions per week" />
+            </Field>
+            <Field label="Applicable sections">
+              <CheckboxChips
+                options={sections.map((s) => ({ id: s.id, label: s.name }))}
+                selected={eligibleSections}
+                onToggle={(id, checked) =>
+                  setEligibleSections((prev) => (checked ? [...prev, id] : prev.filter((x) => x !== id)))
+                }
+              />
+            </Field>
+            <Field label="Eligible faculty">
+              <CheckboxChips
+                options={faculty.map((f) => ({ id: f.id, label: f.name }))}
+                selected={eligibleFaculty}
+                emptyMessage="No faculty added yet. You can assign faculty in Step 3."
+                onToggle={(id, checked) =>
+                  setEligibleFaculty((prev) => (checked ? [...prev, id] : prev.filter((x) => x !== id)))
+                }
+              />
+            </Field>
+            <div className="sm:col-span-2"><Button type="submit" size="sm">Add subject</Button></div>
+          </form>
+        </Card>
+      )}
 
       <Card title={`Subjects (${subjects.length})`}>
         {subjects.length === 0 ? (
@@ -217,31 +240,33 @@ export function SubjectsPage() {
                     {s.type === 'LAB' ? 'Lab' : 'Theory'} · {s.sessionsPerWeek}/wk · {s.durationPeriods}p · {s.eligibleFacultyIds.length} faculty · {s.eligibleSectionIds.length} sections
                   </p>
                 </div>
-                <div className="flex shrink-0 gap-1.5">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      setEditingId(s.id);
-                      setEditForm(subjectFormFrom(s));
-                    }}
-                  >
-                    Edit
-                  </Button>
-                  <Button variant="ghost" size="sm" onClick={() => state.updateSubject(s.id, { active: !s.active })}>
-                    {s.active ? 'Deactivate' : 'Activate'}
-                  </Button>
-                  <Button
-                    variant="danger"
-                    size="sm"
-                    onClick={() => {
-                      const res = state.removeSubject(s.id);
-                      showToast(res.blocked ? 'warning' : 'success', res.reason ?? `Subject ${s.code} removed.`);
-                    }}
-                  >
-                    Delete
-                  </Button>
-                </div>
+                {!isReadOnly && (
+                  <div className="flex shrink-0 gap-1.5">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setEditingId(s.id);
+                        setEditForm(subjectFormFrom(s));
+                      }}
+                    >
+                      Edit
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => state.updateSubject(s.id, { active: !s.active })}>
+                      {s.active ? 'Deactivate' : 'Activate'}
+                    </Button>
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      onClick={() => {
+                        const res = state.removeSubject(s.id);
+                        showToast(res.blocked ? 'warning' : 'success', res.reason ?? `Subject ${s.code} removed.`);
+                      }}
+                    >
+                      Delete
+                    </Button>
+                  </div>
+                )}
               </li>
             ))}
           </ul>

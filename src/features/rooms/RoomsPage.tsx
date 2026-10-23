@@ -11,6 +11,7 @@ import {
   FlaskConical,
   GraduationCap,
   Sparkles,
+  Lock,
 } from 'lucide-react';
 import {
   Button,
@@ -92,6 +93,14 @@ export function RoomsPage() {
   if (!department || !departmentId) {
     return <DepartmentNotFound requestedId={departmentId} targetPage="rooms" />;
   }
+
+  const membership = state.membership;
+  const isForeignDeptForHod =
+    membership?.role === 'HOD' &&
+    Boolean(membership.departmentId) &&
+    membership.departmentId !== departmentId;
+  const isFaculty = membership?.role === 'FACULTY';
+  const isReadOnly = Boolean(isForeignDeptForHod || isFaculty);
 
   const handleCreateRoom = (e: React.FormEvent) => {
     e.preventDefault();
@@ -184,28 +193,39 @@ export function RoomsPage() {
     <div className="space-y-6">
       <DepartmentNav />
 
+      {isReadOnly && (
+        <div className="rounded-xl border border-amber-200 bg-amber-50/80 p-3.5 flex items-center gap-2.5 text-xs text-amber-900">
+          <Lock className="w-4 h-4 text-amber-700 shrink-0" />
+          <span>
+            You are viewing this department's rooms and laboratories in <strong>read-only mode</strong> ({isFaculty ? 'Teaching Faculty' : 'Different Department HOD'}). Facilities and allocations cannot be modified.
+          </span>
+        </div>
+      )}
+
       <PageHeader
         eyebrow="INFRASTRUCTURE & PHYSICAL ASSETS"
         title={`${department.code} — Rooms & Laboratories`}
         actions={
-          <div className="flex items-center gap-2">
-            <Button
-              variant="secondary"
-              onClick={() => setImportModalOpen(true)}
-              className="flex items-center gap-1.5"
-            >
-              <FileSpreadsheet className="w-4 h-4 text-[#0047FF]" />
-              <span>Bulk Import (Excel/CSV)</span>
-            </Button>
-            <Button
-              variant="primary"
-              onClick={() => setShowAddModal(true)}
-              className="flex items-center gap-1.5"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Add Room</span>
-            </Button>
-          </div>
+          !isReadOnly ? (
+            <div className="flex items-center gap-2">
+              <Button
+                variant="secondary"
+                onClick={() => setImportModalOpen(true)}
+                className="flex items-center gap-1.5"
+              >
+                <FileSpreadsheet className="w-4 h-4 text-[#0047FF]" />
+                <span>Bulk Import (Excel/CSV)</span>
+              </Button>
+              <Button
+                variant="primary"
+                onClick={() => setShowAddModal(true)}
+                className="flex items-center gap-1.5"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Add Room</span>
+              </Button>
+            </div>
+          ) : undefined
         }
       />
 
@@ -234,7 +254,7 @@ export function RoomsPage() {
       </div>
 
       {/* Quick Setup Presets Callout if few rooms exist */}
-      {rooms.length === 0 && (
+      {rooms.length === 0 && !isReadOnly && (
         <div className="p-6 rounded-2xl bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="space-y-1">
             <h3 className="text-sm font-bold text-[#111315] flex items-center gap-2">
@@ -290,7 +310,7 @@ export function RoomsPage() {
                   <th className="py-3 px-4">Capacity</th>
                   <th className="py-3 px-4">Weekly Occupancy</th>
                   <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
+                  {!isReadOnly && <th className="py-3 px-4 text-right">Actions</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#E5E8E0]">
@@ -339,8 +359,14 @@ export function RoomsPage() {
                       <td className="py-3.5 px-4">
                         <button
                           type="button"
-                          onClick={() => state.updateRoom(room.id, { active: !room.active })}
-                          className={`inline-flex items-center gap-1 text-xs font-semibold cursor-pointer ${
+                          disabled={isReadOnly}
+                          onClick={() => {
+                            if (isReadOnly) return;
+                            state.updateRoom(room.id, { active: !room.active });
+                          }}
+                          className={`inline-flex items-center gap-1 text-xs font-semibold ${
+                            isReadOnly ? 'cursor-default' : 'cursor-pointer'
+                          } ${
                             room.active ? 'text-emerald-700' : 'text-gray-400'
                           }`}
                         >
@@ -352,39 +378,41 @@ export function RoomsPage() {
                           <span>{room.active ? 'Operational' : 'Disabled'}</span>
                         </button>
                       </td>
-                      <td className="py-3.5 px-4 text-right">
-                        <div className="flex items-center justify-end gap-1">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setEditingRoomId(room.id);
-                              setEditForm({
-                                code: room.code,
-                                name: room.name,
-                                capacity: room.capacity,
-                                type: room.type,
-                              });
-                            }}
-                            className="p-1.5 rounded-lg text-[#71767B] hover:text-[#111315] hover:bg-black/5"
-                            title="Edit Room"
-                          >
-                            <Edit2 className="w-4 h-4" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              if (confirm(`Remove room ${room.code} (${room.name})?`)) {
-                                state.removeRoom(room.id);
-                                showToast('success', `Room ${room.code} deleted.`);
-                              }
-                            }}
-                            className="p-1.5 rounded-lg text-[#71767B] hover:text-red-600 hover:bg-red-50"
-                            title="Delete Room"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </td>
+                      {!isReadOnly && (
+                        <td className="py-3.5 px-4 text-right">
+                          <div className="flex items-center justify-end gap-1">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEditingRoomId(room.id);
+                                setEditForm({
+                                  code: room.code,
+                                  name: room.name,
+                                  capacity: room.capacity,
+                                  type: room.type,
+                                });
+                              }}
+                              className="p-1.5 rounded-lg text-[#71767B] hover:text-[#111315] hover:bg-black/5"
+                              title="Edit Room"
+                            >
+                              <Edit2 className="w-4 h-4" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (confirm(`Remove room ${room.code} (${room.name})?`)) {
+                                  state.removeRoom(room.id);
+                                  showToast('success', `Room ${room.code} deleted.`);
+                                }
+                              }}
+                              className="p-1.5 rounded-lg text-[#71767B] hover:text-red-600 hover:bg-red-50"
+                              title="Delete Room"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      )}
                     </tr>
                   );
                 })}

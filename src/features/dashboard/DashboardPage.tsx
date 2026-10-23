@@ -16,7 +16,7 @@ import type { WorkingDay } from "@/domain/enums";
 import { BUILT_IN_PRESETS, applyPresetWithTimetable } from "@/application/presets";
 import { useEditorStore } from "@/state/stores/editor-store";
 import { flushPersistence } from "@/hooks/usePersistence";
-import { CheckCircle2, Circle, Sparkles, Trash2 } from "lucide-react";
+import { CheckCircle2, Circle, Sparkles, Trash2, BookOpen, ArrowRight } from "lucide-react";
 
 type DeptStatus =
   | "NOT_CONFIGURED"
@@ -78,6 +78,9 @@ export function DashboardPage() {
   const state = useWorkspaceStore();
   const navigate = useNavigate();
   const showToast = useEditorStore((s) => s.showToast);
+  const role = state.membership?.role ?? 'ADMIN';
+  const isFaculty = role === 'FACULTY';
+  const isAdmin = role === 'ADMIN';
   const [showCreate, setShowCreate] = useState(false);
   const [applyingPresetId, setApplyingPresetId] = useState<string | null>(null);
   const [deletingTimetable, setDeletingTimetable] = useState<{
@@ -181,11 +184,47 @@ export function DashboardPage() {
         eyebrow="INSTITUTIONAL OVERVIEW"
         title="Dashboard"
         actions={
-          <Button onClick={() => setShowCreate((v) => !v)}>
-            {showCreate ? "Cancel" : "Create Department"}
-          </Button>
+          !isFaculty ? (
+            <Button onClick={() => setShowCreate((v) => !v)}>
+              {showCreate ? "Cancel" : "Create Department"}
+            </Button>
+          ) : (
+            <span className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-800 border border-emerald-500/20">
+              <BookOpen className="w-3.5 h-3.5" />
+              <span>Faculty Read-Only</span>
+            </span>
+          )
         }
       />
+
+      {isFaculty && (
+        <div className="rounded-2xl border border-emerald-200 bg-emerald-50/70 p-4 flex flex-wrap items-center justify-between gap-3 shadow-xs">
+          <div className="flex items-center gap-3">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-800">
+              <BookOpen className="w-5 h-5" />
+            </span>
+            <div>
+              <p className="text-xs font-bold text-emerald-950">Teaching Faculty Workspace</p>
+              <p className="text-xs text-emerald-800">
+                You have read-only access to browse department schedules, inspect faculty workloads, and download official timetables.
+              </p>
+            </div>
+          </div>
+          {cards[0]?.department?.id && (
+            <Button
+              size="sm"
+              onClick={() => {
+                state.setActiveDepartment(cards[0].department.id);
+                navigate(`/departments/${cards[0].department.id}/faculty-timetable`);
+              }}
+              className="bg-emerald-800 hover:bg-emerald-900 text-white flex items-center gap-1.5"
+            >
+              <span>View Teaching Schedule</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Button>
+          )}
+        </div>
+      )}
 
       {showCreate && (
         <Card title="New Department Configuration">
@@ -359,7 +398,12 @@ export function DashboardPage() {
               let secondaryLabel: string;
               let secondaryRoute: string;
 
-              if (status === "NOT_CONFIGURED" || status === "CONFIGURATION_INCOMPLETE") {
+              if (isFaculty) {
+                primaryLabel = "View Timetable →";
+                primaryRoute = `/departments/${department.id}/timetable`;
+                secondaryLabel = "Faculty Schedule";
+                secondaryRoute = `/departments/${department.id}/faculty-timetable`;
+              } else if (status === "NOT_CONFIGURED" || status === "CONFIGURATION_INCOMPLETE") {
                 primaryLabel = step === "configuration" ? "Add Sections →" : step === "subjects" ? "Add Subjects →" : "Add Faculty →";
                 primaryRoute = `/departments/${department.id}/${step}`;
                 secondaryLabel = "Configure";
@@ -469,7 +513,7 @@ export function DashboardPage() {
                           {secondaryLabel}
                         </Button>
                       )}
-                      {hasTimetable && (
+                      {hasTimetable && !isFaculty && (
                         <Button
                           variant="ghost"
                           size="sm"
@@ -497,53 +541,55 @@ export function DashboardPage() {
       )}
 
       {/* Blueprints / Presets */}
-      <Card
-        title="Institutional Blueprints"
-        actions={
-          <span className="text-xs font-mono text-body-gray">Apply a preset to get started instantly</span>
-        }
-      >
-        <div id="presets-section" className="grid gap-4 sm:grid-cols-3">
-          {BUILT_IN_PRESETS.map((preset) => (
-            <div
-              key={preset.id}
-              className={`flex flex-col justify-between rounded-xl border p-4 transition-all duration-200 ${
-                preset.id === 'enterprise'
-                  ? 'border-metric-blue/40 bg-blue-50/30'
-                  : 'border-[#E5E8E0] bg-surface-1 hover:border-metric-blue/30'
-              }`}
-            >
-              <div>
-                <div className="flex items-start justify-between gap-2">
-                  <h3 className="text-sm font-bold text-ink">{preset.label}</h3>
-                  {preset.id === 'enterprise' && (
-                    <span className="shrink-0 rounded-full bg-metric-blue/10 px-2 py-0.5 text-[10px] font-bold text-metric-blue uppercase">
-                      Recommended
-                    </span>
-                  )}
+      {isAdmin && (
+        <Card
+          title="Institutional Blueprints"
+          actions={
+            <span className="text-xs font-mono text-body-gray">Apply a preset to get started instantly</span>
+          }
+        >
+          <div id="presets-section" className="grid gap-4 sm:grid-cols-3">
+            {BUILT_IN_PRESETS.map((preset) => (
+              <div
+                key={preset.id}
+                className={`flex flex-col justify-between rounded-xl border p-4 transition-all duration-200 ${
+                  preset.id === 'enterprise'
+                    ? 'border-metric-blue/40 bg-blue-50/30'
+                    : 'border-[#E5E8E0] bg-surface-1 hover:border-metric-blue/30'
+                }`}
+              >
+                <div>
+                  <div className="flex items-start justify-between gap-2">
+                    <h3 className="text-sm font-bold text-ink">{preset.label}</h3>
+                    {preset.id === 'enterprise' && (
+                      <span className="shrink-0 rounded-full bg-metric-blue/10 px-2 py-0.5 text-[10px] font-bold text-metric-blue uppercase">
+                        Recommended
+                      </span>
+                    )}
+                  </div>
+                  <p className="mt-1.5 text-xs leading-relaxed text-body-gray">{preset.description}</p>
+                  <p className="mt-3 text-[11px] font-mono text-body-gray/80">
+                    {preset.sections.length} sections · {preset.subjects.length} subjects · {preset.faculty.length} faculty ·{" "}
+                    {preset.workingDays.length} days × {preset.periodsPerDay} periods
+                    {(preset.breaks?.length ?? 0) > 0
+                      ? ` + ${preset.breaks!.map((b) => b.name.toLowerCase()).join(", ")}`
+                      : ""}
+                  </p>
                 </div>
-                <p className="mt-1.5 text-xs leading-relaxed text-body-gray">{preset.description}</p>
-                <p className="mt-3 text-[11px] font-mono text-body-gray/80">
-                  {preset.sections.length} sections · {preset.subjects.length} subjects · {preset.faculty.length} faculty ·{" "}
-                  {preset.workingDays.length} days × {preset.periodsPerDay} periods
-                  {(preset.breaks?.length ?? 0) > 0
-                    ? ` + ${preset.breaks!.map((b) => b.name.toLowerCase()).join(", ")}`
-                    : ""}
-                </p>
+                <div className="mt-4 pt-3 border-t border-[#E5E8E0]/70 flex items-center justify-end">
+                  <Button
+                    size="sm"
+                    disabled={applyingPresetId !== null}
+                    onClick={() => handleApplyPreset(preset)}
+                  >
+                    {applyingPresetId === preset.id ? "Applying & generating..." : "Apply Blueprint & View Schedule →"}
+                  </Button>
+                </div>
               </div>
-              <div className="mt-4 pt-3 border-t border-[#E5E8E0]/70 flex items-center justify-end">
-                <Button
-                  size="sm"
-                  disabled={applyingPresetId !== null}
-                  onClick={() => handleApplyPreset(preset)}
-                >
-                  {applyingPresetId === preset.id ? "Applying & generating..." : "Apply Blueprint & View Schedule →"}
-                </Button>
-              </div>
-            </div>
-          ))}
-        </div>
-      </Card>
+            ))}
+          </div>
+        </Card>
+      )}
 
       {deletingTimetable && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">

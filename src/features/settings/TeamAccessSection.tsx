@@ -8,6 +8,8 @@ import {
   Trash2,
   Clock,
   AlertCircle,
+  Copy,
+  Check,
 } from 'lucide-react';
 import { useWorkspaceStore } from '@/state/stores/workspace-store';
 import { useEditorStore } from '@/state/stores/editor-store';
@@ -33,6 +35,20 @@ export function TeamAccessSection() {
   const [error, setError] = useState<string | null>(null);
   const [inviteModalOpen, setInviteModalOpen] = useState(false);
   const [actionId, setActionId] = useState<string | null>(null);
+  const [copiedToken, setCopiedToken] = useState<string | null>(null);
+
+  async function handleCopyInviteLink(token?: string, email?: string) {
+    if (!token) return;
+    const url = `${window.location.origin}/invite/${token}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopiedToken(token);
+      showToast('success', `Copied invite link for ${email || 'colleague'}`);
+      setTimeout(() => setCopiedToken(null), 2500);
+    } catch {
+      showToast('error', 'Failed to copy invite link.');
+    }
+  }
 
   const loadData = useCallback(async () => {
     try {
@@ -294,6 +310,7 @@ export function TeamAccessSection() {
                     <th className="py-2.5 px-3">Assigned Role</th>
                     <th className="py-2.5 px-3">Scope</th>
                     <th className="py-2.5 px-3">Sent On</th>
+                    <th className="py-2.5 px-3">Invite Link</th>
                     {isAdmin && <th className="py-2.5 px-3 text-right">Cancel</th>}
                   </tr>
                 </thead>
@@ -322,6 +339,30 @@ export function TeamAccessSection() {
                         </td>
                         <td className="py-2.5 px-3 text-[#71767B] whitespace-nowrap">
                           {new Date(inv.createdAt).toLocaleDateString()}
+                        </td>
+                        <td className="py-2.5 px-3">
+                          {inv.token ? (
+                            <button
+                              type="button"
+                              onClick={() => void handleCopyInviteLink(inv.token, inv.email)}
+                              className="inline-flex items-center gap-1.5 rounded-lg border border-[#D0D5DD] bg-white px-2 py-1 text-[11px] font-medium text-[#111315] hover:border-[#0047FF] hover:bg-blue-50/30 transition shadow-2xs"
+                              title="Copy direct invite link"
+                            >
+                              {copiedToken === inv.token ? (
+                                <>
+                                  <Check className="w-3 h-3 text-emerald-600" />
+                                  <span className="text-emerald-700 font-semibold">Copied!</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Copy className="w-3 h-3 text-[#71767B]" />
+                                  <span>Copy Link</span>
+                                </>
+                              )}
+                            </button>
+                          ) : (
+                            <span className="text-[11px] text-[#71767B]">Protected</span>
+                          )}
                         </td>
                         {isAdmin && (
                           <td className="py-2.5 px-3 text-right">

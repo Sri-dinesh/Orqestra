@@ -8,9 +8,10 @@ import { useEditorStore } from '@/state/stores/editor-store';
 
 interface BreaksCardProps {
   department: Department;
+  readOnly?: boolean;
 }
 
-export const BreaksCard: React.FC<BreaksCardProps> = ({ department }) => {
+export const BreaksCard: React.FC<BreaksCardProps> = ({ department, readOnly = false }) => {
   const allBreaks = useWorkspaceStore((s) => s.breaks);
   const breaks = useMemo(
     () => getDepartmentBreaks(allBreaks, department.id),
@@ -119,7 +120,7 @@ export const BreaksCard: React.FC<BreaksCardProps> = ({ department }) => {
         <p className="text-xs text-body-gray">
           Configure lunch, recess, or assembly breaks. All-day breaks insert dedicated break columns in grids and exports.
         </p>
-        {!isAdding && (
+        {!isAdding && !readOnly && (
           <Button
             type="button"
             size="sm"
@@ -136,7 +137,7 @@ export const BreaksCard: React.FC<BreaksCardProps> = ({ department }) => {
       </div>
 
       {/* Add / Edit Form */}
-      {isAdding && (
+      {isAdding && !readOnly && (
         <form onSubmit={handleSubmit} className="mb-5 rounded-xl border border-blue-200 bg-blue-50/50 p-4 space-y-4">
           <div className="flex items-center justify-between border-b border-blue-200 pb-2">
             <div className="flex items-center gap-2">
@@ -300,29 +301,31 @@ export const BreaksCard: React.FC<BreaksCardProps> = ({ department }) => {
                 </div>
               </div>
 
-              <div className="flex items-center gap-1.5 ml-auto">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleStartEdit(b)}
-                  className="text-xs"
-                >
-                  <Edit2 className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline ml-1">Edit</span>
-                </Button>
-                <Button
-                  type="button"
-                  variant="danger"
-                  size="sm"
-                  onClick={() => handleDelete(b.id, b.name)}
-                  className="text-xs"
-                  aria-label={`Remove break ${b.name}`}
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline ml-1">Remove</span>
-                </Button>
-              </div>
+              {!readOnly && (
+                <div className="flex items-center gap-1.5 ml-auto">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleStartEdit(b)}
+                    className="text-xs"
+                  >
+                    <Edit2 className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline ml-1">Edit</span>
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="danger"
+                    size="sm"
+                    onClick={() => handleDelete(b.id, b.name)}
+                    className="text-xs"
+                    aria-label={`Remove break ${b.name}`}
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline ml-1">Remove</span>
+                  </Button>
+                </div>
+              )}
             </div>
           );
         })}
@@ -332,30 +335,32 @@ export const BreaksCard: React.FC<BreaksCardProps> = ({ department }) => {
             <Coffee className="w-8 h-8 text-[#71767B] mx-auto mb-2 opacity-50" />
             <p className="text-xs font-semibold text-[#111315]">No breaks configured yet</p>
             <p className="text-[11px] text-[#71767B] mt-1 max-w-sm mx-auto">
-              Teaching periods run consecutively without recess. Add a standard lunch break or morning tea below to divide the day.
+              Teaching periods run consecutively without recess.
             </p>
-            <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
-              <Button
-                type="button"
-                variant="secondary"
-                size="sm"
-                onClick={handleAddPresetLunch}
-                className="inline-flex items-center gap-1.5 text-xs"
-              >
-                <Sparkles className="w-3.5 h-3.5 text-[#0047FF]" />
-                <span>+ Standard Lunch Break (After P4)</span>
-              </Button>
-              <Button
-                type="button"
-                variant="secondary"
-                size="sm"
-                onClick={handleAddPresetMorningTea}
-                className="inline-flex items-center gap-1.5 text-xs"
-              >
-                <Sparkles className="w-3.5 h-3.5 text-[#0047FF]" />
-                <span>+ Morning Recess (After P2)</span>
-              </Button>
-            </div>
+            {!readOnly && (
+              <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={handleAddPresetLunch}
+                  className="inline-flex items-center gap-1.5 text-xs"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-[#0047FF]" />
+                  <span>+ Standard Lunch Break (After P4)</span>
+                </Button>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={handleAddPresetMorningTea}
+                  className="inline-flex items-center gap-1.5 text-xs"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-[#0047FF]" />
+                  <span>+ Morning Recess (After P2)</span>
+                </Button>
+              </div>
+            )}
           </div>
         )}
       </div>

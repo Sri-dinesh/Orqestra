@@ -11,6 +11,7 @@ import type { CollegeDetails } from '@/domain/models';
 import { SemesterSwitcherModal } from '@/components/ui/SemesterSwitcherModal';
 import { getActiveTerm, listTerms } from '@/storage/term-manager';
 import { TeamAccessSection } from './TeamAccessSection';
+import { RoleSwitcherCard } from './RoleSwitcherCard';
 
 export function SettingsPage() {
   const state = useWorkspaceStore();
@@ -23,6 +24,10 @@ export function SettingsPage() {
   const activeTerm = getActiveTerm();
   const terms = listTerms();
   const location = useLocation();
+
+  const role = state.membership?.role ?? 'ADMIN';
+  const isFaculty = role === 'FACULTY';
+  const isAdmin = role === 'ADMIN';
 
   useEffect(() => {
     if (location.hash === '#team' || location.search.includes('tab=team')) {
@@ -134,7 +139,19 @@ export function SettingsPage() {
     <div className="space-y-8">
       <PageHeader eyebrow="Workspace data" title="Settings" />
 
-      <Card title="College details">
+      {/* Role and Permissions Control Card */}
+      <RoleSwitcherCard />
+
+      <Card
+        title="College details"
+        actions={
+          isFaculty ? (
+            <span className="rounded-md bg-amber-500/10 px-2 py-0.5 text-[11px] font-semibold text-amber-700 border border-amber-500/20">
+              Read-Only for Faculty
+            </span>
+          ) : undefined
+        }
+      >
         <p className="mb-4 text-sm text-body-gray">
           Institution profile used across the app (header, exports). Stored locally with the workspace; not used by the scheduler.
         </p>
@@ -145,6 +162,7 @@ export function SettingsPage() {
               onChange={(e) => setField('name', e.target.value)}
               placeholder="e.g. National Institute of Technology"
               aria-label="College name"
+              disabled={isFaculty}
             />
           </Field>
           <Field label="College code">
@@ -153,6 +171,7 @@ export function SettingsPage() {
               onChange={(e) => setField('code', e.target.value)}
               placeholder="e.g. NIT"
               aria-label="College code"
+              disabled={isFaculty}
             />
           </Field>
           <Field label="Academic year">
@@ -161,6 +180,7 @@ export function SettingsPage() {
               onChange={(e) => setField('academicYear', e.target.value)}
               placeholder="e.g. 2026–27"
               aria-label="Academic year"
+              disabled={isFaculty}
             />
           </Field>
           <Field label="Website">
@@ -169,6 +189,7 @@ export function SettingsPage() {
               onChange={(e) => setField('website', e.target.value)}
               placeholder="https://…"
               aria-label="Website"
+              disabled={isFaculty}
             />
           </Field>
           <Field label="Contact email">
@@ -178,6 +199,7 @@ export function SettingsPage() {
               placeholder="office@college.edu"
               type="email"
               aria-label="Contact email"
+              disabled={isFaculty}
             />
           </Field>
           <Field label="Contact phone">
@@ -187,6 +209,7 @@ export function SettingsPage() {
               placeholder="+91 …"
               type="tel"
               aria-label="Contact phone"
+              disabled={isFaculty}
             />
           </Field>
           <div className="sm:col-span-2">
@@ -196,6 +219,7 @@ export function SettingsPage() {
                 onChange={(e) => setField('address', e.target.value)}
                 placeholder="Street / campus address"
                 aria-label="Address"
+                disabled={isFaculty}
               />
             </Field>
           </div>
@@ -204,6 +228,7 @@ export function SettingsPage() {
               value={details.city}
               onChange={(e) => setField('city', e.target.value)}
               aria-label="City"
+              disabled={isFaculty}
             />
           </Field>
           <Field label="State">
@@ -211,6 +236,7 @@ export function SettingsPage() {
               value={details.state}
               onChange={(e) => setField('state', e.target.value)}
               aria-label="State"
+              disabled={isFaculty}
             />
           </Field>
           <Field label="PIN code">
@@ -219,6 +245,7 @@ export function SettingsPage() {
               onChange={(e) => setField('pincode', e.target.value)}
               inputMode="numeric"
               aria-label="PIN code"
+              disabled={isFaculty}
             />
           </Field>
           <Field label="Logo">
@@ -234,24 +261,28 @@ export function SettingsPage() {
                   None
                 </span>
               )}
-              <input
-                ref={logoRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={(e) => {
-                  const f = e.target.files?.[0];
-                  if (f) onLogoChosen(f);
-                  e.target.value = '';
-                }}
-              />
-              <Button size="sm" variant="secondary" onClick={() => logoRef.current?.click()}>
-                {details.logoDataUrl ? 'Replace…' : 'Upload…'}
-              </Button>
-              {details.logoDataUrl && (
-                <Button size="sm" variant="ghost" onClick={() => { setField('logoDataUrl', ''); setLogoError(null); }}>
-                  Remove
-                </Button>
+              {!isFaculty && (
+                <>
+                  <input
+                    ref={logoRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f) onLogoChosen(f);
+                      e.target.value = '';
+                    }}
+                  />
+                  <Button size="sm" variant="secondary" onClick={() => logoRef.current?.click()}>
+                    {details.logoDataUrl ? 'Replace…' : 'Upload…'}
+                  </Button>
+                  {details.logoDataUrl && (
+                    <Button size="sm" variant="ghost" onClick={() => { setField('logoDataUrl', ''); setLogoError(null); }}>
+                      Remove
+                    </Button>
+                  )}
+                </>
               )}
             </div>
             {logoError && <p className="mt-1 text-xs text-rose-700" role="alert">{logoError}</p>}
@@ -339,14 +370,16 @@ export function SettingsPage() {
             )}
           </div>
         </Card>
-        <Card title="Danger zone">
-          <p className="mb-4 text-sm text-body-gray">
-            Resetting clears all departments, timetables, and preferences stored in this browser. This cannot be undone.
-          </p>
-          <Button variant="danger" onClick={resetWorkspace}>
-            Reset workspace
-          </Button>
-        </Card>
+        {isAdmin && (
+          <Card title="Danger zone">
+            <p className="mb-4 text-sm text-body-gray">
+              Resetting clears all departments, timetables, and preferences stored in this browser. This cannot be undone.
+            </p>
+            <Button variant="danger" onClick={resetWorkspace}>
+              Reset workspace
+            </Button>
+          </Card>
+        )}
       </div>
 
       <SemesterSwitcherModal

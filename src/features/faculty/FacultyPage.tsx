@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { Lock } from 'lucide-react';
 import { Button, Card, EditModal, Field, Input, PageHeader } from '@/components/ui/primitives';
 import { AvailabilityGrid } from '@/components/ui/AvailabilityGrid';
 import type { FacultyAvailability } from '@/domain/models';
@@ -70,6 +71,14 @@ export function FacultyPage() {
 
   if (!department || !departmentId) return <DepartmentNotFound requestedId={departmentId} targetPage="faculty" />;
 
+  const membership = state.membership;
+  const isForeignDeptForHod =
+    membership?.role === 'HOD' &&
+    Boolean(membership.departmentId) &&
+    membership.departmentId !== departmentId;
+  const isFaculty = membership?.role === 'FACULTY';
+  const isReadOnly = Boolean(isForeignDeptForHod || isFaculty);
+
   const assignedLoad = new Map<string, number>();
   if (timetable) {
     for (const e of timetable.entries) {
@@ -99,51 +108,65 @@ export function FacultyPage() {
   return (
     <div className="space-y-6">
       <DepartmentNav />
+
+      {isReadOnly && (
+        <div className="rounded-xl border border-amber-200 bg-amber-50/80 p-3.5 flex items-center gap-2.5 text-xs text-amber-900">
+          <Lock className="w-4 h-4 text-amber-700 shrink-0" />
+          <span>
+            You are viewing this department's faculty roster in <strong>read-only mode</strong> ({isFaculty ? 'Teaching Faculty' : 'Different Department HOD'}). Faculty records and allocations cannot be modified.
+          </span>
+        </div>
+      )}
+
       <PageHeader
         eyebrow="Teaching staff"
         title="Faculty"
         actions={
-          <Button variant="secondary" size="sm" onClick={() => setImportModalOpen(true)}>
-            Bulk Import (Excel/CSV)
-          </Button>
+          !isReadOnly ? (
+            <Button variant="secondary" size="sm" onClick={() => setImportModalOpen(true)}>
+              Bulk Import (Excel/CSV)
+            </Button>
+          ) : undefined
         }
       />
 
-      <Card title="Add faculty member">
-        <form
-          className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (!code.trim() || !name.trim()) return;
-            state.addFaculty({
-              departmentId,
-              facultyCode: code,
-              name,
-              subjectIds: [],
-              sectionIds: [],
-              availability: [],
-              preferredSlots: [],
-              maxPeriodsPerDay: maxPerDay ? Number(maxPerDay) : null,
-              maxPeriodsPerWeek: maxPerWeek ? Number(maxPerWeek) : null,
-            });
-            showToast('success', `Faculty ${code} added.`);
-            setCode('');
-            setName('');
-            setMaxPerDay('');
-            setMaxPerWeek('');
-          }}
-        >
-          <Field label="Code"><Input value={code} onChange={(e) => setCode(e.target.value)} required aria-label="Faculty code" /></Field>
-          <Field label="Name"><Input value={name} onChange={(e) => setName(e.target.value)} required aria-label="Faculty name" /></Field>
-          <Field label="Max periods/day" hint="Optional">
-            <Input type="number" min={1} value={maxPerDay} onChange={(e) => setMaxPerDay(e.target.value)} aria-label="Max periods per day" />
-          </Field>
-          <Field label="Max periods/week" hint="Optional">
-            <Input type="number" min={1} value={maxPerWeek} onChange={(e) => setMaxPerWeek(e.target.value)} aria-label="Max periods per week" />
-          </Field>
-          <div className="lg:col-span-4"><Button type="submit" size="sm">Add faculty</Button></div>
-        </form>
-      </Card>
+      {!isReadOnly && (
+        <Card title="Add faculty member">
+          <form
+            className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (!code.trim() || !name.trim()) return;
+              state.addFaculty({
+                departmentId,
+                facultyCode: code,
+                name,
+                subjectIds: [],
+                sectionIds: [],
+                availability: [],
+                preferredSlots: [],
+                maxPeriodsPerDay: maxPerDay ? Number(maxPerDay) : null,
+                maxPeriodsPerWeek: maxPerWeek ? Number(maxPerWeek) : null,
+              });
+              showToast('success', `Faculty ${code} added.`);
+              setCode('');
+              setName('');
+              setMaxPerDay('');
+              setMaxPerWeek('');
+            }}
+          >
+            <Field label="Code"><Input value={code} onChange={(e) => setCode(e.target.value)} required aria-label="Faculty code" /></Field>
+            <Field label="Name"><Input value={name} onChange={(e) => setName(e.target.value)} required aria-label="Faculty name" /></Field>
+            <Field label="Max periods/day" hint="Optional">
+              <Input type="number" min={1} value={maxPerDay} onChange={(e) => setMaxPerDay(e.target.value)} aria-label="Max periods per day" />
+            </Field>
+            <Field label="Max periods/week" hint="Optional">
+              <Input type="number" min={1} value={maxPerWeek} onChange={(e) => setMaxPerWeek(e.target.value)} aria-label="Max periods per week" />
+            </Field>
+            <div className="lg:col-span-4"><Button type="submit" size="sm">Add faculty</Button></div>
+          </form>
+        </Card>
+      )}
 
       <Card title={`Faculty (${members.length})`}>
         {members.length === 0 ? (
@@ -186,13 +209,15 @@ export function FacultyPage() {
                           .map((s) => (
                             <label
                               key={s.id}
-                              className="flex cursor-pointer items-center gap-1.5 rounded-full bg-white px-2.5 py-1 text-[11px] font-medium text-[#111315] ring-1 ring-inset ring-[#E5E8E0] transition-colors duration-150 has-checked:bg-blue-100 hover:bg-[#FAFBF9]"
+                              className={`flex cursor-pointer items-center gap-1.5 rounded-full bg-white px-2.5 py-1 text-[11px] font-medium text-[#111315] ring-1 ring-inset ring-[#E5E8E0] transition-colors duration-150 has-checked:bg-blue-100 hover:bg-[#FAFBF9] ${isReadOnly ? 'opacity-60 cursor-not-allowed' : ''}`}
                             >
                               <input
                                 type="checkbox"
                                 className="accent-metric-blue"
                                 checked={s.eligibleFacultyIds.includes(f.id)}
+                                disabled={isReadOnly}
                                 onChange={(e) => {
+                                  if (isReadOnly) return;
                                   const next = e.target.checked
                                     ? [...s.eligibleFacultyIds, f.id]
                                     : s.eligibleFacultyIds.filter((x) => x !== f.id);
@@ -205,33 +230,35 @@ export function FacultyPage() {
                         {subjects.length === 0 && <span className="text-[11px] text-body-gray">No subjects available</span>}
                       </div>
                     </div>
-                    <div className="flex shrink-0 gap-1.5">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setEditingId(f.id);
-                          setEditForm(facultyFormFrom(f));
-                          setEditAvailability(f.availability);
-                          setEditPreferred(f.preferredSlots);
-                        }}
-                      >
-                        Edit
-                      </Button>
-                      <Button variant="ghost" size="sm" onClick={() => state.updateFaculty(f.id, { active: !f.active })}>
-                        {f.active ? 'Deactivate' : 'Activate'}
-                      </Button>
-                      <Button
-                        variant="danger"
-                        size="sm"
-                        onClick={() => {
-                          const res = state.removeFaculty(f.id);
-                          showToast(res.blocked ? 'warning' : 'success', res.reason ?? `Faculty ${f.facultyCode} removed.`);
-                        }}
-                      >
-                        Delete
-                      </Button>
-                    </div>
+                    {!isReadOnly && (
+                      <div className="flex shrink-0 gap-1.5">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setEditingId(f.id);
+                            setEditForm(facultyFormFrom(f));
+                            setEditAvailability(f.availability);
+                            setEditPreferred(f.preferredSlots);
+                          }}
+                        >
+                          Edit
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={() => state.updateFaculty(f.id, { active: !f.active })}>
+                          {f.active ? 'Deactivate' : 'Activate'}
+                        </Button>
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          onClick={() => {
+                            const res = state.removeFaculty(f.id);
+                            showToast(res.blocked ? 'warning' : 'success', res.reason ?? `Faculty ${f.facultyCode} removed.`);
+                          }}
+                        >
+                          Delete
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </li>
               );
