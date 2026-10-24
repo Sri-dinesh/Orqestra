@@ -6,4 +6,4 @@ export {
   assertFacultyAccess,
   type AuthenticatedUser,
   type InstitutionalContext,
-} from '../../api/_lib/auth';
+} from '@/server/auth';

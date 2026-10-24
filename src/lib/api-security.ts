@@ -4,13 +4,13 @@ export {
   getClientIp,
   type RateLimitOptions,
   type RateLimitResult,
-} from '../../api/_lib/rate-limit';
+} from '@/server/rate-limit';
 
 export {
   parseJsonBody,
-} from '../../api/_lib/request-guard';
+} from '@/server/request-guard';
 
 export {
   createErrorResponse,
   sanitizeErrorMessage,
-} from '../../api/_lib/errors';
+} from '@/server/errors';

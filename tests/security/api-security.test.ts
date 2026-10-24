@@ -3,9 +3,9 @@ import {
   checkRateLimit,
   enforceRateLimit,
   getClientIp,
-} from '../../api/_lib/rate-limit';
-import { parseJsonBody } from '../../api/_lib/request-guard';
-import { sanitizeErrorMessage, createErrorResponse } from '../../api/_lib/errors';
+} from '@/server/rate-limit';
+import { parseJsonBody } from '@/server/request-guard';
+import { sanitizeErrorMessage, createErrorResponse } from '@/server/errors';
 import { GET as healthHandler } from '@/app/api/health/route';
 import * as dbModule from '@/db';
 
