@@ -16,14 +16,14 @@ In the Neon Console:
 3. Copy the Auth Base URL from the Better Auth project settings.
 4. Add your local and production application domains as trusted domains.
 
-The browser SDK uses the Auth Base URL through `VITE_NEON_AUTH_URL`.
+The browser SDK uses the Auth Base URL through `NEXT_PUBLIC_NEON_AUTH_URL`.
 
 ## 2. Configure environment variables
 
 Copy `.env.example` to `.env.local` and fill in:
 
 ```bash
-VITE_NEON_AUTH_URL=your_neon_auth_base_url
+NEXT_PUBLIC_NEON_AUTH_URL=your_neon_auth_base_url
 DATABASE_URL=your_neon_postgres_connection_string
 NEON_AUTH_BASE_URL=your_neon_auth_base_url
 ```
@@ -31,11 +31,11 @@ NEON_AUTH_BASE_URL=your_neon_auth_base_url
 Optional server-side verification variables:
 
 ```bash
-NEON_AUTH_JWKS_URL=your_neon_auth_base_url/jwt
+NEON_AUTH_JWKS_URL=your_neon_auth_base_url/.well-known/jwks.json
 NEON_AUTH_ISSUER=your_neon_auth_base_url
 ```
 
-Never expose `DATABASE_URL`, `NEON_AUTH_BASE_URL`, or the optional verification variables with a `VITE_` prefix. Only `VITE_NEON_AUTH_URL` belongs in the browser bundle.
+Never expose `DATABASE_URL`, `NEON_AUTH_BASE_URL`, or the optional verification variables with a `NEXT_PUBLIC_` prefix. Only `NEXT_PUBLIC_NEON_AUTH_URL` belongs in the browser bundle.
 
 ## 3. Apply the application migration
 
@@ -61,7 +61,7 @@ The Vite development server includes a small local adapter for `/api/auth/me`, s
 npm run dev
 ```
 
-If you deploy through Vercel, the same `/api/auth/me` handler runs as a Vercel Function in staging and production.
+In production, `/api/auth/me` runs as a Next.js App Router route handler (`src/app/api/auth/me/route.ts`).
 
 ## 5. Authentication behavior
 
