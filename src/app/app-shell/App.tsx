@@ -20,6 +20,9 @@ import { TimetablePage } from "@/features/timetable-editor/TimetablePage";
 import { FacultyTimetablePage } from "@/features/timetable-editor/FacultyTimetablePage";
 import { MasterTimetablePage } from "@/features/timetable-editor/MasterTimetablePage";
 import { SettingsPage } from "@/features/settings/SettingsPage";
+import { TeamPage } from "@/features/team/TeamPage";
+import { ProfilePage } from "@/features/profile/ProfilePage";
+import { InviteAcceptancePage } from "@/features/invite/InviteAcceptancePage";
 import { SchedulePortalPage } from "@/features/portal/SchedulePortalPage";
 import { NotFoundPage } from "@/components/ui/NotFoundPage";
 import { useWorkspaceStore } from "@/state/stores/workspace-store";
@@ -84,6 +87,10 @@ export default function App() {
       } else {
         pageTitle = "Department Configuration — Orqestra";
       }
+    } else if (path === "/team") {
+      pageTitle = "Team & Access Control — Orqestra";
+    } else if (path === "/profile") {
+      pageTitle = "My Profile & Operational Role — Orqestra";
     } else if (path === "/schedule-portal") {
       pageTitle = "My Schedule Portal — Orqestra";
     } else if (path === "/settings") {
@@ -94,7 +101,7 @@ export default function App() {
   }, [location.pathname]);
 
   const isLanding = location.pathname === "/";
-  const isPublicRoute = isLanding || location.pathname.startsWith("/auth/");
+  const isPublicRoute = isLanding || location.pathname.startsWith("/auth/") || location.pathname.startsWith("/invite/");
 
   return (
     <div className="min-h-screen bg-[#F7F8F5] text-[#111315] font-sans">
@@ -153,6 +160,9 @@ export default function App() {
                 <NavLink className={navLinkCls} to="/departments">
                   Departments
                 </NavLink>
+                <NavLink className={navLinkCls} to="/team">
+                  Team
+                </NavLink>
                 <NavLink className={navLinkCls} to="/schedule-portal">
                   My Schedule
                 </NavLink>
@@ -177,9 +187,12 @@ export default function App() {
             <Route path="/auth/sign-up" element={<AuthPage pathname="SIGN_UP" />} />
             <Route path="/auth/forgot-password" element={<AuthPage pathname="FORGOT_PASSWORD" />} />
             <Route path="/auth/reset-password" element={<AuthPage pathname="RESET_PASSWORD" />} />
+            <Route path="/invite/:token" element={<InviteAcceptancePage />} />
 
             <Route element={<RequireAuth />}>
               <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/team" element={<TeamPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
 
               <Route path="/departments" element={<DepartmentConfigPage />} />
               <Route

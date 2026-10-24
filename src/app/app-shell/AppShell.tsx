@@ -19,7 +19,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const activeTerm = getActiveTerm();
 
-  const isPublicRoute = pathname === '/' || pathname.startsWith('/auth/');
+  const isPublicRoute = pathname === '/' || pathname.startsWith('/auth/') || pathname.startsWith('/invite/');
 
   const navLinkCls = (targetPath: string) => {
     const isActive = pathname === targetPath || (targetPath !== '/' && pathname.startsWith(targetPath));
@@ -82,6 +82,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 <Link className={navLinkCls('/departments')} href="/departments">
                   Departments
                 </Link>
+                <Link className={navLinkCls('/team')} href="/team">
+                  Team
+                </Link>
                 <Link className={navLinkCls('/schedule-portal')} href="/schedule-portal">
                   My Schedule
                 </Link>
@@ -127,6 +130,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Departments
+              </Link>
+              <Link
+                className={`block w-full ${navLinkCls('/team')}`}
+                href="/team"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Team
               </Link>
               <Link
                 className={`block w-full ${navLinkCls('/schedule-portal')}`}

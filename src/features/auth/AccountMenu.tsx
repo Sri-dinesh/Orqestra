@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { LogOut, Settings, Calendar, ChevronDown, ShieldCheck, Users } from 'lucide-react';
+import { LogOut, Settings, Calendar, ChevronDown, ShieldCheck, Users, User } from 'lucide-react';
 import { authClient } from '@/auth/client';
 import { useAuthSession, notifyAuthChange } from '@/auth/session';
 import { clearInMemoryWorkspace } from '@/hooks/usePersistence';
@@ -169,26 +169,24 @@ export function AccountMenu() {
           {/* Quick Links */}
           <div className="mt-1 space-y-0.5">
             <Link
-              to="/settings#role"
+              to="/profile"
               onClick={() => setIsOpen(false)}
               role="menuitem"
               className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-medium text-[#30363D] hover:bg-black/5 hover:text-[#111315] transition-colors"
             >
-              <ShieldCheck className="h-4 w-4 text-[#0047FF]" />
-              <span>Adjust Role & Permissions</span>
+              <User className="h-4 w-4 text-[#71767B]" />
+              <span>Profile & Role Settings</span>
             </Link>
 
-            {role === 'ADMIN' && (
-              <Link
-                to="/settings?tab=team"
-                onClick={() => setIsOpen(false)}
-                role="menuitem"
-                className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-medium text-[#30363D] hover:bg-black/5 hover:text-[#111315] transition-colors"
-              >
-                <Users className="h-4 w-4 text-[#71767B]" />
-                <span>Team & Access Control</span>
-              </Link>
-            )}
+            <Link
+              to="/team"
+              onClick={() => setIsOpen(false)}
+              role="menuitem"
+              className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-medium text-[#30363D] hover:bg-black/5 hover:text-[#111315] transition-colors"
+            >
+              <Users className="h-4 w-4 text-[#0047FF]" />
+              <span>Team & Access Control</span>
+            </Link>
 
             <Link
               to="/settings"

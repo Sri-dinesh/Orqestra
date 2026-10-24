@@ -16,7 +16,8 @@ import type { WorkingDay } from "@/domain/enums";
 import { BUILT_IN_PRESETS, applyPresetWithTimetable } from "@/application/presets";
 import { useEditorStore } from "@/state/stores/editor-store";
 import { flushPersistence } from "@/hooks/usePersistence";
-import { CheckCircle2, Circle, Sparkles, Trash2, BookOpen, ArrowRight } from "lucide-react";
+import { CheckCircle2, Circle, Sparkles, Trash2, BookOpen, ArrowRight, UserPlus } from "lucide-react";
+import { InviteMemberModal } from "@/features/settings/InviteMemberModal";
 
 type DeptStatus =
   | "NOT_CONFIGURED"
@@ -82,6 +83,7 @@ export function DashboardPage() {
   const isFaculty = role === 'FACULTY';
   const isAdmin = role === 'ADMIN';
   const [showCreate, setShowCreate] = useState(false);
+  const [inviteModalOpen, setInviteModalOpen] = useState(false);
   const [applyingPresetId, setApplyingPresetId] = useState<string | null>(null);
   const [deletingTimetable, setDeletingTimetable] = useState<{
     id: string;
@@ -185,9 +187,21 @@ export function DashboardPage() {
         title="Dashboard"
         actions={
           !isFaculty ? (
-            <Button onClick={() => setShowCreate((v) => !v)}>
-              {showCreate ? "Cancel" : "Create Department"}
-            </Button>
+            <div className="flex items-center gap-2">
+              {isAdmin && (
+                <Button
+                  variant="secondary"
+                  onClick={() => setInviteModalOpen(true)}
+                  className="flex items-center gap-1.5"
+                >
+                  <UserPlus className="w-3.5 h-3.5 text-[#0047FF]" />
+                  <span>Invite Colleague</span>
+                </Button>
+              )}
+              <Button onClick={() => setShowCreate((v) => !v)}>
+                {showCreate ? "Cancel" : "Create Department"}
+              </Button>
+            </div>
           ) : (
             <span className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-800 border border-emerald-500/20">
               <BookOpen className="w-3.5 h-3.5" />
@@ -633,6 +647,11 @@ export function DashboardPage() {
           </div>
         </div>
       )}
+
+      <InviteMemberModal
+        isOpen={inviteModalOpen}
+        onClose={() => setInviteModalOpen(false)}
+      />
     </div>
   );
 }

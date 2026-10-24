@@ -8,7 +8,7 @@ import { inviteColleague, type MemberInvitationDto } from './member-service';
 interface InviteMemberModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onInvited: () => void;
+  onInvited?: () => void;
 }
 
 export function InviteMemberModal({ isOpen, onClose, onInvited }: InviteMemberModalProps) {
@@ -59,7 +59,7 @@ export function InviteMemberModal({ isOpen, onClose, onInvited }: InviteMemberMo
 
       setCreatedInvite(invitation);
       showToast('success', `Invitation created for ${cleanEmail}`);
-      onInvited();
+      onInvited?.();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create invitation');
     } finally {
