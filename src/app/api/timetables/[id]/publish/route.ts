@@ -1,4 +1,4 @@
-import { and, eq, ne } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { getDatabase } from '@/db';
 import {
   academicTerms,
@@ -114,18 +114,6 @@ export async function POST(
           .onConflictDoNothing();
       }
 
-      // Remove any other timetable for the same department with a different ID
-      await database
-        .delete(timetables)
-        .where(
-          and(
-            eq(timetables.userId, context.institutionId),
-            eq(timetables.termId, termId),
-            eq(timetables.departmentId, departmentId),
-            ne(timetables.id, timetableId),
-          ),
-        );
-
       const [inserted] = await database
         .insert(timetables)
         .values({
@@ -133,6 +121,8 @@ export async function POST(
           userId: context.institutionId,
           termId,
           departmentId,
+          name: tb.name?.trim() || 'Untitled timetable',
+          description: tb.description?.trim() || '',
           status: tb.status,
           revision: tb.revision ?? 1,
           configurationSnapshot: tb.configurationSnapshot,

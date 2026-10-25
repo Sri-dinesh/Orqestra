@@ -1,4 +1,4 @@
-import { and, eq, ne, notInArray, sql } from 'drizzle-orm';
+import { and, eq, notInArray, sql } from 'drizzle-orm';
 import { getDatabase } from '@/db';
 import {
   academicTerms,
@@ -267,6 +267,8 @@ export async function GET(request: Request): Promise<Response> {
     const domainTimetables: Timetable[] = ttRows.map((t) => ({
       id: t.id,
       departmentId: t.departmentId,
+      name: t.name,
+      description: t.description,
       status: t.status as any,
       revision: t.revision,
       configurationSnapshot: t.configurationSnapshot as any,
@@ -304,6 +306,7 @@ export async function GET(request: Request): Promise<Response> {
           breaks: domainBreaks,
           timetables: domainTimetables,
           activeDepartmentId: activeDeptId,
+          activeTimetableId: domainTimetables.find((t) => t.departmentId === activeDeptId)?.id ?? null,
           generationSettingsOverrides,
           collegeDetails,
         },
@@ -982,17 +985,6 @@ export async function PUT(request: Request): Promise<Response> {
     }
 
     for (const t of tts) {
-      await database
-        .delete(timetables)
-        .where(
-          and(
-            eq(timetables.userId, institutionId),
-            eq(timetables.termId, termId),
-            eq(timetables.departmentId, t.departmentId),
-            ne(timetables.id, t.id),
-          ),
-        );
-
       const snapshot = t.configurationSnapshot ?? {
         fingerprint: 'fallback',
         department: { id: t.departmentId, code: '', name: '', workingDays: [], periodsPerDay: 0 },
@@ -1013,6 +1005,8 @@ export async function PUT(request: Request): Promise<Response> {
           userId: institutionId,
           termId,
           departmentId: t.departmentId,
+          name: t.name?.trim() || `Timetable ${tts.findIndex((item) => item.id === t.id) + 1}`,
+          description: t.description?.trim() || '',
           status: t.status,
           revision: t.revision,
           configurationSnapshot: snapshot,
@@ -1027,6 +1021,8 @@ export async function PUT(request: Request): Promise<Response> {
           target: timetables.id,
           set: {
             status: t.status,
+            name: t.name?.trim() || 'Untitled timetable',
+            description: t.description?.trim() || '',
             revision: t.revision,
             configurationSnapshot: snapshot,
             entries: t.entries,

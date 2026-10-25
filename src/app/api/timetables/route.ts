@@ -1,4 +1,4 @@
-import { and, eq, ne } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { getDatabase } from '@/db';
 import {
   academicTerms,
@@ -101,19 +101,7 @@ export async function POST(request: Request): Promise<Response> {
         .onConflictDoNothing();
     }
 
-    // 4. Remove any other timetable for the same department with a different ID to prevent unique index collisions
-    await database
-      .delete(timetables)
-      .where(
-        and(
-          eq(timetables.userId, context.institutionId),
-          eq(timetables.termId, termId),
-          eq(timetables.departmentId, timetable.departmentId),
-          ne(timetables.id, timetable.id),
-        ),
-      );
-
-    // 5. Upsert the current timetable
+    // 4. Upsert the current timetable. Multiple timetables are allowed per department.
     const [saved] = await database
       .insert(timetables)
       .values({
@@ -121,6 +109,8 @@ export async function POST(request: Request): Promise<Response> {
         userId: context.institutionId,
         termId,
         departmentId: timetable.departmentId,
+        name: timetable.name?.trim() || 'Untitled timetable',
+        description: timetable.description?.trim() || '',
         status: timetable.status,
         revision: timetable.revision,
         configurationSnapshot: timetable.configurationSnapshot,
@@ -135,6 +125,8 @@ export async function POST(request: Request): Promise<Response> {
         target: timetables.id,
         set: {
           status: timetable.status,
+          name: timetable.name?.trim() || 'Untitled timetable',
+          description: timetable.description?.trim() || '',
           revision: timetable.revision,
           configurationSnapshot: timetable.configurationSnapshot,
           entries: timetable.entries,
