@@ -82,7 +82,7 @@ export const DepartmentNotFound: React.FC<DepartmentNotFoundProps> = ({
               <p className="text-xs text-[#71767B] mb-4">
                 You haven&apos;t created any departments in this semester yet.
               </p>
-              <Link to="/dashboard">
+               <Link to="/departments">
                 <Button size="sm" className="inline-flex items-center gap-1.5">
                   <PlusCircle className="w-4 h-4" />
                   <span>Create Department in Dashboard</span>
@@ -92,7 +92,7 @@ export const DepartmentNotFound: React.FC<DepartmentNotFoundProps> = ({
           )}
 
           <div className="mt-6 pt-4 border-t border-[#E5E8E0] flex flex-wrap items-center justify-center gap-3">
-            <Link to="/dashboard">
+             <Link to="/departments">
               <Button variant="secondary" size="sm" className="inline-flex items-center gap-1.5">
                 <LayoutDashboard className="w-4 h-4" />
                 <span>Go to Dashboard</span>

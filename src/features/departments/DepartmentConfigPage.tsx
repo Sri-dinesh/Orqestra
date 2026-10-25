@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Lock } from 'lucide-react';
 import { Badge, Button, Card, EditModal, Field, Input, PageHeader } from '@/components/ui/primitives';
+import { useEditorStore } from '@/state/stores/editor-store';
 import { useWorkspaceStore } from '@/state/stores/workspace-store';
 import { WORKING_DAYS } from '@/domain/enums';
 import type { WorkingDay } from '@/domain/enums';
@@ -16,6 +17,7 @@ export function DepartmentConfigPage() {
   const { departmentId } = useParams();
   const navigate = useNavigate();
   const state = useWorkspaceStore();
+  const showToast = useEditorStore((store) => store.showToast);
   const department = state.departments.find((d) => d.id === departmentId) ?? null;
 
   // Department-scoped selectors to avoid activeDepartmentId mismatch
@@ -305,7 +307,15 @@ export function DepartmentConfigPage() {
                     >
                       Edit
                     </Button>
-                    <Button variant="danger" size="sm" onClick={() => state.removeSection(s.id)} aria-label={`Remove section ${s.name}`}>
+                     <Button
+                       variant="danger"
+                       size="sm"
+                       onClick={() => {
+                         const result = state.removeSection(s.id);
+                         showToast(result.blocked ? 'warning' : 'success', result.reason ?? `Section ${s.name} removed.`);
+                       }}
+                       aria-label={`Remove section ${s.name}`}
+                     >
                       Remove
                     </Button>
                   </div>

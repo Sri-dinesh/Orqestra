@@ -1,18 +1,12 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { RequireAuthWrapper } from '@/features/auth/RequireAuth';
+import { DepartmentHomePage } from '@/features/departments/DepartmentHomePage';
 
-export default function DepartmentRootRedirect() {
-  const router = useRouter();
-  const params = useParams();
-  const departmentId = params?.departmentId as string;
-
-  useEffect(() => {
-    if (departmentId) {
-      router.replace(`/departments/${departmentId}/configuration`);
-    }
-  }, [departmentId, router]);
-
-  return null;
+export default function DepartmentRoute() {
+  return (
+    <RequireAuthWrapper>
+      <DepartmentHomePage />
+    </RequireAuthWrapper>
+  );
 }

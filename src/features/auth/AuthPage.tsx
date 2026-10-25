@@ -26,7 +26,7 @@ function safeRedirectPath(target: unknown): string {
   if (typeof target === 'string' && target.startsWith('/') && !target.startsWith('//')) {
     return target;
   }
-  return '/dashboard';
+  return '/departments';
 }
 
 export function AuthPage({ pathname }: AuthPageProps) {
@@ -172,7 +172,7 @@ export function AuthPage({ pathname }: AuthPageProps) {
         });
 
         notifyAuthChange();
-        navigate(safeRedirectPath(location.state?.from), { replace: true });
+        navigate('/departments', { replace: true });
         return;
       }
 

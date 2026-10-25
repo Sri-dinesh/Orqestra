@@ -30,12 +30,15 @@ export interface NavLinkProps extends Omit<React.AnchorHTMLAttributes<HTMLAnchor
   href?: string;
   className?: string | ((props: { isActive: boolean }) => string);
   replace?: boolean;
+  end?: boolean;
 }
 
-export function NavLink({ to, href, className, children, replace, ...props }: NavLinkProps) {
+export function NavLink({ to, href, className, children, replace, end = false, ...props }: NavLinkProps) {
   const pathname = usePathname();
   const target = to || href || '';
-  const isActive = pathname === target || (target !== '/' && pathname?.startsWith(target));
+  const isActive = end
+    ? pathname === target
+    : pathname === target || (target !== '/' && pathname?.startsWith(target));
   const resolvedClass = typeof className === 'function' ? className({ isActive }) : className;
 
   return (

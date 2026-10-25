@@ -9,11 +9,12 @@ import {
   Calendar,
   UserCheck,
   Grid3X3,
+  LayoutDashboard,
   ArrowLeft,
   Lock,
   Check,
 } from 'lucide-react';
-import { useWorkspaceStore } from '@/state/stores/workspace-store';
+import { selectTimetableForDepartment, selectTimetablesForDepartment, useWorkspaceStore } from '@/state/stores/workspace-store';
 
 export const DepartmentNav: React.FC = () => {
   const { departmentId } = useParams();
@@ -41,11 +42,20 @@ export const DepartmentNav: React.FC = () => {
   const subjectsCount = state.subjects.filter((s) => s.departmentId === departmentId).length;
   const facultyCount = state.faculty.filter((f) => f.departmentId === departmentId).length;
   const roomsCount = state.rooms.filter((r) => r.departmentId === departmentId).length;
-  const timetable = state.timetables.find((t) => t.departmentId === departmentId);
+  const timetable = selectTimetableForDepartment(state, departmentId);
+  const timetableCount = selectTimetablesForDepartment(state, departmentId).length;
 
   const setupSteps = [
-    {
-      to: `/departments/${departmentId}/configuration`,
+      {
+        to: `/departments/${departmentId}`,
+        label: 'Overview',
+        stepNum: 0,
+        icon: LayoutDashboard,
+        done: timetableCount > 0,
+        count: timetableCount > 0 ? timetableCount : undefined,
+      },
+      {
+        to: `/departments/${departmentId}/configuration`,
       label: 'Configuration',
       stepNum: 1,
       icon: Settings,
@@ -79,7 +89,7 @@ export const DepartmentNav: React.FC = () => {
   ];
 
   const coreSetupDone = sectionsCount > 0 && subjectsCount > 0 && facultyCount > 0;
-  const completedStepsCount = setupSteps.filter((s) => s.done).length;
+  const completedStepsCount = setupSteps.filter((s) => s.stepNum > 0 && s.done).length;
 
   const viewTabs = [
     {
@@ -120,6 +130,7 @@ export const DepartmentNav: React.FC = () => {
             <NavLink
               key={tab.to}
               to={tab.to}
+              end={tab.stepNum === 0}
               className={({ isActive }) =>
                 `flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl transition-all whitespace-nowrap ${
                   isActive

@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import {
   Link,
-  Navigate,
   NavLink,
   Route,
   Routes,
@@ -12,6 +11,8 @@ import { Calendar, ChevronDown } from "lucide-react";
 import { ErrorBoundary } from "./ErrorBoundary";
 import { LandingPage } from "@/features/landing/LandingPage";
 import { DepartmentConfigPage } from "@/features/departments/DepartmentConfigPage";
+import { DepartmentsPage } from "@/features/departments/DepartmentsPage";
+import { DepartmentHomePage } from "@/features/departments/DepartmentHomePage";
 import { SubjectsPage } from "@/features/subjects/SubjectsPage";
 import { FacultyPage } from "@/features/faculty/FacultyPage";
 import { RoomsPage } from "@/features/rooms/RoomsPage";
@@ -194,10 +195,10 @@ export default function App() {
               <Route path="/team" element={<TeamPage />} />
               <Route path="/profile" element={<ProfilePage />} />
 
-              <Route path="/departments" element={<DepartmentConfigPage />} />
+              <Route path="/departments" element={<DepartmentsPage />} />
               <Route
                 path="/departments/:departmentId"
-                element={<Navigate to="configuration" replace />}
+                element={<DepartmentHomePage />}
               />
               <Route
                 path="/departments/:departmentId/configuration"
