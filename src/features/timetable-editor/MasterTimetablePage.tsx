@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Badge, Button, Card, PageHeader } from '@/components/ui/primitives';
-import { useWorkspaceStore } from '@/state/stores/workspace-store';
+import { selectTimetableForDepartment, useWorkspaceStore } from '@/state/stores/workspace-store';
 import { buildGridLayout, getDepartmentBreaks, gridColumnLabel } from '@/domain/scheduler/grid-layout';
 import { TimetableGridHeader } from '@/components/ui/TimetableGridHeader';
 import { ExportPreviewModal } from '@/components/ui/ExportPreviewModal';
@@ -61,8 +61,8 @@ export function MasterTimetablePage() {
     [state.faculty, departmentId],
   );
   const timetable = useMemo(
-    () => state.timetables.find((t) => t.departmentId === departmentId) ?? null,
-    [state.timetables, departmentId],
+    () => selectTimetableForDepartment(state, departmentId ?? null),
+    [state, departmentId],
   );
   const breaks = useWorkspaceStore((s) => s.breaks);
 

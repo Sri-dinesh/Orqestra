@@ -26,7 +26,7 @@ import {
 import { DepartmentNav } from '@/components/ui/DepartmentNav';
 import { DepartmentNotFound } from '@/components/ui/DepartmentNotFound';
 import { BulkImportModal } from '@/components/ui/BulkImportModal';
-import { useWorkspaceStore } from '@/state/stores/workspace-store';
+import { selectTimetableForDepartment, useWorkspaceStore } from '@/state/stores/workspace-store';
 import { useEditorStore } from '@/state/stores/editor-store';
 import type { SubjectType } from '@/domain/enums';
 
@@ -54,7 +54,7 @@ export function RoomsPage() {
 
   const department = state.departments.find((d) => d.id === departmentId);
   const rooms = state.rooms.filter((r) => r.departmentId === departmentId);
-  const timetable = state.timetables.find((t) => t.departmentId === departmentId);
+  const timetable = selectTimetableForDepartment(state, departmentId ?? null);
 
   // Form state
   const [showAddModal, setShowAddModal] = useState(false);
@@ -401,8 +401,11 @@ export function RoomsPage() {
                               type="button"
                               onClick={() => {
                                 if (confirm(`Remove room ${room.code} (${room.name})?`)) {
-                                  state.removeRoom(room.id);
-                                  showToast('success', `Room ${room.code} deleted.`);
+                                  const result = state.removeRoom(room.id);
+                                  showToast(
+                                    result.blocked ? 'warning' : 'success',
+                                    result.reason ?? `Room ${room.code} deleted.`,
+                                  );
                                 }
                               }}
                               className="p-1.5 rounded-lg text-[#71767B] hover:text-red-600 hover:bg-red-50"

@@ -9,7 +9,7 @@ import {
   PageHeader,
   StatTile,
 } from "@/components/ui/primitives";
-import { useWorkspaceStore } from "@/state/stores/workspace-store";
+import { selectTimetableForDepartment, useWorkspaceStore } from "@/state/stores/workspace-store";
 import type { Timetable } from "@/domain/models";
 import { WORKING_DAYS } from "@/domain/enums";
 import type { WorkingDay } from "@/domain/enums";
@@ -140,7 +140,7 @@ export function DashboardPage() {
         const subjects = state.subjects.filter((s) => s.departmentId === d.id);
         const faculty = state.faculty.filter((f) => f.departmentId === d.id);
         const rooms = state.rooms.filter((r) => r.departmentId === d.id);
-        const timetable = state.timetables.find((t) => t.departmentId === d.id);
+        const timetable = selectTimetableForDepartment(state, d.id) ?? undefined;
         const status = computeDepartmentStatus(
           timetable,
           sections.length,

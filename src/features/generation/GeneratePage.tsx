@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { Badge, Button, Card, Field, Input, PageHeader } from '@/components/ui/primitives';
 import { useEditorStore } from '@/state/stores/editor-store';
 import { useGenerationStore } from '@/state/stores/generation-store';
-import { useWorkspaceStore } from '@/state/stores/workspace-store';
+import { selectTimetableForDepartment, useWorkspaceStore } from '@/state/stores/workspace-store';
 import { GenerationService } from '@/application/generation-service';
 import { withVersion } from '@/application/timetable-versioning';
 import { ManualCancellationToken } from '@/scheduler-runtime/scheduler-runner';
@@ -52,8 +52,8 @@ export function GeneratePage() {
     [allBreaks, departmentId],
   );
   const existingTimetable = useMemo(
-    () => state.timetables.find((t) => t.departmentId === departmentId) ?? null,
-    [state.timetables, departmentId],
+    () => selectTimetableForDepartment(state, departmentId ?? null),
+    [state, departmentId],
   );
   const gen = useGenerationStore();
   const editor = useEditorStore();
@@ -206,7 +206,15 @@ export function GeneratePage() {
 
       if (result.status === 'COMPLETED' && result.timetable) {
         const snapshot = buildConfigurationSnapshot(config);
-        const timetable = { ...result.timetable, configurationSnapshot: snapshot, departmentId: department.id };
+        const timetableName = existingTimetable?.name?.trim()
+          || `Timetable ${state.timetables.filter((item) => item.departmentId === department.id).length + 1}`;
+        const timetable = {
+          ...result.timetable,
+          name: timetableName,
+          description: existingTimetable?.description ?? '',
+          configurationSnapshot: snapshot,
+          departmentId: department.id,
+        };
         const finalTimetable = existingTimetable
           ? {
               ...timetable,
@@ -237,6 +245,7 @@ export function GeneratePage() {
             };
 
         state.upsertTimetable(finalTimetable);
+        state.setActiveTimetable(finalTimetable.id);
         void saveTimetableToCloud(finalTimetable, getActiveTermId(), result.metrics);
         gen.complete(result.metrics!);
         editor.showToast(

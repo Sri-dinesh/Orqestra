@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Share2, Trash2 } from 'lucide-react';
+import { Edit3, Share2, Trash2 } from 'lucide-react';
 import { Badge, Button, Card, EditModal, Field, PageHeader, Select } from '@/components/ui/primitives';
 import { ConflictModal } from '@/components/ui/ConflictModal';
 import { ExportPreviewModal } from '@/components/ui/ExportPreviewModal';
@@ -10,7 +10,7 @@ import { DepartmentNotFound } from '@/components/ui/DepartmentNotFound';
 import { TimetableGridHeader } from '@/components/ui/TimetableGridHeader';
 import type { Conflict } from '@/domain/models';
 import { useEditorStore, popUndoCommand, popRedoCommand } from '@/state/stores/editor-store';
-import { useWorkspaceStore } from '@/state/stores/workspace-store';
+import { selectTimetableForDepartment, useWorkspaceStore } from '@/state/stores/workspace-store';
 import { TimetableEditService } from '@/application/timetable-service';
 import { withVersion } from '@/application/timetable-versioning';
 import { computeSlotConflicts, type SlotConflict } from '@/application/timetable-slot-preview';
@@ -24,6 +24,7 @@ import { DepartmentNav } from '@/components/ui/DepartmentNav';
 import { publishTimetableToCloud } from '@/storage/cloud-sync';
 import { getActiveTermId } from '@/storage/term-manager';
 import { flushPersistence } from '@/hooks/usePersistence';
+import { TimetableDetailsModal } from '@/features/timetables/TimetableDetailsModal';
 
 interface CellVm {
   dayIndex: number;
@@ -68,8 +69,8 @@ export function TimetablePage() {
   );
   const breaks = useWorkspaceStore((s) => s.breaks);
   const timetable = useMemo(
-    () => state.timetables.find((t) => t.departmentId === departmentId) ?? null,
-    [state.timetables, departmentId],
+    () => selectTimetableForDepartment(state, departmentId ?? null),
+    [state, departmentId],
   );
   const editor = useEditorStore();
   const role = state.membership?.role ?? 'ADMIN';
@@ -87,6 +88,7 @@ export function TimetablePage() {
   const [publishing, setPublishing] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [detailsModalOpen, setDetailsModalOpen] = useState(false);
 
   const handleDeleteTimetable = async () => {
     if (!timetable) return;
@@ -568,7 +570,7 @@ export function TimetablePage() {
       <DepartmentNav />
       <PageHeader
         eyebrow="Weekly schedule"
-        title={`Timetable — ${department.code}`}
+        title={timetable.name ? `${timetable.name} — ${department.code}` : `Timetable — ${department.code}`}
         actions={
           <>
             <Badge tone={isStale ? 'amber' : timetable.validationSummary?.isValid ? 'green' : 'red'}>
@@ -581,6 +583,10 @@ export function TimetablePage() {
               </span>
             ) : (
               <>
+                <Button variant="secondary" size="sm" onClick={() => setDetailsModalOpen(true)} className="inline-flex items-center gap-1.5">
+                  <Edit3 className="h-3.5 w-3.5" />
+                  Edit details
+                </Button>
                 <Button variant="secondary" size="sm" onClick={handleUndo} disabled={editor.undoStack.length === 0}>
                   Undo
                 </Button>
@@ -1095,6 +1101,18 @@ export function TimetablePage() {
           editor.showToast('success', 'Period timings updated.');
         }}
       />
+
+      {detailsModalOpen && (
+        <TimetableDetailsModal
+          timetable={timetable}
+          onClose={() => setDetailsModalOpen(false)}
+          onSave={({ name, description }) => {
+            state.updateTimetable(timetable.id, { name, description });
+            setDetailsModalOpen(false);
+            editor.showToast('success', 'Timetable details updated.');
+          }}
+        />
+      )}
 
       <SubstituteModal
         isOpen={substituteModalOpen}

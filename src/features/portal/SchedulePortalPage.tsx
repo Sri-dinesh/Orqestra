@@ -10,7 +10,7 @@ import {
   LayoutDashboard,
 } from 'lucide-react';
 import { Button } from '@/components/ui/primitives';
-import { useWorkspaceStore } from '@/state/stores/workspace-store';
+import { selectTimetableForDepartment, useWorkspaceStore } from '@/state/stores/workspace-store';
 import { buildGridLayout, getDepartmentBreaks } from '@/domain/scheduler/grid-layout';
 import type {
   Department,
@@ -100,7 +100,7 @@ export function SchedulePortalPage() {
 
   const timetable: Timetable | undefined = isPublicSlugMode
     ? portalData?.timetable
-    : state.timetables.find((t) => t.departmentId === currentDept?.id);
+    : selectTimetableForDepartment(state, currentDept?.id ?? null) ?? undefined;
 
   // Portal view mode: STUDENT (by Section) or FACULTY (by Teacher)
   const [role, setRole] = useState<'STUDENT' | 'FACULTY'>('STUDENT');

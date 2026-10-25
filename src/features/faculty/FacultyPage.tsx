@@ -5,7 +5,7 @@ import { Button, Card, EditModal, Field, Input, PageHeader } from '@/components/
 import { AvailabilityGrid } from '@/components/ui/AvailabilityGrid';
 import type { FacultyAvailability } from '@/domain/models';
 import { useEditorStore } from '@/state/stores/editor-store';
-import { useWorkspaceStore } from '@/state/stores/workspace-store';
+import { selectTimetableForDepartment, useWorkspaceStore } from '@/state/stores/workspace-store';
 import { computeFacultyWorkload } from '@/domain/scheduler/feasibility';
 import type { Faculty } from '@/domain/models';
 import { BulkImportModal } from '@/components/ui/BulkImportModal';
@@ -48,8 +48,8 @@ export function FacultyPage() {
     [state.sections, departmentId],
   );
   const timetable = useMemo(
-    () => state.timetables.find((t) => t.departmentId === departmentId) ?? null,
-    [state.timetables, departmentId],
+    () => selectTimetableForDepartment(state, departmentId ?? null),
+    [state, departmentId],
   );
   const showToast = useEditorStore((s) => s.showToast);
   const members = useMemo(
