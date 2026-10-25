@@ -90,6 +90,8 @@ describe('Relational Database Schema (Neon Postgres + Drizzle ORM)', () => {
     expect(cols.userId).toBeDefined();
     expect(cols.termId).toBeDefined();
     expect(cols.departmentId).toBeDefined();
+    expect(cols.name).toBeDefined();
+    expect(cols.description).toBeDefined();
     expect(cols.status).toBeDefined();
     expect(cols.revision).toBeDefined();
     expect(cols.configurationSnapshot).toBeDefined();

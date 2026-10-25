@@ -45,6 +45,7 @@ function makeWorkspace() {
       },
     ],
     activeDepartmentId: ds.department.id,
+    activeTimetableId: null,
   };
   return { ds, payload };
 }
@@ -64,6 +65,25 @@ describe('storage service', () => {
     const outcome = service.load();
     expect(outcome.status).toBe('LOADED');
     expect(outcome.workspace?.payload.departments[0].code).toBe('CSE');
+  });
+
+  it('preserves timetable metadata and active timetable selection', () => {
+    const { payload } = makeWorkspace();
+    const timetableId = payload.timetables[0].id;
+    service.save({
+      ...payload,
+      timetables: payload.timetables.map((timetable) => ({
+        ...timetable,
+        name: 'Odd semester',
+        description: 'Main classroom schedule',
+      })),
+      activeTimetableId: timetableId,
+    });
+
+    const loaded = service.load().workspace!;
+    expect(loaded.payload.timetables[0].name).toBe('Odd semester');
+    expect(loaded.payload.timetables[0].description).toBe('Main classroom schedule');
+    expect(loaded.payload.activeTimetableId).toBe(timetableId);
   });
 
   it('returns EMPTY for missing data', () => {
@@ -97,7 +117,7 @@ describe('storage service', () => {
     expect(service.load().status).toBe('CORRUPT');
   });
 
-  it('migrates v3 teaching-unaware grids to teaching-period counts (v4)', () => {
+  it('migrates v3 teaching-unaware grids to the current schema (v5)', () => {
     const { payload } = makeWorkspace();
     // Old semantics: 7 grid slots including lunch at grid index 3.
     const v3 = {
@@ -118,7 +138,7 @@ describe('storage service', () => {
     const outcome = service.load();
     expect(outcome.status).toBe('LOADED');
     const migrated = outcome.workspace!;
-    expect(migrated.schemaVersion).toBe(4);
+    expect(migrated.schemaVersion).toBe(5);
     // Lunch is excluded from the count; its column stays 4th.
     expect(migrated.payload.departments[0].periodsPerDay).toBe(6);
     expect(migrated.payload.breaks).toMatchObject([

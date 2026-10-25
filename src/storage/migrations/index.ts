@@ -108,6 +108,29 @@ const MIGRATIONS: Record<number, MigrationFn> = {
       },
     };
   },
+  /** v4 → v5: add timetable metadata and selection state. */
+  5: (d) => {
+    const payload = (d['payload'] ?? d) as Record<string, unknown>;
+    const timetables = Array.isArray(payload['timetables'])
+      ? (payload['timetables'] as Record<string, unknown>[])
+      : [];
+
+    return {
+      ...d,
+      payload: {
+        ...payload,
+        activeTimetableId: payload['activeTimetableId'] ?? null,
+        timetables: timetables.map((t, index) => ({
+          ...t,
+          name:
+            typeof t['name'] === 'string' && t['name'].trim()
+              ? t['name']
+              : `Timetable ${index + 1}`,
+          description: typeof t['description'] === 'string' ? t['description'] : '',
+        })),
+      },
+    };
+  },
 };
 
 /** Run the migration chain old → current (§32). Returns null if unusable. */

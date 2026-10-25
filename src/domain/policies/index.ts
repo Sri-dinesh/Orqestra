@@ -5,7 +5,7 @@ import type {
 } from '../models';
 
 export const APPLICATION_VERSION = '1.0.0';
-export const SCHEMA_VERSION = 4;
+export const SCHEMA_VERSION = 5;
 export const SCHEDULER_VERSION = '1.0.0';
 export const VALIDATOR_VERSION = '1.0.0';
 export const CONSTRAINT_VERSION = '1.0.0';

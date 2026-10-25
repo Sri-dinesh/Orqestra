@@ -319,6 +319,10 @@ export interface GenerationResult {
 export interface BaseTimetable {
   id: string;
   departmentId: DepartmentId;
+  /** Human-readable name shown in the department timetable library. */
+  name?: string;
+  /** Optional notes describing the timetable's purpose or audience. */
+  description?: string;
   configurationSnapshot: ConfigurationSnapshot;
   entries: TimetableEntry[];
   generationMetadata: GenerationMetadata | null;

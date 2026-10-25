@@ -115,6 +115,7 @@ export const roomSchema = z.object({
 
 export const breakSchema = z.object({
   id: z.string(),
+  departmentId: z.string().nullable().optional(),
   name: z.string().min(1),
   dayIndex: z.number().int().min(0).max(6).nullable(),
   /** Teaching-coordinate position: "after this many teaching periods". */
@@ -148,6 +149,7 @@ export const timetableEntrySchema = z.object({
   sectionId: z.string(),
   subjectId: z.string(),
   facultyId: z.string(),
+  roomId: z.string().nullable().optional(),
   dayIndex: z.number().int().min(0),
   startPeriod: z.number().int().min(0),
   durationPeriods: z.number().int().min(1).max(3),
@@ -223,6 +225,8 @@ export const timetableVersionSchema = z.object({
 export const timetableSchema = z.object({
   id: z.string(),
   departmentId: z.string(),
+  name: z.string().min(1).optional(),
+  description: z.string().optional(),
   configurationSnapshot: configurationSnapshotSchema,
   entries: z.array(timetableEntrySchema),
   status: timetableStatusSchema,
@@ -283,6 +287,7 @@ export const persistedWorkspacePayloadSchema = z.object({
   rooms: z.array(roomSchema).optional(),
   breaks: z.array(breakSchema).optional(),
   activeDepartmentId: z.string().nullable(),
+  activeTimetableId: z.string().nullable().optional(),
   collegeDetails: collegeDetailsSchema.optional(),
   generationSettingsOverrides: z
     .record(

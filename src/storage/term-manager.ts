@@ -172,6 +172,7 @@ export function createTerm(name: string, academicYear: string): AcademicTerm {
     rooms: [],
     breaks: [],
     activeDepartmentId: null,
+    activeTimetableId: null,
   };
   saveTermWorkspace(id, emptyPayload);
 
@@ -190,6 +191,7 @@ export function cloneTerm(sourceTermId: string, options: CloneTermOptions): Acad
     rooms: [],
     breaks: [],
     activeDepartmentId: null,
+    activeTimetableId: null,
   };
 
   const id = `term-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 6)}`;
@@ -219,6 +221,7 @@ export function cloneTerm(sourceTermId: string, options: CloneTermOptions): Acad
     breaks: sourcePayload.breaks ? sourcePayload.breaks.map((b) => ({ ...b })) : [],
     timetables: options.includeTimetables ? sourcePayload.timetables.map((t) => ({ ...t })) : [],
     activeDepartmentId: options.includeDepartments ? sourcePayload.activeDepartmentId : null,
+    activeTimetableId: options.includeTimetables ? sourcePayload.activeTimetableId ?? null : null,
     collegeDetails: sourcePayload.collegeDetails ? { ...sourcePayload.collegeDetails, academicYear: options.academicYear } : undefined,
   };
 
@@ -267,4 +270,3 @@ export function syncTermsFromCloud(terms: AcademicTerm[], activeTermId?: string)
     backing.setItem(ACTIVE_TERM_STORAGE_KEY, activeTermId);
   }
 }
-

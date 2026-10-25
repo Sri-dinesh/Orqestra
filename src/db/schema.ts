@@ -323,6 +323,8 @@ export const timetables = pgTable(
     departmentId: text('department_id')
       .notNull()
       .references(() => departments.id, { onDelete: 'cascade' }),
+    name: text('name').default('Untitled timetable').notNull(),
+    description: text('description').default('').notNull(),
     status: text('status').$type<Timetable['status']>().notNull(),
     revision: integer('revision').default(1).notNull(),
     configurationSnapshot: jsonb('configuration_snapshot').$type<Timetable['configurationSnapshot']>().notNull(),
@@ -336,7 +338,7 @@ export const timetables = pgTable(
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [
-    uniqueIndex('timetables_user_term_dept_idx').on(table.userId, table.termId, table.departmentId),
+    index('timetables_user_term_dept_idx').on(table.userId, table.termId, table.departmentId),
     index('timetables_department_id_idx').on(table.departmentId),
     index('timetables_public_slug_idx').on(table.publicSlug),
   ],

@@ -21,6 +21,8 @@ export interface PersistedWorkspacePayload {
   /** Breaks (e.g. lunch); absent in documents saved before they existed. */
   breaks?: Break[];
   activeDepartmentId: string | null;
+  /** Currently selected timetable in the active department. */
+  activeTimetableId?: string | null;
   /** Institution profile; absent in documents saved before it existed. */
   collegeDetails?: CollegeDetails;
   generationSettingsOverrides?: Record<string, Partial<GenerationSettingsOverrides>>;
