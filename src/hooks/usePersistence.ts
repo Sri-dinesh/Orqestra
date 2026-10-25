@@ -20,6 +20,7 @@ export function clearInMemoryWorkspace() {
     rooms: [],
     breaks: [],
     activeDepartmentId: null,
+    activeTimetableId: null,
   });
 }
 
@@ -64,6 +65,7 @@ export function usePersistence(namespace = 'anonymous'): LoadOutcome | null {
         rooms: outcome.workspace.payload.rooms,
         breaks: outcome.workspace.payload.breaks,
         activeDepartmentId: outcome.workspace.payload.activeDepartmentId,
+        activeTimetableId: outcome.workspace.payload.activeTimetableId,
         generationSettingsOverrides: outcome.workspace.payload.generationSettingsOverrides,
         collegeDetails: outcome.workspace.payload.collegeDetails,
       });
@@ -77,6 +79,7 @@ export function usePersistence(namespace = 'anonymous'): LoadOutcome | null {
         rooms: [],
         breaks: [],
         activeDepartmentId: null,
+        activeTimetableId: null,
       });
     }
 
@@ -133,6 +136,7 @@ export function usePersistence(namespace = 'anonymous'): LoadOutcome | null {
                 rooms: localCurrentState.rooms,
                 breaks: localCurrentState.breaks,
                 activeDepartmentId: localCurrentState.activeDepartmentId,
+                activeTimetableId: localCurrentState.activeTimetableId,
                 generationSettingsOverrides: localCurrentState.generationSettingsOverrides,
                 collegeDetails: localCurrentState.collegeDetails,
               },
@@ -152,6 +156,7 @@ export function usePersistence(namespace = 'anonymous'): LoadOutcome | null {
             rooms: cloudData.workspace.rooms,
             breaks: cloudData.workspace.breaks,
             activeDepartmentId: cloudData.workspace.activeDepartmentId,
+            activeTimetableId: cloudData.workspace.activeTimetableId,
             generationSettingsOverrides: cloudData.workspace.generationSettingsOverrides,
             collegeDetails: cloudData.workspace.collegeDetails,
             membership: cloudData.membership ?? null,
@@ -199,6 +204,7 @@ export function usePersistence(namespace = 'anonymous'): LoadOutcome | null {
         rooms: state.rooms,
         breaks: state.breaks,
         activeDepartmentId: state.activeDepartmentId,
+        activeTimetableId: state.activeTimetableId,
         generationSettingsOverrides: state.generationSettingsOverrides,
         collegeDetails: state.collegeDetails,
       };
@@ -250,6 +256,7 @@ export function usePersistence(namespace = 'anonymous'): LoadOutcome | null {
     state.rooms,
     state.breaks,
     state.activeDepartmentId,
+    state.activeTimetableId,
     state.generationSettingsOverrides,
     state.collegeDetails,
   ]);
@@ -283,6 +290,7 @@ export async function flushPersistence(): Promise<{ ok: boolean }> {
     rooms: state.rooms,
     breaks: state.breaks,
     activeDepartmentId: state.activeDepartmentId,
+    activeTimetableId: state.activeTimetableId,
     generationSettingsOverrides: state.generationSettingsOverrides,
     collegeDetails: state.collegeDetails,
   };

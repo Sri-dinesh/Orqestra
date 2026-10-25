@@ -36,6 +36,7 @@ export interface WorkspaceState {
   rooms: Room[];
   breaks: Break[];
   activeDepartmentId: string | null;
+  activeTimetableId: string | null;
   persistenceStatus: 'IDLE' | 'SAVING' | 'SAVED' | 'ERROR' | 'OFFLINE';
   /** Per-department generation settings overrides (keyed by department ID). */
   generationSettingsOverrides: Record<string, Partial<GenerationSettingsOverrides>>;
@@ -45,13 +46,15 @@ export interface WorkspaceState {
   membership: InstitutionalMembership | null;
 
   setActiveDepartment: (id: string | null) => void;
+  setActiveTimetable: (id: string | null) => void;
   addDepartment: (input: { code: string; name: string; workingDays: WorkingDay[]; periodsPerDay: number; periodTimings?: PeriodTiming[] }) => Department;
   updateDepartment: (id: string, patch: Partial<Department>) => void;
+  clearDepartmentResources: (id: string) => void;
   removeDepartment: (id: string) => void;
 
   addSection: (input: Omit<Section, 'id' | 'active'>) => Section;
   updateSection: (id: string, patch: Partial<Section>) => void;
-  removeSection: (id: string) => void;
+  removeSection: (id: string) => { blocked: boolean; reason: string | null };
 
   addSubject: (input: Omit<Subject, 'id' | 'active'>) => Subject;
   updateSubject: (id: string, patch: Partial<Subject>) => void;
@@ -68,7 +71,7 @@ export interface WorkspaceState {
 
   addRoom: (input: Omit<Room, 'id' | 'active'>) => Room;
   updateRoom: (id: string, patch: Partial<Room>) => void;
-  removeRoom: (id: string) => void;
+  removeRoom: (id: string) => { blocked: boolean; reason: string | null };
 
   addBreak: (input: Omit<Break, 'id'>) => Break;
   updateBreak: (id: string, patch: Partial<Break>) => void;
@@ -83,6 +86,7 @@ export interface WorkspaceState {
     rooms?: Room[];
     breaks?: Break[];
     activeDepartmentId: string | null;
+    activeTimetableId?: string | null;
     generationSettingsOverrides?: Record<string, Partial<GenerationSettingsOverrides>>;
     collegeDetails?: CollegeDetails;
     membership?: InstitutionalMembership | null;
@@ -105,12 +109,21 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
   rooms: [],
   breaks: [],
   activeDepartmentId: null,
+  activeTimetableId: null,
   persistenceStatus: 'IDLE',
   generationSettingsOverrides: {},
   collegeDetails: EMPTY_COLLEGE_DETAILS,
   membership: null,
 
-  setActiveDepartment: (id) => set({ activeDepartmentId: id }),
+  setActiveDepartment: (id) =>
+    set((s) => ({
+      activeDepartmentId: id,
+      activeTimetableId:
+        id && s.activeTimetableId && s.timetables.some((t) => t.id === s.activeTimetableId && t.departmentId === id)
+          ? s.activeTimetableId
+          : null,
+    })),
+  setActiveTimetable: (id) => set({ activeTimetableId: id }),
 
   addDepartment: (input) => {
     const now = new Date().toISOString();
@@ -132,15 +145,53 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
       ),
     })),
 
-  removeDepartment: (id) =>
+  clearDepartmentResources: (id) =>
     set((s) => ({
-      departments: s.departments.filter((d) => d.id !== id),
-      sections: s.sections.filter((x) => x.departmentId !== id),
-      subjects: s.subjects.filter((x) => x.departmentId !== id),
-      faculty: s.faculty.filter((x) => x.departmentId !== id),
-      timetables: s.timetables.filter((t) => t.departmentId !== id),
-      activeDepartmentId: s.activeDepartmentId === id ? null : s.activeDepartmentId,
+      sections: s.sections.filter((item) => item.departmentId !== id),
+      subjects: s.subjects.filter((item) => item.departmentId !== id),
+      faculty: s.faculty.filter((item) => item.departmentId !== id),
+      timetables: s.timetables.filter((item) => item.departmentId !== id),
+      rooms: s.rooms.filter((item) => item.departmentId !== id),
+      breaks: s.breaks.filter((item) => item.departmentId !== id),
+      activeTimetableId:
+        s.activeTimetableId && s.timetables.some((item) => item.id === s.activeTimetableId && item.departmentId === id)
+          ? null
+          : s.activeTimetableId,
+      generationSettingsOverrides: Object.fromEntries(
+        Object.entries(s.generationSettingsOverrides).filter(([departmentId]) => departmentId !== id),
+      ),
     })),
+
+  removeDepartment: (id) =>
+    set((s) => {
+      const nextDepartments = s.departments.filter((department) => department.id !== id);
+      const nextTimetables = s.timetables.filter((timetable) => timetable.departmentId !== id);
+      const nextActiveDepartmentId =
+        s.activeDepartmentId === id ? nextDepartments[0]?.id ?? null : s.activeDepartmentId;
+      const nextActiveTimetableId =
+        s.activeTimetableId && !nextTimetables.some((timetable) => timetable.id === s.activeTimetableId)
+          ? nextTimetables.find((timetable) => timetable.departmentId === nextActiveDepartmentId)?.id ?? null
+          : s.activeTimetableId;
+
+      return {
+        departments: nextDepartments,
+        sections: s.sections.filter((item) => item.departmentId !== id),
+        subjects: s.subjects.filter((item) => item.departmentId !== id),
+        faculty: s.faculty.filter((item) => item.departmentId !== id),
+        timetables: nextTimetables,
+        rooms: s.rooms.filter((item) => item.departmentId !== id),
+        breaks: s.breaks.filter((item) => item.departmentId !== id),
+        activeDepartmentId: nextActiveDepartmentId,
+        activeTimetableId: nextActiveTimetableId,
+        generationSettingsOverrides: Object.fromEntries(
+          Object.entries(s.generationSettingsOverrides).filter(([departmentId]) => departmentId !== id),
+        ),
+        membership:
+          s.membership?.departmentId === id
+            ? { ...s.membership, departmentId: null }
+            : s.membership,
+      };
+    }),
 
   addSection: (input) => {
     const section: Section = { ...input, id: generateId('sec'), active: true };
@@ -151,7 +202,29 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
   updateSection: (id, patch) =>
     set((s) => ({ sections: s.sections.map((x) => (x.id === id ? { ...x, ...patch } : x)) })),
 
-  removeSection: (id) => set((s) => ({ sections: s.sections.filter((x) => x.id !== id) })),
+  removeSection: (id) => {
+    const state = get();
+    const referenced = state.timetables.some((timetable) =>
+      timetable.entries.some((entry) => entry.sectionId === id),
+    );
+    if (referenced) {
+      set((s) => ({
+        sections: s.sections.map((section) =>
+          section.id === id ? { ...section, active: false } : section,
+        ),
+      }));
+      return { blocked: true, reason: 'Section is referenced by a timetable; it was deactivated instead.' };
+    }
+
+    set((s) => ({
+      sections: s.sections.filter((section) => section.id !== id),
+      subjects: s.subjects.map((subject) => ({
+        ...subject,
+        eligibleSectionIds: subject.eligibleSectionIds.filter((sectionId) => sectionId !== id),
+      })),
+    }));
+    return { blocked: false, reason: null };
+  },
 
   addSubject: (input) => {
     const subject: Subject = { ...input, id: generateId('sub'), active: true };
@@ -201,9 +274,9 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
       if (idx >= 0) {
         const next = [...s.timetables];
         next[idx] = timetable;
-        return { timetables: next };
+        return { timetables: next, activeTimetableId: timetable.id };
       }
-      return { timetables: [...s.timetables, timetable] };
+      return { timetables: [...s.timetables, timetable], activeTimetableId: timetable.id };
     }),
 
   setTimetableStatus: (id, status) =>
@@ -223,18 +296,26 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
       const target = s.timetables.find(
         (t) => t.id === idOrDepartmentId || t.departmentId === idOrDepartmentId,
       );
+      const removingById = s.timetables.some((t) => t.id === idOrDepartmentId);
       const nextTimetables = s.timetables.filter(
-        (t) => t.id !== idOrDepartmentId && t.departmentId !== idOrDepartmentId,
+        (t) => removingById ? t.id !== idOrDepartmentId : t.departmentId !== idOrDepartmentId,
       );
       const deptId = target?.departmentId ?? idOrDepartmentId;
+      const activeWasRemoved = s.activeTimetableId
+        ? !nextTimetables.some((t) => t.id === s.activeTimetableId)
+        : false;
+      const nextActiveTimetable = activeWasRemoved
+        ? nextTimetables.find((t) => t.departmentId === deptId)?.id ?? null
+        : s.activeTimetableId;
       const nextDepartments = s.departments.map((d) =>
-        d.id === deptId && d.status !== 'ARCHIVED'
+        d.id === deptId && !nextTimetables.some((t) => t.departmentId === deptId) && d.status !== 'ARCHIVED'
           ? { ...d, status: 'READY' as const }
           : d,
       );
       return {
         timetables: nextTimetables,
         departments: nextDepartments,
+        activeTimetableId: nextActiveTimetable,
       };
     }),
 
@@ -245,7 +326,20 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
   },
   updateRoom: (id, patch) =>
     set((state) => ({ rooms: state.rooms.map((r) => (r.id === id ? { ...r, ...patch } : r)) })),
-  removeRoom: (id) => set((state) => ({ rooms: state.rooms.filter((r) => r.id !== id) })),
+  removeRoom: (id) => {
+    const state = get();
+    const referenced = state.timetables.some((timetable) =>
+      timetable.entries.some((entry) => entry.roomId === id),
+    );
+    if (referenced) {
+      set((s) => ({
+        rooms: s.rooms.map((room) => (room.id === id ? { ...room, active: false } : room)),
+      }));
+      return { blocked: true, reason: 'Room is referenced by a timetable; it was disabled instead.' };
+    }
+    set((s) => ({ rooms: s.rooms.filter((room) => room.id !== id) }));
+    return { blocked: false, reason: null };
+  },
 
   addBreak: (input) => {
     const brk = { ...input, id: generateId('break') };
@@ -266,6 +360,7 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
       timetables: payload.timetables ?? [],
       rooms: payload.rooms ?? [],
       breaks: payload.breaks ?? [],
+      activeTimetableId: payload.activeTimetableId ?? null,
       generationSettingsOverrides: payload.generationSettingsOverrides ?? {},
       collegeDetails: payload.collegeDetails ?? EMPTY_COLLEGE_DETAILS,
       membership: payload.membership !== undefined ? payload.membership : s.membership,
@@ -300,7 +395,20 @@ export const selectCurrentFaculty = (s: WorkspaceState): Faculty[] =>
   s.faculty.filter((x) => x.departmentId === s.activeDepartmentId);
 
 export const selectTimetableForActiveDepartment = (s: WorkspaceState): Timetable | null =>
-  s.timetables.find((t) => t.departmentId === s.activeDepartmentId) ?? null;
+  selectTimetableForDepartment(s, s.activeDepartmentId);
+
+export const selectTimetablesForDepartment = (
+  s: WorkspaceState,
+  departmentId: string | null,
+): Timetable[] => s.timetables.filter((t) => t.departmentId === departmentId);
+
+export const selectTimetableForDepartment = (
+  s: WorkspaceState,
+  departmentId: string | null,
+): Timetable | null => {
+  const timetables = selectTimetablesForDepartment(s, departmentId);
+  return timetables.find((t) => t.id === s.activeTimetableId) ?? timetables[0] ?? null;
+};
 
 export function selectTimetableEntriesForSection(
   timetable: Timetable | null,
