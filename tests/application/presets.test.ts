@@ -1,5 +1,10 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { BUILT_IN_PRESETS, applyPreset, applyPresetWithTimetable } from '@/application/presets';
+import {
+  BUILT_IN_PRESETS,
+  applyPreset,
+  applyPresetToDepartmentWithTimetable,
+  applyPresetWithTimetable,
+} from '@/application/presets';
 import { useWorkspaceStore } from '@/state/stores/workspace-store';
 import { analyzeFeasibility } from '@/domain/scheduler/feasibility';
 import { generateTimetable } from '@/domain/scheduler/engine';
@@ -107,5 +112,29 @@ describe('built-in presets', () => {
     expect(timetable!.entries.length).toBe(351); // 9 sections × (36 theory + 3 labs = 39 sessions) = 351 sessions (378 periods, 100% full packing)
     expect(timetable!.validationSummary?.isValid).toBe(true);
     expect(timetable!.validationSummary?.conflicts.length).toBe(0);
+  }, 30_000);
+
+  it('applies a preset inside an existing department without creating a second department', async () => {
+    const existing = useWorkspaceStore.getState().addDepartment({
+      code: 'CUSTOM',
+      name: 'Custom Department',
+      workingDays: ['MONDAY', 'TUESDAY'],
+      periodsPerDay: 4,
+    });
+    const preset = BUILT_IN_PRESETS.find((p) => p.id === 'standard-school')!;
+
+    const departmentId = await applyPresetToDepartmentWithTimetable(
+      preset,
+      existing.id,
+      useWorkspaceStore.getState(),
+    );
+    const store = useWorkspaceStore.getState();
+
+    expect(departmentId).toBe(existing.id);
+    expect(store.departments).toHaveLength(1);
+    expect(store.departments[0].code).toBe(preset.department.code);
+    expect(store.sections.every((section) => section.departmentId === existing.id)).toBe(true);
+    expect(store.timetables).toHaveLength(1);
+    expect(store.timetables[0].name).toBe(preset.label);
   }, 30_000);
 });

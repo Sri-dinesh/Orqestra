@@ -426,14 +426,35 @@ type WorkspaceStore = ReturnType<typeof useWorkspaceStore.getState>;
  * Apply a preset: creates the department, sections, subjects, faculty and
  * requirement/assignment wiring in one go. Returns the new department ID.
  */
-export function applyPreset(preset: PresetDefinition, store: WorkspaceStore): string {
-  const department = store.addDepartment({
-    code: preset.department.code,
-    name: preset.department.name,
-    workingDays: [...preset.workingDays],
-    periodsPerDay: preset.periodsPerDay,
-    ...(preset.periodTimings ? { periodTimings: preset.periodTimings.map((t) => ({ ...t })) } : {}),
-  });
+export function applyPreset(
+  preset: PresetDefinition,
+  store: WorkspaceStore,
+  targetDepartmentId?: string,
+): string {
+  const department = targetDepartmentId
+    ? store.departments.find((item) => item.id === targetDepartmentId)
+    : store.addDepartment({
+        code: preset.department.code,
+        name: preset.department.name,
+        workingDays: [...preset.workingDays],
+        periodsPerDay: preset.periodsPerDay,
+        ...(preset.periodTimings ? { periodTimings: preset.periodTimings.map((t) => ({ ...t })) } : {}),
+      });
+
+  if (!department) {
+    throw new Error(`Department ${targetDepartmentId} was not found.`);
+  }
+
+  if (targetDepartmentId) {
+    store.clearDepartmentResources(department.id);
+    store.updateDepartment(department.id, {
+      code: preset.department.code,
+      name: preset.department.name,
+      workingDays: [...preset.workingDays],
+      periodsPerDay: preset.periodsPerDay,
+      ...(preset.periodTimings ? { periodTimings: preset.periodTimings.map((t) => ({ ...t })) } : { periodTimings: undefined }),
+    });
+  }
 
   store.updateDepartment(department.id, {
     status: 'READY',
@@ -563,8 +584,9 @@ export function applyPreset(preset: PresetDefinition, store: WorkspaceStore): st
 export async function applyPresetWithTimetable(
   preset: PresetDefinition,
   store: WorkspaceStore,
+  targetDepartmentId?: string,
 ): Promise<string> {
-  const departmentId = applyPreset(preset, store);
+  const departmentId = applyPreset(preset, store, targetDepartmentId);
 
   // Retrieve the latest workspace snapshot
   const state = useWorkspaceStore.getState();
@@ -615,11 +637,14 @@ export async function applyPresetWithTimetable(
     if (result.timetable) {
       const timetableToSave: Timetable = {
         ...result.timetable,
+        name: preset.label,
+        description: preset.description,
         departmentId,
         configurationSnapshot:
           result.timetable.configurationSnapshot ?? buildConfigurationSnapshot(config),
       };
       store.upsertTimetable(timetableToSave);
+      store.setActiveTimetable(timetableToSave.id);
       store.updateDepartment(departmentId, { status: 'READY' });
     }
   } catch (error) {
@@ -627,4 +652,20 @@ export async function applyPresetWithTimetable(
   }
 
   return departmentId;
+}
+
+export function applyPresetToDepartment(
+  preset: PresetDefinition,
+  departmentId: string,
+  store: WorkspaceStore,
+): string {
+  return applyPreset(preset, store, departmentId);
+}
+
+export async function applyPresetToDepartmentWithTimetable(
+  preset: PresetDefinition,
+  departmentId: string,
+  store: WorkspaceStore,
+): Promise<string> {
+  return applyPresetWithTimetable(preset, store, departmentId);
 }
