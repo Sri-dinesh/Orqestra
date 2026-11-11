@@ -97,6 +97,29 @@ describe('department timetable library', () => {
     expect(next.activeTimetableId).toBe('tt_first');
   });
 
+  it('duplicates a timetable with a fresh id, "Copy of" prefix, revision 1, and clean version history', () => {
+    const original = timetable('tt_original', 'Odd semester');
+    const state = useWorkspaceStore.getState();
+    state.upsertTimetable(original);
+
+    const clone = state.duplicateTimetable('tt_original');
+
+    const next = useWorkspaceStore.getState();
+    expect(clone).not.toBeNull();
+    expect(clone!.id).not.toBe('tt_original');
+    expect(clone!.name).toBe('Copy of Odd semester');
+    expect(clone!.status).toBe('DRAFT');
+    expect(clone!.revision).toBe(1);
+    expect(clone!.versionHistory).toHaveLength(0);
+    expect(next.timetables).toHaveLength(2);
+    expect(next.activeTimetableId).toBe(clone!.id);
+  });
+
+  it('returns null when duplicating a non-existent timetable id', () => {
+    const result = useWorkspaceStore.getState().duplicateTimetable('tt_does_not_exist');
+    expect(result).toBeNull();
+  });
+
   it('removes a department and every department-owned resource', () => {
     const state = useWorkspaceStore.getState();
     state.addRoom({

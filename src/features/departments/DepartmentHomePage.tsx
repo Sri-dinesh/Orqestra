@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { ArrowRight, CalendarDays, Edit3, Layers3, Plus, Settings2, Trash2 } from 'lucide-react';
+import { ArrowRight, CalendarDays, Copy, Edit3, Layers3, Plus, Settings2, Trash2 } from 'lucide-react';
 import { Badge, Button, Card, EditModal, PageHeader } from '@/components/ui/primitives';
 import { DepartmentNav } from '@/components/ui/DepartmentNav';
 import { DepartmentNotFound } from '@/components/ui/DepartmentNotFound';
@@ -80,6 +80,16 @@ export function DepartmentHomePage() {
     }
   };
 
+  const duplicateTimetable = async (sourceId: string) => {
+    const clone = state.duplicateTimetable(sourceId);
+    if (!clone) {
+      showToast('error', 'Could not duplicate timetable.');
+      return;
+    }
+    await flushPersistence();
+    showToast('success', `"${clone.name}" created.`);
+  };
+
   return (
     <div className="space-y-7">
       <DepartmentNav />
@@ -144,6 +154,15 @@ export function DepartmentHomePage() {
                       <>
                         <Button variant="ghost" size="sm" onClick={() => setEditingTimetableId(timetable.id)} aria-label={`Edit ${timetable.name ?? 'timetable'}`}>
                           <Edit3 className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => void duplicateTimetable(timetable.id)}
+                          aria-label={`Duplicate ${timetable.name ?? 'timetable'}`}
+                          title="Duplicate timetable"
+                        >
+                          <Copy className="h-3.5 w-3.5" />
                         </Button>
                         <Button variant="danger" size="sm" onClick={() => setDeletingTimetableId(timetable.id)} aria-label={`Delete ${timetable.name ?? 'timetable'}`}>
                           <Trash2 className="h-3.5 w-3.5" />

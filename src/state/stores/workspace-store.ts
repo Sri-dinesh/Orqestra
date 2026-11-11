@@ -68,6 +68,8 @@ export interface WorkspaceState {
   setTimetableStatus: (id: string, status: Timetable['status']) => void;
   updateTimetable: (id: string, patch: Partial<Timetable>) => void;
   removeTimetable: (idOrDepartmentId: string) => void;
+  /** Deep-clone an existing timetable into a new sibling with a fresh ID. Returns the clone. */
+  duplicateTimetable: (sourceId: string) => Timetable | null;
 
   addRoom: (input: Omit<Room, 'id' | 'active'>) => Room;
   updateRoom: (id: string, patch: Partial<Room>) => void;
@@ -318,6 +320,26 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
         activeTimetableId: nextActiveTimetable,
       };
     }),
+
+  duplicateTimetable: (sourceId) => {
+    const source = get().timetables.find((t) => t.id === sourceId);
+    if (!source) return null;
+    const now = new Date().toISOString();
+    const clone: Timetable = {
+      ...source,
+      id: generateId('tt'),
+      name: `Copy of ${source.name ?? 'Untitled timetable'}`,
+      description: source.description ?? '',
+      entries: source.entries.map((e) => ({ ...e, id: generateId('te') as typeof e.id })),
+      versionHistory: [],
+      status: 'DRAFT' as const,
+      revision: 1,
+      createdAt: now,
+      updatedAt: now,
+    } as Timetable;
+    set((s) => ({ timetables: [...s.timetables, clone], activeTimetableId: clone.id }));
+    return clone;
+  },
 
   addRoom: (input) => {
     const room = { ...input, id: generateId('room'), active: true };
