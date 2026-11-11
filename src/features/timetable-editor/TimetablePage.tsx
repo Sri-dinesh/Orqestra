@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Edit3, Share2, Trash2 } from 'lucide-react';
+import { Copy, Edit3, Share2, Trash2 } from 'lucide-react';
 import { Badge, Button, Card, EditModal, Field, PageHeader, Select } from '@/components/ui/primitives';
 import { ConflictModal } from '@/components/ui/ConflictModal';
 import { ExportPreviewModal } from '@/components/ui/ExportPreviewModal';
@@ -10,7 +10,11 @@ import { DepartmentNotFound } from '@/components/ui/DepartmentNotFound';
 import { TimetableGridHeader } from '@/components/ui/TimetableGridHeader';
 import type { Conflict } from '@/domain/models';
 import { useEditorStore, popUndoCommand, popRedoCommand } from '@/state/stores/editor-store';
-import { selectTimetableForDepartment, useWorkspaceStore } from '@/state/stores/workspace-store';
+import {
+  selectTimetableForDepartment,
+  selectTimetablesForDepartment,
+  useWorkspaceStore,
+} from '@/state/stores/workspace-store';
 import { TimetableEditService } from '@/application/timetable-service';
 import { withVersion } from '@/application/timetable-versioning';
 import { computeSlotConflicts, type SlotConflict } from '@/application/timetable-slot-preview';
@@ -72,6 +76,10 @@ export function TimetablePage() {
     () => selectTimetableForDepartment(state, departmentId ?? null),
     [state, departmentId],
   );
+  const deptTimetables = useMemo(
+    () => selectTimetablesForDepartment(state, departmentId ?? null),
+    [state, departmentId],
+  );
   const editor = useEditorStore();
   const role = state.membership?.role ?? 'ADMIN';
   const isFaculty = role === 'FACULTY';
@@ -89,6 +97,17 @@ export function TimetablePage() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [detailsModalOpen, setDetailsModalOpen] = useState(false);
+
+  const handleDuplicate = async () => {
+    if (!timetable) return;
+    const clone = state.duplicateTimetable(timetable.id);
+    if (!clone) {
+      editor.showToast('error', 'Could not duplicate timetable.');
+      return;
+    }
+    await flushPersistence();
+    editor.showToast('success', `"${clone.name}" created and switched to.`);
+  };
 
   const handleDeleteTimetable = async () => {
     if (!timetable) return;
@@ -348,6 +367,48 @@ export function TimetablePage() {
     }
   };
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (
+        target &&
+        (target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.tagName === 'SELECT' ||
+          target.isContentEditable)
+      ) {
+        return;
+      }
+
+      if (e.key === 'Escape') {
+        if (editor.selectedEntryId) {
+          editor.selectEntry(null);
+        }
+        return;
+      }
+
+      const isMac = typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.platform);
+      const modifier = isMac ? e.metaKey : e.ctrlKey;
+
+      if (modifier && !e.altKey) {
+        if (e.key.toLowerCase() === 'z') {
+          e.preventDefault();
+          if (e.shiftKey) {
+            handleRedo();
+          } else {
+            handleUndo();
+          }
+        } else if (e.key.toLowerCase() === 'y') {
+          e.preventDefault();
+          handleRedo();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [editor, handleUndo, handleRedo]);
+
   const doExportPdf = () => {
     if (!activeSectionId) return;
     try {
@@ -587,10 +648,32 @@ export function TimetablePage() {
                   <Edit3 className="h-3.5 w-3.5" />
                   Edit details
                 </Button>
-                <Button variant="secondary" size="sm" onClick={handleUndo} disabled={editor.undoStack.length === 0}>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={handleDuplicate}
+                  className="inline-flex items-center gap-1.5"
+                  title="Create a copy of this timetable"
+                >
+                  <Copy className="h-3.5 w-3.5" />
+                  Duplicate
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={handleUndo}
+                  disabled={editor.undoStack.length === 0}
+                  title="Undo (Ctrl+Z)"
+                >
                   Undo
                 </Button>
-                <Button variant="secondary" size="sm" onClick={handleRedo} disabled={editor.redoStack.length === 0}>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={handleRedo}
+                  disabled={editor.redoStack.length === 0}
+                  title="Redo (Ctrl+Y)"
+                >
                   Redo
                 </Button>
                 <Button
@@ -664,7 +747,28 @@ export function TimetablePage() {
       )}
 
       <div className="flex flex-col gap-3">
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          {deptTimetables.length > 1 && (
+            <label className="flex items-center gap-2 text-sm font-medium text-ink">
+              Schedule:
+              <Select
+                value={timetable.id}
+                onChange={(e) => {
+                  state.setActiveTimetable(e.target.value);
+                  if (editor.selectedEntryId) editor.selectEntry(null);
+                }}
+                className="w-52"
+                aria-label="Select schedule"
+              >
+                {deptTimetables.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.name || 'Untitled timetable'}
+                  </option>
+                ))}
+              </Select>
+            </label>
+          )}
+
           <label className="flex items-center gap-2 text-sm font-medium text-ink">
             Section:
             <Select
@@ -683,6 +787,36 @@ export function TimetablePage() {
               ))}
             </Select>
           </label>
+          {(() => {
+            // Fill-rate stats: teaching slots vs assigned sessions for active section
+            const totalTeachingSlots = department.workingDays.length * department.periodsPerDay;
+            const assignedPeriods = entries.reduce((sum, e) => sum + e.durationPeriods, 0);
+            const fillPct = totalTeachingSlots > 0 ? Math.round((assignedPeriods / totalTeachingSlots) * 100) : 0;
+            const tone =
+              fillPct === 100 ? 'text-emerald-700 bg-emerald-50 border-emerald-200' :
+              fillPct >= 75 ? 'text-blue-700 bg-blue-50 border-blue-200' :
+              fillPct >= 40 ? 'text-amber-700 bg-amber-50 border-amber-200' :
+              'text-red-700 bg-red-50 border-red-200';
+            const barColor =
+              fillPct === 100 ? 'bg-emerald-500' :
+              fillPct >= 75 ? 'bg-blue-500' :
+              fillPct >= 40 ? 'bg-amber-400' :
+              'bg-red-400';
+            return (
+              <div className={`flex items-center gap-3 rounded-xl border px-3 py-1.5 ${tone}`} title={`${assignedPeriods} of ${totalTeachingSlots} teaching slots filled`}>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xs font-semibold tabular-nums">{assignedPeriods}/{totalTeachingSlots}</span>
+                  <span className="text-xs opacity-70">slots filled</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="h-1.5 w-20 overflow-hidden rounded-full bg-current/20">
+                    <div className={`h-full rounded-full transition-all duration-300 ${barColor}`} style={{ width: `${fillPct}%` }} />
+                  </div>
+                  <span className="text-xs font-bold tabular-nums">{fillPct}%</span>
+                </div>
+              </div>
+            );
+          })()}
         </div>
         {editor.selectedEntryId && (
           <div className="flex flex-wrap items-center gap-2 rounded-xl bg-info-bg px-3 py-2">
