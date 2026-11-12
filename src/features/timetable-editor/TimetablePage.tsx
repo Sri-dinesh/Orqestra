@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Copy, Edit3, Share2, Trash2 } from 'lucide-react';
+import { Copy, Edit3, Plus, Share2, Trash2 } from 'lucide-react';
 import { Badge, Button, Card, EditModal, Field, PageHeader, Select } from '@/components/ui/primitives';
 import { ConflictModal } from '@/components/ui/ConflictModal';
 import { ExportPreviewModal } from '@/components/ui/ExportPreviewModal';
@@ -19,6 +19,7 @@ import { TimetableEditService } from '@/application/timetable-service';
 import { withVersion } from '@/application/timetable-versioning';
 import { computeSlotConflicts, type SlotConflict } from '@/application/timetable-slot-preview';
 import { exportTimetable } from '@/application/export-service';
+import { computeSectionSubjectAllocations } from '@/application/subject-allocation-service';
 import type { EditCommand } from '@/application/timetable-edit-commands';
 import { buildConfigurationSnapshot } from '@/domain/configuration/normalize';
 import { DEFAULT_GENERATION_SETTINGS, DEFAULT_HARD_CONSTRAINTS, DEFAULT_SOFT_WEIGHTS } from '@/domain/policies';
@@ -87,7 +88,7 @@ export function TimetablePage() {
   const [focusConflictId, setFocusConflictId] = useState<string | null>(null);
   const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
   const [blockedConflicts, setBlockedConflicts] = useState<Conflict[] | null>(null);
-  const [addSlot, setAddSlot] = useState<{ dayIndex: number; periodIndex: number } | null>(null);
+  const [addSlot, setAddSlot] = useState<{ dayIndex: number; periodIndex: number; preferredSubjectId?: string } | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [previewModalOpen, setPreviewModalOpen] = useState(false);
   const [timingsModalOpen, setTimingsModalOpen] = useState(false);
@@ -272,6 +273,24 @@ export function TimetablePage() {
   for (const c of conflictsForSection) {
     if (c.dayIndex !== null && c.periodIndex !== null) conflictCells.add(`${c.dayIndex}:${c.periodIndex}`);
   }
+
+  const allocationSummary = useMemo(() => {
+    if (!activeSection || !timetable) return null;
+    return computeSectionSubjectAllocations(activeSection, subjects, faculty, timetable.entries);
+  }, [activeSection, subjects, faculty, timetable]);
+
+  const handleScheduleMissingSubject = (subjectId: string) => {
+    for (let d = 0; d < cells.length; d++) {
+      for (let p = 0; p < cells[d].length; p++) {
+        const cell = cells[d][p];
+        if (!cell.breakName && cell.entryId === null) {
+          setAddSlot({ dayIndex: d, periodIndex: p, preferredSubjectId: subjectId });
+          return;
+        }
+      }
+    }
+    editor.showToast('warning', 'No empty teaching slot available in the grid. Clear or move a slot first.');
+  };
 
   const runCommand = (command: EditCommand) => {
     const outcome = editService.executeCommand(timetable, command);
@@ -1049,6 +1068,127 @@ export function TimetablePage() {
         )}
       </Card>
 
+      {allocationSummary && (
+        <Card
+          title={`Subject Requirements & Allocation — ${activeSection?.name ?? 'Section'}`}
+          actions={
+            <Badge tone={allocationSummary.percentageSatisfied === 100 ? 'green' : 'amber'}>
+              {allocationSummary.percentageSatisfied === 100
+                ? '✓ All requirements met (100%)'
+                : `${allocationSummary.satisfiedSubjectsCount}/${allocationSummary.totalSubjectsCount} subjects met (${allocationSummary.percentageSatisfied}%)`}
+            </Badge>
+          }
+        >
+          <div className="space-y-4">
+            <div className="grid gap-3 sm:grid-cols-3">
+              <div className="rounded-xl border border-[#E5E8E0] bg-[#FAFBF9] p-3">
+                <span className="text-xs text-body-gray">Total Periods Allocated</span>
+                <p className="mt-1 text-lg font-bold text-ink">
+                  {allocationSummary.totalAssignedPeriods} <span className="text-xs font-normal text-body-gray">/ {allocationSummary.totalTargetPeriods} target</span>
+                </p>
+              </div>
+              <div className="rounded-xl border border-[#E5E8E0] bg-[#FAFBF9] p-3">
+                <span className="text-xs text-body-gray">Total Sessions Scheduled</span>
+                <p className="mt-1 text-lg font-bold text-ink">
+                  {allocationSummary.totalAssignedSessions} <span className="text-xs font-normal text-body-gray">/ {allocationSummary.totalTargetSessions} target</span>
+                </p>
+              </div>
+              <div className="rounded-xl border border-[#E5E8E0] bg-[#FAFBF9] p-3">
+                <span className="text-xs text-body-gray">Requirements Fulfillment</span>
+                <div className="mt-1 flex items-center gap-2">
+                  <div className="h-2 w-full overflow-hidden rounded-full bg-[#E5E8E0]">
+                    <div
+                      className={`h-full transition-all duration-300 ${
+                        allocationSummary.percentageSatisfied === 100 ? 'bg-emerald-500' : 'bg-amber-500'
+                      }`}
+                      style={{ width: `${allocationSummary.percentageSatisfied}%` }}
+                    />
+                  </div>
+                  <span className="text-sm font-bold text-ink">{allocationSummary.percentageSatisfied}%</span>
+                </div>
+              </div>
+            </div>
+
+            {allocationSummary.items.length === 0 ? (
+              <p className="py-4 text-center text-xs text-body-gray italic">
+                No subjects or requirements configured for this section yet.
+              </p>
+            ) : (
+              <div className="overflow-x-auto rounded-xl border border-[#E5E8E0]">
+                <table className="min-w-full text-left text-xs">
+                  <thead className="border-b border-[#E5E8E0] bg-[#F1F3ED] text-[#71767B]">
+                    <tr>
+                      <th className="px-3 py-2.5 font-semibold">Subject</th>
+                      <th className="px-3 py-2.5 font-semibold">Type</th>
+                      <th className="px-3 py-2.5 font-semibold">Sessions</th>
+                      <th className="px-3 py-2.5 font-semibold">Periods</th>
+                      <th className="px-3 py-2.5 font-semibold">Faculty</th>
+                      <th className="px-3 py-2.5 font-semibold">Status</th>
+                      {!isFaculty && <th className="px-3 py-2.5 text-right font-semibold">Action</th>}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#E5E8E0] bg-white">
+                    {allocationSummary.items.map((item) => (
+                      <tr key={item.subjectId} className="hover:bg-[#FAFBF9] transition-colors">
+                        <td className="px-3 py-2.5">
+                          <span className="font-mono font-bold text-ink">{item.subjectCode}</span>
+                          <span className="ml-2 text-body-gray">{item.subjectName}</span>
+                        </td>
+                        <td className="px-3 py-2.5">
+                          <span
+                            className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${
+                              item.subjectType === 'LAB'
+                                ? 'bg-purple-100 text-purple-800'
+                                : 'bg-blue-100 text-blue-800'
+                            }`}
+                          >
+                            {item.subjectType === 'LAB' ? 'Lab (2p)' : 'Theory'}
+                          </span>
+                        </td>
+                        <td className="px-3 py-2.5 font-medium text-ink">
+                          {item.assignedSessions} / {item.targetSessions}
+                        </td>
+                        <td className="px-3 py-2.5 text-body-gray">
+                          {item.assignedPeriods} / {item.targetPeriods}p
+                        </td>
+                        <td className="px-3 py-2.5 text-body-gray">
+                          {item.assignedFacultyNames.length > 0
+                            ? item.assignedFacultyNames.join(', ')
+                            : <span className="italic text-body-gray/60">Unassigned</span>}
+                        </td>
+                        <td className="px-3 py-2.5">
+                          {item.status === 'MET' ? (
+                            <Badge tone="green">Complete</Badge>
+                          ) : item.status === 'UNDER' ? (
+                            <Badge tone="amber">Missing {item.missingSessions} session{item.missingSessions > 1 ? 's' : ''}</Badge>
+                          ) : (
+                            <Badge tone="blue">+{item.extraSessions} extra</Badge>
+                          )}
+                        </td>
+                        {!isFaculty && (
+                          <td className="px-3 py-2.5 text-right">
+                            {item.status === 'UNDER' && (
+                              <Button
+                                size="sm"
+                                variant="secondary"
+                                className="inline-flex items-center gap-1 text-[11px] h-7 px-2"
+                                onClick={() => handleScheduleMissingSubject(item.subjectId)}
+                              >
+                                <Plus className="h-3 w-3" /> Schedule
+                              </Button>
+                            )}
+                          </td>
+                        )}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </Card>
+      )}
+
       <Card title="Validation panel">
         {conflictsForSection.length === 0 ? (
           <div className="flex items-center gap-2.5 rounded-xl bg-success-bg p-3">
@@ -1168,8 +1308,15 @@ export function TimetablePage() {
         >
           <div className="grid gap-4">
             <Field label="Subject">
-              <Select name="subjectId" defaultValue={addableSubjects[0]?.id ?? ''} aria-label="Subject for new session">
-                {addableSubjects.map((s) => (
+              <Select
+                name="subjectId"
+                defaultValue={addSlot.preferredSubjectId ?? addableSubjects[0]?.id ?? ''}
+                aria-label="Subject for new session"
+              >
+                {(addSlot.preferredSubjectId && !addableSubjects.some((s) => s.id === addSlot.preferredSubjectId)
+                  ? [subjects.find((s) => s.id === addSlot.preferredSubjectId)!, ...addableSubjects].filter(Boolean)
+                  : addableSubjects
+                ).map((s) => (
                   <option key={s.id} value={s.id}>
                     {s.code} — {s.name}{s.type === 'LAB' ? ' (lab, 2 periods)' : ''}
                   </option>
@@ -1179,10 +1326,12 @@ export function TimetablePage() {
             <Field label="Faculty">
               <Select
                 name="facultyId"
-                defaultValue={facultyForSubject(addableSubjects[0]?.id ?? '')[0]?.id ?? ''}
+                defaultValue={
+                  facultyForSubject(addSlot.preferredSubjectId ?? addableSubjects[0]?.id ?? '')[0]?.id ?? ''
+                }
                 aria-label="Faculty for new session"
               >
-                {facultyForSubject(addableSubjects[0]?.id ?? '').map((f) => (
+                {facultyForSubject(addSlot.preferredSubjectId ?? addableSubjects[0]?.id ?? '').map((f) => (
                   <option key={f.id} value={f.id}>{f.name}</option>
                 ))}
               </Select>
