@@ -51,14 +51,17 @@ export async function GET(request: Request): Promise<Response> {
       .from(academicTerms)
       .where(eq(academicTerms.userId, context.institutionId));
 
-    // If user has no terms yet, initialize a default term
-    let targetTermId = url.searchParams.get('termId');
+    // If user has no terms yet, initialize a unique default term for this institution
+    const requestedTermId = url.searchParams.get('termId')?.trim();
+    let targetTermId = requestedTermId;
+
     if (terms.length === 0) {
       const now = new Date();
-      const [defaultTerm] = await database
+      const defaultTermId = `term_default_${context.institutionId}`;
+      await database
         .insert(academicTerms)
         .values({
-          id: 'default',
+          id: defaultTermId,
           userId: context.institutionId,
           name: 'Academic Year 2026-27 (Odd Sem)',
           academicYear: '2026-27',
@@ -67,12 +70,20 @@ export async function GET(request: Request): Promise<Response> {
           createdAt: now,
           updatedAt: now,
         })
-        .returning();
-      terms = [defaultTerm];
-      targetTermId = defaultTerm.id;
+        .onConflictDoNothing();
+
+      terms = await database
+        .select()
+        .from(academicTerms)
+        .where(eq(academicTerms.userId, context.institutionId));
+
+      targetTermId = terms[0]?.id || defaultTermId;
     } else if (!targetTermId || targetTermId === 'default') {
       const defaultTerm = terms.find((t) => t.isDefault) || terms[0];
       targetTermId = defaultTerm.id;
+    } else {
+      const matchingTerm = terms.find((t) => t.id === targetTermId);
+      targetTermId = matchingTerm?.id || terms.find((t) => t.isDefault)?.id || terms[0].id;
     }
 
     // 2. Fetch College Profile
@@ -347,7 +358,7 @@ export async function PUT(request: Request): Promise<Response> {
       payload?: any;
     }>(request, 15 * 1024 * 1024); // 15MB max workspace payload
 
-    const termId = body.termId || 'default';
+    const requestedTermId = body.termId?.trim() || 'default';
     const payload = body.payload;
 
     if (!payload) {
@@ -378,22 +389,40 @@ export async function PUT(request: Request): Promise<Response> {
         },
       });
 
-    // 1. Ensure target term exists
-    const [existingTerm] = await database
+    // 1. Resolve target term for this institution and ensure it exists
+    const userTerms = await database
       .select()
       .from(academicTerms)
-      .where(and(eq(academicTerms.userId, institutionId), eq(academicTerms.id, termId)));
+      .where(eq(academicTerms.userId, institutionId));
 
-    if (!existingTerm) {
-      await database.insert(academicTerms).values({
-        id: termId,
-        userId: institutionId,
-        name: 'Academic Year 2026-27 (Odd Sem)',
-        academicYear: '2026-27',
-        isDefault: termId === 'default',
-        createdAt: now,
-        updatedAt: now,
-      });
+    let termId = requestedTermId;
+    let targetTerm = userTerms.find((t) => t.id === requestedTermId);
+
+    // If client requested 'default' and no term with literal id === 'default' exists for this user,
+    // map it to the user's default term (or first term)
+    if (!targetTerm && requestedTermId === 'default') {
+      targetTerm = userTerms.find((t) => t.isDefault) || userTerms[0];
+      if (targetTerm) {
+        termId = targetTerm.id;
+      }
+    }
+
+    // If no term exists for this institution at all, create a unique default term
+    if (!targetTerm) {
+      termId = requestedTermId === 'default' ? `term_default_${institutionId}` : requestedTermId;
+      await database
+        .insert(academicTerms)
+        .values({
+          id: termId,
+          userId: institutionId,
+          name: 'Academic Year 2026-27 (Odd Sem)',
+          academicYear: '2026-27',
+          isDefault: true,
+          stats: { departments: 0, sections: 0, faculty: 0, rooms: 0 },
+          createdAt: now,
+          updatedAt: now,
+        })
+        .onConflictDoNothing();
     }
 
     // 2. Sync College Details (Admin only)

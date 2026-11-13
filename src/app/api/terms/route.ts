@@ -22,10 +22,42 @@ export async function GET(request: Request): Promise<Response> {
     const context = await resolveInstitutionalContext(request);
     const database = getDatabase();
 
-    const terms = await database
+    let terms = await database
       .select()
       .from(academicTerms)
       .where(eq(academicTerms.userId, context.institutionId));
+
+    if (terms.length === 0) {
+      const now = new Date();
+      const defaultTermId = `term_default_${context.institutionId}`;
+      await database
+        .insert(userProfiles)
+        .values({
+          id: context.user.id,
+          email: context.user.email,
+          name: context.user.name,
+        })
+        .onConflictDoNothing();
+
+      await database
+        .insert(academicTerms)
+        .values({
+          id: defaultTermId,
+          userId: context.institutionId,
+          name: 'Academic Year 2026-27 (Odd Sem)',
+          academicYear: '2026-27',
+          isDefault: true,
+          stats: { departments: 0, sections: 0, faculty: 0, rooms: 0 },
+          createdAt: now,
+          updatedAt: now,
+        })
+        .onConflictDoNothing();
+
+      terms = await database
+        .select()
+        .from(academicTerms)
+        .where(eq(academicTerms.userId, context.institutionId));
+    }
 
     return Response.json(
       { terms },
@@ -300,6 +332,18 @@ export async function PUT(request: Request): Promise<Response> {
 
     const institutionId = context.institutionId;
 
+    let targetTermId = termId;
+    if (termId === 'default') {
+      const userTerms = await database
+        .select()
+        .from(academicTerms)
+        .where(eq(academicTerms.userId, institutionId));
+      const def = userTerms.find((t) => t.isDefault) || userTerms[0];
+      if (def) {
+        targetTermId = def.id;
+      }
+    }
+
     // Clear previous default
     await database
       .update(academicTerms)
@@ -313,12 +357,12 @@ export async function PUT(request: Request): Promise<Response> {
       .where(
         and(
           eq(academicTerms.userId, institutionId),
-          eq(academicTerms.id, termId),
+          eq(academicTerms.id, targetTermId),
         ),
       );
 
     return Response.json(
-      { ok: true, activeTermId: termId },
+      { ok: true, activeTermId: targetTermId },
       {
         headers: {
           'Cache-Control': 'no-store, no-cache, must-revalidate, private',

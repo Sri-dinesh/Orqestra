@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useWorkspaceStore } from '@/state/stores/workspace-store';
 import { StorageService } from '@/storage';
-import type { PersistedWorkspace } from '@/storage/workspace-document';
+import type { PersistedWorkspace, PersistedWorkspacePayload } from '@/storage/workspace-document';
 import type { LoadOutcome } from '@/storage';
 import { LocalStorageAdapter } from '@/storage/adapters/local-storage-adapter';
 import { fetchCloudWorkspace, saveCloudWorkspace } from '@/storage/cloud-sync';
@@ -42,7 +42,8 @@ export function usePersistence(namespace = 'anonymous'): LoadOutcome | null {
   const outcomeRef = useRef<LoadOutcome | null>(null);
   const state = useWorkspaceStore();
   const firstRun = useRef(true);
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const inFlightRef = useRef(false);
+  const pendingPayloadRef = useRef<{ payload: PersistedWorkspacePayload; termId: string } | null>(null);
 
   activeStorageNamespace = namespace;
 
@@ -185,67 +186,71 @@ export function usePersistence(namespace = 'anonymous'): LoadOutcome | null {
     }
   }, [namespace]);
 
-  // Debounced persistence on store updates
+  // Immediate real-time persistence on store updates
   useEffect(() => {
     if (firstRun.current) return;
-    if (state.persistenceStatus === 'SAVING') return;
 
-    if (timer.current) clearTimeout(timer.current);
-    timer.current = setTimeout(() => {
-      const service = getStorageService(namespace);
+    const payload: PersistedWorkspacePayload = {
+      departments: state.departments,
+      sections: state.sections,
+      subjects: state.subjects,
+      faculty: state.faculty,
+      timetables: state.timetables,
+      rooms: state.rooms,
+      breaks: state.breaks,
+      activeDepartmentId: state.activeDepartmentId,
+      activeTimetableId: state.activeTimetableId,
+      generationSettingsOverrides: state.generationSettingsOverrides,
+      collegeDetails: state.collegeDetails,
+    };
+
+    // A. Write to local storage cache immediately (synchronous, 0ms)
+    const service = getStorageService(namespace);
+    try {
+      service.save(payload, (getStoredCreatedAt() as string | null) ?? undefined);
+    } catch (e) {
+      console.warn('Local storage cache save failed:', e);
+    }
+
+    // B. Write to Neon Postgres if authenticated (and role is not read-only faculty)
+    const currentRole = useWorkspaceStore.getState().membership?.role;
+    if (namespace === 'anonymous' || currentRole === 'FACULTY') {
+      useWorkspaceStore.getState().setPersistenceStatus('SAVED');
+      return;
+    }
+
+    const activeTermId = getActiveTermId();
+
+    const dispatchSave = async (data: PersistedWorkspacePayload, termId: string) => {
+      inFlightRef.current = true;
       useWorkspaceStore.getState().setPersistenceStatus('SAVING');
 
-      const payload = {
-        departments: state.departments,
-        sections: state.sections,
-        subjects: state.subjects,
-        faculty: state.faculty,
-        timetables: state.timetables,
-        rooms: state.rooms,
-        breaks: state.breaks,
-        activeDepartmentId: state.activeDepartmentId,
-        activeTimetableId: state.activeTimetableId,
-        generationSettingsOverrides: state.generationSettingsOverrides,
-        collegeDetails: state.collegeDetails,
-      };
-
-      // A. Write to local storage cache immediately
       try {
-        service.save(payload, (getStoredCreatedAt() as string | null) ?? undefined);
-      } catch (e) {
-        console.warn('Local storage cache save failed:', e);
-      }
-
-      // B. Write to Neon Postgres if authenticated (and role is not read-only faculty)
-      const currentRole = useWorkspaceStore.getState().membership?.role;
-      if (namespace !== 'anonymous') {
-        if (currentRole === 'FACULTY') {
-          useWorkspaceStore.getState().setPersistenceStatus('SAVED');
-          return;
+        const res = await saveCloudWorkspace(data, termId);
+        if (!res.ok) {
+          console.warn('Cloud sync error:', res.error);
         }
-
-        const activeTermId = getActiveTermId();
-        saveCloudWorkspace(payload, activeTermId)
-          .then((res) => {
-            if (res.ok) {
-              useWorkspaceStore.getState().setPersistenceStatus('SAVED');
-            } else {
-              console.warn('Cloud sync error:', res.error);
-              useWorkspaceStore.getState().setPersistenceStatus('OFFLINE');
-            }
-          })
-          .catch((err) => {
-            console.warn('Cloud sync network error:', err);
-            useWorkspaceStore.getState().setPersistenceStatus('OFFLINE');
-          });
-      } else {
-        useWorkspaceStore.getState().setPersistenceStatus('SAVED');
+      } catch (err) {
+        console.warn('Cloud sync network error:', err);
+      } finally {
+        inFlightRef.current = false;
+        if (pendingPayloadRef.current) {
+          const next = pendingPayloadRef.current;
+          pendingPayloadRef.current = null;
+          void dispatchSave(next.payload, next.termId);
+        } else {
+          useWorkspaceStore.getState().setPersistenceStatus('SAVED');
+        }
       }
-    }, 600);
-
-    return () => {
-      if (timer.current) clearTimeout(timer.current);
     };
+
+    if (inFlightRef.current) {
+      // Save is currently in flight: queue the latest payload so it executes immediately when ready
+      pendingPayloadRef.current = { payload, termId: activeTermId };
+    } else {
+      // Execute immediately without delay
+      void dispatchSave(payload, activeTermId);
+    }
   }, [
     namespace,
     state.departments,
@@ -260,6 +265,28 @@ export function usePersistence(namespace = 'anonymous'): LoadOutcome | null {
     state.generationSettingsOverrides,
     state.collegeDetails,
   ]);
+
+  // Flush any pending queue on tab unload or backgrounding
+  useEffect(() => {
+    const handleFlush = () => {
+      if (pendingPayloadRef.current && activeStorageNamespace !== 'anonymous') {
+        const next = pendingPayloadRef.current;
+        pendingPayloadRef.current = null;
+        void saveCloudWorkspace(next.payload, next.termId);
+      }
+    };
+
+    window.addEventListener('beforeunload', handleFlush);
+    const handleVisibility = () => {
+      if (document.visibilityState === 'hidden') handleFlush();
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleFlush);
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
+  }, []);
 
   return outcomeRef.current;
 }

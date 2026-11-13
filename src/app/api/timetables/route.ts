@@ -30,7 +30,6 @@ export async function POST(request: Request): Promise<Response> {
 
     const {
       timetable,
-      termId = 'default',
       auditMetrics,
     } = body;
 
@@ -56,13 +55,25 @@ export async function POST(request: Request): Promise<Response> {
       })
       .onConflictDoNothing();
 
-    // 2. Ensure academic term exists
-    const [existingTerm] = await database
-      .select({ id: academicTerms.id })
+    // 2. Resolve and ensure academic term exists
+    const requestedTermId = body.termId?.trim() || 'default';
+    const userTerms = await database
+      .select()
       .from(academicTerms)
-      .where(and(eq(academicTerms.userId, context.institutionId), eq(academicTerms.id, termId)));
+      .where(eq(academicTerms.userId, context.institutionId));
 
-    if (!existingTerm) {
+    let termId = requestedTermId;
+    let targetTerm = userTerms.find((t) => t.id === requestedTermId);
+
+    if (!targetTerm && requestedTermId === 'default') {
+      targetTerm = userTerms.find((t) => t.isDefault) || userTerms[0];
+      if (targetTerm) {
+        termId = targetTerm.id;
+      }
+    }
+
+    if (!targetTerm) {
+      termId = requestedTermId === 'default' ? `term_default_${context.institutionId}` : requestedTermId;
       await database
         .insert(academicTerms)
         .values({
@@ -70,7 +81,7 @@ export async function POST(request: Request): Promise<Response> {
           userId: context.institutionId,
           name: 'Academic Year 2026-27 (Odd Sem)',
           academicYear: '2026-27',
-          isDefault: termId === 'default',
+          isDefault: true,
           createdAt: now,
           updatedAt: now,
         })
