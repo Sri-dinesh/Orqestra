@@ -2,6 +2,9 @@
   "name": "orqestra",
   "private": true,
   "version": "1.0.0",
+  "description": "Intelligent Academic Timetable Generator & Operational Schedule Workstation",
+  "homepage": "https://orqestraofficial.vercel.app",
+  "author": "Sridinesh <santhisridinesh@gmail.com>",
   "type": "module",
   "scripts": {
     "dev": "next dev",

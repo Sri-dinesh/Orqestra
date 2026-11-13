@@ -35,7 +35,7 @@ describe('Team Invitation Links & Operational RBAC Role Switching', () => {
   describe('GET /api/invitations/[token]', () => {
     it('rejects invalid or oversized tokens with 400', async () => {
       const longToken = 'a'.repeat(150);
-      const req = new Request(`https://orqestra.app/api/invitations/${longToken}`);
+      const req = new Request(`https://orqestraofficial.vercel.app/api/invitations/${longToken}`);
       const res = await getInvitationHandler(req, {
         params: Promise.resolve({ token: longToken }),
       });
@@ -55,7 +55,7 @@ describe('Team Invitation Links & Operational RBAC Role Switching', () => {
         }),
       } as any);
 
-      const req = new Request('https://orqestra.app/api/invitations/non_existent_token');
+      const req = new Request('https://orqestraofficial.vercel.app/api/invitations/non_existent_token');
       const res = await getInvitationHandler(req, {
         params: Promise.resolve({ token: 'non_existent_token' }),
       });
@@ -85,7 +85,7 @@ describe('Team Invitation Links & Operational RBAC Role Switching', () => {
         }),
       } as any);
 
-      const req = new Request('https://orqestra.app/api/invitations/accepted_token');
+      const req = new Request('https://orqestraofficial.vercel.app/api/invitations/accepted_token');
       const res = await getInvitationHandler(req, {
         params: Promise.resolve({ token: 'accepted_token' }),
       });
@@ -116,7 +116,7 @@ describe('Team Invitation Links & Operational RBAC Role Switching', () => {
         }),
       } as any);
 
-      const req = new Request('https://orqestra.app/api/invitations/expired_token');
+      const req = new Request('https://orqestraofficial.vercel.app/api/invitations/expired_token');
       const res = await getInvitationHandler(req, {
         params: Promise.resolve({ token: 'expired_token' }),
       });
@@ -169,7 +169,7 @@ describe('Team Invitation Links & Operational RBAC Role Switching', () => {
         }),
       } as any);
 
-      const req = new Request('https://orqestra.app/api/invitations/valid_faculty_token');
+      const req = new Request('https://orqestraofficial.vercel.app/api/invitations/valid_faculty_token');
       const res = await getInvitationHandler(req, {
         params: Promise.resolve({ token: 'valid_faculty_token' }),
       });
@@ -235,7 +235,7 @@ describe('Team Invitation Links & Operational RBAC Role Switching', () => {
         update: updateSpy,
       } as any);
 
-      const req = new Request('https://orqestra.app/api/invitations/token_to_accept/accept', {
+      const req = new Request('https://orqestraofficial.vercel.app/api/invitations/token_to_accept/accept', {
         method: 'POST',
       });
       const res = await acceptInvitationHandler(req, {
@@ -263,7 +263,7 @@ describe('Team Invitation Links & Operational RBAC Role Switching', () => {
       };
       vi.spyOn(authServerModule, 'resolveInstitutionalContext').mockResolvedValue(mockContext as any);
 
-      const req = new Request('https://orqestra.app/api/members/me/role', {
+      const req = new Request('https://orqestraofficial.vercel.app/api/members/me/role', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ role: 'SUPER_ROOT_INVALID' }),
@@ -286,7 +286,7 @@ describe('Team Invitation Links & Operational RBAC Role Switching', () => {
       };
       vi.spyOn(authServerModule, 'resolveInstitutionalContext').mockResolvedValue(mockContext as any);
 
-      const req = new Request('https://orqestra.app/api/members/me/role', {
+      const req = new Request('https://orqestraofficial.vercel.app/api/members/me/role', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ role: 'HOD', departmentId: null }),
@@ -331,7 +331,7 @@ describe('Team Invitation Links & Operational RBAC Role Switching', () => {
         }),
       } as any);
 
-      const req = new Request('https://orqestra.app/api/members/me/role', {
+      const req = new Request('https://orqestraofficial.vercel.app/api/members/me/role', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -12,29 +12,29 @@ import * as dbModule from '@/db';
 describe('API Security Utilities', () => {
   describe('Rate Limiter', () => {
     it('extracts client IP from various headers', () => {
-      const req1 = new Request('https://orqestra.app/api/portal/test', {
+      const req1 = new Request('https://orqestraofficial.vercel.app/api/portal/test', {
         headers: { 'x-forwarded-for': '203.0.113.195, 70.41.3.18' },
       });
       expect(getClientIp(req1)).toBe('203.0.113.195');
 
-      const req2 = new Request('https://orqestra.app/api/portal/test', {
+      const req2 = new Request('https://orqestraofficial.vercel.app/api/portal/test', {
         headers: { 'x-real-ip': '198.51.100.1' },
       });
       expect(getClientIp(req2)).toBe('198.51.100.1');
 
-      const req3 = new Request('https://orqestra.app/api/portal/test', {
+      const req3 = new Request('https://orqestraofficial.vercel.app/api/portal/test', {
         headers: { 'cf-connecting-ip': '192.0.2.1' },
       });
       expect(getClientIp(req3)).toBe('192.0.2.1');
 
-      const req4 = new Request('https://orqestra.app/api/portal/test');
+      const req4 = new Request('https://orqestraofficial.vercel.app/api/portal/test');
       expect(getClientIp(req4)).toBe('127.0.0.1');
     });
 
     it('enforces request counts within sliding window', () => {
       const ip = '10.0.0.42';
       const makeRequest = () =>
-        new Request('https://orqestra.app/api/portal/test', {
+        new Request('https://orqestraofficial.vercel.app/api/portal/test', {
           headers: { 'x-forwarded-for': ip },
         });
 
@@ -66,7 +66,7 @@ describe('API Security Utilities', () => {
   describe('Request Guard & Payload Validation', () => {
     it('parses valid JSON payloads within size limits', async () => {
       const payload = { name: 'Engineering', code: 'ENG' };
-      const req = new Request('https://orqestra.app/api/workspace', {
+      const req = new Request('https://orqestraofficial.vercel.app/api/workspace', {
         method: 'PUT',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify(payload),
@@ -77,7 +77,7 @@ describe('API Security Utilities', () => {
     });
 
     it('rejects oversized payloads according to Content-Length header', async () => {
-      const req = new Request('https://orqestra.app/api/workspace', {
+      const req = new Request('https://orqestraofficial.vercel.app/api/workspace', {
         method: 'PUT',
         headers: { 'content-length': '2097152' }, // 2MB
       });
@@ -90,7 +90,7 @@ describe('API Security Utilities', () => {
 
     it('rejects oversized payloads according to actual body content', async () => {
       const largeString = 'A'.repeat(2000);
-      const req = new Request('https://orqestra.app/api/workspace', {
+      const req = new Request('https://orqestraofficial.vercel.app/api/workspace', {
         method: 'PUT',
         body: JSON.stringify({ data: largeString }),
       });
@@ -102,7 +102,7 @@ describe('API Security Utilities', () => {
     });
 
     it('rejects malformed JSON with 400 Bad Request', async () => {
-      const req = new Request('https://orqestra.app/api/workspace', {
+      const req = new Request('https://orqestraofficial.vercel.app/api/workspace', {
         method: 'PUT',
         body: '{ malformed: json, missing quotes }',
       });

@@ -128,16 +128,33 @@ export const Footer: React.FC = () => {
 
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between text-xs text-white/40 font-mono gap-4">
-          <div>© 2026 Orqestra. MIT licensed. Your data never leaves your browser.</div>
+          <div>
+            © 2026 Orqestra · MIT licensed · Built & maintained by{' '}
+            <a
+              href="mailto:santhisridinesh@gmail.com"
+              className="text-white/60 hover:text-white transition-colors underline decoration-white/20 hover:decoration-white"
+            >
+              Sridinesh
+            </a>
+          </div>
           <div className="flex items-center gap-6">
+            <a
+              href="https://orqestraofficial.vercel.app/"
+              className="hover:text-white transition-colors"
+            >
+              Live Workstation
+            </a>
             <Link to="/dashboard" className="hover:text-white transition-colors">
               Open app
             </Link>
             <a href="#how-it-works" className="hover:text-white transition-colors">
               How it works
             </a>
-            <a href="#faq" className="hover:text-white transition-colors">
-              FAQ
+            <a
+              href="mailto:santhisridinesh@gmail.com"
+              className="hover:text-white transition-colors"
+            >
+              Contact
             </a>
           </div>
         </div>
