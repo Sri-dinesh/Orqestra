@@ -106,25 +106,25 @@ export const HeroScheduleVisualizer: React.FC<HeroVisualizerProps> = ({ onSelect
   return (
     <div className="rounded-md bg-white dark:bg-[#18181a] border border-[#e1e4e8] dark:border-[#2a2a2d] shadow-xs overflow-hidden">
       {/* Workstation Header Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 border-b border-[#e1e4e8] dark:border-[#2a2a2d] bg-[#f6f7f8] dark:bg-[#111112]">
+      <div className="flex flex-wrap items-center justify-between gap-2 px-3.5 py-2 border-b border-[#e1e4e8] dark:border-[#2a2a2d] bg-[#f6f7f8] dark:bg-[#111112]">
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1.5" aria-hidden="true">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#d3d7dd] dark:bg-[#36363a]" />
-            <span className="w-2.5 h-2.5 rounded-full bg-[#d3d7dd] dark:bg-[#36363a]" />
-            <span className="w-2.5 h-2.5 rounded-full bg-[#d3d7dd] dark:bg-[#36363a]" />
+            <span className="w-2 h-2 rounded-full bg-[#d3d7dd] dark:bg-[#36363a]" />
+            <span className="w-2 h-2 rounded-full bg-[#d3d7dd] dark:bg-[#36363a]" />
+            <span className="w-2 h-2 rounded-full bg-[#d3d7dd] dark:bg-[#36363a]" />
           </div>
-          <span className="text-xs font-mono font-medium text-[#121417] dark:text-[#ececec] ml-2">
+          <span className="text-xs font-mono font-medium text-[#121417] dark:text-[#ececec] ml-1">
             B.Tech CSE · Semester V · Section G
           </span>
         </div>
 
-        <div className="flex items-center gap-3 text-xs font-mono">
-          <span className="hidden sm:inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/30 text-[#2f9e44] dark:text-[#51cf66] border border-emerald-200/60 dark:border-emerald-900/40 font-semibold">
-            <CheckCircle2 className="w-3.5 h-3.5" />
+        <div className="flex items-center gap-2 text-xs font-mono">
+          <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/30 text-[#2f9e44] dark:text-[#51cf66] border border-emerald-200/60 dark:border-emerald-900/40 text-[11px] font-semibold">
+            <CheckCircle2 className="w-3 h-3" />
             <span>0 Conflicts Detected</span>
           </span>
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-[#e8effc] dark:bg-[#18233a] text-[#3b6fe0] dark:text-[#7aa2f7] font-medium border border-[#3b6fe0]/20 dark:border-[#7aa2f7]/20">
-            <ShieldCheck className="w-3.5 h-3.5" />
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-[#e8effc] dark:bg-[#18233a] text-[#3b6fe0] dark:text-[#7aa2f7] text-[11px] font-medium border border-[#3b6fe0]/20 dark:border-[#7aa2f7]/20">
+            <ShieldCheck className="w-3 h-3" />
             <span>Solver Verified</span>
           </span>
         </div>
@@ -134,27 +134,27 @@ export const HeroScheduleVisualizer: React.FC<HeroVisualizerProps> = ({ onSelect
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse text-xs">
           <thead>
-            <tr className="bg-[#f6f7f8] dark:bg-[#111112] border-b border-[#e1e4e8] dark:border-[#2a2a2d] font-mono text-[11px] text-[#5b616b] dark:text-[#a1a1a6]">
-              <th className="py-2.5 px-3 border-r border-[#e1e4e8] dark:border-[#2a2a2d] w-16">Day</th>
-              <th className="py-2.5 px-2 text-center border-r border-[#e1e4e8] dark:border-[#2a2a2d]">Period 1</th>
-              <th className="py-2.5 px-2 text-center border-r border-[#e1e4e8] dark:border-[#2a2a2d]">Period 2</th>
-              <th className="py-2.5 px-1 text-center border-r border-[#e1e4e8] dark:border-[#2a2a2d] bg-[#eef0f2]/60 dark:bg-[#232326]/60 w-12 text-[#5b616b] dark:text-[#a1a1a6] font-normal">
+            <tr className="bg-[#f6f7f8] dark:bg-[#111112] border-b border-[#e1e4e8] dark:border-[#2a2a2d] font-mono text-[10.5px] text-[#5b616b] dark:text-[#a1a1a6]">
+              <th className="py-1.5 px-2.5 border-r border-[#e1e4e8] dark:border-[#2a2a2d] w-14">Day</th>
+              <th className="py-1.5 px-2 text-center border-r border-[#e1e4e8] dark:border-[#2a2a2d]">Period 1</th>
+              <th className="py-1.5 px-2 text-center border-r border-[#e1e4e8] dark:border-[#2a2a2d]">Period 2</th>
+              <th className="py-1.5 px-1 text-center border-r border-[#e1e4e8] dark:border-[#2a2a2d] bg-[#eef0f2]/60 dark:bg-[#232326]/60 w-10 text-[#5b616b] dark:text-[#a1a1a6] font-normal text-[10px]">
                 Break
               </th>
-              <th className="py-2.5 px-2 text-center border-r border-[#e1e4e8] dark:border-[#2a2a2d]">Period 3</th>
-              <th className="py-2.5 px-2 text-center border-r border-[#e1e4e8] dark:border-[#2a2a2d]">Period 4</th>
-              <th className="py-2.5 px-1 text-center border-r border-[#e1e4e8] dark:border-[#2a2a2d] bg-[#eef0f2]/60 dark:bg-[#232326]/60 w-14 text-[#5b616b] dark:text-[#a1a1a6] font-normal">
+              <th className="py-1.5 px-2 text-center border-r border-[#e1e4e8] dark:border-[#2a2a2d]">Period 3</th>
+              <th className="py-1.5 px-2 text-center border-r border-[#e1e4e8] dark:border-[#2a2a2d]">Period 4</th>
+              <th className="py-1.5 px-1 text-center border-r border-[#e1e4e8] dark:border-[#2a2a2d] bg-[#eef0f2]/60 dark:bg-[#232326]/60 w-11 text-[#5b616b] dark:text-[#a1a1a6] font-normal text-[10px]">
                 Lunch
               </th>
-              <th className="py-2.5 px-2 text-center border-r border-[#e1e4e8] dark:border-[#2a2a2d]">Period 5</th>
-              <th className="py-2.5 px-2 text-center border-r border-[#e1e4e8] dark:border-[#2a2a2d]">Period 6</th>
-              <th className="py-2.5 px-2 text-center">Period 7</th>
+              <th className="py-1.5 px-2 text-center border-r border-[#e1e4e8] dark:border-[#2a2a2d]">Period 5</th>
+              <th className="py-1.5 px-2 text-center border-r border-[#e1e4e8] dark:border-[#2a2a2d]">Period 6</th>
+              <th className="py-1.5 px-2 text-center">Period 7</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[#e1e4e8] dark:divide-[#2a2a2d]">
             {DAYS.map((day, dayIdx) => (
               <tr key={day} className="hover:bg-[#f6f7f8]/40 dark:hover:bg-[#232326]/40 transition-colors">
-                <td className="py-2 px-3 border-r border-[#e1e4e8] dark:border-[#2a2a2d] font-mono font-semibold text-[#121417] dark:text-[#ececec] bg-[#f6f7f8]/50 dark:bg-[#111112]/50">
+                <td className="py-1 px-2.5 border-r border-[#e1e4e8] dark:border-[#2a2a2d] font-mono font-semibold text-[11px] text-[#121417] dark:text-[#ececec] bg-[#f6f7f8]/50 dark:bg-[#111112]/50">
                   {day}
                 </td>
 
@@ -169,20 +169,20 @@ export const HeroScheduleVisualizer: React.FC<HeroVisualizerProps> = ({ onSelect
                     <td
                       key={periodIdx}
                       onClick={() => handleCellClick(dayIdx, periodIdx)}
-                      className={`p-1.5 border-r border-[#e1e4e8] dark:border-[#2a2a2d] cursor-pointer transition-all ${
+                      className={`p-1 border-r border-[#e1e4e8] dark:border-[#2a2a2d] cursor-pointer transition-all ${
                         isSelected ? 'ring-2 ring-[#3b6fe0] dark:ring-[#7aa2f7] bg-[#e8effc]/30 dark:bg-[#18233a]/50' : 'hover:bg-[#f6f7f8] dark:hover:bg-[#232326]'
                       }`}
                     >
-                      <div className={`p-1.5 rounded border ${style.border} ${style.bg} flex flex-col justify-between h-14`}>
+                      <div className={`p-1 sm:p-1.5 rounded border ${style.border} ${style.bg} flex flex-col justify-between h-10 sm:h-11`}>
                         <div className="flex items-center justify-between">
-                          <span className="font-mono font-semibold text-[11px] text-[#121417] dark:text-[#ececec]">
+                          <span className="font-mono font-bold text-[10.5px] text-[#121417] dark:text-[#ececec]">
                             {cell.code}
                           </span>
                           <span className={`w-1.5 h-1.5 rounded-full ${style.dot}`} />
                         </div>
-                        <div className="flex items-center justify-between text-[10px] text-[#5b616b] dark:text-[#a1a1a6]">
-                          <span className="truncate max-w-[65px]">{cell.facultyCode}</span>
-                          <span className="font-mono text-[9px] text-[#5b616b] dark:text-[#a1a1a6]">{cell.room}</span>
+                        <div className="flex items-center justify-between text-[9.5px] text-[#5b616b] dark:text-[#a1a1a6]">
+                          <span className="truncate max-w-[55px] font-medium">{cell.facultyCode}</span>
+                          <span className="font-mono text-[9px]">{cell.room}</span>
                         </div>
                       </div>
                     </td>
@@ -190,7 +190,7 @@ export const HeroScheduleVisualizer: React.FC<HeroVisualizerProps> = ({ onSelect
                 })}
 
                 {/* Morning Interval Column */}
-                <td className="p-1 border-r border-[#e1e4e8] dark:border-[#2a2a2d] bg-[#eef0f2]/40 dark:bg-[#232326]/40 text-center font-mono text-[10px] text-[#5b616b] dark:text-[#a1a1a6] select-none">
+                <td className="p-0.5 border-r border-[#e1e4e8] dark:border-[#2a2a2d] bg-[#eef0f2]/40 dark:bg-[#232326]/40 text-center font-mono text-[9.5px] text-[#5b616b] dark:text-[#a1a1a6] select-none">
                   <span className="writing-mode-vertical">10m</span>
                 </td>
 
@@ -205,13 +205,13 @@ export const HeroScheduleVisualizer: React.FC<HeroVisualizerProps> = ({ onSelect
                     <td
                       key={periodIdx}
                       onClick={() => handleCellClick(dayIdx, periodIdx)}
-                      className={`p-1.5 border-r border-[#e1e4e8] dark:border-[#2a2a2d] cursor-pointer transition-all ${
+                      className={`p-1 border-r border-[#e1e4e8] dark:border-[#2a2a2d] cursor-pointer transition-all ${
                         isSelected ? 'ring-2 ring-[#3b6fe0] dark:ring-[#7aa2f7] bg-[#e8effc]/30 dark:bg-[#18233a]/50' : 'hover:bg-[#f6f7f8] dark:hover:bg-[#232326]'
                       }`}
                     >
-                      <div className={`p-1.5 rounded border ${style.border} ${style.bg} flex flex-col justify-between h-14`}>
+                      <div className={`p-1 sm:p-1.5 rounded border ${style.border} ${style.bg} flex flex-col justify-between h-10 sm:h-11`}>
                         <div className="flex items-center justify-between">
-                          <span className="font-mono font-semibold text-[11px] text-[#121417] dark:text-[#ececec]">
+                          <span className="font-mono font-bold text-[10.5px] text-[#121417] dark:text-[#ececec]">
                             {cell.code}
                           </span>
                           {cell.kind === 'LAB' ? (
@@ -222,9 +222,9 @@ export const HeroScheduleVisualizer: React.FC<HeroVisualizerProps> = ({ onSelect
                             <span className={`w-1.5 h-1.5 rounded-full ${style.dot}`} />
                           )}
                         </div>
-                        <div className="flex items-center justify-between text-[10px] text-[#5b616b] dark:text-[#a1a1a6]">
-                          <span className="truncate max-w-[65px]">{cell.facultyCode}</span>
-                          <span className="font-mono text-[9px] text-[#5b616b] dark:text-[#a1a1a6]">{cell.room}</span>
+                        <div className="flex items-center justify-between text-[9.5px] text-[#5b616b] dark:text-[#a1a1a6]">
+                          <span className="truncate max-w-[55px] font-medium">{cell.facultyCode}</span>
+                          <span className="font-mono text-[9px]">{cell.room}</span>
                         </div>
                       </div>
                     </td>
@@ -232,7 +232,7 @@ export const HeroScheduleVisualizer: React.FC<HeroVisualizerProps> = ({ onSelect
                 })}
 
                 {/* Lunch Interval Column */}
-                <td className="p-1 border-r border-[#e1e4e8] dark:border-[#2a2a2d] bg-[#eef0f2]/40 dark:bg-[#232326]/40 text-center font-mono text-[10px] text-[#5b616b] dark:text-[#a1a1a6] select-none">
+                <td className="p-0.5 border-r border-[#e1e4e8] dark:border-[#2a2a2d] bg-[#eef0f2]/40 dark:bg-[#232326]/40 text-center font-mono text-[9.5px] text-[#5b616b] dark:text-[#a1a1a6] select-none">
                   <span className="writing-mode-vertical">45m</span>
                 </td>
 
@@ -247,13 +247,13 @@ export const HeroScheduleVisualizer: React.FC<HeroVisualizerProps> = ({ onSelect
                     <td
                       key={periodIdx}
                       onClick={() => handleCellClick(dayIdx, periodIdx)}
-                      className={`p-1.5 border-r border-[#e1e4e8] dark:border-[#2a2a2d] last:border-r-0 cursor-pointer transition-all ${
+                      className={`p-1 border-r border-[#e1e4e8] dark:border-[#2a2a2d] last:border-r-0 cursor-pointer transition-all ${
                         isSelected ? 'ring-2 ring-[#3b6fe0] dark:ring-[#7aa2f7] bg-[#e8effc]/30 dark:bg-[#18233a]/50' : 'hover:bg-[#f6f7f8] dark:hover:bg-[#232326]'
                       }`}
                     >
-                      <div className={`p-1.5 rounded border ${style.border} ${style.bg} flex flex-col justify-between h-14`}>
+                      <div className={`p-1 sm:p-1.5 rounded border ${style.border} ${style.bg} flex flex-col justify-between h-10 sm:h-11`}>
                         <div className="flex items-center justify-between">
-                          <span className="font-mono font-semibold text-[11px] text-[#121417] dark:text-[#ececec]">
+                          <span className="font-mono font-bold text-[10.5px] text-[#121417] dark:text-[#ececec]">
                             {cell.code}
                           </span>
                           {cell.kind === 'LAB' ? (
@@ -264,9 +264,9 @@ export const HeroScheduleVisualizer: React.FC<HeroVisualizerProps> = ({ onSelect
                             <span className={`w-1.5 h-1.5 rounded-full ${style.dot}`} />
                           )}
                         </div>
-                        <div className="flex items-center justify-between text-[10px] text-[#5b616b] dark:text-[#a1a1a6]">
-                          <span className="truncate max-w-[65px]">{cell.facultyCode}</span>
-                          <span className="font-mono text-[9px] text-[#5b616b] dark:text-[#a1a1a6]">{cell.room}</span>
+                        <div className="flex items-center justify-between text-[9.5px] text-[#5b616b] dark:text-[#a1a1a6]">
+                          <span className="truncate max-w-[55px] font-medium">{cell.facultyCode}</span>
+                          <span className="font-mono text-[9px]">{cell.room}</span>
                         </div>
                       </div>
                     </td>
@@ -279,12 +279,12 @@ export const HeroScheduleVisualizer: React.FC<HeroVisualizerProps> = ({ onSelect
       </div>
 
       {/* Interactive Footer Hint */}
-      <div className="px-4 py-2.5 bg-[#f6f7f8] dark:bg-[#111112] border-t border-[#e1e4e8] dark:border-[#2a2a2d] flex items-center justify-between text-xs text-[#5b616b] dark:text-[#a1a1a6]">
-        <div className="flex items-center gap-2">
-          <Sparkles className="w-3.5 h-3.5 text-[#3b6fe0] dark:text-[#7aa2f7]" />
+      <div className="px-3.5 py-1.5 bg-[#f6f7f8] dark:bg-[#111112] border-t border-[#e1e4e8] dark:border-[#2a2a2d] flex items-center justify-between text-[11px] text-[#5b616b] dark:text-[#a1a1a6]">
+        <div className="flex items-center gap-1.5">
+          <Sparkles className="w-3 h-3 text-[#3b6fe0] dark:text-[#7aa2f7]" />
           <span>Click any cell to inspect course requirements, room allocations, and faculty load</span>
         </div>
-        <span className="font-mono text-[11px] text-[#5b616b] dark:text-[#a1a1a6] hidden sm:inline">
+        <span className="font-mono text-[10px] text-[#5b616b] dark:text-[#a1a1a6] hidden sm:inline">
           35/35 Periods Scheduled · 100% Filled
         </span>
       </div>
