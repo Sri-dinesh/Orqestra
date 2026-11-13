@@ -37,7 +37,7 @@ export function applyTheme(theme: Theme) {
 
 export function useTheme() {
   const [theme, setThemeState] = useState<Theme>(() => {
-    if (typeof window === 'undefined') return 'dark';
+    if (typeof window === 'undefined') return 'system';
     try {
       const stored = localStorage.getItem(THEME_STORAGE_KEY) as Theme | null;
       if (stored === 'dark' || stored === 'light' || stored === 'system') {
@@ -46,8 +46,7 @@ export function useTheme() {
     } catch {
       // fallback
     }
-    // Default to dark mode for the /dev/null developer workstation experience
-    return 'dark';
+    return 'system';
   });
 
   const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>(() => resolveTheme(theme));

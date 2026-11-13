@@ -1,6 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   /* Orqestra /dev/null Unified Design System */
   --color-shell: #f6f7f8;
@@ -88,11 +90,22 @@
   color: #121417;
 }
 
+html.dark {
+  color-scheme: dark;
+  background-color: #111112;
+  color: #ececec;
+}
+
 body {
   background-color: #f6f7f8;
   color: #121417;
   font-family: 'Geist', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-feature-settings: 'ss01', 'cv11';
+}
+
+html.dark body {
+  background-color: #111112;
+  color: #ececec;
 }
 
 /* Landing Page Unified Theme */
@@ -111,22 +124,26 @@ body {
   --color-surface-2: #eef0f2;
   --color-metric-blue: #3b6fe0;
 
-  font-family: 'Geist', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-  font-feature-settings: 'ss01', 'cv11' !important;
-  background-color: #f6f7f8 !important;
-  color: #121417 !important;
+  font-family: 'Geist', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-feature-settings: 'ss01', 'cv11';
 }
 
-.landing-theme h1,
-.landing-theme h2,
-.landing-theme h3,
-.landing-theme h4,
-.landing-theme h5,
-.landing-theme h6 {
-  font-family: 'Geist', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-  font-weight: 600;
-  letter-spacing: -0.025em;
-  color: #121417;
+html.dark .landing-theme,
+.dark .landing-theme,
+.dark.landing-theme {
+  --color-bg: #111112;
+  --color-ink: #ececec;
+  --color-slate: #a1a1a6;
+  --color-muted: #a1a1a6;
+  --color-border: #2a2a2d;
+  --color-accent: #7aa2f7;
+  --color-accent-hover: #94b5f9;
+  --color-accent-subtle: #18233a;
+  --color-card-bg: #18181a;
+  --color-surface-0: #18181a;
+  --color-surface-1: #1f1f22;
+  --color-surface-2: #232326;
+  --color-metric-blue: #7aa2f7;
 }
 
 /* Internal Application Unified Theme */
@@ -163,34 +180,8 @@ body {
   --shadow-panel: none;
   --shadow-elevation: none;
 
-  font-family: 'Geist', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-  font-feature-settings: 'ss01', 'cv11' !important;
-  background-color: #f6f7f8 !important;
-  color: #121417 !important;
-}
-
-.app-internal h1,
-.app-internal h2,
-.app-internal h3,
-.app-internal h4,
-.app-internal h5,
-.app-internal h6 {
-  font-family: 'Geist', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-  font-weight: 600;
-  letter-spacing: -0.025em;
-  color: #121417;
-}
-
-/* Dark Graphite Theme (/dev/null Unified Theme) */
-html.dark,
-body.dark,
-.dark {
-  color-scheme: dark;
-}
-
-html.dark body {
-  background-color: #111112 !important;
-  color: #ececec !important;
+  font-family: 'Geist', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-feature-settings: 'ss01', 'cv11';
 }
 
 html.dark .app-internal,
@@ -228,118 +219,16 @@ html.dark .app-internal,
   --color-lane-3: #3bc9db;
   --color-lane-4: #f06595;
   --color-lane-5: #fcc419;
-
-  background-color: #111112 !important;
-  color: #ececec !important;
 }
 
-html.dark .app-internal h1,
-html.dark .app-internal h2,
-html.dark .app-internal h3,
-html.dark .app-internal h4,
-html.dark .app-internal h5,
-html.dark .app-internal h6,
-.dark .app-internal h1,
-.dark .app-internal h2,
-.dark .app-internal h3,
-.dark .app-internal h4,
-.dark .app-internal h5,
-.dark .app-internal h6 {
-  color: #ececec !important;
+/* Dark Graphite Theme (/dev/null Unified Theme) */
+html.dark,
+body.dark,
+.dark {
+  color-scheme: dark;
 }
 
-/* Dark theme class mappings for all /dev/null components */
-html.dark .bg-white,
-html.dark [class*="bg-white"],
-.dark .bg-white,
-.dark [class*="bg-white"] {
-  background-color: #18181a !important;
-}
-
-html.dark [class*="bg-[#ffffff]"],
-.dark [class*="bg-[#ffffff]"] {
-  background-color: #18181a !important;
-}
-
-html.dark [class*="bg-[#f6f7f8]"],
-.dark [class*="bg-[#f6f7f8]"] {
-  background-color: #111112 !important;
-}
-
-html.dark [class*="bg-[#eef0f2]"],
-.dark [class*="bg-[#eef0f2]"] {
-  background-color: #232326 !important;
-}
-
-html.dark [class*="border-[#e1e4e8]"],
-.dark [class*="border-[#e1e4e8]"] {
-  border-color: #2a2a2d !important;
-}
-
-html.dark [class*="border-[#d3d7dd]"],
-.dark [class*="border-[#d3d7dd]"] {
-  border-color: #36363a !important;
-}
-
-html.dark [class*="text-[#121417]"],
-.dark [class*="text-[#121417]"] {
-  color: #ececec !important;
-}
-
-html.dark [class*="text-[#5b616b]"],
-.dark [class*="text-[#5b616b]"] {
-  color: #a1a1a6 !important;
-}
-
-html.dark [class*="bg-[#e8effc]"],
-.dark [class*="bg-[#e8effc]"] {
-  background-color: #18233a !important;
-}
-
-html.dark [class*="text-[#3b6fe0]"],
-.dark [class*="text-[#3b6fe0]"] {
-  color: #7aa2f7 !important;
-}
-
-html.dark [class*="border-[#3b6fe0]"],
-.dark [class*="border-[#3b6fe0]"] {
-  border-color: #7aa2f7 !important;
-}
-
-html.dark [class*="bg-[#3b6fe0]"],
-.dark [class*="bg-[#3b6fe0]"] {
-  background-color: #7aa2f7 !important;
-  color: #111112 !important;
-}
-
-html.dark [class*="hover:bg-[#2e5ccb]"]:hover,
-.dark [class*="hover:bg-[#2e5ccb]"]:hover {
-  background-color: #94b5f9 !important;
-}
-
-html.dark [class*="hover:bg-[#eef0f2]"]:hover,
-.dark [class*="hover:bg-[#eef0f2]"]:hover {
-  background-color: #232326 !important;
-}
-
-html.dark input,
-html.dark select,
-html.dark textarea,
-.dark input,
-.dark select,
-.dark textarea {
-  background-color: #18181a !important;
-  color: #ececec !important;
-  border-color: #2a2a2d !important;
-}
-
-html.dark input::placeholder,
-html.dark textarea::placeholder,
-.dark input::placeholder,
-.dark textarea::placeholder {
-  color: #a1a1a6 !important;
-}
-
+/* Ensure clean font styling */
 .font-mono,
 code,
 kbd,
@@ -393,7 +282,7 @@ kbd,
 }
 
 [class*="text-[#111315]"] {
-  color: #121417 !important;
+  color: #121417;
 }
 
 [class*="text-[#71767B]"],
@@ -401,7 +290,47 @@ kbd,
 .text-body-gray,
 .text-slate,
 .text-muted {
-  color: #5b616b !important;
+  color: #5b616b;
+}
+
+/* Dark mode text and surface overrides */
+html.dark [class*="text-[#111315]"],
+.dark [class*="text-[#111315]"],
+html.dark .text-ink,
+.dark .text-ink {
+  color: #ececec;
+}
+
+html.dark [class*="text-[#71767B]"],
+html.dark [class*="text-[#4B5259]"],
+.dark [class*="text-[#71767B]"],
+.dark [class*="text-[#4B5259]"],
+html.dark .text-body-gray,
+.dark .text-body-gray,
+html.dark .text-slate,
+.dark .text-slate,
+html.dark .text-muted,
+.dark .text-muted {
+  color: #a1a1a6;
+}
+
+html.dark [class*="text-[#0047FF]"],
+.dark [class*="text-[#0047FF]"],
+html.dark .text-metric-blue,
+.dark .text-metric-blue {
+  color: #7aa2f7;
+}
+
+html.dark .bg-surface-0,
+html.dark .bg-surface-1,
+.dark .bg-surface-0,
+.dark .bg-surface-1 {
+  background-color: #18181a;
+}
+
+html.dark .bg-surface-2,
+.dark .bg-surface-2 {
+  background-color: #232326;
 }
 
 .rounded-2xl {

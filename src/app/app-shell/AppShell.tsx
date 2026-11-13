@@ -26,8 +26,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   const navLinkCls = (targetPath: string) => {
     const isActive = pathname === targetPath || (targetPath !== '/' && pathname.startsWith(targetPath));
-    return `px-3 py-1.5 text-xs font-medium rounded-lg transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#3b6fe0] ${
-      isActive ? 'bg-[#e8effc] text-[#3b6fe0]' : 'text-[#5b616b] hover:text-[#121417] hover:bg-[#eef0f2]'
+    return `px-3 py-1.5 text-xs font-medium rounded-lg transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#3b6fe0] dark:focus-visible:outline-[#7aa2f7] ${
+      isActive
+        ? 'bg-[#e8effc] text-[#3b6fe0] dark:bg-[#18233a] dark:text-[#7aa2f7]'
+        : 'text-[#5b616b] dark:text-[#a1a1a6] hover:text-[#121417] dark:hover:text-[#ececec] hover:bg-[#eef0f2] dark:hover:bg-[#232326]'
     }`;
   };
 
@@ -35,34 +37,34 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     <div
       className={
         isLanding
-          ? 'landing-theme min-h-screen bg-[#f6f7f8] text-[#121417] font-sans'
+          ? 'landing-theme min-h-screen bg-[#f6f7f8] dark:bg-[#111112] text-[#121417] dark:text-[#ececec] font-sans transition-colors duration-150'
           : isAuthRoute
-            ? 'app-internal h-screen h-[100dvh] overflow-hidden bg-[#f6f7f8] text-[#121417]'
-            : 'app-internal min-h-screen bg-[#f6f7f8] text-[#121417]'
+            ? 'app-internal h-screen h-[100dvh] overflow-hidden bg-[#f6f7f8] dark:bg-[#111112] text-[#121417] dark:text-[#ececec] transition-colors duration-150'
+            : 'app-internal min-h-screen bg-[#f6f7f8] dark:bg-[#111112] text-[#121417] dark:text-[#ececec] transition-colors duration-150'
       }
     >
       {!isPublicRoute && (
-        <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-[#e1e4e8] transition-all">
+        <header className="sticky top-0 z-50 bg-white/95 dark:bg-[#18181a]/95 backdrop-blur-md border-b border-[#e1e4e8] dark:border-[#2a2a2d] transition-colors">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-2 sm:gap-3 min-w-0 shrink">
                 {/* Logo Brand */}
                 <Link
                   href="/dashboard"
-                  className="group flex items-center gap-2 text-base font-bold tracking-tight text-[#121417] hover:opacity-90 transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#3b6fe0] shrink-0"
+                  className="group flex items-center gap-2 text-base font-bold tracking-tight text-[#121417] dark:text-[#ececec] hover:opacity-90 transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#3b6fe0] dark:focus-visible:outline-[#7aa2f7] shrink-0"
                 >
                   <span
-                    className="flex h-7 w-7 items-center justify-center rounded-md bg-[#121417] text-white text-[11px] font-bold shadow-xs transition-transform group-hover:scale-105"
+                    className="flex h-7 w-7 items-center justify-center rounded-md bg-[#121417] dark:bg-[#ececec] text-white dark:text-[#111112] text-[11px] font-bold shadow-xs transition-transform group-hover:scale-105"
                     aria-hidden="true"
                   >
                     O
                   </span>
-                  <span className="font-['Geist',ui-sans-serif,sans-serif] text-lg font-bold tracking-tight text-[#121417]">
+                  <span className="font-['Geist',ui-sans-serif,sans-serif] text-lg font-bold tracking-tight text-[#121417] dark:text-[#ececec]">
                     Orqestra
                   </span>
                   {collegeName && (
                     <span
-                      className="hidden xl:inline border-l border-[#e1e4e8] pl-2.5 text-xs font-normal text-[#5b616b] truncate max-w-[160px]"
+                      className="hidden xl:inline border-l border-[#e1e4e8] dark:border-[#2a2a2d] pl-2.5 text-xs font-normal text-[#5b616b] dark:text-[#a1a1a6] truncate max-w-[160px]"
                       title={collegeName}
                     >
                       {collegeName}
@@ -74,14 +76,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 <button
                   type="button"
                   onClick={() => setSemesterModalOpen(true)}
-                  className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-[#121417] bg-[#f6f7f8] border border-[#e1e4e8] hover:border-[#3b6fe0] hover:bg-[#eef0f2] rounded-md transition-all cursor-pointer min-w-0 max-w-[130px] sm:max-w-[170px] lg:max-w-[210px] shrink"
+                  className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-[#121417] dark:text-[#ececec] bg-[#f6f7f8] dark:bg-[#111112] border border-[#e1e4e8] dark:border-[#2a2a2d] hover:border-[#3b6fe0] dark:hover:border-[#7aa2f7] hover:bg-[#eef0f2] dark:hover:bg-[#232326] rounded-md transition-all cursor-pointer min-w-0 max-w-[130px] sm:max-w-[170px] lg:max-w-[210px] shrink"
                   title={`Academic Semester: ${activeTerm.name}`}
                 >
-                  <Calendar className="w-3.5 h-3.5 text-[#3b6fe0] shrink-0" />
+                  <Calendar className="w-3.5 h-3.5 text-[#3b6fe0] dark:text-[#7aa2f7] shrink-0" />
                   <span className="truncate">
                     {activeTerm.name}
                   </span>
-                  <ChevronDown className="w-3 h-3 text-[#5b616b] shrink-0" />
+                  <ChevronDown className="w-3 h-3 text-[#5b616b] dark:text-[#a1a1a6] shrink-0" />
                 </button>
               </div>
 
