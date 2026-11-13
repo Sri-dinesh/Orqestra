@@ -1,104 +1,103 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { ArrowRight, Sliders, Cpu, FileCheck } from 'lucide-react';
 
 const STEPS = [
   {
-    n: "01",
-    title: "Create a department — or apply a preset",
-    text: "Start from scratch on the dashboard, or apply one of 3 institutional blueprints (from Standard School to a 9-section B.Tech Enterprise setup) that wires up sections, subjects, faculty, and requirements in one click.",
+    step: '01',
+    icon: Sliders,
+    title: 'Define institutional parameters',
+    summary: 'Working days, periods, rooms, and faculty pools',
+    text: 'Set your schedule dimensions, add theory courses and continuous laboratory blocks, assign eligible faculty pools, or apply one of three preconfigured institutional blueprints in one click.',
   },
   {
-    n: "02",
-    title: "Configure days, periods, sections, subjects, faculty",
-    text: "Set working days and teaching periods per day, add sections, define theory and lab subjects with eligible faculty pools, and assign weekly session requirements per section. Labs always count as 2 consecutive periods.",
+    step: '02',
+    icon: Cpu,
+    title: 'Solve with constraint intelligence',
+    summary: 'Preflight diagnostics and backtracking search',
+    text: 'Preflight checks verify capacity in milliseconds before search begins. The backtracking solver then resolves hundreds of course requirements in seconds using minimum remaining values heuristics.',
   },
   {
-    n: "03",
-    title: "Check preflight before you generate",
-    text: "The Generate page analyzes feasibility in milliseconds: section capacity vs. weekly periods, lab placeability around breaks, faculty workload vs. caps, and stale subject references — with exact shortfalls and suggestions.",
-  },
-  {
-    n: "04",
-    title: "Generate with a seeded solver",
-    text: "Run the backtracking search with an optional seed (same input + same seed = bit-identical timetable), per-department time and node budgets, live progress, and cancel. Finished runs report duration, explored nodes, backtracks, and a quality score.",
-  },
-  {
-    n: "05",
-    title: "Edit by hand — validation blocks conflicts",
-    text: "Click an entry to select it, click a free slot to move, right-click to swap, double-click to change subject, faculty, day, or period. Conflicting edits are rejected with a blocking modal; valid edits support undo/redo and snapshot a restorable version.",
-  },
-  {
-    n: "06",
-    title: "Review faculty load, then export",
-    text: "Set availability and preferred windows per teacher, review the read-only faculty timetable for weekly balance, then export the official notice-board PDF or Excel grid — or print directly.",
+    step: '03',
+    icon: FileCheck,
+    title: 'Review and publish official schedules',
+    summary: 'Conflict guarded hand edits and notice board exports',
+    text: 'Make fine manual adjustments with an authoritative validator that immediately blocks double bookings. When finalized, export official notice board PDFs with crest headers and signature blocks.',
   },
 ];
 
 export const HowItWorksSection: React.FC = () => {
   return (
-    <section
-      id="how-it-works"
-      className="gsap-section-reveal py-20 lg:py-28 bg-[#f6f7f8]"
-    >
+    <section id="how-it-works" className="py-20 lg:py-28 bg-[#f6f7f8] border-b border-[#e1e4e8]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="max-w-3xl mb-12">
+        {/* Section Header */}
+        <div className="max-w-3xl mb-14">
           <div className="flex items-center gap-2 text-xs font-mono font-medium text-[#5b616b] uppercase tracking-widest mb-3">
             <span>Workflow</span>
-            <span aria-hidden="true" className="text-black/30">
-              ·
-            </span>
-            <span className="text-[#3b6fe0]">How it works</span>
+            <span aria-hidden="true" className="text-[#d3d7dd]">·</span>
+            <span className="text-[#3b6fe0]">From Setup to Publication</span>
           </div>
-          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-[#121417] leading-tight text-balance">
-            From empty department to notice-board PDF in six steps.
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-[#121417] leading-tight text-balance">
+            Publish your institutional timetable in three decisive steps.
           </h2>
-          <p className="mt-4 text-base sm:text-lg text-[#5b616b] leading-relaxed max-w-2xl text-balance">
-            This is the actual workflow in the app — the same screens,
-            services, and guarantees described here are what you get when you
-            open the dashboard.
+          <p className="mt-4 text-base sm:text-lg text-[#5b616b] leading-relaxed max-w-2xl text-pretty">
+            Experience the real workstation workflow. The exact same solver, validation boundaries, and export engines running in these steps power your operational schedule.
           </p>
         </div>
 
-        <ol className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {/* 3 Step Sequence */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
           {STEPS.map((s) => (
-            <li
-              key={s.n}
-              className="rounded-md bg-white border border-[#e1e4e8] p-6 flex flex-col"
+            <div
+              key={s.step}
+              className="rounded-md bg-white border border-[#e1e4e8] p-6 sm:p-8 flex flex-col justify-between"
             >
-              <span className="text-xs font-mono font-bold text-[#3b6fe0] mb-3">
-                {s.n}
-              </span>
-              <h3 className="font-display text-lg font-bold text-[#121417] mb-2 leading-snug">
-                {s.title}
-              </h3>
-              <p className="text-[13px] text-[#5b616b] leading-relaxed">{s.text}</p>
-            </li>
-          ))}
-        </ol>
+              <div>
+                <div className="flex items-center justify-between mb-6">
+                  <span className="text-sm font-mono font-semibold text-[#3b6fe0] px-2 py-0.5 rounded bg-[#e8effc] border border-[#3b6fe0]/20">
+                    Step {s.step}
+                  </span>
+                  <div className="w-8 h-8 rounded-md bg-[#f6f7f8] border border-[#e1e4e8] flex items-center justify-center text-[#5b616b]">
+                    <s.icon className="w-4 h-4" />
+                  </div>
+                </div>
 
-        <div className="mt-6 rounded-md bg-[#121417] text-white p-6 lg:p-8 flex flex-col lg:flex-row lg:items-center gap-5">
-          <div className="flex-1">
-            <p className="text-xs font-mono uppercase tracking-widest text-blue-300 mb-2">
-              The full-packing rule
+                <h3 className="text-lg font-semibold text-[#121417] mb-1">
+                  {s.title}
+                </h3>
+                <p className="text-xs font-mono text-[#3b6fe0] mb-3">
+                  {s.summary}
+                </p>
+                <p className="text-xs text-[#5b616b] leading-relaxed text-pretty">
+                  {s.text}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Full Packing Rule Guarantee Banner */}
+        <div className="rounded-md bg-white border border-[#e1e4e8] p-6 lg:p-8 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          <div className="max-w-3xl">
+            <div className="flex items-center gap-2 text-xs font-mono font-semibold text-[#3b6fe0] uppercase tracking-wider mb-2">
+              <span>The Full Packing Rule</span>
+              <span aria-hidden="true" className="text-[#d3d7dd]">·</span>
+              <span className="text-[#5b616b] font-normal">Mathematical Invariant</span>
+            </div>
+            <p className="text-sm font-semibold text-[#121417] mb-1">
+              Required session periods must match working days multiplied by daily teaching periods.
             </p>
-            <p className="text-sm text-white/80 leading-relaxed max-w-3xl">
-              A section's weekly requirements must sum to exactly{" "}
-              <span className="font-mono text-white">
-                working days × teaching periods per day
-              </span>{" "}
-              (labs = 2 periods each). Breaks like lunch sit in their own grid
-              columns and are never counted. If requirements sum to less, the
-              shortfall shows up as empty periods — the Generate page's
-              preflight warnings tell you the exact gap.
+            <p className="text-xs text-[#5b616b] leading-relaxed text-pretty">
+              Two period continuous laboratories count as two periods each. Breaks like lunch sit in dedicated interval columns and are never counted toward session capacity. If requirements fall short, preflight warnings calculate the exact missing periods before search starts.
             </p>
           </div>
+
           <Link
             to="/dashboard"
-            className="shrink-0 inline-flex items-center gap-2 px-5 py-3 text-sm font-semibold text-[#121417] bg-white hover:bg-blue-50 rounded-md transition-colors"
+            className="shrink-0 inline-flex items-center justify-center gap-2 px-5 py-2.5 text-xs font-semibold text-white bg-[#3b6fe0] hover:bg-[#2e5ccb] active:scale-[0.98] rounded-md transition-all duration-150"
           >
-            <span>Try it on the dashboard</span>
-            <ArrowRight className="w-4 h-4" />
+            <span>Test on Live Dashboard</span>
+            <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
       </div>

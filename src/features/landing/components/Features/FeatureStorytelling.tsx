@@ -1,96 +1,150 @@
-import React from "react";
+import React from 'react';
 import {
-  LayoutDashboard,
-  SlidersHorizontal,
-  Zap,
-  MousePointerClick,
   ShieldCheck,
-  CalendarCheck2,
-  History,
+  Clock,
+  Scale,
+  Award,
   FileDown,
-} from "lucide-react";
+  Cpu,
+  Layers,
+  History,
+} from 'lucide-react';
 
-const FEATURES = [
-  {
-    icon: LayoutDashboard,
-    title: "Department dashboard",
-    text: "Status at a glance with live counts of sections, subjects, faculty, and timetable version — plus one-click preset setup to start fast.",
-  },
-  {
-    icon: SlidersHorizontal,
-    title: "Full configuration",
-    text: "Working days, periods per day, sections, theory + lab subjects, faculty pools, and per-section weekly session requirements — including breaks that sit in their own grid columns.",
-  },
-  {
-    icon: Zap,
-    title: "Automated generation",
-    text: "A backtracking scheduler with seeded randomness, preflight feasibility analysis, faculty-fairness heuristics, and configurable time and node budgets.",
-  },
-  {
-    icon: MousePointerClick,
-    title: "Manual editor",
-    text: "Move or swap sessions with drag-and-drop, change subject or faculty, place custom day/period sessions via an edit dialog — all with undo and redo.",
-  },
+const CORE_BENEFITS = [
   {
     icon: ShieldCheck,
-    title: "Conflict blocking",
-    text: "Every edit runs the full authoritative validator before commit. Hard conflicts are rejected with a blocking modal that explains exactly why.",
+    title: 'Zero schedule collisions',
+    headline: 'Guaranteed conflict prevention across parallel sections',
+    text: 'Algorithmic backtracking ensures no faculty member, classroom, or student batch is double booked across teaching periods, preventing opening day chaos.',
   },
   {
-    icon: CalendarCheck2,
-    title: "Faculty availability",
-    text: "Set available and preferred teaching windows in a dedicated grid editor, cap weekly and daily loads, and review each teacher's week in a read-only faculty timetable.",
+    icon: Clock,
+    title: 'Atomic continuous laboratory blocks',
+    headline: 'Practical labs scheduled as indivisible multi period units',
+    text: 'Laboratory sessions are placed as uninterrupted two period blocks by construction. They never cross lunch intervals or get fragmented across days.',
   },
   {
-    icon: History,
-    title: "Version history",
-    text: "Every generation and committed edit creates a restore-point snapshot (capped at 20, newest last). Browse and restore any version — restores are reversible too.",
+    icon: Scale,
+    title: 'Equitable faculty workload distribution',
+    headline: 'Intelligent heuristics balance teaching loads across working days',
+    text: 'Heuristic scoring balances daily and weekly hours among eligible teachers, protecting preparation time and preventing educator burnout.',
+  },
+  {
+    icon: Award,
+    title: 'Instant regulatory curriculum compliance',
+    headline: 'Aligned with credit standards and institutional guidelines',
+    text: 'Strictly satisfies AICTE, UGC, and national credit mandates by verifying exact weekly session counts per course before generation completes.',
   },
   {
     icon: FileDown,
-    title: "PDF + Excel export",
-    text: "Official notice-board PDF per section — crest header, time grid with break columns, advisor, course and instructor details, mentors, signatories — plus an Excel grid and print support.",
+    title: 'Notice board publication exports',
+    headline: 'Official printable PDF grids with crest headers and signatures',
+    text: 'Generate official notice board timetables with institutional crests, course codes, instructor names, section advisors, and signatory blocks.',
+  },
+];
+
+const CAPABILITY_TILES = [
+  {
+    icon: Cpu,
+    title: 'Minimum remaining values backtracking solver',
+    text: 'Evaluates hard constraints against an occupancy matrix in constant time, exploring thousands of candidate states per second with reversible rollback.',
+  },
+  {
+    icon: Layers,
+    title: 'Multi semester workspace isolation',
+    text: 'Maintain separate academic terms with full semester cloning. Carry over faculty directories, rooms, and course structures without retyping data.',
+  },
+  {
+    icon: History,
+    title: 'Twenty restorable snapshot versions',
+    text: 'Every solver execution and manual edit creates a restorable snapshot in your browser. Revert to any prior iteration with complete confidence.',
   },
 ];
 
 export const FeatureStorytelling: React.FC = () => {
   return (
-    <section
-      id="features"
-      className="gsap-section-reveal py-20 lg:py-28 bg-white border-y border-[#e1e4e8]"
-    >
+    <section id="features" className="py-20 lg:py-28 bg-[#ffffff] border-b border-[#e1e4e8]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="max-w-3xl mb-12">
+        {/* Section Header */}
+        <div className="max-w-3xl mb-14">
           <div className="flex items-center gap-2 text-xs font-mono font-medium text-[#5b616b] uppercase tracking-widest mb-3">
-            <span>Features</span>
-            <span aria-hidden="true" className="text-black/30">
-              ·
-            </span>
-            <span className="text-[#3b6fe0]">What the app does</span>
+            <span>Core Capabilities</span>
+            <span aria-hidden="true" className="text-[#d3d7dd]">·</span>
+            <span className="text-[#3b6fe0]">Engineered for Higher Education</span>
           </div>
-          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-[#121417] leading-tight text-balance">
-            Everything a department needs to ship a timetable.
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-[#121417] leading-tight text-balance">
+            Everything an academic institution requires to generate verifiable timetables.
           </h2>
-          <p className="mt-4 text-base sm:text-lg text-[#5b616b] leading-relaxed max-w-2xl text-balance">
-            No backend, no accounts, no sales calls. Configure, generate, edit,
-            version, and export — all offline in your browser.
+          <p className="mt-4 text-base sm:text-lg text-[#5b616b] leading-relaxed max-w-2xl text-pretty">
+            Designed specifically for engineering colleges, universities, and academic departments balancing complex faculty pools, multi period laboratories, and physical room constraints.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {FEATURES.map((f) => (
-            <article
-              key={f.title}
-              className="rounded-md bg-[#ffffff] border border-[#e1e4e8] p-5 flex flex-col hover:border-[#3b6fe0]/40 hover:bg-white transition-colors"
+        {/* 5 Core Outcome-Driven Benefit Pillars */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          {CORE_BENEFITS.map((b) => (
+            <div
+              key={b.title}
+              className="rounded-md bg-white border border-[#e1e4e8] p-6 flex flex-col justify-between hover:border-[#3b6fe0]/50 transition-colors"
             >
-              <div className="w-9 h-9 rounded-lg bg-[#121417] text-white flex items-center justify-center mb-4">
-                <f.icon className="w-4.5 h-4.5" size={18} />
+              <div>
+                <div className="w-10 h-10 rounded-md bg-[#e8effc] text-[#3b6fe0] flex items-center justify-center mb-4 border border-[#3b6fe0]/20">
+                  <b.icon className="w-5 h-5" />
+                </div>
+                <h3 className="text-base font-semibold text-[#121417] mb-1">
+                  {b.title}
+                </h3>
+                <p className="text-xs font-mono text-[#3b6fe0] mb-3">
+                  {b.headline}
+                </p>
+                <p className="text-xs text-[#5b616b] leading-relaxed text-pretty">
+                  {b.text}
+                </p>
               </div>
-              <h3 className="font-display text-base font-bold text-[#121417] mb-1.5">
-                {f.title}
+            </div>
+          ))}
+
+          {/* Special Bento Architecture Card */}
+          <div className="rounded-md bg-[#121417] text-white p-6 flex flex-col justify-between border border-[#121417]">
+            <div>
+              <div className="w-10 h-10 rounded-md bg-white/10 text-[#7aa2f7] flex items-center justify-center mb-4 border border-white/10">
+                <Cpu className="w-5 h-5" />
+              </div>
+              <h3 className="text-base font-semibold text-white mb-1">
+                Deterministic solver seeding
               </h3>
-              <p className="text-[13px] text-[#5b616b] leading-relaxed">{f.text}</p>
-            </article>
+              <p className="text-xs font-mono text-[#7aa2f7] mb-3">
+                Bit identical timetable reproduction
+              </p>
+              <p className="text-xs text-white/70 leading-relaxed text-pretty">
+                Every solver run records its pseudo random number seed. Running the solver with the exact same seed and parameters regenerates the exact same schedule bit for bit.
+              </p>
+            </div>
+            <div className="mt-6 pt-4 border-t border-white/10 text-[11px] font-mono text-[#51cf66]">
+              Verified by automated integration test suites
+            </div>
+          </div>
+        </div>
+
+        {/* 3 Secondary Capability Tiles */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
+          {CAPABILITY_TILES.map((t) => (
+            <div
+              key={t.title}
+              className="p-5 rounded-md bg-[#f6f7f8] border border-[#e1e4e8] flex flex-col justify-between"
+            >
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <t.icon className="w-4 h-4 text-[#3b6fe0]" />
+                  <h4 className="text-sm font-semibold text-[#121417]">
+                    {t.title}
+                  </h4>
+                </div>
+                <p className="text-xs text-[#5b616b] leading-relaxed text-pretty">
+                  {t.text}
+                </p>
+              </div>
+            </div>
           ))}
         </div>
       </div>

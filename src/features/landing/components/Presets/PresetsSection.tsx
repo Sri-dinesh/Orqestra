@@ -1,100 +1,114 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import { ArrowRight, Star } from "lucide-react";
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { ArrowRight, Star, Building2, GraduationCap, Stethoscope } from 'lucide-react';
 
 const PRESETS = [
   {
-    name: "Standard School — Delhi Public School",
-    spec: "4 sections (9-A, 9-B, 10-A, 10-B) · 9 subjects (1 lab) · 15 teachers · 5 days × 7 periods",
-    text: "CBSE secondary wing with real subject curriculum, period timings, morning recess, and lunch break. Solved with zero conflicts in ~1s.",
+    icon: Building2,
+    name: 'Standard Secondary School',
+    institution: 'CBSE and High School Pattern',
+    spec: '4 sections · 9 courses · 15 teachers · 5 days × 7 periods',
+    text: 'Secondary school curriculum with standardized subject allocations, morning break, and lunch intervals. Fully scheduled with zero collisions in under a second.',
     featured: false,
   },
   {
-    name: "B.Tech CSE (Enterprise) — 9 Sections",
-    spec: "9 sections (CSE-A to CSE-I) · 8 subjects (5 theory + 3 labs) · 40 faculty · 14 rooms · 6 days × 7 periods",
-    text: "Vardhaman College of Engineering scale: 342 sessions, 5 dedicated faculty per subject, 2-period atomic lab blocks, morning break & lunch. 100% conflict-free in ~2.5s.",
+    icon: GraduationCap,
+    name: 'B.Tech CSE Enterprise Blueprint',
+    institution: 'Engineering University Scale',
+    spec: '9 sections · 8 courses with 3 continuous labs · 40 faculty · 14 rooms · 6 days × 7 periods',
+    text: 'Large engineering college scale covering 342 teaching sessions, dedicated faculty pools per course, two period atomic laboratory practicals, and balanced daily loads.',
     featured: true,
   },
   {
-    name: "Medical College — AIIMS Clinical Phase",
-    spec: "3 batches (Alpha, Beta, Gamma) · 8 subjects (5 theory + 3 clinical) · 16 doctors · 5 days × 6 periods",
-    text: "MBBS clinical curriculum with hospital ward rotations, histopathology and diagnostic laboratories. Solved in ~0.3s.",
+    icon: Stethoscope,
+    name: 'Medical College Clinical Phase',
+    institution: 'MBBS Clinical Rotations',
+    spec: '3 batches · 8 clinical courses · 16 doctors · 5 days × 6 periods',
+    text: 'Clinical phase curriculum coordinating hospital ward rotations, histopathology sessions, and diagnostic laboratories without double booking practicing consultants.',
     featured: false,
   },
 ];
 
 export const PresetsSection: React.FC = () => {
   return (
-    <section
-      id="presets"
-      className="gsap-section-reveal py-20 lg:py-28 bg-white border-y border-[#e1e4e8]"
-    >
+    <section id="presets" className="py-20 lg:py-28 bg-[#ffffff] border-b border-[#e1e4e8]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="max-w-3xl mb-12">
+        {/* Section Header */}
+        <div className="max-w-3xl mb-14">
           <div className="flex items-center gap-2 text-xs font-mono font-medium text-[#5b616b] uppercase tracking-widest mb-3">
-            <span>Built-in presets</span>
-            <span aria-hidden="true" className="text-black/30">
-              ·
-            </span>
-            <span className="text-[#3b6fe0]">One click sets up everything</span>
+            <span>Prebuilt Blueprints</span>
+            <span aria-hidden="true" className="text-[#d3d7dd]">·</span>
+            <span className="text-[#3b6fe0]">Instant Department Setup</span>
           </div>
-          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-[#121417] leading-tight text-balance">
-            Start from a real department, not a blank form.
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-[#121417] leading-tight text-balance">
+            Start from an accredited institutional structure, not an empty form.
           </h2>
-          <p className="mt-4 text-base sm:text-lg text-[#5b616b] leading-relaxed max-w-2xl text-balance">
-            Three production-grade institutional blueprints ship with the app:
-            Standard School, B.Tech Enterprise (9 Sections), and Medical College.
-            Applying one pre-configures all sections, subjects, faculty, rooms,
-            and generates a 100% conflict-free timetable in one click.
+          <p className="mt-4 text-base sm:text-lg text-[#5b616b] leading-relaxed max-w-2xl text-pretty">
+            Three production grade institutional blueprints ship directly inside the workstation. Applying a blueprint sets up sections, courses, faculty pools, and room allocations in one click.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {/* Blueprint Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           {PRESETS.map((p) => (
-            <article
+            <div
               key={p.name}
-              className={`rounded-md border p-5 flex flex-col ${
+              className={`rounded-md border p-6 sm:p-8 flex flex-col justify-between transition-colors ${
                 p.featured
-                  ? "bg-[#121417] text-white border-[#121417]"
-                  : "bg-[#ffffff] border-[#e1e4e8]"
+                  ? 'bg-[#121417] text-white border-[#121417]'
+                  : 'bg-white border-[#e1e4e8] hover:border-[#3b6fe0]/40'
               }`}
             >
-              <div className="flex items-start justify-between gap-2 mb-2">
-                <h3 className="font-display text-base font-bold leading-snug">
+              <div>
+                <div className="flex items-start justify-between gap-3 mb-4">
+                  <div className={`w-9 h-9 rounded-md flex items-center justify-center ${
+                    p.featured ? 'bg-white/10 text-[#7aa2f7]' : 'bg-[#e8effc] text-[#3b6fe0]'
+                  }`}>
+                    <p.icon className="w-5 h-5" />
+                  </div>
+                  {p.featured && (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-mono font-semibold text-[#7aa2f7] uppercase px-2 py-0.5 rounded bg-white/10">
+                      <Star className="w-3 h-3 fill-current" /> Most Popular
+                    </span>
+                  )}
+                </div>
+
+                <h3 className="text-base font-semibold mb-1">
                   {p.name}
                 </h3>
-                {p.featured && (
-                  <span className="shrink-0 inline-flex items-center gap-1 text-[10px] font-mono font-bold text-blue-300 uppercase">
-                    <Star size={11} /> Popular
-                  </span>
-                )}
+                <p className={`text-xs font-mono mb-3 ${
+                  p.featured ? 'text-[#7aa2f7]' : 'text-[#3b6fe0]'
+                }`}>
+                  {p.institution}
+                </p>
+
+                <p className={`text-xs font-mono mb-4 p-2.5 rounded ${
+                  p.featured ? 'bg-white/5 text-white/70' : 'bg-[#f6f7f8] text-[#5b616b]'
+                }`}>
+                  {p.spec}
+                </p>
+
+                <p className={`text-xs leading-relaxed text-pretty ${
+                  p.featured ? 'text-white/80' : 'text-[#5b616b]'
+                }`}>
+                  {p.text}
+                </p>
               </div>
-              <p
-                className={`text-[11px] font-mono mb-2.5 ${p.featured ? "text-white/60" : "text-[#5b616b]"}`}
-              >
-                {p.spec}
-              </p>
-              <p
-                className={`text-[13px] leading-relaxed flex-1 ${p.featured ? "text-white/80" : "text-[#5b616b]"}`}
-              >
-                {p.text}
-              </p>
-            </article>
+            </div>
           ))}
         </div>
 
-        <div className="mt-6 rounded-md bg-[#ffffff] border border-[#e1e4e8] p-6 flex flex-col sm:flex-row sm:items-center gap-4">
-          <p className="text-sm text-[#5b616b] leading-relaxed flex-1">
-            Presets live on the dashboard under “Institutional Blueprints” —
-            apply one, inspect the generated configuration, then head to the
-            Generate page.
+        {/* Action Row */}
+        <div className="rounded-md bg-[#f6f7f8] border border-[#e1e4e8] p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <p className="text-xs text-[#5b616b] leading-relaxed max-w-2xl text-pretty">
+            Presets live directly inside the workstation under Institutional Blueprints. Load any blueprint, inspect the generated parameters, and generate the schedule instantly.
           </p>
           <Link
             to="/dashboard"
-            className="shrink-0 inline-flex items-center gap-2 px-5 py-3 text-sm font-semibold text-white bg-[#121417] hover:bg-[#3b6fe0] rounded-md transition-colors"
+            className="shrink-0 inline-flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-semibold text-white bg-[#121417] hover:bg-[#3b6fe0] active:scale-[0.98] rounded-md transition-all duration-150"
           >
-            <span>Browse presets</span>
-            <ArrowRight className="w-4 h-4" />
+            <span>Explore Blueprints</span>
+            <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
       </div>

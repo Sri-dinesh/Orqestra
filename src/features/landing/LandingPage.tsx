@@ -1,31 +1,22 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Navbar } from './components/Navbar';
 import { HeroSection } from './components/Hero/HeroSection';
+import { ProblemSolutionSection } from './components/Problem/ProblemSolutionSection';
+import { TaglineRevealSection } from './components/Tagline/TaglineRevealSection';
 import { FeatureStorytelling } from './components/Features/FeatureStorytelling';
 import { HowItWorksSection } from './components/Workflow/HowItWorksSection';
 import { EngineArchitectureSection } from './components/Engine/EngineArchitectureSection';
-import { EditorSection } from './components/Operations/EditorSection';
-import { FacultySection } from './components/Faculty/FacultySection';
 import { PresetsSection } from './components/Presets/PresetsSection';
-import { DataSection } from './components/Data/DataSection';
 import { FaqSection } from './components/FAQ/FaqSection';
 import { FinalCTASection } from './components/CTA/FinalCTASection';
 import { Footer } from './components/Footer/Footer';
 import { CellDetailDrawer } from './components/Modals/CellDetailDrawer';
 import { ScheduleClass } from './types/schedule';
-import { initScrollTriggerAnimations } from './lib/scrollAnimations';
 
 export function LandingPage() {
   const [inspectedClass, setInspectedClass] = useState<ScheduleClass | null>(null);
 
-  useEffect(() => {
-    const cleanup = initScrollTriggerAnimations();
-    return () => {
-      cleanup();
-    };
-  }, []);
-
-  const scrollToDemo = () => {
+  const scrollToWorkflow = () => {
     const el = document.getElementById('how-it-works');
     if (el) {
       el.scrollIntoView({ behavior: 'smooth' });
@@ -34,47 +25,46 @@ export function LandingPage() {
 
   return (
     <div className="landing-theme min-h-screen bg-[#f6f7f8] text-[#121417] font-sans selection:bg-[#3b6fe0] selection:text-white flex flex-col">
-      <Navbar onScrollToDemo={scrollToDemo} />
+      {/* Floating Modern Header */}
+      <Navbar onScrollToDemo={scrollToWorkflow} />
 
-      {/* Main Content Sections Flow */}
+      {/* Main Product Launch Storyline */}
       <main className="flex-1">
-        {/* 1. Hero with honest product preview */}
+        {/* 1. Hero with Live Interactive Schedule Specimen */}
         <HeroSection
-          onScrollToDemo={scrollToDemo}
+          onScrollToDemo={scrollToWorkflow}
           onSelectClass={(item) => setInspectedClass(item)}
         />
 
-        {/* 2. Product features */}
+        {/* 2. Problem to Solution: Manual Spreadsheets vs Orqestra Solver */}
+        <ProblemSolutionSection />
+
+        {/* 3. Mandatory B11 Tagline Reveal (Word-by-word scroll transition) */}
+        <TaglineRevealSection />
+
+        {/* 4. Core Outcome-Driven Benefits (5 Pillars + Architecture Bento) */}
         <FeatureStorytelling />
 
-        {/* 3. How it works — the real app workflow */}
+        {/* 5. How It Works: 3 Decisive Steps + Full Packing Guarantee */}
         <HowItWorksSection />
 
-        {/* 4. Scheduling engine, honestly explained */}
+        {/* 6. Scheduling Engine Pipeline: Transparent Constraint Architecture */}
         <EngineArchitectureSection />
 
-        {/* 5. Timetable editor: draft → validate → commit */}
-        <EditorSection />
-
-        {/* 6. Faculty availability, fairness, and review */}
-        <FacultySection />
-
-        {/* 7. Built-in presets */}
+        {/* 7. Institutional Blueprints: Prebuilt Accredited Structures */}
         <PresetsSection />
 
-        {/* 8. Export, version history & privacy */}
-        <DataSection />
-
-        {/* 9. FAQ */}
+        {/* 8. Frequently Asked Questions: Institutional Objection Busters */}
         <FaqSection />
 
-        {/* 10. Final CTA */}
-        <FinalCTASection onScrollToDemo={scrollToDemo} />
+        {/* 9. Final Decisive Call to Action with Risk Reversal */}
+        <FinalCTASection onScrollToDemo={scrollToWorkflow} />
       </main>
 
+      {/* Structured Modern Footer */}
       <Footer />
 
-      {/* Course Detail Inspection Drawer */}
+      {/* Interactive Course Detail Inspection Drawer */}
       <CellDetailDrawer
         selectedClass={inspectedClass}
         onClose={() => setInspectedClass(null)}

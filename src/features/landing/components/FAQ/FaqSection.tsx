@@ -1,92 +1,96 @@
-import React, { useState } from "react";
-import { ChevronDown } from "lucide-react";
+import React, { useState } from 'react';
+import { ChevronDown } from 'lucide-react';
 
 const FAQS = [
   {
-    q: "Is my data sent anywhere?",
-    a: "No. Orqestra is fully client-side — there is no backend and no account. Your workspace lives in the browser's local storage, the app works offline, and nothing ever leaves your machine. Use workspace import/export (JSON) for backup and transfer.",
+    q: 'Does institutional student or faculty data get uploaded to external cloud servers?',
+    a: 'No. Orqestra is completely client side. All data persistence operates through your browser local storage. The application works entirely offline with zero network calls required to schedule timetables. You can export and import complete workspace snapshots as structured JSON files for backup and migration.',
   },
   {
-    q: "What does “fully packed” mean?",
-    a: "A section's weekly session requirements must sum to exactly working days × teaching periods per day, with each lab counting as 2 periods. Breaks such as lunch sit in their own grid columns and are never counted. If requirements sum to less, the shortfall shows up as empty periods — the Generate page's preflight warnings tell you the exact gap per section.",
+    q: 'What happens if a department has more course requirements than available periods in the week?',
+    a: 'The preflight feasibility engine catches capacity shortages before any search begins. It compares required subject sessions against working days multiplied by daily teaching periods. If requirements exceed capacity, generation is blocked with a clear diagnostic explaining the exact shortfall.',
   },
   {
-    q: "How do laboratory sessions work?",
-    a: "Labs are atomic 2-period blocks by construction: a lab is placed as a single indivisible unit spanning 2 consecutive periods on one day. A lab can never split across days or span a break column, and you can optionally cap labs per section per day.",
+    q: 'How does the scheduler enforce continuous multi period laboratory sessions?',
+    a: 'Laboratories are modeled as indivisible continuous two period blocks by construction. The solver structurally forbids placing a laboratory across break intervals or splitting it across multiple days. Laboratory rooms and faculty pools are locked simultaneously for the full duration.',
   },
   {
-    q: "What happens when I edit a timetable by hand?",
-    a: "Every edit follows draft → validate → commit. The app copies the timetable, applies your change to the draft, and runs the full authoritative validator before committing. Hard conflicts (double-booked faculty, section collisions, lab overruns) are rejected with a blocking modal explaining why — a rejected edit leaves the timetable byte-identical. Committed edits support undo/redo and snapshot a restorable version.",
+    q: 'Can department heads make manual schedule adjustments after generation?',
+    a: 'Yes. The workstation includes a drag and drop timetable editor following a draft, validate, commit workflow. You can swap sessions, move classes to open slots, or reassign faculty. Every manual modification is vetted by the authoritative validator, which immediately blocks any conflicting assignment.',
   },
   {
-    q: "Can I reproduce a generated timetable exactly?",
-    a: "Yes. Generation uses a seeded PRNG and the seed is stored in the run's metadata: identical input plus identical seed produces a bit-identical timetable. Leave the seed blank for auto mode, or set one to lock a result.",
+    q: 'How are faculty workload limits and preferred teaching times enforced?',
+    a: 'Department administrators can configure weekly and daily maximum teaching limits per faculty member. The availability matrix allows setting preferred and unavailable teaching hours, ensuring senior professors and adjunct lecturers receive schedules suited to their constraints.',
   },
   {
-    q: "What if generation fails or times out?",
-    a: "Preflight diagnostics catch most impossibilities in milliseconds — capacity gaps, lab placeability, faculty overloads, stale subjects — with exact numbers and suggestions. If the search itself exhausts its per-department time or node budget, you get SEARCH_TIMEOUT or SEARCH_NODE_LIMIT with guidance (raise a budget, reduce sessions, add faculty or days), and a Cancel button stops long runs.",
+    q: 'Can an identical timetable be reproduced if an accreditation review requires verification?',
+    a: 'Yes. Every solver run records a deterministic pseudo random number seed in its metadata. Providing the identical input parameters and seed produces a bit identical timetable schedule every time, satisfying institutional audit requirements.',
   },
   {
-    q: "What do VALID, STALE, and INVALID mean?",
-    a: "VALID means the timetable passed full validation against the current configuration. STALE means the configuration changed after generation — regenerate to reconcile. INVALID means requirement counts drifted (for example after intentional removals) and the validation panel lists exactly what is missing or in excess.",
+    q: 'What export formats are provided for physical campus notice boards?',
+    a: 'Orqestra generates official notice board PDF documents formatted with institutional crest headers, section identifiers, course instructor mappings, advisor contacts, and dean signature blocks. Full Excel spreadsheets and direct browser printouts are also supported.',
   },
   {
-    q: "How do I back up or move my workspace?",
-    a: "Settings offers workspace-level import/export to JSON (files named orqestra-workspace-*.json). Storage is schema-versioned with migrations and corruption recovery, so older workspaces upgrade cleanly on load.",
+    q: 'How does Orqestra compare to expensive proprietary timetable software?',
+    a: 'Traditional academic scheduling suites charge thousands of dollars annually and require complex server installations. Orqestra is an open source MIT licensed workstation that runs instantly in any modern browser without license keys, subscriptions, or deployment overhead.',
   },
 ];
 
 export const FaqSection: React.FC = () => {
-  const [open, setOpen] = useState<number | null>(0);
+  const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   return (
-    <section
-      id="faq"
-      className="gsap-section-reveal py-20 lg:py-28 bg-white border-y border-[#e1e4e8]"
-    >
+    <section id="faq" className="py-20 lg:py-28 bg-[#ffffff] border-b border-[#e1e4e8]">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-10 text-center">
-          <div className="flex items-center justify-center gap-2 text-xs font-mono font-medium text-[#5b616b] uppercase tracking-widest mb-3">
-            <span>FAQ</span>
-            <span aria-hidden="true" className="text-black/30">
-              ·
-            </span>
-            <span className="text-[#3b6fe0]">Honest answers</span>
+        {/* Section Header */}
+        <div className="mb-14 text-center">
+          <div className="inline-flex items-center justify-center gap-2 text-xs font-mono font-medium text-[#5b616b] uppercase tracking-widest mb-3">
+            <span>Frequently Asked Questions</span>
+            <span aria-hidden="true" className="text-[#d3d7dd]">·</span>
+            <span className="text-[#3b6fe0]">Objection Resolution</span>
           </div>
-          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-[#121417] leading-tight text-balance">
-            Questions departments actually ask.
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-[#121417] leading-tight text-balance">
+            Questions academic leaders ask before adopting Orqestra.
           </h2>
+          <p className="mt-4 text-base text-[#5b616b] leading-relaxed max-w-xl mx-auto text-pretty">
+            Clear, transparent answers regarding privacy, constraint satisfaction, laboratory handling, and institutional compliance.
+          </p>
         </div>
 
-        <div className="space-y-2.5">
-          {FAQS.map((f, i) => {
-            const isOpen = open === i;
+        {/* Accordion List */}
+        <div className="space-y-3">
+          {FAQS.map((faq, idx) => {
+            const isOpen = openIndex === idx;
+
             return (
               <div
-                key={f.q}
-                className={`rounded-md border transition-colors ${
+                key={faq.q}
+                className={`rounded-md border transition-all duration-200 ${
                   isOpen
-                    ? "bg-[#ffffff] border-[#3b6fe0]/40"
-                    : "bg-white border-[#e1e4e8] hover:border-[#121417]/40"
+                    ? 'bg-white border-[#3b6fe0]/40 shadow-xs'
+                    : 'bg-white border-[#e1e4e8] hover:border-[#d3d7dd]'
                 }`}
               >
                 <button
                   type="button"
-                  onClick={() => setOpen(isOpen ? null : i)}
+                  onClick={() => setOpenIndex(isOpen ? null : idx)}
                   aria-expanded={isOpen}
                   className="w-full flex items-center justify-between gap-4 text-left px-5 py-4"
                 >
                   <span className="text-sm font-semibold text-[#121417]">
-                    {f.q}
+                    {faq.q}
                   </span>
                   <ChevronDown
-                    className={`w-4 h-4 shrink-0 text-[#5b616b] transition-transform ${isOpen ? "rotate-180" : ""}`}
+                    className={`w-4 h-4 shrink-0 text-[#5b616b] transition-transform duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                      isOpen ? 'rotate-180 text-[#3b6fe0]' : ''
+                    }`}
                   />
                 </button>
+
                 {isOpen && (
-                  <p className="px-5 pb-5 text-[13px] text-[#5b616b] leading-relaxed">
-                    {f.a}
-                  </p>
+                  <div className="px-5 pb-5 pt-1 text-xs text-[#5b616b] leading-relaxed border-t border-[#e1e4e8]/60 text-pretty">
+                    {faq.a}
+                  </div>
                 )}
               </div>
             );

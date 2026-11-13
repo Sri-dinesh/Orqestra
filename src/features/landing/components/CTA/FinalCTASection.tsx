@@ -1,113 +1,55 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import { ArrowRight, CheckCircle2 } from "lucide-react";
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { ArrowRight, CheckCircle2, ShieldCheck, Sparkles } from 'lucide-react';
 
 interface FinalCTASectionProps {
-  onScrollToDemo: () => void;
+  onScrollToDemo?: () => void;
 }
 
-export const FinalCTASection: React.FC<FinalCTASectionProps> = ({
-  onScrollToDemo,
-}) => {
-  const floatingBlocks = [
-    {
-      code: "CSE-G",
-      title: "B.Tech CSE 3rd Year · 42/42 packed",
-      room: "Break + Lunch columns · ~1s solve",
-      time: "6 DAYS × 7 PERIODS",
-      pos: "top-8 left-8 hidden lg:block",
-    },
-    {
-      code: "SEC-A…I",
-      title: "Enterprise · 378 sessions",
-      room: "9 sections · 40 faculty · ~2–5s",
-      time: "FULLY PACKED",
-      pos: "top-12 right-12 hidden lg:block",
-    },
-    {
-      code: "v20",
-      title: "Version history with restore",
-      room: "Every run & edit snapshotted",
-      time: "REVERSIBLE",
-      pos: "bottom-12 left-16 hidden lg:block",
-    },
-    {
-      code: "PDF+XLSX",
-      title: "Notice-board export",
-      room: "Crest header · signatories",
-      time: "READY TO PIN",
-      pos: "bottom-10 right-20 hidden lg:block",
-    },
-  ];
-
+export const FinalCTASection: React.FC<FinalCTASectionProps> = () => {
   return (
-    <section className="gsap-section-reveal py-24 lg:py-32 bg-[#111112] text-white relative overflow-hidden">
-      {/* Background architectural grid pattern */}
-      <div className="absolute inset-0 bg-grid-pattern-dark opacity-20 pointer-events-none" />
-
-      {/* Floating product-fact cards */}
-      {floatingBlocks.map((b) => (
-        <div
-          key={b.code}
-          className={`absolute ${b.pos} p-3.5 rounded-md bg-white/[0.04] border border-white/10 backdrop-blur-md pointer-events-none font-mono text-xs opacity-60`}
-        >
-          <div className="flex items-center justify-between text-[10px] text-white/50 mb-1">
-            <span>{b.time}</span>
-            <span className="text-[#51cf66]">IN THE APP</span>
-          </div>
-          <div className="font-bold text-white font-sans">
-            {b.code} · {b.title}
-          </div>
-          <div className="text-[10px] text-white/60 mt-0.5">{b.room}</div>
-        </div>
-      ))}
-
+    <section className="py-24 sm:py-32 bg-[#111112] text-white relative overflow-hidden border-t border-[#2a2a2d]">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
         {/* Kicker */}
-        <div className="inline-flex items-center gap-2 text-xs font-mono text-[#7aa2f7] uppercase tracking-widest mb-6">
-          <span>OFFLINE · PRIVATE · MIT LICENSED</span>
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-white/10 text-xs font-mono text-[#7aa2f7] uppercase tracking-widest mb-8 border border-white/10">
+          <Sparkles className="w-3.5 h-3.5 text-[#51cf66]" />
+          <span>Institutional Readiness · Open Source Workstation</span>
         </div>
 
         {/* Headline */}
-        <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-[1.1] text-balance mb-6">
-          Your department&apos;s timetable is one preset away.
+        <h2 className="text-3xl sm:text-5xl lg:text-6xl font-semibold tracking-tight text-white leading-[1.15] text-balance mb-6">
+          Publish your department schedule with mathematical certainty.
         </h2>
 
-        {/* Supporting message */}
-        <p className="text-base sm:text-lg text-white/70 max-w-2xl mx-auto leading-relaxed text-balance mb-10">
-          Apply a preset, check preflight, generate in seconds, edit anything
-          with validation blocking conflicts — then export the notice-board PDF.
+        {/* Subtitle */}
+        <p className="text-base sm:text-lg text-white/70 max-w-2xl mx-auto leading-relaxed text-pretty mb-10">
+          Eliminate manual scheduling conflicts permanently. Apply an accredited blueprint, run preflight diagnostics, and generate conflict free timetables in seconds.
         </p>
 
+        {/* Identical Primary CTA Button */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <Link
             to="/dashboard"
-            className="w-full sm:w-auto px-6 py-3.5 text-sm font-medium text-white bg-[#3b6fe0] hover:bg-[#2e5ccb] rounded-md transition-all duration-150 flex items-center justify-center gap-2.5 group shadow-none"
+            className="w-full sm:w-auto px-8 py-3.5 text-sm font-semibold text-white bg-[#3b6fe0] hover:bg-[#2e5ccb] active:scale-[0.98] rounded-md transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] flex items-center justify-center gap-2.5 group shadow-none focus:outline-none focus:ring-2 focus:ring-[#7aa2f7] focus:ring-offset-2 focus:ring-offset-[#111112]"
           >
-            <span>Open the app</span>
+            <span>Launch Free Workstation</span>
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </Link>
-          <button
-            onClick={onScrollToDemo}
-            className="w-full sm:w-auto px-6 py-3.5 text-sm font-medium text-white/90 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-md transition-all duration-150 shadow-none"
-          >
-            See how it works
-          </button>
         </div>
 
-        {/* Bottom verification markers — real guarantees */}
-        <div className="mt-12 flex flex-wrap items-center justify-center gap-6 text-xs text-white/50 font-mono">
+        {/* Risk Reversal Guarantee Chips */}
+        <div className="mt-12 flex flex-wrap items-center justify-center gap-6 text-xs text-white/60 font-mono">
           <span className="flex items-center gap-1.5">
             <CheckCircle2 className="w-3.5 h-3.5 text-[#51cf66]" />
-            <span>No account needed</span>
+            <span>100% Free and MIT Licensed</span>
+          </span>
+          <span className="flex items-center gap-1.5">
+            <ShieldCheck className="w-3.5 h-3.5 text-[#51cf66]" />
+            <span>Zero Server Data Transmission</span>
           </span>
           <span className="flex items-center gap-1.5">
             <CheckCircle2 className="w-3.5 h-3.5 text-[#51cf66]" />
-            <span>Works offline, data stays in your browser</span>
-          </span>
-          <span className="flex items-center gap-1.5">
-            <CheckCircle2 className="w-3.5 h-3.5 text-[#51cf66]" />
-            <span>PDF + Excel export included</span>
+            <span>Instant In Browser Execution</span>
           </span>
         </div>
       </div>

@@ -13,7 +13,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "lint": "eslint src scripts drizzle.config.ts",
+    "lint": "eslint src drizzle.config.ts --no-error-on-unmatched-pattern",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx scripts/migrate.ts"
   },

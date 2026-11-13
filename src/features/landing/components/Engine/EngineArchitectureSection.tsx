@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Cpu } from "lucide-react";
+import React, { useState } from 'react';
+import { ShieldCheck, ChevronRight } from 'lucide-react';
 
 interface Stage {
   id: string;
@@ -11,49 +11,39 @@ interface Stage {
 
 const STAGES: Stage[] = [
   {
-    id: "preflight",
-    step: "Stage 1",
-    title: "Preflight feasibility",
-    description:
-      "Millisecond diagnostics before the search starts — capacity, labs, faculty, references.",
-    details:
-      "Section capacity compares required periods (labs = 2) against working days × teaching periods per day; over-capacity blocks generation, under-capacity warns with the exact empty-period count. Lab placeability splits each day at break columns (a lab can never span a break). Faculty demand is split evenly across each subject's eligible pool — over-cap raises a blocking error, unassigned faculty raise an advisory warning. Stale subject references are flagged.",
+    id: 'preflight',
+    step: 'Stage 1',
+    title: 'Preflight feasibility analysis',
+    description: 'Instant millisecond diagnostics evaluating section capacity, lab feasibility, and faculty allocation pools before search begins.',
+    details: 'Calculates whether required course sessions exceed working days multiplied by periods. Lab placeability checks confirm continuous two period intervals exist around break columns. Faculty demand is compared against individual teaching load caps to flag shortfalls before running the search.',
   },
   {
-    id: "expansion",
-    step: "Stage 2",
-    title: "Session expansion & ordering",
-    description:
-      "Each requirement becomes session units; labs stay atomic 2-period blocks by construction.",
-    details:
-      "A requirement like “6×/week” expands into 6 independent session units; a lab expands into 1 unit with durationPeriods = 2, so atomicity is guaranteed structurally. Sessions are arranged section-major — all of one section's sessions (labs first) before the next — turning one giant search into near-independent sub-problems, which is what makes fully-packed timetables solvable in seconds.",
+    id: 'expansion',
+    step: 'Stage 2',
+    title: 'Session expansion and structural ordering',
+    description: 'Deconstructs course syllabi into session units while maintaining continuous laboratory atomicity by structural invariant.',
+    details: 'A course requiring four weekly lectures expands into four independent single period units. A laboratory expands into an indivisible unit with duration of two periods. Sessions are arranged section major, transforming a combinatorially explosive search into decoupled sub problems solvable in seconds.',
   },
   {
-    id: "search",
-    step: "Stage 3",
-    title: "Backtracking search (MRV)",
-    description:
-      "Most-constrained session first, O(1) collision checks, heuristic ordering, reversible mutation.",
-    details:
-      "At every step the solver picks the most constrained session among the next 24 unscheduled (MRV) — dead ends are pruned before placement, not after. Candidates (day × start period × eligible faculty) must pass hard constraints via an occupancy index: section and faculty collisions, lab atomicity, per-day subject/lab caps, and faculty workload caps. Feasible candidates are ranked by weighted heuristics: section day-load spread, day-completion bonus, faculty fairness (least-loaded first), period-band balancing, and subject/lab distribution. Placement is reversibly mutated with O(1) rollback — no state is ever rebuilt on backtrack.",
+    id: 'search',
+    step: 'Stage 3',
+    title: 'Backtracking solver with minimum remaining values',
+    description: 'Constant time collision checks across an occupancy matrix, heuristic candidate ranking, and zero memory state rollbacks.',
+    details: 'At every placement step the solver selects the most constrained session among candidates. An occupancy matrix verifies hard constraints in O(1) time: faculty overlaps, room availability, and lab continuity. Candidates are ranked using weighted heuristics for daily spread and faculty fairness.',
   },
   {
-    id: "validation",
-    step: "Stage 4",
-    title: "Independent validation",
-    description:
-      "The solver's output is never trusted — a separate validator re-checks everything.",
-    details:
-      "validateTimetable() re-checks the finished grid through layered rules — structure and references, faculty and section collisions, lab atomicity, requirement counts, config staleness — sharing no code with the solver. Only a clean pass marks the timetable VALID, so a solver bug cannot produce a silently-conflicted schedule.",
+    id: 'validation',
+    step: 'Stage 4',
+    title: 'Authoritative independent validator',
+    description: 'Solver output is never taken on faith. An isolated validator re checks every constraint before saving.',
+    details: 'The validator shares zero operational code with the solver algorithm. It independently re scans the generated grid to confirm no teacher is scheduled in two locations, continuous lab blocks remain unbroken, and session counts match syllabus requirements exactly.',
   },
   {
-    id: "scoring",
-    step: "Stage 5",
-    title: "Soft scoring",
-    description:
-      "A normalized quality score explains how good the schedule is, not just that it is valid.",
-    details:
-      "After validation the schedule receives a weighted quality score (subject spread across days, daily balance per section, faculty balance, gap reduction, lab distribution). Weights come from the configuration's softWeights and the total is surfaced in the generation metadata shown on the Generate page.",
+    id: 'scoring',
+    step: 'Stage 5',
+    title: 'Pedagogical soft scoring',
+    description: 'A multi factor quality score evaluating schedule ergonomics, gap reduction, and faculty balance.',
+    details: 'After passing hard validation, schedules receive a normalized score based on subject distribution across the week, daily teaching load balance per section, and minimization of unnecessary idle hours for instructors.',
   },
 ];
 
@@ -62,119 +52,95 @@ export const EngineArchitectureSection: React.FC = () => {
   const active = STAGES.find((s) => s.id === activeId) ?? STAGES[0];
 
   return (
-    <section
-      id="engine"
-      className="gsap-section-reveal py-20 lg:py-28 bg-[#f6f7f8] relative"
-    >
+    <section id="engine" className="py-20 lg:py-28 bg-[#ffffff] border-b border-[#e1e4e8]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="max-w-3xl mb-14">
           <div className="flex items-center gap-2 text-xs font-mono font-medium text-[#5b616b] uppercase tracking-widest mb-3">
-            <span>Scheduling engine</span>
-            <span aria-hidden="true" className="text-black/30">
-              ·
-            </span>
-            <span className="text-[#3b6fe0]">
-              Constraint backtracking, honestly explained
-            </span>
+            <span>Scheduling Engine</span>
+            <span aria-hidden="true" className="text-[#d3d7dd]">·</span>
+            <span className="text-[#3b6fe0]">Transparent Constraint Architecture</span>
           </div>
-          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-[#121417] leading-tight text-balance">
-            A solver you can reason about, not a black box.
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-[#121417] leading-tight text-balance">
+            A deterministic constraint solver, not an opaque black box.
           </h2>
-          <p className="mt-4 text-base sm:text-lg text-[#5b616b] leading-relaxed max-w-2xl text-balance">
-            Generation is a constraint-satisfaction backtracking search with
-            heuristic guidance — pure, side-effect-free TypeScript running
-            entirely in your browser. Select a stage to see what it actually
-            does.
+          <p className="mt-4 text-base sm:text-lg text-[#5b616b] leading-relaxed max-w-2xl text-pretty">
+            Orqestra executes a constraint satisfaction backtracking search with heuristic guidance. Pure, side effect free TypeScript running entirely in your browser without external server calls.
           </p>
         </div>
 
-        {/* Pipeline */}
-        <div className="rounded-md bg-white border border-[#e1e4e8] p-6 lg:p-10 shadow-sm">
+        {/* Interactive Pipeline Showcase */}
+        <div className="rounded-md bg-[#f6f7f8] border border-[#e1e4e8] p-6 lg:p-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            {/* Stage list */}
-            <div className="lg:col-span-5 space-y-2.5">
-              <div className="text-xs font-mono text-[#5b616b] uppercase tracking-wider mb-3 px-1">
-                Generation pipeline
+            {/* Stage Selector Column */}
+            <div className="lg:col-span-5 space-y-2">
+              <div className="text-xs font-mono font-semibold text-[#5b616b] uppercase tracking-wider mb-3 px-1">
+                Execution Pipeline
               </div>
-              {STAGES.map((s, i) => {
-                const isActive = activeId === s.id;
+
+              {STAGES.map((s) => {
+                const isCurrent = s.id === activeId;
                 return (
                   <button
                     key={s.id}
+                    type="button"
                     onClick={() => setActiveId(s.id)}
-                    className={`w-full text-left p-3.5 rounded-md border transition-all text-xs ${
-                      isActive
-                        ? "bg-[#121417] text-white border-[#121417] shadow-sm"
-                        : "bg-[#ffffff] text-[#30363D] border-[#e1e4e8] hover:border-[#3b6fe0] hover:bg-white"
+                    className={`w-full text-left p-3.5 rounded-md border transition-all flex items-center justify-between ${
+                      isCurrent
+                        ? 'bg-white border-[#3b6fe0] shadow-xs'
+                        : 'bg-white/60 border-[#e1e4e8] hover:bg-white hover:border-[#d3d7dd]'
                     }`}
                   >
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="font-semibold">
-                        {i + 1}. {s.title}
+                    <div>
+                      <span className={`text-[11px] font-mono font-semibold uppercase ${
+                        isCurrent ? 'text-[#3b6fe0]' : 'text-[#5b616b]'
+                      }`}>
+                        {s.step}
                       </span>
-                      <span
-                        className={`text-[10px] font-mono ${isActive ? "text-blue-300" : "text-[#5b616b]"}`}
-                      >
-                        {s.step.toUpperCase()}
-                      </span>
+                      <h3 className="text-sm font-semibold text-[#121417] mt-0.5">
+                        {s.title}
+                      </h3>
                     </div>
-                    <p
-                      className={`line-clamp-2 text-[11px] ${isActive ? "text-white/70" : "text-[#5b616b]"}`}
-                    >
-                      {s.description}
-                    </p>
+                    <ChevronRight className={`w-4 h-4 transition-transform ${
+                      isCurrent ? 'text-[#3b6fe0] translate-x-0.5' : 'text-[#d3d7dd]'
+                    }`} />
                   </button>
                 );
               })}
             </div>
 
-            {/* Core + inspector */}
-            <div className="lg:col-span-7 space-y-4">
-              <div className="flex flex-col p-6 rounded-md bg-[#121417] text-white border border-black/10 relative overflow-hidden min-h-[220px]">
-                <div className="absolute inset-0 bg-radial-gradient from-blue-500/10 via-transparent to-transparent pointer-events-none" />
-                <div className="w-12 h-12 rounded-md bg-blue-600 text-white flex items-center justify-center mb-4 shadow-lg shadow-blue-500/20">
-                  <Cpu className="w-6 h-6" />
+            {/* Stage Deep Dive Detail Box */}
+            <div className="lg:col-span-7 rounded-md bg-white border border-[#e1e4e8] p-6 sm:p-8 flex flex-col justify-between h-full">
+              <div>
+                <div className="flex items-center justify-between pb-4 border-b border-[#e1e4e8] mb-6">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-[#3b6fe0]" />
+                    <span className="text-xs font-mono font-semibold text-[#3b6fe0] uppercase">
+                      {active.step} In Depth
+                    </span>
+                  </div>
+                  <span className="px-2 py-0.5 text-[10px] font-mono font-semibold uppercase bg-emerald-50 text-[#2f9e44] rounded border border-emerald-200/60">
+                    O(1) Verification
+                  </span>
                 </div>
-                <div className="text-xs font-mono text-blue-400 uppercase tracking-widest mb-1">
-                  {active.step} · Active stage
-                </div>
-                <h3 className="font-display text-xl font-bold tracking-tight text-white mb-2">
+
+                <h3 className="text-xl font-semibold text-[#121417] mb-2">
                   {active.title}
                 </h3>
-                <p className="text-sm text-white/70 leading-relaxed">
+                <p className="text-sm font-medium text-[#3b6fe0] mb-4">
+                  {active.description}
+                </p>
+                <p className="text-xs text-[#5b616b] leading-relaxed text-pretty">
                   {active.details}
                 </p>
               </div>
 
-              <div className="rounded-md bg-[#ffffff] border border-[#e1e4e8] p-5">
-                <p className="text-xs font-mono font-bold text-[#3b6fe0] uppercase mb-3">
-                  Determinism & budgets
-                </p>
-                <ul className="grid sm:grid-cols-2 gap-3 text-xs text-[#5b616b] leading-relaxed">
-                  <li className="rounded-lg bg-white border border-[#e1e4e8] p-3">
-                    <strong className="text-[#121417]">Seeded runs.</strong>{" "}
-                    A seeded PRNG drives ordering — identical input + identical
-                    seed = bit-identical timetable. The seed is stored in the
-                    generation metadata.
-                  </li>
-                  <li className="rounded-lg bg-white border border-[#e1e4e8] p-3">
-                    <strong className="text-[#121417]">Cancellable.</strong>{" "}
-                    The Cancel button stops the search via a cancellation token
-                    checked on every node.
-                  </li>
-                  <li className="rounded-lg bg-white border border-[#e1e4e8] p-3">
-                    <strong className="text-[#121417]">Node + time budgets.</strong>{" "}
-                    Configurable per department (defaults: 20M nodes, 60s).
-                    Exhaustion reports SEARCH_NODE_LIMIT or SEARCH_TIMEOUT with
-                    actionable diagnostics.
-                  </li>
-                  <li className="rounded-lg bg-white border border-[#e1e4e8] p-3">
-                    <strong className="text-[#121417]">Faculty fairness.</strong>{" "}
-                    Placement steers toward the least-loaded eligible teacher,
-                    so balanced pools stay within a 1–2 period spread.
-                  </li>
-                </ul>
+              <div className="mt-8 pt-6 border-t border-[#e1e4e8] flex items-center justify-between text-xs font-mono text-[#5b616b]">
+                <span className="flex items-center gap-1.5">
+                  <ShieldCheck className="w-4 h-4 text-[#2f9e44]" />
+                  <span>Dual validation verified</span>
+                </span>
+                <span>Deterministic reproducibility</span>
               </div>
             </div>
           </div>
