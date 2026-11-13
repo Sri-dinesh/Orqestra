@@ -45,7 +45,7 @@ export function DepartmentPresetLibrary({ departmentId }: { departmentId: string
       title="Department presets"
       actions={<span className="text-xs text-body-gray">Replace this department with a ready-made blueprint</span>}
     >
-      <div className="mb-4 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50/70 p-3 text-xs text-amber-900">
+      <div className="mb-4 flex items-start gap-3 rounded-md border border-amber-200 bg-amber-50/70 p-3 text-xs text-amber-900">
         <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
         <p>
           Applying a preset replaces this department&apos;s current sections, subjects, faculty, rooms, breaks, generation settings, and saved timetables. The department itself keeps the same identity and URL.
@@ -56,7 +56,7 @@ export function DepartmentPresetLibrary({ departmentId }: { departmentId: string
         {BUILT_IN_PRESETS.map((preset) => {
           const applying = applyingPresetId === preset.id;
           return (
-            <div key={preset.id} className="flex flex-col rounded-xl border border-[#E5E8E0] bg-[#FAFBF9] p-4">
+            <div key={preset.id} className="flex flex-col rounded-md border border-[#e1e4e8] bg-[#ffffff] p-4">
               <div className="flex items-start justify-between gap-2">
                 <span className="font-mono text-xs font-bold uppercase tracking-wider text-metric-blue">
                   {preset.department.code}

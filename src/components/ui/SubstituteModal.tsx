@@ -197,11 +197,11 @@ export const SubstituteModal: React.FC<SubstituteModalProps> = ({
       aria-labelledby="substitute-modal-title"
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-150"
     >
-      <div className="relative flex flex-col w-full max-w-4xl max-h-[90vh] bg-white rounded-2xl border border-gray-200 shadow-2xl overflow-hidden">
+      <div className="relative flex flex-col w-full max-w-4xl max-h-[90vh] bg-white rounded-md border border-gray-200 shadow-2xl overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-[#FAFAF8]">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-blue-50 text-blue-600">
+            <div className="p-2 rounded-md bg-blue-50 text-blue-600">
               <UserCheck className="w-5 h-5" />
             </div>
             <div>
@@ -246,7 +246,7 @@ export const SubstituteModal: React.FC<SubstituteModalProps> = ({
             </div>
 
             {/* Printable Memo Document */}
-            <div className="p-8 bg-white border border-gray-300 rounded-xl shadow-xs text-ink space-y-6 print:border-none print:p-0 print:shadow-none">
+            <div className="p-8 bg-white border border-gray-300 rounded-md shadow-xs text-ink space-y-6 print:border-none print:p-0 print:shadow-none">
               <div className="text-center border-b border-gray-300 pb-4">
                 <h1 className="text-lg font-bold tracking-wide uppercase text-gray-900">{activeSlipData.collegeName}</h1>
                 <p className="text-xs font-semibold uppercase tracking-wider text-gray-600 mt-0.5">
@@ -338,7 +338,7 @@ export const SubstituteModal: React.FC<SubstituteModalProps> = ({
           /* Main Finder & Recommendation View */
           <div className="flex-1 overflow-y-auto p-6 space-y-5">
             {/* Session Selector / Target Banner */}
-            <div className="rounded-xl border border-[#E5E8E0] bg-[#F9FAF8] p-4 space-y-3">
+            <div className="rounded-md border border-[#e1e4e8] bg-[#F9FAF8] p-4 space-y-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <span className="text-xs font-bold text-ink uppercase tracking-wider flex items-center gap-1.5">
                   <Calendar className="w-4 h-4 text-blue-600" />
@@ -349,7 +349,7 @@ export const SubstituteModal: React.FC<SubstituteModalProps> = ({
                   <select
                     value={filterDayIndex}
                     onChange={(e) => setFilterDayIndex(e.target.value)}
-                    className="text-xs px-2 py-1 rounded-lg border border-[#E5E8E0] bg-white text-ink"
+                    className="text-xs px-2 py-1 rounded-lg border border-[#e1e4e8] bg-white text-ink"
                   >
                     <option value="ALL">All Days</option>
                     {department.workingDays.map((d, i) => (
@@ -361,7 +361,7 @@ export const SubstituteModal: React.FC<SubstituteModalProps> = ({
                   <select
                     value={filterSectionId}
                     onChange={(e) => setFilterSectionId(e.target.value)}
-                    className="text-xs px-2 py-1 rounded-lg border border-[#E5E8E0] bg-white text-ink"
+                    className="text-xs px-2 py-1 rounded-lg border border-[#e1e4e8] bg-white text-ink"
                   >
                     <option value="ALL">All Sections</option>
                     {sections.map((s) => (
@@ -373,7 +373,7 @@ export const SubstituteModal: React.FC<SubstituteModalProps> = ({
                   <select
                     value={filterFacultyId}
                     onChange={(e) => setFilterFacultyId(e.target.value)}
-                    className="text-xs px-2 py-1 rounded-lg border border-[#E5E8E0] bg-white text-ink"
+                    className="text-xs px-2 py-1 rounded-lg border border-[#e1e4e8] bg-white text-ink"
                   >
                     <option value="ALL">All Faculty</option>
                     {faculty.map((f) => (
@@ -390,7 +390,7 @@ export const SubstituteModal: React.FC<SubstituteModalProps> = ({
                 <select
                   value={selectedEntryId ?? ''}
                   onChange={(e) => setSelectedEntryId(e.target.value || null)}
-                  className="w-full text-xs font-medium px-3 py-2 rounded-xl border border-gray-300 bg-white text-gray-900 focus:outline-hidden focus:ring-2 focus:ring-blue-600 shadow-xs"
+                  className="w-full text-xs font-medium px-3 py-2 rounded-md border border-gray-300 bg-white text-gray-900 focus:outline-hidden focus:ring-2 focus:ring-blue-600 shadow-xs"
                 >
                   {filteredEntries.map((e) => {
                     const sub = subjectMap.get(e.subjectId);
@@ -408,23 +408,23 @@ export const SubstituteModal: React.FC<SubstituteModalProps> = ({
 
               {/* Active Entry Detail Pill */}
               {currentEntry && currentSubject && currentFaculty && currentSection && (
-                <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 pt-2 border-t border-[#E5E8E0] text-xs">
+                <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 pt-2 border-t border-[#e1e4e8] text-xs">
                   <div>
-                    <span className="text-[11px] text-[#71767B] block">Subject</span>
+                    <span className="text-[11px] text-[#5b616b] block">Subject</span>
                     <span className="font-semibold text-ink">
                       {currentSubject.code} ({currentSubject.name})
                     </span>
                   </div>
                   <div>
-                    <span className="text-[11px] text-[#71767B] block">Current Faculty</span>
+                    <span className="text-[11px] text-[#5b616b] block">Current Faculty</span>
                     <span className="font-semibold text-ink">{currentFaculty.name}</span>
                   </div>
                   <div>
-                    <span className="text-[11px] text-[#71767B] block">Class Section</span>
+                    <span className="text-[11px] text-[#5b616b] block">Class Section</span>
                     <span className="font-semibold text-ink">{currentSection.name}</span>
                   </div>
                   <div>
-                    <span className="text-[11px] text-[#71767B] block">Slot & Duration</span>
+                    <span className="text-[11px] text-[#5b616b] block">Slot & Duration</span>
                     <span className="font-semibold text-ink">
                       {department.workingDays[currentEntry.dayIndex]}, P{currentEntry.startPeriod + 1} ({currentEntry.durationPeriods}{' '}
                       {currentEntry.durationPeriods > 1 ? 'hrs' : 'hr'})
@@ -437,12 +437,12 @@ export const SubstituteModal: React.FC<SubstituteModalProps> = ({
             {/* Candidate Filters & Search */}
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
               {/* Tier Filter Tabs */}
-              <div className="flex flex-wrap items-center gap-1.5 p-1 bg-[#F1F3ED] rounded-xl text-xs font-medium">
+              <div className="flex flex-wrap items-center gap-1.5 p-1 bg-[#eef0f2] rounded-md text-xs font-medium">
                 <button
                   type="button"
                   onClick={() => setTierFilter('ALL')}
                   className={`px-2.5 py-1 rounded-lg transition-colors ${
-                    tierFilter === 'ALL' ? 'bg-white text-ink shadow-xs font-semibold' : 'text-[#71767B] hover:text-ink'
+                    tierFilter === 'ALL' ? 'bg-white text-ink shadow-xs font-semibold' : 'text-[#5b616b] hover:text-ink'
                   }`}
                 >
                   All ({candidates.length})
@@ -502,16 +502,16 @@ export const SubstituteModal: React.FC<SubstituteModalProps> = ({
                   placeholder="Filter candidate faculty..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl border border-gray-300 bg-white text-gray-900 placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 shadow-xs"
+                  className="w-full pl-8 pr-3 py-1.5 text-xs rounded-md border border-gray-300 bg-white text-gray-900 placeholder-gray-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 shadow-xs"
                 />
               </div>
             </div>
 
             {/* Candidate List */}
             {displayedCandidates.length === 0 ? (
-              <div className="p-8 text-center rounded-xl border border-dashed border-[#E5E8E0] bg-[#F9FAF8]">
+              <div className="p-8 text-center rounded-md border border-dashed border-[#e1e4e8] bg-[#F9FAF8]">
                 <p className="text-sm font-medium text-ink">No substitute faculty found</p>
-                <p className="text-xs text-[#71767B] mt-1">
+                <p className="text-xs text-[#5b616b] mt-1">
                   Try adjusting the tier filters or searching for a different faculty name.
                 </p>
               </div>
@@ -527,7 +527,7 @@ export const SubstituteModal: React.FC<SubstituteModalProps> = ({
                   return (
                     <div
                       key={f.id}
-                      className={`flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3.5 rounded-xl border transition-all ${
+                      className={`flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3.5 rounded-md border transition-all ${
                         isBest
                           ? 'bg-emerald-50/80 border-emerald-300 hover:border-emerald-400 shadow-xs'
                           : isBusy
@@ -556,7 +556,7 @@ export const SubstituteModal: React.FC<SubstituteModalProps> = ({
                         <div>
                           <div className="flex items-center gap-2">
                             <span className="text-sm font-semibold text-ink">{f.name}</span>
-                            <span className="text-xs text-[#71767B]">({f.facultyCode})</span>
+                            <span className="text-xs text-[#5b616b]">({f.facultyCode})</span>
 
                             {/* Tier Badge */}
                             {isBest && (
@@ -587,7 +587,7 @@ export const SubstituteModal: React.FC<SubstituteModalProps> = ({
                           </div>
 
                           {/* Workload and qualification tags */}
-                          <div className="flex flex-wrap items-center gap-3 mt-1 text-xs text-[#71767B]">
+                          <div className="flex flex-wrap items-center gap-3 mt-1 text-xs text-[#5b616b]">
                             <span>
                               Today: <strong className="text-ink">{c.dailyLoad}</strong>
                               {f.maxPeriodsPerDay ? `/${f.maxPeriodsPerDay}` : ''} periods
@@ -598,13 +598,13 @@ export const SubstituteModal: React.FC<SubstituteModalProps> = ({
                               {f.maxPeriodsPerWeek ? `/${f.maxPeriodsPerWeek}` : ''} periods
                             </span>
                             <span>•</span>
-                            <span className={isEligibleSubject ? 'text-emerald-700 font-medium' : 'text-[#71767B]'}>
+                            <span className={isEligibleSubject ? 'text-emerald-700 font-medium' : 'text-[#5b616b]'}>
                               {isEligibleSubject ? '✓ Designated for this subject' : 'General Department Faculty'}
                             </span>
                           </div>
 
                           {/* Reason breakdown */}
-                          <div className="mt-1 text-[11px] text-[#71767B] italic">
+                          <div className="mt-1 text-[11px] text-[#5b616b] italic">
                             {c.reasons.join(' · ')}
                           </div>
                         </div>
@@ -661,18 +661,18 @@ export const SubstituteModal: React.FC<SubstituteModalProps> = ({
         {/* Confirmation Modal for Overloaded Faculty */}
         {confirmOverloadedCandidate && (
           <div className="absolute inset-0 z-60 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-            <div className="w-full max-w-md bg-white rounded-2xl p-5 border border-amber-300 shadow-xl space-y-4">
+            <div className="w-full max-w-md bg-white rounded-md p-5 border border-amber-300 shadow-xl space-y-4">
               <div className="flex items-center gap-3 text-amber-700">
-                <div className="p-2 rounded-xl bg-amber-100">
+                <div className="p-2 rounded-md bg-amber-100">
                   <ShieldAlert className="w-6 h-6" />
                 </div>
                 <div>
                   <h3 className="text-sm font-bold text-ink">Workload Limit Warning</h3>
-                  <p className="text-xs text-[#71767B]">Confirm substitute assignment</p>
+                  <p className="text-xs text-[#5b616b]">Confirm substitute assignment</p>
                 </div>
               </div>
 
-              <div className="text-xs text-ink space-y-2 bg-amber-50 p-3 rounded-xl border border-amber-200">
+              <div className="text-xs text-ink space-y-2 bg-amber-50 p-3 rounded-md border border-amber-200">
                 <p>
                   Assigning <strong>{confirmOverloadedCandidate.faculty.name}</strong> will exceed their configured daily
                   or weekly workload cap:
@@ -688,7 +688,7 @@ export const SubstituteModal: React.FC<SubstituteModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setConfirmOverloadedCandidate(null)}
-                  className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-[#E5E8E0] bg-white text-ink hover:bg-black/5"
+                  className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-[#e1e4e8] bg-white text-ink hover:bg-black/5"
                 >
                   Cancel
                 </button>
@@ -705,14 +705,14 @@ export const SubstituteModal: React.FC<SubstituteModalProps> = ({
         )}
 
         {/* Modal Footer */}
-        <div className="flex items-center justify-between px-6 py-3.5 border-t border-[#E5E8E0] bg-[#FAFAF8]">
-          <div className="text-xs text-[#71767B]">
+        <div className="flex items-center justify-between px-6 py-3.5 border-t border-[#e1e4e8] bg-[#FAFAF8]">
+          <div className="text-xs text-[#5b616b]">
             {activeSlipData ? 'Substitution slip ready for print.' : `${candidates.length} active faculty evaluated.`}
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 text-xs font-semibold rounded-xl border border-[#E5E8E0] bg-white hover:bg-black/5 text-ink transition-colors"
+            className="px-4 py-2 text-xs font-semibold rounded-md border border-[#e1e4e8] bg-white hover:bg-black/5 text-ink transition-colors"
           >
             Close
           </button>

@@ -140,18 +140,18 @@ export const ExportPreviewModal: React.FC<ExportPreviewModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 overflow-y-auto no-print">
-      <div className="relative w-full max-w-6xl max-h-[94vh] flex flex-col bg-[#F7F8F5] rounded-2xl shadow-2xl border border-black/10 overflow-hidden">
+      <div className="relative w-full max-w-6xl max-h-[94vh] flex flex-col bg-[#f6f7f8] rounded-md shadow-2xl border border-black/10 overflow-hidden">
         {/* Modal Top Control Bar */}
-        <div className="flex flex-wrap items-center justify-between px-6 py-4 bg-white border-b border-[#E5E8E0] gap-4">
+        <div className="flex flex-wrap items-center justify-between px-6 py-4 bg-white border-b border-[#e1e4e8] gap-4">
           <div className="flex items-center gap-3">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#111315] text-white text-xs font-bold">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#121417] text-white text-xs font-bold">
               O
             </span>
             <div>
-              <h2 className="text-base font-bold text-[#111315]">
+              <h2 className="text-base font-bold text-[#121417]">
                 Export &amp; Print Preview
               </h2>
-              <p className="text-xs text-[#71767B]">
+              <p className="text-xs text-[#5b616b]">
                 Notice-board ready institutional document · {department.name} ({department.code})
               </p>
             </div>
@@ -160,12 +160,12 @@ export const ExportPreviewModal: React.FC<ExportPreviewModalProps> = ({
           {/* Section / Faculty Selector */}
           <div className="flex items-center gap-3">
             {type === 'SECTION' && sections.length > 0 && (
-              <label className="flex items-center gap-2 text-xs font-semibold text-[#4B5259]">
+              <label className="flex items-center gap-2 text-xs font-semibold text-[#5b616b]">
                 Section:
                 <select
                   value={selectedSectionId}
                   onChange={(e) => setSelectedSectionId(e.target.value)}
-                  className="rounded-lg border border-[#D0D5DD] bg-white px-2.5 py-1.5 text-xs font-medium text-[#111315] focus:outline-none focus:ring-2 focus:ring-[#0047FF]"
+                  className="rounded-lg border border-[#e1e4e8] bg-white px-2.5 py-1.5 text-xs font-medium text-[#121417] focus:outline-none focus:ring-2 focus:ring-[#3b6fe0]"
                 >
                   {sections.map((sec) => (
                     <option key={sec.id} value={sec.id}>
@@ -177,12 +177,12 @@ export const ExportPreviewModal: React.FC<ExportPreviewModalProps> = ({
             )}
 
             {type === 'FACULTY' && faculty.length > 0 && (
-              <label className="flex items-center gap-2 text-xs font-semibold text-[#4B5259]">
+              <label className="flex items-center gap-2 text-xs font-semibold text-[#5b616b]">
                 Faculty:
                 <select
                   value={selectedFacultyId}
                   onChange={(e) => setSelectedFacultyId(e.target.value)}
-                  className="rounded-lg border border-[#D0D5DD] bg-white px-2.5 py-1.5 text-xs font-medium text-[#111315] focus:outline-none focus:ring-2 focus:ring-[#0047FF]"
+                  className="rounded-lg border border-[#e1e4e8] bg-white px-2.5 py-1.5 text-xs font-medium text-[#121417] focus:outline-none focus:ring-2 focus:ring-[#3b6fe0]"
                 >
                   {faculty.map((f) => (
                     <option key={f.id} value={f.id}>
@@ -200,8 +200,8 @@ export const ExportPreviewModal: React.FC<ExportPreviewModalProps> = ({
                 onClick={() => setPreviewTab('SHEET')}
                 className={`px-3 py-1 text-xs font-semibold rounded-md transition-all ${
                   previewTab === 'SHEET'
-                    ? 'bg-white text-[#111315] shadow-xs'
-                    : 'text-[#4B5259] hover:text-[#111315]'
+                    ? 'bg-white text-[#121417] shadow-xs'
+                    : 'text-[#5b616b] hover:text-[#121417]'
                 }`}
               >
                 Notice Sheet (PDF)
@@ -211,8 +211,8 @@ export const ExportPreviewModal: React.FC<ExportPreviewModalProps> = ({
                 onClick={() => setPreviewTab('EXCEL')}
                 className={`px-3 py-1 text-xs font-semibold rounded-md transition-all ${
                   previewTab === 'EXCEL'
-                    ? 'bg-white text-[#111315] shadow-xs'
-                    : 'text-[#4B5259] hover:text-[#111315]'
+                    ? 'bg-white text-[#121417] shadow-xs'
+                    : 'text-[#5b616b] hover:text-[#121417]'
                 }`}
               >
                 Excel Grid
@@ -222,8 +222,8 @@ export const ExportPreviewModal: React.FC<ExportPreviewModalProps> = ({
                 onClick={() => setPreviewTab('WORD')}
                 className={`px-3 py-1 text-xs font-semibold rounded-md transition-all ${
                   previewTab === 'WORD'
-                    ? 'bg-white text-[#111315] shadow-xs'
-                    : 'text-[#4B5259] hover:text-[#111315]'
+                    ? 'bg-white text-[#121417] shadow-xs'
+                    : 'text-[#5b616b] hover:text-[#121417]'
                 }`}
               >
                 Word Doc
@@ -231,22 +231,22 @@ export const ExportPreviewModal: React.FC<ExportPreviewModalProps> = ({
             </div>
 
             {/* Zoom Controls */}
-            <div className="flex items-center gap-1 border-l border-[#E5E8E0] pl-3">
+            <div className="flex items-center gap-1 border-l border-[#e1e4e8] pl-3">
               <button
                 type="button"
                 onClick={() => setZoom((z) => Math.max(60, z - 10))}
-                className="p-1.5 rounded-lg text-[#71767B] hover:text-[#111315] hover:bg-black/5"
+                className="p-1.5 rounded-lg text-[#5b616b] hover:text-[#121417] hover:bg-black/5"
                 title="Zoom Out"
               >
                 <ZoomOut className="w-4 h-4" />
               </button>
-              <span className="text-xs font-mono font-medium text-[#4B5259] w-10 text-center">
+              <span className="text-xs font-mono font-medium text-[#5b616b] w-10 text-center">
                 {zoom}%
               </span>
               <button
                 type="button"
                 onClick={() => setZoom((z) => Math.min(150, z + 10))}
-                className="p-1.5 rounded-lg text-[#71767B] hover:text-[#111315] hover:bg-black/5"
+                className="p-1.5 rounded-lg text-[#5b616b] hover:text-[#121417] hover:bg-black/5"
                 title="Zoom In"
               >
                 <ZoomIn className="w-4 h-4" />
@@ -254,7 +254,7 @@ export const ExportPreviewModal: React.FC<ExportPreviewModalProps> = ({
               <button
                 type="button"
                 onClick={() => setZoom(100)}
-                className="p-1.5 rounded-lg text-[#71767B] hover:text-[#111315] hover:bg-black/5"
+                className="p-1.5 rounded-lg text-[#5b616b] hover:text-[#121417] hover:bg-black/5"
                 title="Reset Zoom"
               >
                 <Maximize2 className="w-4 h-4" />
@@ -264,7 +264,7 @@ export const ExportPreviewModal: React.FC<ExportPreviewModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="p-1.5 rounded-lg text-[#71767B] hover:text-[#111315] hover:bg-black/5 ml-2"
+              className="p-1.5 rounded-lg text-[#5b616b] hover:text-[#121417] hover:bg-black/5 ml-2"
               title="Close Preview"
             >
               <X className="w-5 h-5" />
@@ -281,24 +281,24 @@ export const ExportPreviewModal: React.FC<ExportPreviewModalProps> = ({
         )}
 
         {/* Modal Scrollable Canvas */}
-        <div className="flex-1 overflow-auto p-6 sm:p-10 flex justify-center bg-[#E5E8E0]/40">
+        <div className="flex-1 overflow-auto p-6 sm:p-10 flex justify-center bg-[#e1e4e8]/40">
           <div
             style={{
               transform: `scale(${zoom / 100})`,
               transformOrigin: 'top center',
               transition: 'transform 0.15s ease-out',
             }}
-            className="w-full max-w-[1040px] bg-white rounded-xl shadow-xl border border-black/10 p-8 sm:p-10 text-[#111315]"
+            className="w-full max-w-[1040px] bg-white rounded-md shadow-xl border border-black/10 p-8 sm:p-10 text-[#121417]"
           >
             {/* Document Header */}
             <div className="text-center space-y-1 mb-5">
-              <h1 className="font-display text-xl sm:text-2xl font-bold tracking-tight text-[#111315] uppercase">
+              <h1 className="font-display text-xl sm:text-2xl font-bold tracking-tight text-[#121417] uppercase">
                 {collegeName}
               </h1>
               <p className="text-sm font-semibold tracking-wide text-[#33383F] uppercase">
                 Department of {department.name}
               </p>
-              <h2 className="text-xs sm:text-sm font-bold text-[#0047FF] tracking-wider uppercase">
+              <h2 className="text-xs sm:text-sm font-bold text-[#3b6fe0] tracking-wider uppercase">
                 Class Timetable — {currentSection?.name ?? 'Section'}
               </h2>
               <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-[#555D67] pt-1">
@@ -314,7 +314,7 @@ export const ExportPreviewModal: React.FC<ExportPreviewModalProps> = ({
                   <strong>With effect from:</strong> {effectiveDate}
                 </span>
               </div>
-              <div className="h-[2px] w-full bg-[#111315]/15 mt-3 rounded-full" />
+              <div className="h-[2px] w-full bg-[#121417]/15 mt-3 rounded-full" />
             </div>
 
             {/* Weekly Timetable Grid */}
@@ -322,13 +322,13 @@ export const ExportPreviewModal: React.FC<ExportPreviewModalProps> = ({
               <table className="w-full border-collapse text-center text-xs">
                 <thead>
                   <tr className="bg-[#F0F3F6] border-b border-[#333]">
-                    <th className="border-r border-[#333] p-2 font-bold w-20 text-[#111315]">
+                    <th className="border-r border-[#333] p-2 font-bold w-20 text-[#121417]">
                       DAY
                     </th>
                     {periodLabels.map((lbl, idx) => (
                       <th
                         key={idx}
-                        className="border-r last:border-r-0 border-[#333] p-2 font-bold text-[#111315]"
+                        className="border-r last:border-r-0 border-[#333] p-2 font-bold text-[#121417]"
                       >
                         {lbl}
                       </th>
@@ -341,7 +341,7 @@ export const ExportPreviewModal: React.FC<ExportPreviewModalProps> = ({
                       key={day}
                       className="border-b last:border-b-0 border-[#333]"
                     >
-                      <th className="border-r border-[#333] p-2 font-bold bg-[#F5F7FA] text-[#111315]">
+                      <th className="border-r border-[#333] p-2 font-bold bg-[#F5F7FA] text-[#121417]">
                         {day.slice(0, 3).toUpperCase()}
                       </th>
                       {grid[d].map((cell, cIdx) => {
@@ -373,7 +373,7 @@ export const ExportPreviewModal: React.FC<ExportPreviewModalProps> = ({
                               isLab ? 'bg-[#F3F0FC]' : 'bg-[#F0F5FF]'
                             }`}
                           >
-                            <span className="block font-bold text-[#111315] text-[11.5px]">
+                            <span className="block font-bold text-[#121417] text-[11.5px]">
                               {cell.label}
                             </span>
                             {cell.detail && (
@@ -391,7 +391,7 @@ export const ExportPreviewModal: React.FC<ExportPreviewModalProps> = ({
             </div>
 
             {/* Class Advisor & Mentors Banner */}
-            <div className="flex flex-wrap items-center justify-between gap-3 px-3 py-2 bg-[#FAFBF9] border border-[#333] rounded-lg text-xs font-semibold text-[#111315] mb-4">
+            <div className="flex flex-wrap items-center justify-between gap-3 px-3 py-2 bg-[#ffffff] border border-[#333] rounded-lg text-xs font-semibold text-[#121417] mb-4">
               <span>
                 Class Advisor:{' '}
                 <span className="font-normal text-[#333]">
@@ -417,7 +417,7 @@ export const ExportPreviewModal: React.FC<ExportPreviewModalProps> = ({
                 </div>
                 <table className="w-full text-xs">
                   <thead>
-                    <tr className="bg-[#FAFBF9] border-b border-[#333] text-[11px] font-semibold">
+                    <tr className="bg-[#ffffff] border-b border-[#333] text-[11px] font-semibold">
                       <th className="p-1.5 border-r border-[#333] w-16 text-center">
                         Code
                       </th>
@@ -453,7 +453,7 @@ export const ExportPreviewModal: React.FC<ExportPreviewModalProps> = ({
                 </div>
                 <table className="w-full text-xs">
                   <thead>
-                    <tr className="bg-[#FAFBF9] border-b border-[#333] text-[11px] font-semibold">
+                    <tr className="bg-[#ffffff] border-b border-[#333] text-[11px] font-semibold">
                       <th className="p-1.5 border-r border-[#333] w-16 text-center">
                         Code
                       </th>
@@ -501,7 +501,7 @@ export const ExportPreviewModal: React.FC<ExportPreviewModalProps> = ({
             </div>
 
             {/* Notice Footer & Copy To */}
-            <div className="flex flex-wrap items-center justify-between text-[10.5px] text-[#555] pt-2 border-t border-[#E5E8E0]">
+            <div className="flex flex-wrap items-center justify-between text-[10.5px] text-[#555] pt-2 border-t border-[#e1e4e8]">
               <div className="space-x-2">
                 <strong>Copy to:</strong>
                 <span>1. PA to Principal</span>
@@ -517,15 +517,15 @@ export const ExportPreviewModal: React.FC<ExportPreviewModalProps> = ({
         </div>
 
         {/* Modal Bottom Action Footer */}
-        <div className="flex flex-wrap items-center justify-between px-6 py-4 bg-white border-t border-[#E5E8E0] gap-3">
-          <div className="text-xs text-[#71767B]">
+        <div className="flex flex-wrap items-center justify-between px-6 py-4 bg-white border-t border-[#e1e4e8] gap-3">
+          <div className="text-xs text-[#5b616b]">
             All exports are generated client-side directly from authoritative validation engine.
           </div>
           <div className="flex items-center gap-2.5">
             <button
               type="button"
               onClick={handlePrint}
-              className="px-4 py-2 text-xs font-semibold text-[#111315] bg-[#F0F2EB] hover:bg-[#E5E8E0] rounded-xl transition-all duration-150 flex items-center gap-1.5 shadow-xs"
+              className="px-4 py-2 text-xs font-semibold text-[#121417] bg-[#F0F2EB] hover:bg-[#e1e4e8] rounded-md transition-all duration-150 flex items-center gap-1.5 shadow-xs"
             >
               <Printer className="w-3.5 h-3.5" />
               <span>Print Timetable</span>
@@ -534,7 +534,7 @@ export const ExportPreviewModal: React.FC<ExportPreviewModalProps> = ({
               <button
                 type="button"
                 onClick={handleDownloadBooklet}
-                className="px-4 py-2 text-xs font-semibold text-[#0047FF] bg-[#EBF1FF] hover:bg-[#D9E5FF] rounded-xl transition-all duration-150 flex items-center gap-1.5 shadow-xs"
+                className="px-4 py-2 text-xs font-semibold text-[#3b6fe0] bg-[#EBF1FF] hover:bg-[#D9E5FF] rounded-md transition-all duration-150 flex items-center gap-1.5 shadow-xs"
                 title="Generate combined PDF booklet for all sections in this department"
               >
                 <BookOpen className="w-3.5 h-3.5" />
@@ -544,7 +544,7 @@ export const ExportPreviewModal: React.FC<ExportPreviewModalProps> = ({
             <button
               type="button"
               onClick={handleDownloadWord}
-              className="px-4 py-2 text-xs font-semibold text-[#111315] bg-[#F0F2EB] hover:bg-[#E5E8E0] rounded-xl transition-all duration-150 flex items-center gap-1.5 shadow-xs"
+              className="px-4 py-2 text-xs font-semibold text-[#121417] bg-[#F0F2EB] hover:bg-[#e1e4e8] rounded-md transition-all duration-150 flex items-center gap-1.5 shadow-xs"
             >
               <FileCode className="w-3.5 h-3.5" />
               <span>Word (.doc)</span>
@@ -552,7 +552,7 @@ export const ExportPreviewModal: React.FC<ExportPreviewModalProps> = ({
             <button
               type="button"
               onClick={handleDownloadExcel}
-              className="px-4 py-2 text-xs font-semibold text-[#111315] bg-[#F0F2EB] hover:bg-[#E5E8E0] rounded-xl transition-all duration-150 flex items-center gap-1.5 shadow-xs"
+              className="px-4 py-2 text-xs font-semibold text-[#121417] bg-[#F0F2EB] hover:bg-[#e1e4e8] rounded-md transition-all duration-150 flex items-center gap-1.5 shadow-xs"
             >
               <FileSpreadsheet className="w-3.5 h-3.5" />
               <span>Excel (.xlsx)</span>
@@ -560,7 +560,7 @@ export const ExportPreviewModal: React.FC<ExportPreviewModalProps> = ({
             <button
               type="button"
               onClick={handleDownloadPdf}
-              className="px-5 py-2 text-xs font-semibold text-white bg-[#111315] hover:bg-[#0047FF] rounded-xl transition-all duration-150 flex items-center gap-1.5 shadow-md hover:shadow-lg"
+              className="px-5 py-2 text-xs font-semibold text-white bg-[#121417] hover:bg-[#3b6fe0] rounded-md transition-all duration-150 flex items-center gap-1.5 shadow-md hover:shadow-lg"
             >
               <FileText className="w-3.5 h-3.5" />
               <span>Download Official PDF</span>

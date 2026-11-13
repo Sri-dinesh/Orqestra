@@ -110,7 +110,7 @@ export function FacultyPage() {
       <DepartmentNav />
 
       {isReadOnly && (
-        <div className="rounded-xl border border-amber-200 bg-amber-50/80 p-3.5 flex items-center gap-2.5 text-xs text-amber-900">
+        <div className="rounded-md border border-amber-200 bg-amber-50/80 p-3.5 flex items-center gap-2.5 text-xs text-amber-900">
           <Lock className="w-4 h-4 text-amber-700 shrink-0" />
           <span>
             You are viewing this department's faculty roster in <strong>read-only mode</strong> ({isFaculty ? 'Teaching Faculty' : 'Different Department HOD'}). Faculty records and allocations cannot be modified.
@@ -170,8 +170,8 @@ export function FacultyPage() {
 
       <Card title={`Faculty (${members.length})`}>
         {members.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-[#E5E8E0] bg-[#FAFBF9] p-6 text-center">
-            <p className="text-sm font-semibold text-[#111315]">No faculty members registered yet</p>
+          <div className="rounded-md border border-dashed border-[#e1e4e8] bg-[#ffffff] p-6 text-center">
+            <p className="text-sm font-semibold text-[#121417]">No faculty members registered yet</p>
             <p className="mt-1 text-xs text-body-gray">
               Add your professors and teaching staff above, or use Bulk Import to load your roster from a CSV or Excel spreadsheet.
             </p>
@@ -184,19 +184,19 @@ export function FacultyPage() {
               const capacity = f.maxPeriodsPerWeek ?? null;
               const over = capacity !== null && required > capacity;
               return (
-                <li key={f.id} className="rounded-xl bg-[#FAFBF9] px-3 py-2.5 border border-[#E5E8E0]">
+                <li key={f.id} className="rounded-md bg-[#ffffff] px-3 py-2.5 border border-[#e1e4e8]">
                   <div className="flex flex-wrap items-start justify-between gap-2">
                     <div className="min-w-0">
-                      <p className="text-sm text-[#111315]">
+                      <p className="text-sm text-[#121417]">
                         <strong>{f.facultyCode}</strong> — {f.name}
                         {!f.active && <span className="ml-2 text-xs font-medium text-rose-700">inactive</span>}
                       </p>
-                      <p className="mt-0.5 text-xs text-[#71767B]">
+                      <p className="mt-0.5 text-xs text-[#5b616b]">
                         Required: <strong className="text-ink">{required}</strong>/wk
                         {timetable ? (<> · Assigned: <strong className="text-ink">{assigned}</strong></>) : null}
                         {capacity !== null ? (<> · Capacity {capacity}</>) : null}
                         {over && <span className="ml-1.5 font-semibold text-rose-700">Over capacity</span>}
-                      </p>                          <p className="mt-0.5 text-[11px] text-[#71767B]">
+                      </p>                          <p className="mt-0.5 text-[11px] text-[#5b616b]">
                         {f.availability.length === 0
                           ? 'Availability: all slots'
                           : `Availability: ${f.availability.reduce((a, w) => a + w.durationPeriods, 0)} periods/wk`}
@@ -209,7 +209,7 @@ export function FacultyPage() {
                           .map((s) => (
                             <label
                               key={s.id}
-                              className={`flex cursor-pointer items-center gap-1.5 rounded-full bg-white px-2.5 py-1 text-[11px] font-medium text-[#111315] ring-1 ring-inset ring-[#E5E8E0] transition-colors duration-150 has-checked:bg-blue-100 hover:bg-[#FAFBF9] ${isReadOnly ? 'opacity-60 cursor-not-allowed' : ''}`}
+                              className={`flex cursor-pointer items-center gap-1.5 rounded-full bg-white px-2.5 py-1 text-[11px] font-medium text-[#121417] ring-1 ring-inset ring-[#e1e4e8] transition-colors duration-150 has-checked:bg-blue-100 hover:bg-[#ffffff] ${isReadOnly ? 'opacity-60 cursor-not-allowed' : ''}`}
                             >
                               <input
                                 type="checkbox"

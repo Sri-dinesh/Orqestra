@@ -104,15 +104,15 @@ export const PeriodTimingsModal: React.FC<PeriodTimingsModalProps> = ({
       aria-labelledby="period-timings-title"
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4"
     >
-      <div className="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl border border-black/10 overflow-hidden flex flex-col max-h-[92vh]">
+      <div className="relative w-full max-w-2xl bg-white rounded-md shadow-2xl border border-black/10 overflow-hidden flex flex-col max-h-[92vh]">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#E5E8E0] bg-[#FAFAF8]">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#e1e4e8] bg-[#FAFAF8]">
           <div className="flex items-center gap-3">
-            <span className="p-2.5 rounded-xl bg-blue-50 text-blue-600 border border-blue-100">
+            <span className="p-2.5 rounded-md bg-blue-50 text-blue-600 border border-blue-100">
               <Clock className="w-5 h-5 text-metric-blue" />
             </span>
             <div>
-              <h3 id="period-timings-title" className="text-base font-bold text-[#111315]">
+              <h3 id="period-timings-title" className="text-base font-bold text-[#121417]">
                 Adjust Period Timings
               </h3>
               <p className="text-xs text-body-gray">
@@ -123,7 +123,7 @@ export const PeriodTimingsModal: React.FC<PeriodTimingsModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-lg text-body-gray hover:text-[#111315] hover:bg-black/5 transition-colors"
+            className="p-1.5 rounded-lg text-body-gray hover:text-[#121417] hover:bg-black/5 transition-colors"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
@@ -133,7 +133,7 @@ export const PeriodTimingsModal: React.FC<PeriodTimingsModalProps> = ({
         {/* Scrollable Body */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {/* Quick Auto-Scheduler Assistant */}
-          <div className="rounded-xl border border-blue-200 bg-blue-50/60 p-4">
+          <div className="rounded-md border border-blue-200 bg-blue-50/60 p-4">
             <div className="flex items-center gap-2 mb-3">
               <Sparkles className="w-4 h-4 text-blue-600" />
               <h4 className="text-xs font-bold uppercase tracking-wider text-blue-900">
@@ -212,7 +212,7 @@ export const PeriodTimingsModal: React.FC<PeriodTimingsModalProps> = ({
 
           {/* Validation Warnings */}
           {!validation.isValid && (
-            <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900 space-y-1">
+            <div className="rounded-md border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900 space-y-1">
               <div className="flex items-center gap-1.5 font-semibold text-amber-950">
                 <AlertTriangle className="w-4 h-4 text-amber-600" />
                 <span>Timing Inconsistencies</span>
@@ -252,7 +252,7 @@ export const PeriodTimingsModal: React.FC<PeriodTimingsModalProps> = ({
               </div>
             </div>
 
-            <div className="divide-y divide-[#E5E8E0] rounded-xl border border-[#E5E8E0] overflow-hidden bg-white">
+            <div className="divide-y divide-[#e1e4e8] rounded-md border border-[#e1e4e8] overflow-hidden bg-white">
               {Array.from({ length: periodsCount }, (_, i) => {
                 const timing = timings[i] ?? { start: '', end: '' };
                 const dur = calculateDurationMinutes(timing.start, timing.end);
@@ -264,7 +264,7 @@ export const PeriodTimingsModal: React.FC<PeriodTimingsModalProps> = ({
                     {precedingBreaks.map((b) => (
                       <div
                         key={b.id}
-                        className="flex items-center justify-between px-3 py-1.5 bg-[#F9FAF8] border-y border-[#E5E8E0] text-[11px] text-[#555A60]"
+                        className="flex items-center justify-between px-3 py-1.5 bg-[#F9FAF8] border-y border-[#e1e4e8] text-[11px] text-[#555A60]"
                       >
                         <div className="flex items-center gap-1.5 font-medium">
                           <span className="w-2 h-2 rounded-full bg-amber-500" />
@@ -300,7 +300,7 @@ export const PeriodTimingsModal: React.FC<PeriodTimingsModalProps> = ({
                             value={timing.start}
                             onChange={(e) => handleTimingChange(i, 'start', e.target.value)}
                             placeholder="09:00 AM"
-                            className="w-24 text-xs font-medium text-ink rounded-md border border-[#E5E8E0] bg-white px-2 py-1 focus:border-blue-500 focus:outline-hidden"
+                            className="w-24 text-xs font-medium text-ink rounded-md border border-[#e1e4e8] bg-white px-2 py-1 focus:border-blue-500 focus:outline-hidden"
                             aria-label={`Period ${i + 1} start time`}
                           />
                           <span className="text-xs text-body-gray font-bold">–</span>
@@ -309,7 +309,7 @@ export const PeriodTimingsModal: React.FC<PeriodTimingsModalProps> = ({
                             value={timing.end}
                             onChange={(e) => handleTimingChange(i, 'end', e.target.value)}
                             placeholder="09:50 AM"
-                            className="w-24 text-xs font-medium text-ink rounded-md border border-[#E5E8E0] bg-white px-2 py-1 focus:border-blue-500 focus:outline-hidden"
+                            className="w-24 text-xs font-medium text-ink rounded-md border border-[#e1e4e8] bg-white px-2 py-1 focus:border-blue-500 focus:outline-hidden"
                             aria-label={`Period ${i + 1} end time`}
                           />
                         </div>
@@ -355,7 +355,7 @@ export const PeriodTimingsModal: React.FC<PeriodTimingsModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-[#E5E8E0] bg-[#FAFAF8]">
+        <div className="flex items-center justify-between px-6 py-4 border-t border-[#e1e4e8] bg-[#FAFAF8]">
           <button
             type="button"
             onClick={handleClearAll}
@@ -368,14 +368,14 @@ export const PeriodTimingsModal: React.FC<PeriodTimingsModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-xs font-semibold rounded-xl border border-[#E5E8E0] bg-white hover:bg-black/5 text-ink transition-colors"
+              className="px-4 py-2 text-xs font-semibold rounded-md border border-[#e1e4e8] bg-white hover:bg-black/5 text-ink transition-colors"
             >
               Cancel
             </button>
             <button
               type="button"
               onClick={handleSave}
-              className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-xl bg-metric-blue hover:bg-blue-700 text-white shadow-xs transition-colors"
+              className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-md bg-metric-blue hover:bg-blue-700 text-white shadow-xs transition-colors"
             >
               <Check className="w-4 h-4" />
               Save Period Timings

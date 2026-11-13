@@ -49,7 +49,7 @@ function CheckboxChips({
       {options.map((o) => (
         <label
           key={o.id}
-          className="flex cursor-pointer items-center gap-1.5 rounded-full bg-[#F1F3ED] px-3 py-1.5 text-xs font-medium text-[#111315] transition-colors duration-150 has-checked:bg-blue-100 hover:bg-[#E5E8E0]"
+          className="flex cursor-pointer items-center gap-1.5 rounded-full bg-[#eef0f2] px-3 py-1.5 text-xs font-medium text-[#121417] transition-colors duration-150 has-checked:bg-blue-100 hover:bg-[#e1e4e8]"
         >
           <input
             type="checkbox"
@@ -136,7 +136,7 @@ export function SubjectsPage() {
       <DepartmentNav />
 
       {isReadOnly && (
-        <div className="rounded-xl border border-amber-200 bg-amber-50/80 p-3.5 flex items-center gap-2.5 text-xs text-amber-900">
+        <div className="rounded-md border border-amber-200 bg-amber-50/80 p-3.5 flex items-center gap-2.5 text-xs text-amber-900">
           <Lock className="w-4 h-4 text-amber-700 shrink-0" />
           <span>
             You are viewing this department's course catalogue in <strong>read-only mode</strong> ({isFaculty ? 'Teaching Faculty' : 'Different Department HOD'}). Catalogue subjects cannot be added, modified, or removed.
@@ -221,8 +221,8 @@ export function SubjectsPage() {
 
       <Card title={`Subjects (${subjects.length})`}>
         {subjects.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-[#E5E8E0] bg-[#FAFBF9] p-6 text-center">
-            <p className="text-sm font-semibold text-[#111315]">No subjects in catalogue yet</p>
+          <div className="rounded-md border border-dashed border-[#e1e4e8] bg-[#ffffff] p-6 text-center">
+            <p className="text-sm font-semibold text-[#121417]">No subjects in catalogue yet</p>
             <p className="mt-1 text-xs text-body-gray">
               Add your department's theory and lab subjects above, or use Bulk Import to load from Excel or CSV.
             </p>
@@ -230,13 +230,13 @@ export function SubjectsPage() {
         ) : (
           <ul className="space-y-2">
             {subjects.map((s) => (
-              <li key={s.id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-[#FAFBF9] px-3 py-2.5 border border-[#E5E8E0]">
+              <li key={s.id} className="flex flex-wrap items-center justify-between gap-2 rounded-md bg-[#ffffff] px-3 py-2.5 border border-[#e1e4e8]">
                 <div className="min-w-0">
-                  <p className="text-sm text-[#111315]">
+                  <p className="text-sm text-[#121417]">
                     <strong>{s.code}</strong> — {s.name}
                     {!s.active && <span className="ml-2 text-xs font-medium text-rose-700">inactive</span>}
                   </p>
-                  <p className="mt-0.5 text-xs text-[#71767B]">
+                  <p className="mt-0.5 text-xs text-[#5b616b]">
                     {s.type === 'LAB' ? 'Lab' : 'Theory'} · {s.sessionsPerWeek}/wk · {s.durationPeriods}p · {s.eligibleFacultyIds.length} faculty · {s.eligibleSectionIds.length} sections
                   </p>
                 </div>

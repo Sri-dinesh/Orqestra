@@ -194,7 +194,7 @@ export function RoomsPage() {
       <DepartmentNav />
 
       {isReadOnly && (
-        <div className="rounded-xl border border-amber-200 bg-amber-50/80 p-3.5 flex items-center gap-2.5 text-xs text-amber-900">
+        <div className="rounded-md border border-amber-200 bg-amber-50/80 p-3.5 flex items-center gap-2.5 text-xs text-amber-900">
           <Lock className="w-4 h-4 text-amber-700 shrink-0" />
           <span>
             You are viewing this department's rooms and laboratories in <strong>read-only mode</strong> ({isFaculty ? 'Teaching Faculty' : 'Different Department HOD'}). Facilities and allocations cannot be modified.
@@ -213,7 +213,7 @@ export function RoomsPage() {
                 onClick={() => setImportModalOpen(true)}
                 className="flex items-center gap-1.5"
               >
-                <FileSpreadsheet className="w-4 h-4 text-[#0047FF]" />
+                <FileSpreadsheet className="w-4 h-4 text-[#3b6fe0]" />
                 <span>Bulk Import (Excel/CSV)</span>
               </Button>
               <Button
@@ -255,13 +255,13 @@ export function RoomsPage() {
 
       {/* Quick Setup Presets Callout if few rooms exist */}
       {rooms.length === 0 && !isReadOnly && (
-        <div className="p-6 rounded-2xl bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="p-6 rounded-md bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="space-y-1">
-            <h3 className="text-sm font-bold text-[#111315] flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-[#0047FF]" />
+            <h3 className="text-sm font-bold text-[#121417] flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-[#3b6fe0]" />
               <span>Instant Infrastructure Setup</span>
             </h3>
-            <p className="text-xs text-[#4B5259]">
+            <p className="text-xs text-[#5b616b]">
               Populate this department with a standard engineering suite: Lecture Halls, Computer Networks Lab, AI/Data Lab, Hardware IoT Lab, and Seminar Auditorium.
             </p>
           </div>
@@ -275,7 +275,7 @@ export function RoomsPage() {
       <Card
         title={`Classrooms & Laboratories (${filteredRooms.length})`}
         actions={
-          <div className="flex items-center gap-1 bg-[#F0F2EB] p-1 rounded-xl">
+          <div className="flex items-center gap-1 bg-[#eef0f2] p-1 rounded-md">
             {(['ALL', 'LAB', 'THEORY', 'GENERAL'] as const).map((t) => (
               <button
                 key={t}
@@ -283,8 +283,8 @@ export function RoomsPage() {
                 onClick={() => setFilterType(t)}
                 className={`px-3 py-1 text-xs font-semibold rounded-lg transition-all ${
                   filterType === t
-                    ? 'bg-white text-[#111315] shadow-xs'
-                    : 'text-[#71767B] hover:text-[#111315]'
+                    ? 'bg-white text-[#121417] shadow-xs'
+                    : 'text-[#5b616b] hover:text-[#121417]'
                 }`}
               >
                 {t === 'ALL' ? 'All Spaces' : t === 'LAB' ? 'Labs' : t === 'THEORY' ? 'Theory Halls' : 'General'}
@@ -294,15 +294,15 @@ export function RoomsPage() {
         }
       >
         {filteredRooms.length === 0 ? (
-          <div className="py-12 text-center text-[#71767B] space-y-3">
-            <Building2 className="w-10 h-10 mx-auto text-[#71767B]/40" />
-            <p className="text-sm font-medium text-[#111315]">No rooms found for this filter</p>
+          <div className="py-12 text-center text-[#5b616b] space-y-3">
+            <Building2 className="w-10 h-10 mx-auto text-[#5b616b]/40" />
+            <p className="text-sm font-medium text-[#121417]">No rooms found for this filter</p>
             <p className="text-xs">Add a room or import using an Excel template to assign physical spaces to timetable slots.</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="bg-[#FAFBF9] border-b border-[#E5E8E0] text-xs font-bold text-[#4B5259] uppercase tracking-wider">
+              <thead className="bg-[#ffffff] border-b border-[#e1e4e8] text-xs font-bold text-[#5b616b] uppercase tracking-wider">
                 <tr>
                   <th className="py-3 px-4">Room Code</th>
                   <th className="py-3 px-4">Facility Name</th>
@@ -313,15 +313,15 @@ export function RoomsPage() {
                   {!isReadOnly && <th className="py-3 px-4 text-right">Actions</th>}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#E5E8E0]">
+              <tbody className="divide-y divide-[#e1e4e8]">
                 {filteredRooms.map((room) => {
                   const usagePeriods = roomUsageCount.get(room.id) ?? 0;
                   return (
-                    <tr key={room.id} className="hover:bg-[#FAFBF9]/80 transition-colors">
-                      <td className="py-3.5 px-4 font-mono font-bold text-[#111315]">
+                    <tr key={room.id} className="hover:bg-[#ffffff]/80 transition-colors">
+                      <td className="py-3.5 px-4 font-mono font-bold text-[#121417]">
                         {room.code}
                       </td>
-                      <td className="py-3.5 px-4 font-medium text-[#111315]">
+                      <td className="py-3.5 px-4 font-medium text-[#121417]">
                         <div className="flex items-center gap-2">
                           {room.type === 'LAB' ? (
                             <FlaskConical className="w-4 h-4 text-purple-600 shrink-0" />
@@ -350,7 +350,7 @@ export function RoomsPage() {
                       <td className="py-3.5 px-4">
                         <span
                           className={`text-xs font-semibold ${
-                            usagePeriods > 0 ? 'text-[#0047FF]' : 'text-[#71767B]'
+                            usagePeriods > 0 ? 'text-[#3b6fe0]' : 'text-[#5b616b]'
                           }`}
                         >
                           {usagePeriods > 0 ? `${usagePeriods} periods scheduled` : 'Idle / Unassigned'}
@@ -392,7 +392,7 @@ export function RoomsPage() {
                                   type: room.type,
                                 });
                               }}
-                              className="p-1.5 rounded-lg text-[#71767B] hover:text-[#111315] hover:bg-black/5"
+                              className="p-1.5 rounded-lg text-[#5b616b] hover:text-[#121417] hover:bg-black/5"
                               title="Edit Room"
                             >
                               <Edit2 className="w-4 h-4" />
@@ -408,7 +408,7 @@ export function RoomsPage() {
                                   );
                                 }
                               }}
-                              className="p-1.5 rounded-lg text-[#71767B] hover:text-red-600 hover:bg-red-50"
+                              className="p-1.5 rounded-lg text-[#5b616b] hover:text-red-600 hover:bg-red-50"
                               title="Delete Room"
                             >
                               <Trash2 className="w-4 h-4" />

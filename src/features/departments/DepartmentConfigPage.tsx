@@ -99,7 +99,7 @@ export function DepartmentConfigPage() {
       <DepartmentNav />
 
       {isReadOnly && (
-        <div className="rounded-xl border border-amber-200 bg-amber-50/80 p-3.5 flex items-center gap-2.5 text-xs text-amber-900">
+        <div className="rounded-md border border-amber-200 bg-amber-50/80 p-3.5 flex items-center gap-2.5 text-xs text-amber-900">
           <Lock className="w-4 h-4 text-amber-700 shrink-0" />
           <span>
             You are viewing this department in <strong>read-only mode</strong> ({isFaculty ? 'Teaching Faculty' : 'Different Department HOD'}). Configuration, timings, and sections cannot be modified.
@@ -188,7 +188,7 @@ export function DepartmentConfigPage() {
               <span className="mb-1.5 block text-xs font-medium text-body-gray">Working days</span>
               <div className="flex flex-wrap gap-2">
                 {WORKING_DAYS.map((day) => (
-                  <label key={day} className={`flex cursor-pointer items-center gap-1.5 rounded-full bg-[#F1F3ED] px-3 py-1.5 text-xs font-medium text-[#111315] transition-colors duration-150 hover:bg-[#E5E8E0] has-checked:bg-blue-100 ${isReadOnly ? 'opacity-60 cursor-not-allowed' : ''}`}>
+                  <label key={day} className={`flex cursor-pointer items-center gap-1.5 rounded-full bg-[#eef0f2] px-3 py-1.5 text-xs font-medium text-[#121417] transition-colors duration-150 hover:bg-[#e1e4e8] has-checked:bg-blue-100 ${isReadOnly ? 'opacity-60 cursor-not-allowed' : ''}`}>
                     <input
                       type="checkbox"
                       className="accent-metric-blue"
@@ -234,7 +234,7 @@ export function DepartmentConfigPage() {
                 state.updateDepartment(department.id, { periodTimings: next });
               };
               return (
-                <li key={i} className="flex items-center gap-1.5 rounded-xl bg-surface-1 px-2.5 py-2">
+                <li key={i} className="flex items-center gap-1.5 rounded-md bg-surface-1 px-2.5 py-2">
                   <span className="w-7 shrink-0 text-xs font-semibold text-ink">P{i + 1}</span>
                   <Input
                     value={current.start}
@@ -290,8 +290,8 @@ export function DepartmentConfigPage() {
           )}
           <ul className="space-y-2">
             {sections.map((s) => (
-              <li key={s.id} className="flex items-center justify-between gap-2 rounded-xl bg-[#FAFBF9] px-3 py-2 border border-[#E5E8E0]">
-                <span className="text-sm text-[#111315]">
+              <li key={s.id} className="flex items-center justify-between gap-2 rounded-md bg-[#ffffff] px-3 py-2 border border-[#e1e4e8]">
+                <span className="text-sm text-[#121417]">
                   <strong>{s.name}</strong>
                   <span className="ml-2 text-xs text-body-gray">Y{s.year} S{s.semester} · {s.studentCount} students</span>
                 </span>
@@ -329,8 +329,8 @@ export function DepartmentConfigPage() {
 
       <Card title={`Section requirements — ${subjects.length} subjects, ${faculty.length} faculty available`}>
         {sections.length === 0 || subjects.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-[#E5E8E0] bg-[#FAFBF9] p-6 text-center">
-            <p className="text-sm font-semibold text-[#111315]">
+          <div className="rounded-md border border-dashed border-[#e1e4e8] bg-[#ffffff] p-6 text-center">
+            <p className="text-sm font-semibold text-[#121417]">
               {sections.length === 0 && subjects.length === 0
                 ? 'Add sections above, then add subjects to define weekly curriculum hours.'
                 : sections.length === 0
@@ -351,8 +351,8 @@ export function DepartmentConfigPage() {
         ) : (
           <div className="grid gap-4 lg:grid-cols-2">
             {sections.map((section) => (
-              <div key={section.id} className="rounded-xl bg-[#FAFBF9] p-4 border border-[#E5E8E0]">
-                <h3 className="mb-2 text-sm font-semibold text-[#111315]">{section.name}</h3>
+              <div key={section.id} className="rounded-md bg-[#ffffff] p-4 border border-[#e1e4e8]">
+                <h3 className="mb-2 text-sm font-semibold text-[#121417]">{section.name}</h3>
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="text-left text-[11px] uppercase tracking-wide text-body-gray">
@@ -366,10 +366,10 @@ export function DepartmentConfigPage() {
                       const value = req?.sessionsPerWeek ?? 0;
                       const applicable = sub.eligibleSectionIds.includes(section.id);
                       return (
-                        <tr key={sub.id} className="border-t border-[#E5E8E0]">
-                          <td className="py-1.5 pr-2 border-b border-[#E5E8E0]">
-                            <span className="font-medium text-[#111315]">{sub.code}</span>
-                            <span className="ml-1.5 text-xs text-[#71767B]">{sub.type === 'LAB' ? 'Lab' : 'Theory'}</span>
+                        <tr key={sub.id} className="border-t border-[#e1e4e8]">
+                          <td className="py-1.5 pr-2 border-b border-[#e1e4e8]">
+                            <span className="font-medium text-[#121417]">{sub.code}</span>
+                            <span className="ml-1.5 text-xs text-[#5b616b]">{sub.type === 'LAB' ? 'Lab' : 'Theory'}</span>
                             {!applicable && value > 0 && !isReadOnly && (
                               <button
                                 type="button"
@@ -384,7 +384,7 @@ export function DepartmentConfigPage() {
                               </button>
                             )}
                           </td>
-                          <td className="py-1.5 border-b border-[#E5E8E0]">
+                          <td className="py-1.5 border-b border-[#e1e4e8]">
                             <Input
                               type="number"
                               min={0}

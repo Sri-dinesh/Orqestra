@@ -205,18 +205,18 @@ export const BulkImportModal: React.FC<BulkImportModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
-      <div className="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl border border-black/10 overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="relative w-full max-w-2xl bg-white rounded-md shadow-2xl border border-black/10 overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#E5E8E0]">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#e1e4e8]">
           <div className="flex items-center gap-2.5">
-            <span className="p-2 rounded-lg bg-[#F0F2EB] text-[#111315]">
-              <FileSpreadsheet className="w-5 h-5 text-[#0047FF]" />
+            <span className="p-2 rounded-lg bg-[#F0F2EB] text-[#121417]">
+              <FileSpreadsheet className="w-5 h-5 text-[#3b6fe0]" />
             </span>
             <div>
-              <h3 className="text-base font-bold text-[#111315]">
+              <h3 className="text-base font-bold text-[#121417]">
                 Bulk Import {type === 'FACULTY' ? 'Faculty' : type === 'SUBJECTS' ? 'Subjects' : 'Rooms & Labs'}
               </h3>
-              <p className="text-xs text-[#71767B]">
+              <p className="text-xs text-[#5b616b]">
                 Upload CSV or Excel spreadsheets (.xlsx, .xls, .csv)
               </p>
             </div>
@@ -224,7 +224,7 @@ export const BulkImportModal: React.FC<BulkImportModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-lg text-[#71767B] hover:text-[#111315] hover:bg-black/5"
+            className="p-1.5 rounded-lg text-[#5b616b] hover:text-[#121417] hover:bg-black/5"
           >
             <X className="w-5 h-5" />
           </button>
@@ -233,27 +233,27 @@ export const BulkImportModal: React.FC<BulkImportModalProps> = ({
         {/* Content */}
         <div className="p-6 space-y-5 overflow-y-auto">
           {/* Step 1: Download Template */}
-          <div className="flex items-center justify-between p-3.5 bg-[#FAFBF9] border border-[#E5E8E0] rounded-xl">
+          <div className="flex items-center justify-between p-3.5 bg-[#ffffff] border border-[#e1e4e8] rounded-md">
             <div>
-              <h4 className="text-xs font-bold text-[#111315]">Step 1: Download Standard Template</h4>
-              <p className="text-xs text-[#71767B]">Get the pre-formatted Excel template with sample records.</p>
+              <h4 className="text-xs font-bold text-[#121417]">Step 1: Download Standard Template</h4>
+              <p className="text-xs text-[#5b616b]">Get the pre-formatted Excel template with sample records.</p>
             </div>
             <button
               type="button"
               onClick={handleDownloadTemplate}
-              className="px-3.5 py-1.5 text-xs font-semibold text-[#111315] bg-white border border-[#D0D5DD] hover:bg-black/5 rounded-lg transition-colors flex items-center gap-1.5 shadow-xs"
+              className="px-3.5 py-1.5 text-xs font-semibold text-[#121417] bg-white border border-[#e1e4e8] hover:bg-black/5 rounded-lg transition-colors flex items-center gap-1.5 shadow-xs"
             >
-              <Download className="w-3.5 h-3.5 text-[#0047FF]" />
+              <Download className="w-3.5 h-3.5 text-[#3b6fe0]" />
               <span>Download Template</span>
             </button>
           </div>
 
           {/* Step 2: Upload File Dropzone */}
           <div>
-            <h4 className="text-xs font-bold text-[#111315] mb-2">Step 2: Upload Completed File</h4>
+            <h4 className="text-xs font-bold text-[#121417] mb-2">Step 2: Upload Completed File</h4>
             <div
               onClick={() => fileInputRef.current?.click()}
-              className="border-2 border-dashed border-[#D0D5DD] hover:border-[#0047FF] bg-[#FAFBF9] hover:bg-blue-50/20 rounded-xl p-6 text-center cursor-pointer transition-all"
+              className="border-2 border-dashed border-[#e1e4e8] hover:border-[#3b6fe0] bg-[#ffffff] hover:bg-blue-50/20 rounded-md p-6 text-center cursor-pointer transition-all"
             >
               <input
                 ref={fileInputRef}
@@ -262,17 +262,17 @@ export const BulkImportModal: React.FC<BulkImportModalProps> = ({
                 onChange={handleFileUpload}
                 className="hidden"
               />
-              <Upload className="w-8 h-8 mx-auto text-[#71767B] mb-2" />
-              <p className="text-xs font-semibold text-[#111315]">
+              <Upload className="w-8 h-8 mx-auto text-[#5b616b] mb-2" />
+              <p className="text-xs font-semibold text-[#121417]">
                 {fileName ? fileName : 'Click to select spreadsheet or drop file here'}
               </p>
-              <p className="text-[11px] text-[#71767B] mt-0.5">Supports .xlsx, .xls, and .csv</p>
+              <p className="text-[11px] text-[#5b616b] mt-0.5">Supports .xlsx, .xls, and .csv</p>
             </div>
           </div>
 
           {/* Validation Warnings / Errors */}
           {errors.length > 0 && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-xl space-y-1">
+            <div className="p-3 bg-red-50 border border-red-200 rounded-md space-y-1">
               <div className="flex items-center gap-1.5 text-xs font-bold text-red-700">
                 <AlertCircle className="w-4 h-4" />
                 <span>Validation Issues ({errors.length})</span>
@@ -289,54 +289,54 @@ export const BulkImportModal: React.FC<BulkImportModalProps> = ({
           {parsedData.length > 0 && (
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-[#111315] flex items-center gap-1.5">
+                <span className="text-xs font-bold text-[#121417] flex items-center gap-1.5">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                   <span>Ready to Import: {parsedData.length} records</span>
                 </span>
               </div>
 
-              <div className="border border-[#E5E8E0] rounded-xl overflow-hidden max-h-48 overflow-y-auto">
+              <div className="border border-[#e1e4e8] rounded-md overflow-hidden max-h-48 overflow-y-auto">
                 <table className="w-full text-left text-xs">
-                  <thead className="bg-[#F0F2EB] sticky top-0 font-semibold text-[#4B5259]">
+                  <thead className="bg-[#F0F2EB] sticky top-0 font-semibold text-[#5b616b]">
                     <tr>
                       {type === 'FACULTY' ? (
                         <>
-                          <th className="p-2 border-b border-[#E5E8E0]">Code</th>
-                          <th className="p-2 border-b border-[#E5E8E0]">Name</th>
-                          <th className="p-2 border-b border-[#E5E8E0]">Max / Day</th>
-                          <th className="p-2 border-b border-[#E5E8E0]">Max / Week</th>
+                          <th className="p-2 border-b border-[#e1e4e8]">Code</th>
+                          <th className="p-2 border-b border-[#e1e4e8]">Name</th>
+                          <th className="p-2 border-b border-[#e1e4e8]">Max / Day</th>
+                          <th className="p-2 border-b border-[#e1e4e8]">Max / Week</th>
                         </>
                       ) : type === 'SUBJECTS' ? (
                         <>
-                          <th className="p-2 border-b border-[#E5E8E0]">Code</th>
-                          <th className="p-2 border-b border-[#E5E8E0]">Title</th>
-                          <th className="p-2 border-b border-[#E5E8E0]">Course Code</th>
-                          <th className="p-2 border-b border-[#E5E8E0]">Type</th>
-                          <th className="p-2 border-b border-[#E5E8E0]">Periods/Wk</th>
+                          <th className="p-2 border-b border-[#e1e4e8]">Code</th>
+                          <th className="p-2 border-b border-[#e1e4e8]">Title</th>
+                          <th className="p-2 border-b border-[#e1e4e8]">Course Code</th>
+                          <th className="p-2 border-b border-[#e1e4e8]">Type</th>
+                          <th className="p-2 border-b border-[#e1e4e8]">Periods/Wk</th>
                         </>
                       ) : (
                         <>
-                          <th className="p-2 border-b border-[#E5E8E0]">Room Code</th>
-                          <th className="p-2 border-b border-[#E5E8E0]">Room Name</th>
-                          <th className="p-2 border-b border-[#E5E8E0]">Capacity</th>
-                          <th className="p-2 border-b border-[#E5E8E0]">Type</th>
+                          <th className="p-2 border-b border-[#e1e4e8]">Room Code</th>
+                          <th className="p-2 border-b border-[#e1e4e8]">Room Name</th>
+                          <th className="p-2 border-b border-[#e1e4e8]">Capacity</th>
+                          <th className="p-2 border-b border-[#e1e4e8]">Type</th>
                         </>
                       )}
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#E5E8E0]">
+                  <tbody className="divide-y divide-[#e1e4e8]">
                     {parsedData.slice(0, 15).map((row, idx) => (
                       <tr key={idx} className="hover:bg-black/5">
                         {type === 'FACULTY' ? (
                           <>
-                            <td className="p-2 font-bold text-[#111315]">{row.facultyCode}</td>
+                            <td className="p-2 font-bold text-[#121417]">{row.facultyCode}</td>
                             <td className="p-2 text-[#333]">{row.name}</td>
                             <td className="p-2 text-[#666]">{row.maxPeriodsPerDay ?? '—'}</td>
                             <td className="p-2 text-[#666]">{row.maxPeriodsPerWeek ?? '—'}</td>
                           </>
                         ) : type === 'SUBJECTS' ? (
                           <>
-                            <td className="p-2 font-bold text-[#111315]">{row.code}</td>
+                            <td className="p-2 font-bold text-[#121417]">{row.code}</td>
                             <td className="p-2 text-[#333]">{row.name}</td>
                             <td className="p-2 text-[#666]">{row.courseCode ?? '—'}</td>
                             <td className="p-2">
@@ -348,7 +348,7 @@ export const BulkImportModal: React.FC<BulkImportModalProps> = ({
                           </>
                         ) : (
                           <>
-                            <td className="p-2 font-bold text-[#111315]">{row.code}</td>
+                            <td className="p-2 font-bold text-[#121417]">{row.code}</td>
                             <td className="p-2 text-[#333]">{row.name}</td>
                             <td className="p-2 text-[#666]">{row.capacity} seats</td>
                             <td className="p-2">
@@ -364,7 +364,7 @@ export const BulkImportModal: React.FC<BulkImportModalProps> = ({
                 </table>
               </div>
               {parsedData.length > 15 && (
-                <p className="text-[11px] text-[#71767B] text-center">
+                <p className="text-[11px] text-[#5b616b] text-center">
                   Showing 15 of {parsedData.length} records...
                 </p>
               )}
@@ -373,15 +373,15 @@ export const BulkImportModal: React.FC<BulkImportModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between px-6 py-4 bg-[#FAFBF9] border-t border-[#E5E8E0]">
-          <span className="text-xs text-[#71767B]">
+        <div className="flex items-center justify-between px-6 py-4 bg-[#ffffff] border-t border-[#e1e4e8]">
+          <span className="text-xs text-[#5b616b]">
             Data is merged safely into current department workspace.
           </span>
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={onClose}
-              className="px-3.5 py-1.5 text-xs font-semibold text-[#4B5259] hover:text-[#111315] rounded-lg transition-colors"
+              className="px-3.5 py-1.5 text-xs font-semibold text-[#5b616b] hover:text-[#121417] rounded-lg transition-colors"
             >
               Cancel
             </button>
@@ -389,7 +389,7 @@ export const BulkImportModal: React.FC<BulkImportModalProps> = ({
               type="button"
               disabled={parsedData.length === 0}
               onClick={handleConfirm}
-              className="px-4 py-2 text-xs font-semibold text-white bg-[#111315] hover:bg-[#0047FF] disabled:opacity-40 disabled:hover:bg-[#111315] rounded-xl transition-all shadow-xs"
+              className="px-4 py-2 text-xs font-semibold text-white bg-[#121417] hover:bg-[#3b6fe0] disabled:opacity-40 disabled:hover:bg-[#121417] rounded-md transition-all shadow-xs"
             >
               Import {parsedData.length} Records
             </button>

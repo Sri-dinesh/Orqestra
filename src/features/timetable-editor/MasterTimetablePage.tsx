@@ -121,7 +121,7 @@ export function MasterTimetablePage() {
       <div className="space-y-6">
         <PageHeader eyebrow="Institution view" title={`Master timetable — ${department.code}`} />
         <Card>
-          <p className="text-sm text-[#71767B]">No timetable generated yet.</p>
+          <p className="text-sm text-[#5b616b]">No timetable generated yet.</p>
           <Link to={`/departments/${departmentId}/generate`}>
             <Button size="sm" className="mt-3">Go to generation →</Button>
           </Link>
@@ -185,7 +185,7 @@ export function MasterTimetablePage() {
           type="button"
           onClick={() => setFocusSectionId(null)}
           className={`rounded-full px-3 py-1 text-xs font-medium transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-metric-blue ${
-            focusSectionId === null ? 'bg-charcoal text-white' : 'bg-surface-2 text-[#71767B] hover:text-ink'
+            focusSectionId === null ? 'bg-charcoal text-white' : 'bg-surface-2 text-[#5b616b] hover:text-ink'
           }`}
           aria-pressed={focusSectionId === null}
         >
@@ -197,7 +197,7 @@ export function MasterTimetablePage() {
             type="button"
             onClick={() => setFocusSectionId(focusSectionId === s.id ? null : s.id)}
             className={`rounded-full px-3 py-1 text-xs font-medium transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-metric-blue ${
-              focusSectionId === s.id ? 'bg-charcoal text-white' : 'bg-surface-2 text-[#71767B] hover:text-ink'
+              focusSectionId === s.id ? 'bg-charcoal text-white' : 'bg-surface-2 text-[#5b616b] hover:text-ink'
             }`}
             aria-pressed={focusSectionId === s.id}
           >
@@ -209,21 +209,21 @@ export function MasterTimetablePage() {
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Card>
           <p className="text-xl font-semibold tracking-tight text-ink">{totalSessions}</p>
-          <p className="text-xs text-[#71767B]">Scheduled periods</p>
+          <p className="text-xs text-[#5b616b]">Scheduled periods</p>
         </Card>
         <Card>
           <p className="text-xl font-semibold tracking-tight text-ink">{capacity}</p>
-          <p className="text-xs text-[#71767B]">Grid capacity (sections × slots)</p>
+          <p className="text-xs text-[#5b616b]">Grid capacity (sections × slots)</p>
         </Card>
         <Card>
           <p className="text-xl font-semibold tracking-tight text-ink">
             {dayCount > 0 ? department.workingDays[busiestDay].slice(0, 3) : '—'}
           </p>
-          <p className="text-xs text-[#71767B]">Busiest day ({perDayLoad[busiestDay] ?? 0} periods)</p>
+          <p className="text-xs text-[#5b616b]">Busiest day ({perDayLoad[busiestDay] ?? 0} periods)</p>
         </Card>
         <Card>
           <p className="text-xl font-semibold tracking-tight text-ink">{activeFacultyIds.size}</p>
-          <p className="text-xs text-[#71767B]">Faculty teaching</p>
+          <p className="text-xs text-[#5b616b]">Faculty teaching</p>
         </Card>
       </div>
 
@@ -286,7 +286,7 @@ export function MasterTimetablePage() {
                                   <span className="block truncate text-[11px] font-semibold text-ink">
                                     {chip.subjectCode}
                                   </span>
-                                  <span className="block truncate text-[10px] text-[#71767B]">
+                                  <span className="block truncate text-[10px] text-[#5b616b]">
                                     {focusSectionId ? chip.facultyName : `${sectionName(chip.sectionId)} · ${chip.facultyName}`}
                                   </span>
                                   {chip.durationPeriods >= 2 && (
@@ -294,7 +294,7 @@ export function MasterTimetablePage() {
                                   )}
                                 </>
                               ) : (
-                                <span className="block text-[10px] text-[#71767B]">↳ {chip.subjectCode}</span>
+                                <span className="block text-[10px] text-[#5b616b]">↳ {chip.subjectCode}</span>
                               )}
                             </div>
                           ))}
@@ -309,7 +309,7 @@ export function MasterTimetablePage() {
         </div>
 
         {/* Legend: section color key */}
-        <ul className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[11px] text-[#71767B]" aria-label="Section color legend">
+        <ul className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-[11px] text-[#5b616b]" aria-label="Section color legend">
           {sections.map((s) => (
             <li key={s.id} className="flex items-center gap-1.5">
               <span className={`h-3.5 w-5 rounded ring-1 ring-inset ring-hairline ${sectionTone(s.id)}`} aria-hidden="true" />
@@ -317,7 +317,7 @@ export function MasterTimetablePage() {
             </li>
           ))}
         </ul>
-        <p className="mt-2 text-xs text-[#71767B]">
+        <p className="mt-2 text-xs text-[#5b616b]">
           Read-only overview of every section in {department.code}. Filter with the section chips above; hover a cell for subject and faculty details. Labs span two periods. Use the section view to edit.
         </p>
       </Card>

@@ -230,11 +230,11 @@ export function SchedulePortalPage() {
   if (loadingPortal) {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center p-8 text-center">
-        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#111315] text-white">
-          <Calendar className="h-6 w-6 animate-pulse text-[#0047FF]" />
+        <div className="flex h-12 w-12 items-center justify-center rounded-md bg-[#121417] text-white">
+          <Calendar className="h-6 w-6 animate-pulse text-[#3b6fe0]" />
         </div>
-        <h2 className="mt-4 text-sm font-semibold text-[#111315]">Loading published institutional schedule…</h2>
-        <p className="mt-1 text-xs text-[#71767B]">Fetching the latest verified timetable from Neon Cloud</p>
+        <h2 className="mt-4 text-sm font-semibold text-[#121417]">Loading published institutional schedule…</h2>
+        <p className="mt-1 text-xs text-[#5b616b]">Fetching the latest verified timetable from Neon Cloud</p>
       </div>
     );
   }
@@ -242,16 +242,16 @@ export function SchedulePortalPage() {
   if (slug && portalError) {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center p-8 text-center">
-        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 border border-amber-200">
+        <div className="flex h-12 w-12 items-center justify-center rounded-md bg-amber-50 text-amber-600 border border-amber-200">
           <Calendar className="h-6 w-6" />
         </div>
-        <h2 className="mt-4 text-base font-bold text-[#111315]">Schedule Not Available</h2>
-        <p className="mt-1 max-w-sm text-xs text-[#4B5259]">
+        <h2 className="mt-4 text-base font-bold text-[#121417]">Schedule Not Available</h2>
+        <p className="mt-1 max-w-sm text-xs text-[#5b616b]">
           {portalError || 'This timetable is either unpublished, expired, or the link is invalid.'}
         </p>
         <Link
           to="/"
-          className="mt-5 inline-flex items-center gap-1.5 rounded-xl bg-[#111315] px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-black transition"
+          className="mt-5 inline-flex items-center gap-1.5 rounded-md bg-[#121417] px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-black transition"
         >
           Return to Home
         </Link>
@@ -261,12 +261,12 @@ export function SchedulePortalPage() {
 
   if (!currentDept) {
     return (
-      <div className="rounded-2xl bg-white p-12 text-center border border-[#E5E8E0] shadow-card max-w-md mx-auto my-12">
-        <div className="inline-flex p-3 rounded-2xl bg-blue-50 text-[#0047FF] border border-blue-100 mb-3">
-          <Calendar className="w-8 h-8 text-[#0047FF]" />
+      <div className="rounded-md bg-white p-12 text-center border border-[#e1e4e8] shadow-card max-w-md mx-auto my-12">
+        <div className="inline-flex p-3 rounded-md bg-blue-50 text-[#3b6fe0] border border-blue-100 mb-3">
+          <Calendar className="w-8 h-8 text-[#3b6fe0]" />
         </div>
-        <p className="text-base font-bold text-[#111315]">No Departments Found</p>
-        <p className="text-xs text-[#71767B] mt-1">Please create a department in the Dashboard first to view student and faculty schedules.</p>
+        <p className="text-base font-bold text-[#121417]">No Departments Found</p>
+        <p className="text-xs text-[#5b616b] mt-1">Please create a department in the Dashboard first to view student and faculty schedules.</p>
         <div className="mt-5">
           <Link to="/dashboard">
             <Button size="sm" className="inline-flex items-center gap-1.5">
@@ -288,13 +288,13 @@ export function SchedulePortalPage() {
       {/* Top Banner & Title */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <p className="text-xs font-mono font-bold tracking-widest text-[#0047FF] uppercase">
+          <p className="text-xs font-mono font-bold tracking-widest text-[#3b6fe0] uppercase">
             CAMPUS DAILY AGENDA
           </p>
-          <h1 className="text-2xl sm:text-3xl font-display font-bold text-[#111315] tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-display font-bold text-[#121417] tracking-tight">
             My Schedule Portal
           </h1>
-          <p className="text-xs text-[#71767B] mt-0.5">
+          <p className="text-xs text-[#5b616b] mt-0.5">
             Real-time personalized class schedule · {currentDept.name} ({currentDept.code})
           </p>
         </div>
@@ -303,26 +303,26 @@ export function SchedulePortalPage() {
           <button
             type="button"
             onClick={printSchedule}
-            className="px-3.5 py-2 text-xs font-semibold text-[#111315] bg-white border border-[#D0D5DD] hover:bg-black/5 rounded-xl transition-all flex items-center gap-1.5 shadow-xs"
+            className="px-3.5 py-2 text-xs font-semibold text-[#121417] bg-white border border-[#e1e4e8] hover:bg-black/5 rounded-md transition-all flex items-center gap-1.5 shadow-xs"
           >
-            <Printer className="w-3.5 h-3.5 text-[#71767B]" />
+            <Printer className="w-3.5 h-3.5 text-[#5b616b]" />
             <span>Print Agenda</span>
           </button>
         </div>
       </div>
 
       {/* Control Strip (Role, Department, Target) */}
-      <div className="bg-white rounded-2xl border border-[#E5E8E0] shadow-xs p-4 sm:p-5 space-y-4 no-print">
+      <div className="bg-white rounded-md border border-[#e1e4e8] shadow-xs p-4 sm:p-5 space-y-4 no-print">
         <div className="flex flex-wrap items-center justify-between gap-4">
           {/* Student vs Faculty Switcher */}
-          <div className="flex items-center p-1 bg-[#F0F2EB] rounded-xl">
+          <div className="flex items-center p-1 bg-[#eef0f2] rounded-md">
             <button
               type="button"
               onClick={() => setRole('STUDENT')}
               className={`flex items-center gap-1.5 px-4 py-1.5 text-xs font-bold rounded-lg transition-all ${
                 role === 'STUDENT'
-                  ? 'bg-white text-[#111315] shadow-xs'
-                  : 'text-[#71767B] hover:text-[#111315]'
+                  ? 'bg-white text-[#121417] shadow-xs'
+                  : 'text-[#5b616b] hover:text-[#121417]'
               }`}
             >
               <GraduationCap className="w-3.5 h-3.5" />
@@ -333,8 +333,8 @@ export function SchedulePortalPage() {
               onClick={() => setRole('FACULTY')}
               className={`flex items-center gap-1.5 px-4 py-1.5 text-xs font-bold rounded-lg transition-all ${
                 role === 'FACULTY'
-                  ? 'bg-white text-[#111315] shadow-xs'
-                  : 'text-[#71767B] hover:text-[#111315]'
+                  ? 'bg-white text-[#121417] shadow-xs'
+                  : 'text-[#5b616b] hover:text-[#121417]'
               }`}
             >
               <User className="w-3.5 h-3.5" />
@@ -344,7 +344,7 @@ export function SchedulePortalPage() {
 
           {/* Department Selector if multiple exist */}
           {departments.length > 1 && (
-            <label className="flex items-center gap-2 text-xs font-semibold text-[#4B5259]">
+            <label className="flex items-center gap-2 text-xs font-semibold text-[#5b616b]">
               Department:
               <select
                 value={selectedDeptId}
@@ -355,7 +355,7 @@ export function SchedulePortalPage() {
                   const firstFac = state.faculty.find((f) => f.departmentId === e.target.value);
                   if (firstFac) setSelectedFacultyId(firstFac.id);
                 }}
-                className="rounded-lg border border-[#D0D5DD] bg-white px-2.5 py-1.5 text-xs font-medium text-[#111315] focus:outline-none focus:ring-2 focus:ring-[#0047FF]"
+                className="rounded-lg border border-[#e1e4e8] bg-white px-2.5 py-1.5 text-xs font-medium text-[#121417] focus:outline-none focus:ring-2 focus:ring-[#3b6fe0]"
               >
                 {departments.map((d) => (
                   <option key={d.id} value={d.id}>
@@ -369,12 +369,12 @@ export function SchedulePortalPage() {
           {/* Target Selector (Section or Faculty) */}
           <div>
             {role === 'STUDENT' ? (
-              <label className="flex items-center gap-2 text-xs font-semibold text-[#4B5259]">
+              <label className="flex items-center gap-2 text-xs font-semibold text-[#5b616b]">
                 Select Class Section:
                 <select
                   value={selectedSectionId || sections[0]?.id || ''}
                   onChange={(e) => setSelectedSectionId(e.target.value)}
-                  className="rounded-lg border border-[#D0D5DD] bg-white px-3 py-1.5 text-xs font-bold text-[#111315] focus:outline-none focus:ring-2 focus:ring-[#0047FF]"
+                  className="rounded-lg border border-[#e1e4e8] bg-white px-3 py-1.5 text-xs font-bold text-[#121417] focus:outline-none focus:ring-2 focus:ring-[#3b6fe0]"
                 >
                   {sections.map((sec) => (
                     <option key={sec.id} value={sec.id}>
@@ -384,12 +384,12 @@ export function SchedulePortalPage() {
                 </select>
               </label>
             ) : (
-              <label className="flex items-center gap-2 text-xs font-semibold text-[#4B5259]">
+              <label className="flex items-center gap-2 text-xs font-semibold text-[#5b616b]">
                 Select Faculty Member:
                 <select
                   value={selectedFacultyId || faculty[0]?.id || ''}
                   onChange={(e) => setSelectedFacultyId(e.target.value)}
-                  className="rounded-lg border border-[#D0D5DD] bg-white px-3 py-1.5 text-xs font-bold text-[#111315] focus:outline-none focus:ring-2 focus:ring-[#0047FF]"
+                  className="rounded-lg border border-[#e1e4e8] bg-white px-3 py-1.5 text-xs font-bold text-[#121417] focus:outline-none focus:ring-2 focus:ring-[#3b6fe0]"
                 >
                   {faculty.map((f) => (
                     <option key={f.id} value={f.id}>
@@ -403,8 +403,8 @@ export function SchedulePortalPage() {
         </div>
 
         {/* Day of Week Selector Pills */}
-        <div className="flex items-center gap-2 overflow-x-auto pt-2 border-t border-[#E5E8E0] scrollbar-none">
-          <span className="text-xs font-semibold text-[#71767B] mr-1 hidden sm:inline">
+        <div className="flex items-center gap-2 overflow-x-auto pt-2 border-t border-[#e1e4e8] scrollbar-none">
+          <span className="text-xs font-semibold text-[#5b616b] mr-1 hidden sm:inline">
             Day:
           </span>
           {currentDept.workingDays.map((day, idx) => {
@@ -415,17 +415,17 @@ export function SchedulePortalPage() {
                 key={day}
                 type="button"
                 onClick={() => setSelectedDayIndex(idx)}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${
+                className={`px-3.5 py-1.5 rounded-md text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${
                   isSelected
-                    ? 'bg-[#111315] text-white shadow-xs'
-                    : 'bg-[#FAFBF9] text-[#4B5259] border border-[#E5E8E0] hover:bg-black/5 hover:text-[#111315]'
+                    ? 'bg-[#121417] text-white shadow-xs'
+                    : 'bg-[#ffffff] text-[#5b616b] border border-[#e1e4e8] hover:bg-black/5 hover:text-[#121417]'
                 }`}
               >
                 <span>{day.substring(0, 3)}</span>
                 {isToday && (
                   <span
                     className={`h-1.5 w-1.5 rounded-full ${
-                      isSelected ? 'bg-emerald-400' : 'bg-[#0047FF]'
+                      isSelected ? 'bg-emerald-400' : 'bg-[#3b6fe0]'
                     }`}
                   />
                 )}
@@ -436,43 +436,43 @@ export function SchedulePortalPage() {
       </div>
 
       {/* Target Details Badge Bar */}
-      <div className="bg-[#FAFBF9] border border-[#E5E8E0] rounded-xl px-5 py-3 flex flex-wrap items-center justify-between gap-3 text-xs">
-        <div className="flex items-center gap-2 text-[#111315] font-semibold">
+      <div className="bg-[#ffffff] border border-[#e1e4e8] rounded-md px-5 py-3 flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div className="flex items-center gap-2 text-[#121417] font-semibold">
           {role === 'STUDENT' ? (
             <>
-              <GraduationCap className="w-4 h-4 text-[#0047FF]" />
+              <GraduationCap className="w-4 h-4 text-[#3b6fe0]" />
               <span>Section: <strong>{activeSection?.name ?? '—'}</strong></span>
               {activeSection?.roomNo && (
-                <span className="text-[#71767B]">· Homeroom: {activeSection.roomNo}</span>
+                <span className="text-[#5b616b]">· Homeroom: {activeSection.roomNo}</span>
               )}
               {activeSection?.classAdvisor && (
-                <span className="text-[#71767B]">· Advisor: {activeSection.classAdvisor}</span>
+                <span className="text-[#5b616b]">· Advisor: {activeSection.classAdvisor}</span>
               )}
             </>
           ) : (
             <>
-              <User className="w-4 h-4 text-[#0047FF]" />
+              <User className="w-4 h-4 text-[#3b6fe0]" />
               <span>Faculty: <strong>{activeFaculty?.name ?? '—'}</strong> ({activeFaculty?.facultyCode})</span>
-              <span className="text-[#71767B]">· Weekly Load: {relevantEntries.reduce((acc, e) => acc + e.durationPeriods, 0)} periods</span>
+              <span className="text-[#5b616b]">· Weekly Load: {relevantEntries.reduce((acc, e) => acc + e.durationPeriods, 0)} periods</span>
             </>
           )}
         </div>
 
-        <div className="text-[#71767B] font-mono">
+        <div className="text-[#5b616b] font-mono">
           Showing: <strong>{currentDept.workingDays[selectedDayIndex]}</strong> · {dailyTimeline.filter((t) => t.type === 'ENTRY').length} class session(s)
         </div>
       </div>
 
       {/* Daily Timeline Cards */}
       {!timetable ? (
-        <div className="bg-white rounded-2xl border border-[#E5E8E0] p-12 text-center text-[#71767B] space-y-2">
-          <Calendar className="w-10 h-10 mx-auto text-[#71767B]/40" />
-          <p className="text-base font-bold text-[#111315]">Timetable Not Yet Generated</p>
+        <div className="bg-white rounded-md border border-[#e1e4e8] p-12 text-center text-[#5b616b] space-y-2">
+          <Calendar className="w-10 h-10 mx-auto text-[#5b616b]/40" />
+          <p className="text-base font-bold text-[#121417]">Timetable Not Yet Generated</p>
           <p className="text-xs">Generate the timetable in the scheduling engine to view live class schedules.</p>
         </div>
       ) : dailyTimeline.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-[#E5E8E0] p-12 text-center text-[#71767B]">
-          <p className="text-sm font-semibold text-[#111315]">No sessions scheduled for this day</p>
+        <div className="bg-white rounded-md border border-[#e1e4e8] p-12 text-center text-[#5b616b]">
+          <p className="text-sm font-semibold text-[#121417]">No sessions scheduled for this day</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -481,11 +481,11 @@ export function SchedulePortalPage() {
               return (
                 <div
                   key={idx}
-                  className="bg-[#FAFBF9] border border-dashed border-[#D0D5DD] rounded-xl px-5 py-3 flex items-center justify-between text-xs text-[#71767B]"
+                  className="bg-[#ffffff] border border-dashed border-[#e1e4e8] rounded-md px-5 py-3 flex items-center justify-between text-xs text-[#5b616b]"
                 >
                   <div className="flex items-center gap-2">
                     <Coffee className="w-4 h-4 text-amber-600" />
-                    <span className="font-bold text-[#111315] uppercase tracking-wider text-[11px]">
+                    <span className="font-bold text-[#121417] uppercase tracking-wider text-[11px]">
                       {item.periodLabel}
                     </span>
                   </div>
@@ -500,9 +500,9 @@ export function SchedulePortalPage() {
               return (
                 <div
                   key={idx}
-                  className="bg-white/60 border border-[#E5E8E0] rounded-xl px-5 py-3 flex items-center justify-between text-xs text-[#71767B]/70"
+                  className="bg-white/60 border border-[#e1e4e8] rounded-md px-5 py-3 flex items-center justify-between text-xs text-[#5b616b]/70"
                 >
-                  <span className="font-medium text-[11px] text-[#71767B]">
+                  <span className="font-medium text-[11px] text-[#5b616b]">
                     {item.periodLabel}
                   </span>
                   <span className="italic">Free Period / Self Study</span>
@@ -522,16 +522,16 @@ export function SchedulePortalPage() {
             return (
               <div
                 key={idx}
-                className={`bg-white rounded-2xl border p-4 sm:p-5 shadow-xs transition-all hover:shadow-md ${
+                className={`bg-white rounded-md border p-4 sm:p-5 shadow-xs transition-all hover:shadow-md ${
                   isLab
                     ? 'border-purple-200/80 bg-purple-50/15'
-                    : 'border-[#E5E8E0] hover:border-black/20'
+                    : 'border-[#e1e4e8] hover:border-black/20'
                 }`}
               >
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="space-y-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#111315] text-white">
+                      <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#121417] text-white">
                         {item.periodLabel}
                         {entry.durationPeriods > 1 ? ` – P${entry.startPeriod + entry.durationPeriods}` : ''}
                       </span>
@@ -545,32 +545,32 @@ export function SchedulePortalPage() {
                         {isLab ? 'Laboratory (2 Periods)' : 'Theory Session'}
                       </span>
                       {subject?.courseCode && (
-                        <span className="font-mono text-xs text-[#71767B]">
+                        <span className="font-mono text-xs text-[#5b616b]">
                           [{subject.courseCode}]
                         </span>
                       )}
                     </div>
 
-                    <h3 className="text-base font-bold text-[#111315] pt-0.5">
+                    <h3 className="text-base font-bold text-[#121417] pt-0.5">
                       {subject?.name ?? 'Course Title'}
                     </h3>
 
-                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-[#4B5259] pt-1">
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-[#5b616b] pt-1">
                       {role === 'STUDENT' ? (
                         <span className="flex items-center gap-1.5 font-medium">
-                          <User className="w-3.5 h-3.5 text-[#0047FF]" />
+                          <User className="w-3.5 h-3.5 text-[#3b6fe0]" />
                           Instructor: <strong>{teacher?.name ?? '—'}</strong> ({teacher?.facultyCode})
                         </span>
                       ) : (
                         <span className="flex items-center gap-1.5 font-medium">
-                          <GraduationCap className="w-3.5 h-3.5 text-[#0047FF]" />
+                          <GraduationCap className="w-3.5 h-3.5 text-[#3b6fe0]" />
                           Class: <strong>{section?.name ?? '—'}</strong>
                         </span>
                       )}
 
                       {(room || section?.roomNo) && (
-                        <span className="flex items-center gap-1.5 font-mono text-[#111315] bg-[#F0F2EB] px-2 py-0.5 rounded-lg">
-                          <Building2 className="w-3.5 h-3.5 text-[#71767B]" />
+                        <span className="flex items-center gap-1.5 font-mono text-[#121417] bg-[#eef0f2] px-2 py-0.5 rounded-lg">
+                          <Building2 className="w-3.5 h-3.5 text-[#5b616b]" />
                           Room: <strong>{room?.code ?? section?.roomNo}</strong>
                         </span>
                       )}
@@ -578,9 +578,9 @@ export function SchedulePortalPage() {
                   </div>
 
                   {item.timing && (
-                    <div className="flex sm:flex-col items-center sm:items-end justify-between border-t sm:border-t-0 pt-2 sm:pt-0 border-[#E5E8E0] text-xs">
-                      <span className="text-[10px] uppercase font-mono text-[#71767B]">Period Time</span>
-                      <span className="font-mono font-bold text-[#111315] text-sm">
+                    <div className="flex sm:flex-col items-center sm:items-end justify-between border-t sm:border-t-0 pt-2 sm:pt-0 border-[#e1e4e8] text-xs">
+                      <span className="text-[10px] uppercase font-mono text-[#5b616b]">Period Time</span>
+                      <span className="font-mono font-bold text-[#121417] text-sm">
                         {item.timing}
                       </span>
                     </div>

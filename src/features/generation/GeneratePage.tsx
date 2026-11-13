@@ -303,14 +303,14 @@ export function GeneratePage() {
         <PageHeader eyebrow="Scheduling engine" title={`Generate timetable — ${department.code}`} />
         <Card title="Timetable Generation Restricted">
           <div className="py-8 text-center space-y-4 max-w-md mx-auto">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50 text-[#0047FF]">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-md bg-blue-50 text-[#3b6fe0]">
               <Sparkles className="w-7 h-7" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-[#111315]">
+              <h3 className="text-base font-bold text-[#121417]">
                 {isFaculty ? 'Teaching Faculty (Read-Only Access)' : 'Department Access Restricted'}
               </h3>
-              <p className="mt-1.5 text-xs text-[#71767B] leading-relaxed">
+              <p className="mt-1.5 text-xs text-[#5b616b] leading-relaxed">
                 {isFaculty
                   ? 'Timetable generation and solver operations are managed by Administrators and Department HODs. You have read-only access to view and export the current schedule.'
                   : `You are assigned as HOD for a different department. Timetable generation for ${department.code} is reserved for its assigned HOD or an Institution Administrator.`}
@@ -319,7 +319,7 @@ export function GeneratePage() {
             <div className="pt-2">
               <Link
                 to={`/departments/${departmentId}/timetable`}
-                className="inline-flex items-center gap-1.5 rounded-xl bg-[#0047FF] px-4 py-2.5 text-xs font-semibold text-white hover:bg-blue-600 transition"
+                className="inline-flex items-center gap-1.5 rounded-md bg-[#3b6fe0] px-4 py-2.5 text-xs font-semibold text-white hover:bg-blue-600 transition"
               >
                 <span>View Current Timetable</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -369,7 +369,7 @@ export function GeneratePage() {
           </dl>
 
           {/* Period Timings & Schedule Hours Section */}
-          <div className="mt-4 rounded-xl border border-[#E5E8E0] bg-surface-1 p-3.5">
+          <div className="mt-4 rounded-md border border-[#e1e4e8] bg-surface-1 p-3.5">
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <Clock className="w-4 h-4 text-metric-blue shrink-0" />
@@ -392,7 +392,7 @@ export function GeneratePage() {
                   return (
                     <span
                       key={i}
-                      className="inline-flex items-center gap-1.5 rounded-lg bg-white px-2.5 py-1 text-[11px] font-medium text-ink border border-[#E5E8E0] shadow-2xs"
+                      className="inline-flex items-center gap-1.5 rounded-lg bg-white px-2.5 py-1 text-[11px] font-medium text-ink border border-[#e1e4e8] shadow-2xs"
                     >
                       <strong className="text-metric-blue font-bold">P{i + 1}</strong>
                       <span className="text-[#555A60]">
@@ -419,7 +419,7 @@ export function GeneratePage() {
           {preflight.diagnostics.length > 0 && preflight.verdict === 'READY' && (
             <ul className="mt-4 space-y-2">
               {preflight.diagnostics.map((d, i) => (
-                <li key={i} className="rounded-xl bg-warning-bg p-3 text-xs text-warning">
+                <li key={i} className="rounded-md bg-warning-bg p-3 text-xs text-warning">
                   <strong>{d.code}</strong>: {d.message}
                   {d.suggestions.length > 0 && (
                     <ul className="mt-1.5 list-disc pl-4 text-body-gray">
@@ -432,7 +432,7 @@ export function GeneratePage() {
           )}
 
           {preflight.sectionReports.length > 0 && (
-            <details className="mt-4 rounded-xl bg-surface-1 p-3">
+            <details className="mt-4 rounded-md bg-surface-1 p-3">
               <summary className="cursor-pointer text-xs font-semibold text-ink">
                 Section capacity (required vs weekly)
               </summary>
@@ -454,7 +454,7 @@ export function GeneratePage() {
           )}
 
           {faculty.length > 0 && (
-            <details className="mt-4 rounded-xl bg-surface-1 p-3">
+            <details className="mt-4 rounded-md bg-surface-1 p-3">
               <summary className="cursor-pointer text-xs font-semibold text-ink">
                 Faculty workload ({faculty.filter((f) => f.active).length} active)
               </summary>
@@ -479,7 +479,7 @@ export function GeneratePage() {
             </details>
           )}
 
-          <details className="mt-4 rounded-xl border border-[#E5E8E0] bg-surface-1 p-3">
+          <details className="mt-4 rounded-md border border-[#e1e4e8] bg-surface-1 p-3">
             <summary className="cursor-pointer text-xs font-semibold text-ink">
               Advanced generation settings (budgets, seed & limits)
             </summary>
@@ -571,7 +571,7 @@ export function GeneratePage() {
           </details>
 
           {showRegenConfirm && existingTimetable && (
-            <div className="mt-4 rounded-xl border border-amber-300 bg-amber-50 p-4 text-xs">
+            <div className="mt-4 rounded-md border border-amber-300 bg-amber-50 p-4 text-xs">
               <div className="flex items-start gap-2.5">
                 <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
                 <div className="flex-1">
@@ -627,13 +627,13 @@ export function GeneratePage() {
 
           {showDeleteModal && existingTimetable && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-              <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-[#E5E8E0] space-y-4 animate-in fade-in zoom-in-95 duration-150">
+              <div className="w-full max-w-md rounded-md bg-white p-6 shadow-2xl border border-[#e1e4e8] space-y-4 animate-in fade-in zoom-in-95 duration-150">
                 <div className="flex items-center gap-3 text-red-600">
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 shrink-0">
                     <Trash2 className="h-5 w-5" />
                   </div>
                   <div>
-                    <h3 className="text-base font-bold text-[#111315]">Delete Timetable</h3>
+                    <h3 className="text-base font-bold text-[#121417]">Delete Timetable</h3>
                     <p className="text-xs text-body-gray">This schedule will be permanently deleted</p>
                   </div>
                 </div>
@@ -643,7 +643,7 @@ export function GeneratePage() {
                   <strong>{department.name} ({department.code})</strong>? The generated schedule and its revision history will be removed.
                 </p>
 
-                <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#E5E8E0]">
+                <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#e1e4e8]">
                   <Button
                     variant="secondary"
                     size="sm"
@@ -699,7 +699,7 @@ export function GeneratePage() {
                 <span className="flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
                 <p className="font-semibold text-success">Generation Completed Successfully</p>
               </div>
-              <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2 text-xs rounded-xl bg-surface-1 border border-[#E5E8E0] p-3">
+              <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2 text-xs rounded-md bg-surface-1 border border-[#e1e4e8] p-3">
                 <dt className="text-body-gray">Duration</dt><dd className="text-right tabular-nums font-semibold text-ink">{gen.metrics.durationMs} ms</dd>
                 <dt className="text-body-gray">Explored nodes</dt><dd className="text-right tabular-nums font-semibold text-ink">{gen.metrics.exploredNodes.toLocaleString()}</dd>
                 <dt className="text-body-gray">Backtracks</dt><dd className="text-right tabular-nums font-semibold text-ink">{gen.metrics.backtrackCount.toLocaleString()}</dd>
@@ -729,7 +729,7 @@ export function GeneratePage() {
               {gen.diagnostics.length > 0 && (
                 <ul className="mt-3 space-y-2">
                   {gen.diagnostics.map((d, i) => (
-                    <li key={i} className="rounded-xl bg-danger-bg p-3 text-xs text-rose-700">
+                    <li key={i} className="rounded-md bg-danger-bg p-3 text-xs text-rose-700">
                       <strong>{d.code}</strong>: {d.message}
                       {d.suggestions.length > 0 && (
                         <ul className="mt-1.5 list-disc pl-4 text-body-gray">

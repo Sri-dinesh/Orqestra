@@ -129,7 +129,7 @@ export function FacultyTimetablePage() {
       <div className="space-y-6">
         <PageHeader eyebrow="Faculty workload" title={`Faculty timetable — ${department.code}`} />
         <Card>
-          <p className="text-sm text-[#71767B]">No timetable generated yet.</p>
+          <p className="text-sm text-[#5b616b]">No timetable generated yet.</p>
           <Link to={`/departments/${departmentId}/generate`}>
             <Button size="sm" className="mt-3">Go to generation →</Button>
           </Link>
@@ -194,15 +194,15 @@ export function FacultyTimetablePage() {
       />
 
       {/* Mode Switcher */}
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#E5E8E0] bg-[#FAFBF9] p-2">
-        <div className="flex items-center gap-1 rounded-xl bg-[#F1F3ED] p-1">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-[#e1e4e8] bg-[#ffffff] p-2">
+        <div className="flex items-center gap-1 rounded-md bg-[#eef0f2] p-1">
           <button
             type="button"
             onClick={() => setViewMode('INDIVIDUAL')}
             className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
               viewMode === 'INDIVIDUAL'
                 ? 'bg-white text-ink shadow-sm'
-                : 'text-[#71767B] hover:text-ink'
+                : 'text-[#5b616b] hover:text-ink'
             }`}
           >
             Individual Schedule
@@ -213,7 +213,7 @@ export function FacultyTimetablePage() {
             className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
               viewMode === 'MEETING_FINDER'
                 ? 'bg-white text-metric-blue shadow-sm'
-                : 'text-[#71767B] hover:text-ink'
+                : 'text-[#5b616b] hover:text-ink'
             }`}
           >
             <Users className="h-3.5 w-3.5" />
@@ -246,21 +246,21 @@ export function FacultyTimetablePage() {
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               <Card>
                 <p className="text-xl font-semibold tracking-tight text-ink">{weeklyLoad}</p>
-                <p className="text-xs text-[#71767B]">Periods / week</p>
+                <p className="text-xs text-[#5b616b]">Periods / week</p>
               </Card>
               <Card>
                 <p className="text-xl font-semibold tracking-tight text-ink">{busyDays}/{dayCount}</p>
-                <p className="text-xs text-[#71767B]">Busy days</p>
+                <p className="text-xs text-[#5b616b]">Busy days</p>
               </Card>
               <Card>
                 <p className="text-xl font-semibold tracking-tight text-ink">{freePeriods}</p>
-                <p className="text-xs text-[#71767B]">Free periods</p>
+                <p className="text-xs text-[#5b616b]">Free periods</p>
               </Card>
               <Card>
                 <p className="text-xl font-semibold tracking-tight text-ink">
                   {new Set([...cellBySlot.values()].map((c) => c.sectionId)).size}
                 </p>
-                <p className="text-xs text-[#71767B]">Sections taught</p>
+                <p className="text-xs text-[#5b616b]">Sections taught</p>
               </Card>
             </div>
           )}
@@ -308,13 +308,13 @@ export function FacultyTimetablePage() {
                             {cell.isStart ? (
                               <div className="p-1.5">
                                 <span className="block text-xs font-semibold text-ink">{cell.subjectCode}</span>
-                                <span className="block truncate text-[10px] text-[#71767B]">{cell.sectionName}</span>
+                                <span className="block truncate text-[10px] text-[#5b616b]">{cell.sectionName}</span>
                                 {cell.durationPeriods >= 2 && (
                                   <span className="block text-[10px] font-medium text-[#5b3fb8]">LAB (2p)</span>
                                 )}
                               </div>
                             ) : (
-                              <span className="block p-1.5 text-[10px] text-[#71767B]">↳ {cell.subjectCode}</span>
+                              <span className="block p-1.5 text-[10px] text-[#5b616b]">↳ {cell.subjectCode}</span>
                             )}
                           </td>
                         );
@@ -324,7 +324,7 @@ export function FacultyTimetablePage() {
                 </tbody>
               </table>
             </div>
-            <p className="mt-3 text-xs text-[#71767B]">
+            <p className="mt-3 text-xs text-[#5b616b]">
               Read-only view: every session this faculty member teaches, across all sections. Cell colors identify the section. Use the section timetable to edit sessions.
             </p>
           </Card>
@@ -374,7 +374,7 @@ export function FacultyTimetablePage() {
                     className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
                       isSelected
                         ? 'bg-blue-100 text-metric-blue ring-1 ring-metric-blue/40 font-semibold'
-                        : 'bg-[#F1F3ED] text-[#71767B] hover:text-ink'
+                        : 'bg-[#eef0f2] text-[#5b616b] hover:text-ink'
                     }`}
                   >
                     <span
@@ -393,28 +393,28 @@ export function FacultyTimetablePage() {
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <Card>
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+                <div className="flex h-10 w-10 items-center justify-center rounded-md bg-emerald-50 text-emerald-600">
                   <CheckCircle2 className="h-5 w-5" />
                 </div>
                 <div>
                   <p className="text-xl font-bold tracking-tight text-ink">
                     {commonFreeSummary.totalCommonFreeSlots}
                   </p>
-                  <p className="text-xs text-[#71767B]">Mutual Free Periods</p>
+                  <p className="text-xs text-[#5b616b]">Mutual Free Periods</p>
                 </div>
               </div>
             </Card>
 
             <Card>
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-metric-blue">
+                <div className="flex h-10 w-10 items-center justify-center rounded-md bg-blue-50 text-metric-blue">
                   <Calendar className="h-5 w-5" />
                 </div>
                 <div>
                   <p className="text-base font-bold tracking-tight text-ink">
                     {commonFreeSummary.bestDayName ?? 'None'}
                   </p>
-                  <p className="text-xs text-[#71767B]">
+                  <p className="text-xs text-[#5b616b]">
                     Best Meeting Day ({commonFreeSummary.bestDayFreeCount} slots)
                   </p>
                 </div>
@@ -423,28 +423,28 @@ export function FacultyTimetablePage() {
 
             <Card>
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-50 text-purple-600">
+                <div className="flex h-10 w-10 items-center justify-center rounded-md bg-purple-50 text-purple-600">
                   <Users className="h-5 w-5" />
                 </div>
                 <div>
                   <p className="text-xl font-bold tracking-tight text-ink">
                     {selectedMeetingFacultyIds.length}
                   </p>
-                  <p className="text-xs text-[#71767B]">Faculty Included</p>
+                  <p className="text-xs text-[#5b616b]">Faculty Included</p>
                 </div>
               </div>
             </Card>
 
             <Card>
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
+                <div className="flex h-10 w-10 items-center justify-center rounded-md bg-amber-50 text-amber-600">
                   <Clock className="h-5 w-5" />
                 </div>
                 <div>
                   <p className="text-xl font-bold tracking-tight text-ink">
                     {commonFreeSummary.totalTeachingSlots}
                   </p>
-                  <p className="text-xs text-[#71767B]">Total Teaching Slots</p>
+                  <p className="text-xs text-[#5b616b]">Total Teaching Slots</p>
                 </div>
               </div>
             </Card>
@@ -460,7 +460,7 @@ export function FacultyTimetablePage() {
             }
           >
             {selectedMeetingFacultyIds.length === 0 ? (
-              <div className="py-12 text-center text-sm text-[#71767B]">
+              <div className="py-12 text-center text-sm text-[#5b616b]">
                 Please select at least one faculty member above to view availability.
               </div>
             ) : (
@@ -547,8 +547,8 @@ export function FacultyTimetablePage() {
                               }`}
                               title="All selected faculty are teaching. Click to inspect."
                             >
-                              <div className="text-xs text-[#71767B]">All busy</div>
-                              <div className="text-[10px] text-[#71767B]/70">0 available</div>
+                              <div className="text-xs text-[#5b616b]">All busy</div>
+                              <div className="text-[10px] text-[#5b616b]/70">0 available</div>
                             </td>
                           );
                         })}
@@ -559,7 +559,7 @@ export function FacultyTimetablePage() {
               </div>
             )}
 
-            <div className="mt-4 flex flex-wrap items-center gap-4 text-xs text-[#71767B] border-t border-[#E5E8E0] pt-3">
+            <div className="mt-4 flex flex-wrap items-center gap-4 text-xs text-[#5b616b] border-t border-[#e1e4e8] pt-3">
               <div className="flex items-center gap-1.5">
                 <span className="h-3.5 w-3.5 rounded bg-emerald-100 border border-emerald-300" />
                 <span>100% Mutual Free (All selected faculty available)</span>
@@ -591,7 +591,7 @@ export function FacultyTimetablePage() {
                 }
               >
                 <div className="grid gap-6 md:grid-cols-2">
-                  <div className="rounded-xl border border-emerald-200 bg-emerald-50/50 p-4">
+                  <div className="rounded-md border border-emerald-200 bg-emerald-50/50 p-4">
                     <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-900">
                       Available Faculty ({slot.freeFacultyNames.length})
                     </h4>
@@ -609,7 +609,7 @@ export function FacultyTimetablePage() {
                     )}
                   </div>
 
-                  <div className="rounded-xl border border-amber-200 bg-amber-50/40 p-4">
+                  <div className="rounded-md border border-amber-200 bg-amber-50/40 p-4">
                     <h4 className="text-xs font-bold uppercase tracking-wider text-amber-900">
                       Busy / Teaching Faculty ({slot.busyFaculty.length})
                     </h4>
@@ -620,7 +620,7 @@ export function FacultyTimetablePage() {
                         {slot.busyFaculty.map((b) => (
                           <li key={b.facultyId} className="text-xs text-amber-950">
                             <span className="font-semibold">{b.facultyName}</span>
-                            <span className="text-[#71767B]"> — {b.subjectCode} ({b.subjectName}) in <strong>{b.sectionName}</strong></span>
+                            <span className="text-[#5b616b]"> — {b.subjectCode} ({b.subjectName}) in <strong>{b.sectionName}</strong></span>
                           </li>
                         ))}
                       </ul>

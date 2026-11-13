@@ -120,7 +120,7 @@ export function DepartmentsPage() {
             <Field label="Working days">
               <div className="flex flex-wrap gap-2 pt-1">
                 {WORKING_DAYS.map((day) => (
-                  <label key={day} className="flex cursor-pointer items-center gap-1.5 rounded-lg border border-[#E5E8E0] bg-surface-1 px-3 py-1.5 text-xs font-medium hover:bg-surface-2">
+                  <label key={day} className="flex cursor-pointer items-center gap-1.5 rounded-lg border border-[#e1e4e8] bg-surface-1 px-3 py-1.5 text-xs font-medium hover:bg-surface-2">
                     <input
                       type="checkbox"
                       className="accent-metric-blue"
@@ -149,7 +149,7 @@ export function DepartmentsPage() {
       {state.departments.length === 0 ? (
         <Card>
           <div className="mx-auto max-w-xl py-12 text-center">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#EBF1FF] text-metric-blue">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-md bg-[#EBF1FF] text-metric-blue">
               <Building2 className="h-7 w-7" />
             </div>
             <h2 className="mt-5 text-xl font-bold text-ink">Create your first department</h2>
@@ -185,7 +185,7 @@ export function DepartmentsPage() {
                   <Badge tone={statusTone(department.status)}>{department.status.replaceAll('_', ' ')}</Badge>
                 </div>
 
-                <dl className="mt-5 grid grid-cols-4 gap-2 rounded-xl border border-[#E5E8E0] bg-surface-1 p-3 text-center">
+                <dl className="mt-5 grid grid-cols-4 gap-2 rounded-md border border-[#e1e4e8] bg-surface-1 p-3 text-center">
                   <div><dt className="text-[10px] uppercase tracking-wide text-body-gray">Sections</dt><dd className="mt-1 text-sm font-bold text-ink">{sectionsCount}</dd></div>
                   <div><dt className="text-[10px] uppercase tracking-wide text-body-gray">Subjects</dt><dd className="mt-1 text-sm font-bold text-ink">{subjectsCount}</dd></div>
                   <div><dt className="text-[10px] uppercase tracking-wide text-body-gray">Faculty</dt><dd className="mt-1 text-sm font-bold text-ink">{facultyCount}</dd></div>
@@ -236,7 +236,7 @@ export function DepartmentsPage() {
       )}
 
       {state.departments.length > 0 && canManage && (
-        <div className="rounded-2xl border border-[#D7E2FF] bg-[#F2F6FF] p-4 text-sm text-[#18366F]">
+        <div className="rounded-md border border-[#D7E2FF] bg-[#F2F6FF] p-4 text-sm text-[#18366F]">
           <div className="flex items-start gap-3">
             <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-metric-blue" />
             <p><strong>Next:</strong> open a department, finish its configuration, then create as many named timetables as you need for that department.</p>
@@ -281,7 +281,7 @@ export function DepartmentsPage() {
             <p className="text-sm leading-relaxed text-body-gray">
               This permanently removes the department and its sections, subjects, faculty, rooms, breaks, generation settings, and saved timetables from this workspace.
             </p>
-            <div className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs leading-relaxed text-rose-800">
+            <div className="rounded-md border border-rose-200 bg-rose-50 p-3 text-xs leading-relaxed text-rose-800">
               This action cannot be undone from the app. Export your workspace first if you need a backup.
             </div>
             <div className="flex justify-end gap-2">
