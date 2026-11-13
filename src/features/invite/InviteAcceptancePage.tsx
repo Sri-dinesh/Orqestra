@@ -11,6 +11,7 @@ import {
   Sparkles,
   CheckCircle2,
 } from 'lucide-react';
+import { BrandLogo } from '@/components/ui/BrandLogo';
 import { useAuthSession } from '@/auth/session';
 import { useWorkspaceStore } from '@/state/stores/workspace-store';
 import { useEditorStore } from '@/state/stores/editor-store';
@@ -91,9 +92,9 @@ export function InviteAcceptancePage() {
         {/* Loading State */}
         {loading && (
           <div className="rounded-3xl border border-[#e1e4e8] bg-white p-8 text-center shadow-lg shadow-black/5">
-            <div className="relative mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-md bg-[#121417] text-xl font-bold text-white shadow-md">
-              <span>O</span>
-              <span className="absolute -inset-1.5 -z-10 animate-ping rounded-md bg-[#3b6fe0]/20" />
+            <div className="relative mx-auto mb-5 flex h-14 w-14 items-center justify-center">
+              <BrandLogo size={56} className="w-14 h-14 rounded-lg" />
+              <span className="absolute -inset-1.5 -z-10 animate-ping rounded-lg bg-[#3b6fe0]/20" />
             </div>
             <h2 className="text-base font-bold text-[#121417]">Verifying invitation link…</h2>
             <p className="mt-1.5 text-xs text-[#5b616b]">

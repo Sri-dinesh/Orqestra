@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { BrandLogo } from "@/components/ui/BrandLogo";
 
 export const Footer: React.FC = () => {
   return (
@@ -12,9 +13,7 @@ export const Footer: React.FC = () => {
           {/* Brand Column */}
           <div className="lg:col-span-2 space-y-4">
             <div className="flex items-center gap-2.5">
-              <span className="w-7 h-7 rounded-md bg-white text-[#121417] flex items-center justify-center font-mono text-xs font-bold">
-                O
-              </span>
+              <BrandLogo size={28} withContainer className="w-6 h-6" containerClassName="flex items-center justify-center w-7 h-7 rounded-md bg-white p-0.5 shadow-xs shrink-0" />
               <span className="text-xl font-bold tracking-tight text-white">
                 Orqestra
               </span>

@@ -1,6 +1,7 @@
 import { Suspense, useEffect, useState, type ReactNode } from 'react';
 import { Navigate, Outlet, useLocation, Link } from 'react-router-dom';
 import { RefreshCw, LogIn, ShieldAlert } from 'lucide-react';
+import { BrandLogo } from '@/components/ui/BrandLogo';
 import { syncCurrentUser } from '@/auth/server-api';
 import { useAuthSession } from '@/auth/session';
 import { usePersistence } from '@/hooks/usePersistence';
@@ -9,10 +10,10 @@ function AuthLoading() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-[#f6f7f8] px-4">
       <div className="flex flex-col items-center text-center">
-        {/* Brand Monogram */}
-        <div className="relative mb-5 flex h-12 w-12 items-center justify-center rounded-md bg-[#121417] text-xl font-bold text-white shadow-none">
-          <span>O</span>
-          <span className="absolute -inset-1 -z-10 animate-ping rounded-md bg-[#3b6fe0]/20" />
+        {/* Brand Logo */}
+        <div className="relative mb-5 flex h-12 w-12 items-center justify-center">
+          <BrandLogo size={48} className="w-12 h-12 rounded-lg" />
+          <span className="absolute -inset-1 -z-10 animate-ping rounded-lg bg-[#3b6fe0]/20" />
         </div>
 
         <h2 className="text-base font-semibold text-[#121417]">Verifying secure session</h2>

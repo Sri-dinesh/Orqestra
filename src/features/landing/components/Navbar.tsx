@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Menu, X, Sparkles } from 'lucide-react';
+import { BrandLogo } from '@/components/ui/BrandLogo';
 import { ThemeToggleCompact } from '@/components/ui/ThemeSwitcher';
 
 interface NavbarProps {
@@ -42,9 +43,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onScrollToDemo }) => {
             to="/"
             className="flex items-center gap-2 text-base font-semibold tracking-tight text-[#121417] dark:text-[#ececec] hover:opacity-90 transition-opacity"
           >
-            <span className="w-7 h-7 rounded-md bg-[#121417] dark:bg-[#ececec] text-white dark:text-[#111112] flex items-center justify-center font-mono text-xs font-semibold">
-              O
-            </span>
+            <BrandLogo size={28} className="w-7 h-7 rounded-md" />
             <span className="text-base font-semibold tracking-tight text-[#121417] dark:text-[#ececec]">
               Orqestra
             </span>

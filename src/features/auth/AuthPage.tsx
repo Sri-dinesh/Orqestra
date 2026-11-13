@@ -14,6 +14,7 @@ import {
   Check,
   Sparkles,
 } from 'lucide-react';
+import { BrandLogo } from '@/components/ui/BrandLogo';
 import { authClient } from '@/auth/client';
 import { useAuthSession, notifyAuthChange } from '@/auth/session';
 import { syncCurrentUser } from '@/auth/server-api';
@@ -234,9 +235,7 @@ export function AuthPage({ pathname }: AuthPageProps) {
               to="/"
               className="flex items-center gap-2.5 text-base font-bold tracking-tight text-[#121417] hover:opacity-90 transition-opacity"
             >
-              <span className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-md bg-[#121417] text-white text-xs font-bold shadow-none">
-                O
-              </span>
+              <BrandLogo size={32} className="w-7 h-7 sm:w-8 sm:h-8 rounded-md" />
               <span className="font-['Geist',ui-sans-serif,sans-serif] text-lg sm:text-xl font-bold tracking-tight text-[#121417]">Orqestra</span>
             </Link>
 

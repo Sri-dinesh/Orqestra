@@ -8,6 +8,7 @@ import {
   useNavigate,
 } from "react-router-dom";
 import { Calendar, ChevronDown } from "lucide-react";
+import { BrandLogo } from "@/components/ui/BrandLogo";
 import { ErrorBoundary } from "./ErrorBoundary";
 import { LandingPage } from "@/features/landing/LandingPage";
 import { DepartmentConfigPage } from "@/features/departments/DepartmentConfigPage";
@@ -126,12 +127,10 @@ export default function App() {
                   to="/dashboard"
                   className="group flex items-center gap-2.5 text-base font-bold tracking-tight text-[#121417] hover:opacity-90 transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#3b6fe0] shrink-0"
                 >
-                  <span
-                    className="flex h-7 w-7 items-center justify-center rounded-md bg-[#121417] text-white text-[11px] font-bold shadow-xs transition-transform group-hover:scale-105"
-                    aria-hidden="true"
-                  >
-                    O
-                  </span>
+                  <BrandLogo
+                    size={28}
+                    className="w-7 h-7 rounded-md transition-transform group-hover:scale-105"
+                  />
                   <span className="font-['Geist',ui-sans-serif,sans-serif] text-lg font-bold tracking-tight text-[#121417]">
                     Orqestra
                   </span>
