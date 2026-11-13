@@ -1,0 +1,52 @@
+name: Feature Request
+description: Propose a new feature, heuristic, or enhancement for Orqestra
+title: "feat: [short summary of proposed feature]"
+labels: ["enhancement", "proposal"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for suggesting a feature! Please provide as much institutional context and detail as possible.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement
+      description: Is your feature request related to a problem or institutional constraint?
+      placeholder: "I'm always frustrated when our medical college has split shifts..."
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution / Heuristic
+      description: Describe the solution you'd like to see added.
+      placeholder: Add a configurable constraint policy that allows...
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Describe any alternative solutions or workarounds you've considered.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Affected Area
+      options:
+        - Constraint Solver & Backtracking Engine
+        - Timetable Grid & Interactive Editor
+        - Department Configuration & Working Rules
+        - Faculty Workload & Availability Tracking
+        - PDF / Excel Export Engine
+        - Authentication & Role-Based Access Control
+        - /dev/null Theme & UI Primitives
+        - Other
+    validations:
+      required: true
+  - type: checkboxes
+    id: willingness
+    attributes:
+      label: Contribution
+      options:
+        - label: I would be willing to submit a pull request implementing this feature!
+          required: false
