@@ -59,8 +59,8 @@ representative at an online or offline event.
 ## Enforcement
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the community leaders responsible for enforcement at
-[conduct@orqestra.app] or via a private maintainer issue.
+reported to the project maintainer at
+[santhisridinesh@gmail.com](mailto:santhisridinesh@gmail.com) or via a private maintainer issue.
 All complaints will be reviewed and investigated promptly and fairly.
 
 All community leaders are obligated to respect the privacy and security of the

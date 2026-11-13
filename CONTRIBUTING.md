@@ -176,8 +176,10 @@ We use [Conventional Commits](https://www.conventionalcommits.org/) for clear, a
 ## Getting Help
 
 If you have questions or need architectural guidance:
+- Visit the live deployment: [https://orqestraofficial.vercel.app](https://orqestraofficial.vercel.app)
 - Join GitHub Discussions on our repository.
 - Check the [Algorithmic Deep Dive in README.md](README.md#timetable-generation--algorithm-deep-dive).
 - Review [DESIGN.md](DESIGN.md) for UI guidelines.
+- Contact the maintainer directly at [santhisridinesh@gmail.com](mailto:santhisridinesh@gmail.com).
 
 Thank you for helping make Orqestra better for institutions worldwide!

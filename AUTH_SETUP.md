@@ -14,7 +14,7 @@ In the Neon Console:
 1. Create or select the production Neon project.
 2. Enable **Managed Better Auth**.
 3. Copy the Auth Base URL from the Better Auth project settings.
-4. Add your local and production application domains as trusted domains.
+4. Add your local (`http://localhost:3000`) and production application domains (`https://orqestraofficial.vercel.app`) as trusted domains.
 
 The browser SDK uses the Auth Base URL through `NEXT_PUBLIC_NEON_AUTH_URL`.
 
@@ -23,6 +23,7 @@ The browser SDK uses the Auth Base URL through `NEXT_PUBLIC_NEON_AUTH_URL`.
 Copy `.env.example` to `.env.local` and fill in:
 
 ```bash
+NEXT_PUBLIC_APP_URL=https://orqestraofficial.vercel.app
 NEXT_PUBLIC_NEON_AUTH_URL=your_neon_auth_base_url
 DATABASE_URL=your_neon_postgres_connection_string
 NEON_AUTH_BASE_URL=your_neon_auth_base_url
@@ -55,13 +56,13 @@ The first migration creates `user_profiles`. Neon Auth owns its own authenticati
 
 ## 4. Run locally
 
-The Vite development server includes a small local adapter for `/api/auth/me`, so the normal command can be used after environment variables are configured:
+The Next.js development server runs both the client application and App Router route handlers (`src/app/api/auth/me/route.ts`), so the normal command can be used after environment variables are configured:
 
 ```bash
 npm run dev
 ```
 
-In production, `/api/auth/me` runs as a Next.js App Router route handler (`src/app/api/auth/me/route.ts`).
+In production on Vercel, the application is deployed at `https://orqestraofficial.vercel.app`.
 
 ## 5. Authentication behavior
 

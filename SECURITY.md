@@ -18,7 +18,7 @@ Please **do not** report security vulnerabilities through public GitHub issues o
 If you believe you have discovered a security vulnerability in Orqestra, please report it privately:
 
 1. **GitHub Security Advisory**: Submit a private report via the [GitHub Security Advisories tab](https://github.com/Sri-dinesh/Orqestra/security/advisories/new) on our repository.
-2. **Email Disclosure**: Alternatively, email the maintainers directly at [security@orqestra.app].
+2. **Email Disclosure**: Alternatively, email the maintainer directly at [santhisridinesh@gmail.com](mailto:santhisridinesh@gmail.com).
 
 ### What to Include in Your Report
 To help us triage and resolve the issue quickly, please provide:

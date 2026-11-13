@@ -4,6 +4,7 @@
 
 **Intelligent Academic Timetable Generator & Operational Schedule Workstation**
 
+[![Live Demo](https://img.shields.io/badge/Live_Demo-orqestraofficial.vercel.app-2ea44f?logo=vercel&logoColor=white)](https://orqestraofficial.vercel.app/)
 [![CI & Verification](https://github.com/Sri-dinesh/Orqestra/actions/workflows/ci.yml/badge.svg)](https://github.com/Sri-dinesh/Orqestra/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![TypeScript: Strict](https://img.shields.io/badge/TypeScript-Strict-3178C6?logo=typescript&logoColor=white)](tsconfig.json)
@@ -13,6 +14,7 @@
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 <p align="center">
+  <a href="https://orqestraofficial.vercel.app/"><strong>🌐 Live Deployment</strong></a> •
   <a href="#key-features">Key Features</a> •
   <a href="#how-it-works">How It Works</a> •
   <a href="#timetable-generation--algorithm-deep-dive">Algorithm Deep Dive</a> •
@@ -260,3 +262,13 @@ For security vulnerabilities, please refer to our [Security Policy](SECURITY.md)
 ## License
 
 Orqestra is open-source software licensed under the [MIT License](LICENSE).
+
+---
+
+## Author & Maintainer
+
+Orqestra is designed, built, and maintained by **Sridinesh**:
+- 🌐 **Live Workstation**: [https://orqestraofficial.vercel.app](https://orqestraofficial.vercel.app/)
+- ✉️ **Contact Email**: [santhisridinesh@gmail.com](mailto:santhisridinesh@gmail.com)
+- 🐙 **GitHub**: [@Sri-dinesh](https://github.com/Sri-dinesh)
+
