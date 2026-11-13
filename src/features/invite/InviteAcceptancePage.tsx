@@ -86,21 +86,21 @@ export function InviteAcceptancePage() {
   const currentUser = authData?.user;
 
   return (
-    <div className="flex min-h-[calc(100vh-64px)] items-center justify-center bg-[#F7F8F5] px-4 py-12">
+    <div className="flex min-h-[calc(100vh-64px)] items-center justify-center bg-[#f6f7f8] px-4 py-12">
       <div className="w-full max-w-lg">
         {/* Loading State */}
         {loading && (
-          <div className="rounded-3xl border border-[#E5E8E0] bg-white p-8 text-center shadow-lg shadow-black/5">
-            <div className="relative mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#111315] text-xl font-bold text-white shadow-md">
+          <div className="rounded-3xl border border-[#e1e4e8] bg-white p-8 text-center shadow-lg shadow-black/5">
+            <div className="relative mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-md bg-[#121417] text-xl font-bold text-white shadow-md">
               <span>O</span>
-              <span className="absolute -inset-1.5 -z-10 animate-ping rounded-2xl bg-[#0047FF]/20" />
+              <span className="absolute -inset-1.5 -z-10 animate-ping rounded-md bg-[#3b6fe0]/20" />
             </div>
-            <h2 className="text-base font-bold text-[#111315]">Verifying invitation link…</h2>
-            <p className="mt-1.5 text-xs text-[#71767B]">
+            <h2 className="text-base font-bold text-[#121417]">Verifying invitation link…</h2>
+            <p className="mt-1.5 text-xs text-[#5b616b]">
               Connecting to institutional workspace…
             </p>
-            <div className="mx-auto mt-6 h-1 w-48 overflow-hidden rounded-full bg-[#E5E8E0]">
-              <div className="h-full w-24 animate-[shimmer_1.5s_infinite] rounded-full bg-[#0047FF]" />
+            <div className="mx-auto mt-6 h-1 w-48 overflow-hidden rounded-full bg-[#e1e4e8]">
+              <div className="h-full w-24 animate-[shimmer_1.5s_infinite] rounded-full bg-[#3b6fe0]" />
             </div>
           </div>
         )}
@@ -108,22 +108,22 @@ export function InviteAcceptancePage() {
         {/* Error / Inactive Invitation State */}
         {!loading && error && (
           <div className="rounded-3xl border border-rose-200 bg-white p-8 text-center shadow-xl shadow-rose-500/5">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-50 text-rose-600">
+            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-md bg-rose-50 text-rose-600">
               <ShieldAlert className="h-6 w-6" />
             </div>
-            <h1 className="mt-4 text-lg font-bold text-[#111315]">Invitation Unavailable</h1>
-            <p className="mt-2 text-xs leading-relaxed text-[#71767B]">{error}</p>
+            <h1 className="mt-4 text-lg font-bold text-[#121417]">Invitation Unavailable</h1>
+            <p className="mt-2 text-xs leading-relaxed text-[#5b616b]">{error}</p>
 
             <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:justify-center">
               <Link
                 to="/dashboard"
-                className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#111315] px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-black"
+                className="inline-flex items-center justify-center gap-1.5 rounded-md bg-[#121417] px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-black"
               >
                 <span>Go to Dashboard</span>
               </Link>
               <Link
                 to="/auth/sign-in"
-                className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-[#D0D5DD] bg-white px-4 py-2.5 text-xs font-semibold text-[#111315] transition hover:bg-black/5"
+                className="inline-flex items-center justify-center gap-1.5 rounded-md border border-[#e1e4e8] bg-white px-4 py-2.5 text-xs font-semibold text-[#121417] transition hover:bg-black/5"
               >
                 <span>Sign In</span>
               </Link>
@@ -134,11 +134,11 @@ export function InviteAcceptancePage() {
         {/* Successful Accepted State */}
         {!loading && acceptedSuccess && (
           <div className="rounded-3xl border border-emerald-200 bg-white p-8 text-center shadow-xl shadow-emerald-500/5">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-md bg-emerald-50 text-emerald-600">
               <CheckCircle2 className="h-7 w-7" />
             </div>
-            <h2 className="mt-4 text-lg font-bold text-[#111315]">Welcome to the Team!</h2>
-            <p className="mt-1.5 text-xs text-[#71767B]">
+            <h2 className="mt-4 text-lg font-bold text-[#121417]">Welcome to the Team!</h2>
+            <p className="mt-1.5 text-xs text-[#5b616b]">
               You have successfully joined {invitation?.institutionName}. Redirecting to your workspace…
             </p>
             <div className="mx-auto mt-5 h-1 w-32 overflow-hidden rounded-full bg-emerald-100">
@@ -149,17 +149,17 @@ export function InviteAcceptancePage() {
 
         {/* Valid Invitation State */}
         {!loading && !error && !acceptedSuccess && invitation && (
-          <div className="rounded-3xl border border-[#E5E8E0] bg-white p-7 sm:p-9 shadow-xl shadow-black/5">
+          <div className="rounded-3xl border border-[#e1e4e8] bg-white p-7 sm:p-9 shadow-xl shadow-black/5">
             {/* Institution Brand */}
-            <div className="flex items-center gap-3.5 pb-6 border-b border-[#E5E8E0]">
+            <div className="flex items-center gap-3.5 pb-6 border-b border-[#e1e4e8]">
               {invitation.logoDataUrl ? (
                 <img
                   src={invitation.logoDataUrl}
                   alt={invitation.institutionName}
-                  className="h-12 w-12 rounded-2xl border border-[#E5E8E0] bg-white object-contain p-1 shadow-xs"
+                  className="h-12 w-12 rounded-md border border-[#e1e4e8] bg-white object-contain p-1 shadow-xs"
                 />
               ) : (
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-[#0047FF] shadow-xs">
+                <div className="flex h-12 w-12 items-center justify-center rounded-md bg-blue-50 text-[#3b6fe0] shadow-xs">
                   <Building2 className="h-6 w-6" />
                 </div>
               )}
@@ -167,20 +167,20 @@ export function InviteAcceptancePage() {
                 <span className="inline-block rounded-md bg-blue-500/10 px-2 py-0.5 text-[10px] font-bold text-blue-700 uppercase tracking-wider">
                   Institutional Invitation
                 </span>
-                <h1 className="mt-0.5 truncate text-base font-bold text-[#111315]" title={invitation.institutionName}>
+                <h1 className="mt-0.5 truncate text-base font-bold text-[#121417]" title={invitation.institutionName}>
                   {invitation.institutionName}
                 </h1>
                 {invitation.institutionCode && (
-                  <p className="text-[11px] text-[#71767B]">{invitation.institutionCode}</p>
+                  <p className="text-[11px] text-[#5b616b]">{invitation.institutionCode}</p>
                 )}
               </div>
             </div>
 
             {/* Invite Details */}
             <div className="mt-6 space-y-4">
-              <div className="rounded-2xl bg-[#F7F8F5] p-4 text-left border border-[#E5E8E0]/70">
+              <div className="rounded-md bg-[#f6f7f8] p-4 text-left border border-[#e1e4e8]/70">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="font-medium text-[#71767B]">Assigned Role</span>
+                  <span className="font-medium text-[#5b616b]">Assigned Role</span>
                   <span
                     className={`rounded-lg px-2.5 py-1 text-xs font-bold ${
                       invitation.role === 'ADMIN'
@@ -199,20 +199,20 @@ export function InviteAcceptancePage() {
                 </div>
 
                 {invitation.departmentName && (
-                  <div className="mt-3 flex items-center justify-between text-xs border-t border-[#E5E8E0] pt-2.5">
-                    <span className="font-medium text-[#71767B]">Department Scope</span>
-                    <span className="font-semibold text-[#111315]">{invitation.departmentName}</span>
+                  <div className="mt-3 flex items-center justify-between text-xs border-t border-[#e1e4e8] pt-2.5">
+                    <span className="font-medium text-[#5b616b]">Department Scope</span>
+                    <span className="font-semibold text-[#121417]">{invitation.departmentName}</span>
                   </div>
                 )}
 
-                <div className="mt-3 flex items-center justify-between text-xs border-t border-[#E5E8E0] pt-2.5">
-                  <span className="font-medium text-[#71767B]">Invited Email</span>
-                  <span className="font-mono text-[11px] text-[#111315]">{invitation.email}</span>
+                <div className="mt-3 flex items-center justify-between text-xs border-t border-[#e1e4e8] pt-2.5">
+                  <span className="font-medium text-[#5b616b]">Invited Email</span>
+                  <span className="font-mono text-[11px] text-[#121417]">{invitation.email}</span>
                 </div>
               </div>
 
               {/* Role Permissions Description */}
-              <div className="rounded-2xl border border-blue-100 bg-blue-50/50 p-4 text-xs text-blue-900 leading-relaxed">
+              <div className="rounded-md border border-blue-100 bg-blue-50/50 p-4 text-xs text-blue-900 leading-relaxed">
                 <p className="font-bold flex items-center gap-1.5 text-blue-800">
                   <Sparkles className="w-3.5 h-3.5" />
                   <span>
@@ -250,9 +250,9 @@ export function InviteAcceptancePage() {
               {/* Auth / Action Area */}
               {currentUser ? (
                 <div className="mt-6 space-y-3">
-                  <div className="flex items-center justify-between rounded-xl bg-black/5 px-3.5 py-2 text-xs">
-                    <span className="text-[#71767B]">Signed in as:</span>
-                    <span className="font-semibold text-[#111315]">
+                  <div className="flex items-center justify-between rounded-md bg-black/5 px-3.5 py-2 text-xs">
+                    <span className="text-[#5b616b]">Signed in as:</span>
+                    <span className="font-semibold text-[#121417]">
                       {currentUser.name ? `${currentUser.name} (${currentUser.email})` : currentUser.email}
                     </span>
                   </div>
@@ -261,7 +261,7 @@ export function InviteAcceptancePage() {
                     type="button"
                     disabled={isAccepting}
                     onClick={() => void handleAccept()}
-                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#0047FF] px-4 py-3 text-xs font-bold text-white shadow-md shadow-blue-500/20 transition hover:bg-blue-600 disabled:opacity-50"
+                    className="flex w-full items-center justify-center gap-2 rounded-md bg-[#3b6fe0] px-4 py-3 text-xs font-bold text-white shadow-md shadow-blue-500/20 transition hover:bg-blue-600 disabled:opacity-50"
                   >
                     {isAccepting ? (
                       <>
@@ -276,11 +276,11 @@ export function InviteAcceptancePage() {
                     )}
                   </button>
 
-                  <p className="text-center text-[11px] text-[#71767B]">
+                  <p className="text-center text-[11px] text-[#5b616b]">
                     Want to use another account?{' '}
                     <Link
                       to={`/auth/sign-in?returnTo=/invite/${token}`}
-                      className="font-semibold text-[#0047FF] hover:underline"
+                      className="font-semibold text-[#3b6fe0] hover:underline"
                     >
                       Sign in with a different email
                     </Link>
@@ -288,14 +288,14 @@ export function InviteAcceptancePage() {
                 </div>
               ) : (
                 <div className="mt-6 space-y-3">
-                  <p className="text-center text-xs text-[#71767B]">
+                  <p className="text-center text-xs text-[#5b616b]">
                     Please sign in or create an account to accept this invitation.
                   </p>
 
                   <div className="flex flex-col gap-2.5 sm:flex-row">
                     <Link
                       to={`/auth/sign-in?returnTo=/invite/${token}`}
-                      className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-[#111315] px-4 py-2.5 text-xs font-semibold text-white shadow-xs transition hover:bg-black"
+                      className="flex flex-1 items-center justify-center gap-1.5 rounded-md bg-[#121417] px-4 py-2.5 text-xs font-semibold text-white shadow-xs transition hover:bg-black"
                     >
                       <LogIn className="h-3.5 w-3.5" />
                       <span>Sign In</span>
@@ -303,9 +303,9 @@ export function InviteAcceptancePage() {
 
                     <Link
                       to={`/auth/sign-up?returnTo=/invite/${token}`}
-                      className="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-[#D0D5DD] bg-white px-4 py-2.5 text-xs font-semibold text-[#111315] shadow-xs transition hover:bg-black/5"
+                      className="flex flex-1 items-center justify-center gap-1.5 rounded-md border border-[#e1e4e8] bg-white px-4 py-2.5 text-xs font-semibold text-[#121417] shadow-xs transition hover:bg-black/5"
                     >
-                      <UserPlus className="h-3.5 w-3.5 text-[#71767B]" />
+                      <UserPlus className="h-3.5 w-3.5 text-[#5b616b]" />
                       <span>Create Account</span>
                     </Link>
                   </div>

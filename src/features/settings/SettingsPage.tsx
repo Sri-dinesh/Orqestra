@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 import { Button, Card, Field, Input, PageHeader } from '@/components/ui/primitives';
-import { Calendar, Copy } from 'lucide-react';
+import { Calendar, Copy, Users } from 'lucide-react';
 import { getStorageService } from '@/hooks/usePersistence';
 import { useEditorStore } from '@/state/stores/editor-store';
 import { useWorkspaceStore } from '@/state/stores/workspace-store';
@@ -10,8 +10,7 @@ import { EMPTY_COLLEGE_DETAILS } from '@/domain/models';
 import type { CollegeDetails } from '@/domain/models';
 import { SemesterSwitcherModal } from '@/components/ui/SemesterSwitcherModal';
 import { getActiveTerm, listTerms } from '@/storage/term-manager';
-import { TeamAccessSection } from './TeamAccessSection';
-import { RoleSwitcherCard } from './RoleSwitcherCard';
+import { ThemeSwitcher } from '@/components/ui/ThemeSwitcher';
 
 export function SettingsPage() {
   const state = useWorkspaceStore();
@@ -142,11 +141,21 @@ export function SettingsPage() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <PageHeader eyebrow="Workspace data" title="Settings" />
 
-      {/* Role and Permissions Control Card */}
-      <RoleSwitcherCard />
+      {/* Appearance & Theme (/dev/null specification) */}
+      <Card title="Appearance & Theme">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h3 className="text-sm font-semibold text-[#121417] dark:text-[#ececec]">Interface Theme</h3>
+            <p className="mt-0.5 text-xs text-[#5b616b] dark:text-[#a1a1a6]">
+              Switch between the signature Dark Graphite workstation theme, Clean Light mode, or follow system preference.
+            </p>
+          </div>
+          <ThemeSwitcher />
+        </div>
+      </Card>
 
       <Card
         title="College details"
@@ -158,10 +167,10 @@ export function SettingsPage() {
           ) : undefined
         }
       >
-        <p className="mb-4 text-sm text-body-gray">
+        <p className="mb-4 text-xs text-[#5b616b] leading-relaxed">
           Institution profile used across the app (header, exports). Stored locally with the workspace; not used by the scheduler.
         </p>
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-3.5 sm:grid-cols-2">
           <Field label="College name">
             <Input
               value={details.name}
@@ -260,10 +269,10 @@ export function SettingsPage() {
                 <img
                   src={details.logoDataUrl}
                   alt="College logo"
-                  className="h-12 w-12 rounded-lg bg-white object-contain ring-1 ring-inset ring-hairline"
+                  className="h-12 w-12 rounded-md bg-white object-contain border border-[#e1e4e8]"
                 />
               ) : (
-                <span className="flex h-12 w-12 items-center justify-center rounded-lg bg-surface-2 text-xs text-body-gray" aria-hidden="true">
+                <span className="flex h-12 w-12 items-center justify-center rounded-md bg-[#f6f7f8] border border-[#e1e4e8] text-xs text-[#5b616b]" aria-hidden="true">
                   None
                 </span>
               )}
@@ -309,44 +318,56 @@ export function SettingsPage() {
           </Button>
         }
       >
-        <div className="space-y-4">
-          <p className="text-sm text-body-gray">
+        <div className="space-y-3">
+          <p className="text-xs text-[#5b616b] leading-relaxed">
             Maintain independent timetable workspaces across academic years and terms. Clone an existing semester to carry over your faculty directory, room infrastructure, and department structures without re-entering data.
           </p>
-          <div className="p-4 rounded-xl bg-[#FAFBF9] border border-[#E5E8E0] flex flex-wrap items-center justify-between gap-4">
+          <div className="p-3.5 rounded-md bg-[#f6f7f8] border border-[#e1e4e8] flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <span className="p-2.5 rounded-xl bg-blue-50 text-[#0047FF]">
-                <Calendar className="w-5 h-5" />
+              <span className="p-2 rounded-md bg-[#e8effc] text-[#3b6fe0]">
+                <Calendar className="w-4 h-4" />
               </span>
               <div>
-                <p className="text-xs font-bold text-[#111315]">
+                <p className="text-xs font-semibold text-[#121417]">
                   Active Semester: {activeTerm.name}
                 </p>
-                <p className="text-xs text-[#71767B]">
+                <p className="text-[11px] text-[#5b616b] mt-0.5">
                   Academic Year: {activeTerm.academicYear} · {terms.length} total semester(s) configured
                 </p>
               </div>
             </div>
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() => setSemesterModalOpen(true)}
-            >
-              Switch or Duplicate
-            </Button>
           </div>
         </div>
       </Card>
 
-      <TeamAccessSection />
+      {/* Team & Permissions Gateway */}
+      <div id="team" className="rounded-md border border-[#e1e4e8] bg-white p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 transition-colors hover:border-[#d3d7dd]">
+        <div className="flex items-start gap-3">
+          <span className="p-2 rounded-md bg-[#e8effc] text-[#3b6fe0] shrink-0 mt-0.5">
+            <Users className="w-4 h-4" />
+          </span>
+          <div>
+            <h3 className="text-sm font-semibold text-[#121417]">Team & Role-Based Permissions</h3>
+            <p className="text-xs text-[#5b616b] mt-0.5">
+              Manage institution administrators, department heads, and teaching faculty access on the dedicated Team page.
+            </p>
+          </div>
+        </div>
+        <Link
+          to="/team"
+          className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md border border-[#e1e4e8] bg-[#f6f7f8] text-[#121417] hover:bg-[#eef0f2] hover:border-[#3b6fe0] transition-colors"
+        >
+          <span>Manage Team →</span>
+        </Link>
+      </div>
 
       <div className="grid items-start gap-4 lg:grid-cols-2">
         <Card title="Export / Import">
           <div className="flex flex-col gap-3">
-            <p className="text-sm text-body-gray">
+            <p className="text-xs text-[#5b616b] leading-relaxed">
               Download a full snapshot of your workspace as JSON, or restore one from a previous export.
             </p>
-            <Button onClick={exportWorkspace}>Export workspace (JSON)</Button>
+            <Button onClick={exportWorkspace} className="w-full sm:w-auto">Export workspace (JSON)</Button>
             <div>
               <input
                 ref={fileRef}
@@ -358,15 +379,15 @@ export function SettingsPage() {
                   if (f) void onFileChosen(f);
                 }}
               />
-              <Button variant="secondary" onClick={() => fileRef.current?.click()}>
+              <Button variant="secondary" onClick={() => fileRef.current?.click()} className="w-full sm:w-auto">
                 Choose import file…
               </Button>
             </div>
             {importSummary && (
-              <div className="rounded-xl bg-warning-bg p-3 text-sm text-warning" role="alert">
-                <p className="font-medium">Import preview</p>
-                <p className="mt-1 text-xs">{importSummary}</p>
-                <div className="mt-3 flex gap-2">
+              <div className="rounded-md bg-amber-50 border border-amber-200 p-3 text-xs text-amber-900" role="alert">
+                <p className="font-semibold">Import preview</p>
+                <p className="mt-1 text-[11px] text-amber-800">{importSummary}</p>
+                <div className="mt-2.5 flex gap-2">
                   <Button size="sm" onClick={confirmImport}>Confirm import</Button>
                   <Button size="sm" variant="secondary" onClick={() => { setPendingImport(null); setImportSummary(null); }}>
                     Cancel
@@ -378,10 +399,10 @@ export function SettingsPage() {
         </Card>
         {isAdmin && (
           <Card title="Danger zone">
-            <p className="mb-4 text-sm text-body-gray">
+            <p className="mb-4 text-xs text-[#5b616b] leading-relaxed">
               Resetting clears all departments, timetables, and preferences stored in this browser. This cannot be undone.
             </p>
-            <Button variant="danger" onClick={resetWorkspace}>
+            <Button variant="danger" onClick={resetWorkspace} className="w-full sm:w-auto">
               Reset workspace
             </Button>
           </Card>

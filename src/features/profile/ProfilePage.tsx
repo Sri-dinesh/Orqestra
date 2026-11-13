@@ -39,12 +39,12 @@ export function ProfilePage() {
       <Card title="User Identity">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#111315] text-lg font-bold text-white shadow-md">
+            <span className="flex h-14 w-14 items-center justify-center rounded-md bg-[#121417] text-lg font-bold text-white shadow-md">
               {initials}
             </span>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-base font-bold text-[#111315]">{userName}</h3>
+                <h3 className="text-base font-bold text-[#121417]">{userName}</h3>
                 <span
                   className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-semibold ${
                     role === 'ADMIN'
@@ -57,13 +57,13 @@ export function ProfilePage() {
                   {role === 'ADMIN' ? '👑 Institution Admin' : role === 'HOD' ? `🏛️ HOD · ${assignedDept?.code || 'Dept'}` : '📚 Teaching Faculty'}
                 </span>
               </div>
-              <p className="flex items-center gap-1.5 text-xs text-[#71767B] mt-1">
+              <p className="flex items-center gap-1.5 text-xs text-[#5b616b] mt-1">
                 <Mail className="w-3.5 h-3.5" />
                 <span>{userEmail}</span>
                 {collegeName && (
                   <>
                     <span>·</span>
-                    <span className="font-medium text-[#111315]">{collegeName}</span>
+                    <span className="font-medium text-[#121417]">{collegeName}</span>
                   </>
                 )}
               </p>

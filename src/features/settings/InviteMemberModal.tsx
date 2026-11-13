@@ -110,18 +110,18 @@ export function InviteMemberModal({ isOpen, onClose, onInvited }: InviteMemberMo
       aria-labelledby="invite-modal-title"
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150"
     >
-      <div className="relative w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl border border-[#E5E8E0] space-y-5">
+      <div className="relative w-full max-w-lg rounded-md bg-white p-5 shadow-xl border border-[#e1e4e8] space-y-4">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-[#E5E8E0] pb-4">
-          <div className="flex items-center gap-3">
-            <span className="p-2 rounded-xl bg-blue-50 text-[#0047FF]">
-              {createdInvite ? <Sparkles className="w-5 h-5" /> : <Mail className="w-5 h-5" />}
+        <div className="flex items-center justify-between border-b border-[#e1e4e8] pb-3">
+          <div className="flex items-center gap-2.5">
+            <span className="p-1.5 rounded-md bg-[#e8effc] text-[#3b6fe0]">
+              {createdInvite ? <Sparkles className="w-4 h-4" /> : <Mail className="w-4 h-4" />}
             </span>
             <div>
-              <h2 id="invite-modal-title" className="text-base font-bold text-[#111315]">
+              <h2 id="invite-modal-title" className="text-sm font-semibold text-[#121417]">
                 {createdInvite ? 'Invitation Link Ready' : 'Invite Institutional Colleague'}
               </h2>
-              <p className="text-xs text-[#71767B]">
+              <p className="text-xs text-[#5b616b]">
                 {createdInvite
                   ? 'Share this invitation link with your colleague to grant access.'
                   : 'Assign role privileges and departmental scopes to team members.'}
@@ -131,30 +131,30 @@ export function InviteMemberModal({ isOpen, onClose, onInvited }: InviteMemberMo
           <button
             type="button"
             onClick={handleCloseModal}
-            className="p-1 rounded-lg text-[#71767B] hover:bg-black/5 hover:text-[#111315] transition"
+            className="p-1 rounded-md text-[#5b616b] hover:bg-[#f6f7f8] hover:text-[#121417] transition"
             aria-label="Close dialog"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
         {error && (
-          <div className="rounded-xl bg-rose-50 border border-rose-200 p-3 text-xs text-rose-700">
+          <div className="rounded-md bg-rose-50 border border-rose-200 p-2.5 text-xs text-rose-700">
             {error}
           </div>
         )}
 
         {/* View A: Success Link Screen */}
         {createdInvite ? (
-          <div className="space-y-4 text-left">
-            <div className="rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4">
+          <div className="space-y-3.5 text-left">
+            <div className="rounded-md border border-[#e1e4e8] bg-[#f6f7f8] p-3">
               <div className="flex items-center justify-between text-xs">
-                <span className="font-semibold text-emerald-900">Recipient Email</span>
-                <span className="font-mono text-emerald-800 font-bold">{createdInvite.email}</span>
+                <span className="font-medium text-[#5b616b]">Recipient Email</span>
+                <span className="font-mono text-[#121417] font-semibold">{createdInvite.email}</span>
               </div>
-              <div className="mt-2 flex items-center justify-between text-xs border-t border-emerald-200/60 pt-2">
-                <span className="font-semibold text-emerald-900">Assigned Access</span>
-                <span className="rounded-md bg-emerald-500/20 px-2 py-0.5 text-[11px] font-bold text-emerald-900">
+              <div className="mt-2 flex items-center justify-between text-xs border-t border-[#e1e4e8] pt-2">
+                <span className="font-medium text-[#5b616b]">Assigned Access</span>
+                <span className="rounded bg-[#e8effc] px-2 py-0.5 text-[11px] font-semibold text-[#3b6fe0]">
                   {createdInvite.role === 'ADMIN'
                     ? '👑 Institution Admin'
                     : createdInvite.role === 'HOD'
@@ -165,7 +165,7 @@ export function InviteMemberModal({ isOpen, onClose, onInvited }: InviteMemberMo
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-[#111315] mb-1.5">
+              <label className="block text-xs font-semibold text-[#121417] mb-1">
                 Direct Invitation Link
               </label>
               <div className="flex items-center gap-2">
@@ -174,7 +174,7 @@ export function InviteMemberModal({ isOpen, onClose, onInvited }: InviteMemberMo
                   readOnly
                   value={inviteUrl}
                   onClick={(e) => (e.target as HTMLInputElement).select()}
-                  className="flex-1 rounded-xl border border-[#D0D5DD] bg-[#F7F8F5] px-3 py-2 font-mono text-xs text-[#111315] shadow-xs focus:border-[#0047FF] focus:outline-none"
+                  className="flex-1 rounded-md border border-[#e1e4e8] bg-[#f6f7f8] px-2.5 py-1.5 font-mono text-xs text-[#121417] shadow-xs focus:border-[#3b6fe0] focus:outline-none"
                 />
                 <Button
                   type="button"
@@ -183,23 +183,23 @@ export function InviteMemberModal({ isOpen, onClose, onInvited }: InviteMemberMo
                 >
                   {hasCopied ? (
                     <>
-                      <Check className="w-4 h-4 text-emerald-400" />
+                      <Check className="w-3.5 h-3.5 text-emerald-400" />
                       <span>Copied!</span>
                     </>
                   ) : (
                     <>
-                      <Copy className="w-4 h-4" />
+                      <Copy className="w-3.5 h-3.5" />
                       <span>Copy Link</span>
                     </>
                   )}
                 </Button>
               </div>
-              <p className="mt-2 text-[11px] leading-relaxed text-[#71767B]">
+              <p className="mt-1.5 text-[11px] leading-relaxed text-[#5b616b]">
                 Copy and paste this link to your faculty member via WhatsApp, Slack, or email. When they open it, they can accept and enter the workspace immediately.
               </p>
             </div>
 
-            <div className="flex items-center justify-between pt-4 border-t border-[#E5E8E0]">
+            <div className="flex items-center justify-between pt-3 border-t border-[#e1e4e8]">
               <Button type="button" variant="ghost" onClick={handleResetForAnother}>
                 Invite Another
               </Button>
@@ -210,7 +210,7 @@ export function InviteMemberModal({ isOpen, onClose, onInvited }: InviteMemberMo
           </div>
         ) : (
           /* View B: Form Screen */
-          <form onSubmit={handleSubmit} className="space-y-4 text-left">
+          <form onSubmit={handleSubmit} className="space-y-3.5 text-left">
             <Field label="Colleague Email Address *">
               <Input
                 type="email"
@@ -227,43 +227,43 @@ export function InviteMemberModal({ isOpen, onClose, onInvited }: InviteMemberMo
                 <button
                   type="button"
                   onClick={() => setRole('ADMIN')}
-                  className={`flex flex-col items-center justify-center gap-1 rounded-xl border p-2.5 text-center transition ${
+                  className={`flex flex-col items-center justify-center gap-1 rounded-md border p-2 text-center transition ${
                     role === 'ADMIN'
-                      ? 'border-amber-500 bg-amber-500/10 text-amber-900 font-bold shadow-xs'
-                      : 'border-[#E5E8E0] bg-white text-[#4B5259] hover:bg-black/5'
+                      ? 'border-[#121417] bg-[#f6f7f8] text-[#121417] font-semibold shadow-xs'
+                      : 'border-[#e1e4e8] bg-white text-[#5b616b] hover:bg-[#f6f7f8]'
                   }`}
                 >
-                  <Shield className="w-4 h-4 text-amber-600" />
+                  <Shield className="w-3.5 h-3.5 text-amber-600" />
                   <span className="text-xs">Admin</span>
-                  <span className="text-[10px] text-[#71767B] font-normal">Full Control</span>
+                  <span className="text-[10px] text-[#5b616b] font-normal">Full Control</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => setRole('HOD')}
-                  className={`flex flex-col items-center justify-center gap-1 rounded-xl border p-2.5 text-center transition ${
+                  className={`flex flex-col items-center justify-center gap-1 rounded-md border p-2 text-center transition ${
                     role === 'HOD'
-                      ? 'border-blue-500 bg-blue-500/10 text-blue-900 font-bold shadow-xs'
-                      : 'border-[#E5E8E0] bg-white text-[#4B5259] hover:bg-black/5'
+                      ? 'border-[#3b6fe0] bg-[#e8effc]/30 text-[#3b6fe0] font-semibold shadow-xs'
+                      : 'border-[#e1e4e8] bg-white text-[#5b616b] hover:bg-[#f6f7f8]'
                   }`}
                 >
-                  <UserCheck className="w-4 h-4 text-blue-600" />
+                  <UserCheck className="w-3.5 h-3.5 text-[#3b6fe0]" />
                   <span className="text-xs">HOD</span>
-                  <span className="text-[10px] text-[#71767B] font-normal">Dept Scoped</span>
+                  <span className="text-[10px] text-[#5b616b] font-normal">Dept Scoped</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => setRole('FACULTY')}
-                  className={`flex flex-col items-center justify-center gap-1 rounded-xl border p-2.5 text-center transition ${
+                  className={`flex flex-col items-center justify-center gap-1 rounded-md border p-2 text-center transition ${
                     role === 'FACULTY'
-                      ? 'border-emerald-500 bg-emerald-500/10 text-emerald-900 font-bold shadow-xs'
-                      : 'border-[#E5E8E0] bg-white text-[#4B5259] hover:bg-black/5'
+                      ? 'border-emerald-600 bg-emerald-50/40 text-emerald-800 font-semibold shadow-xs'
+                      : 'border-[#e1e4e8] bg-white text-[#5b616b] hover:bg-[#f6f7f8]'
                   }`}
                 >
-                  <Mail className="w-4 h-4 text-emerald-600" />
+                  <Mail className="w-3.5 h-3.5 text-emerald-600" />
                   <span className="text-xs">Faculty</span>
-                  <span className="text-[10px] text-[#71767B] font-normal">Read-Only</span>
+                  <span className="text-[10px] text-[#5b616b] font-normal">Read-Only</span>
                 </button>
               </div>
             </Field>
@@ -279,7 +279,7 @@ export function InviteMemberModal({ isOpen, onClose, onInvited }: InviteMemberMo
                     setDepartmentId(e.target.value);
                     setFacultyId('');
                   }}
-                  className="w-full rounded-xl border border-[#D0D5DD] bg-white px-3 py-2 text-xs font-medium text-[#111315] shadow-xs focus:border-[#0047FF] focus:outline-none"
+                  className="w-full rounded-md border border-[#e1e4e8] bg-white px-2.5 py-1.5 text-xs text-[#121417] shadow-xs focus:border-[#3b6fe0] focus:outline-none"
                   required={role === 'HOD'}
                 >
                   {departments.length === 0 ? (
@@ -301,7 +301,7 @@ export function InviteMemberModal({ isOpen, onClose, onInvited }: InviteMemberMo
                 <select
                   value={facultyId}
                   onChange={(e) => setFacultyId(e.target.value)}
-                  className="w-full rounded-xl border border-[#D0D5DD] bg-white px-3 py-2 text-xs font-medium text-[#111315] shadow-xs focus:border-[#0047FF] focus:outline-none"
+                  className="w-full rounded-md border border-[#e1e4e8] bg-white px-2.5 py-1.5 text-xs text-[#121417] shadow-xs focus:border-[#3b6fe0] focus:outline-none"
                 >
                   <option value="">None (Generic Faculty Access)</option>
                   {filteredFaculty.map((f) => (
@@ -310,13 +310,13 @@ export function InviteMemberModal({ isOpen, onClose, onInvited }: InviteMemberMo
                     </option>
                   ))}
                 </select>
-                <p className="mt-1 text-[11px] text-[#71767B]">
+                <p className="mt-1 text-[11px] text-[#5b616b]">
                   Linking associates their login with their teaching workload and personal timetable schedule.
                 </p>
               </Field>
             )}
 
-            <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#E5E8E0]">
+            <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-[#e1e4e8]">
               <Button type="button" variant="ghost" onClick={handleCloseModal} disabled={isSubmitting}>
                 Cancel
               </Button>
