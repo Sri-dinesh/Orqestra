@@ -35,8 +35,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className="min-h-screen bg-[#F7F8F5] text-[#111315] font-sans antialiased selection:bg-[#0047FF] selection:text-white">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('theme');var isDark=t==='dark'||(!t)||((t==='system')&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(isDark){document.documentElement.classList.add('dark');document.documentElement.style.colorScheme='dark';}else{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';}}catch(e){}})();`,
+          }}
+        />
+      </head>
+      <body className="min-h-screen antialiased selection:bg-[#3b6fe0] selection:text-white dark:selection:bg-[#7aa2f7] dark:selection:text-[#111112]">
         <AppShell>{children}</AppShell>
       </body>
     </html>
