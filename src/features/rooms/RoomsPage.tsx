@@ -275,16 +275,16 @@ export function RoomsPage() {
       <Card
         title={`Classrooms & Laboratories (${filteredRooms.length})`}
         actions={
-          <div className="flex items-center gap-1 bg-[#eef0f2] p-1 rounded-md">
+          <div className="flex items-center gap-1 bg-[#eef0f2] dark:bg-[#111112] border border-transparent dark:border-[#2a2a2d] p-1 rounded-md">
             {(['ALL', 'LAB', 'THEORY', 'GENERAL'] as const).map((t) => (
               <button
                 key={t}
                 type="button"
                 onClick={() => setFilterType(t)}
-                className={`px-3 py-1 text-xs font-semibold rounded-lg transition-all ${
+                className={`px-3 py-1 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
                   filterType === t
-                    ? 'bg-white text-[#121417] shadow-xs'
-                    : 'text-[#5b616b] hover:text-[#121417]'
+                    ? 'bg-white dark:bg-[#18181a] text-[#121417] dark:text-[#ececec] shadow-xs'
+                    : 'text-[#5b616b] dark:text-[#a1a1a6] hover:text-[#121417] dark:hover:text-[#ececec]'
                 }`}
               >
                 {t === 'ALL' ? 'All Spaces' : t === 'LAB' ? 'Labs' : t === 'THEORY' ? 'Theory Halls' : 'General'}

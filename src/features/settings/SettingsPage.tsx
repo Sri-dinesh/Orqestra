@@ -167,7 +167,7 @@ export function SettingsPage() {
           ) : undefined
         }
       >
-        <p className="mb-4 text-xs text-[#5b616b] leading-relaxed">
+        <p className="mb-4 text-xs text-[#5b616b] dark:text-[#a1a1a6] leading-relaxed">
           Institution profile used across the app (header, exports). Stored locally with the workspace; not used by the scheduler.
         </p>
         <div className="grid gap-3.5 sm:grid-cols-2">
@@ -269,10 +269,10 @@ export function SettingsPage() {
                 <img
                   src={details.logoDataUrl}
                   alt="College logo"
-                  className="h-12 w-12 rounded-md bg-white object-contain border border-[#e1e4e8]"
+                  className="h-12 w-12 rounded-md bg-white dark:bg-[#18181a] object-contain border border-[#e1e4e8] dark:border-[#2a2a2d]"
                 />
               ) : (
-                <span className="flex h-12 w-12 items-center justify-center rounded-md bg-[#f6f7f8] border border-[#e1e4e8] text-xs text-[#5b616b]" aria-hidden="true">
+                <span className="flex h-12 w-12 items-center justify-center rounded-md bg-[#f6f7f8] dark:bg-[#232326] border border-[#e1e4e8] dark:border-[#2a2a2d] text-xs text-[#5b616b] dark:text-[#a1a1a6]" aria-hidden="true">
                   None
                 </span>
               )}
@@ -319,19 +319,19 @@ export function SettingsPage() {
         }
       >
         <div className="space-y-3">
-          <p className="text-xs text-[#5b616b] leading-relaxed">
+          <p className="text-xs text-[#5b616b] dark:text-[#a1a1a6] leading-relaxed">
             Maintain independent timetable workspaces across academic years and terms. Clone an existing semester to carry over your faculty directory, room infrastructure, and department structures without re-entering data.
           </p>
-          <div className="p-3.5 rounded-md bg-[#f6f7f8] border border-[#e1e4e8] flex items-center justify-between gap-3">
+          <div className="p-3.5 rounded-md bg-[#f6f7f8] dark:bg-[#111112] border border-[#e1e4e8] dark:border-[#2a2a2d] flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <span className="p-2 rounded-md bg-[#e8effc] text-[#3b6fe0]">
+              <span className="p-2 rounded-md bg-[#e8effc] dark:bg-[#18233a] text-[#3b6fe0] dark:text-[#7aa2f7]">
                 <Calendar className="w-4 h-4" />
               </span>
               <div>
-                <p className="text-xs font-semibold text-[#121417]">
+                <p className="text-xs font-semibold text-[#121417] dark:text-[#ececec]">
                   Active Semester: {activeTerm.name}
                 </p>
-                <p className="text-[11px] text-[#5b616b] mt-0.5">
+                <p className="text-[11px] text-[#5b616b] dark:text-[#a1a1a6] mt-0.5">
                   Academic Year: {activeTerm.academicYear} · {terms.length} total semester(s) configured
                 </p>
               </div>
@@ -341,21 +341,21 @@ export function SettingsPage() {
       </Card>
 
       {/* Team & Permissions Gateway */}
-      <div id="team" className="rounded-md border border-[#e1e4e8] bg-white p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 transition-colors hover:border-[#d3d7dd]">
+      <div id="team" className="rounded-md border border-[#e1e4e8] dark:border-[#2a2a2d] bg-white dark:bg-[#18181a] p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 transition-colors hover:border-[#d3d7dd] dark:hover:border-[#36363a]">
         <div className="flex items-start gap-3">
-          <span className="p-2 rounded-md bg-[#e8effc] text-[#3b6fe0] shrink-0 mt-0.5">
+          <span className="p-2 rounded-md bg-[#e8effc] dark:bg-[#18233a] text-[#3b6fe0] dark:text-[#7aa2f7] shrink-0 mt-0.5">
             <Users className="w-4 h-4" />
           </span>
           <div>
-            <h3 className="text-sm font-semibold text-[#121417]">Team & Role-Based Permissions</h3>
-            <p className="text-xs text-[#5b616b] mt-0.5">
+            <h3 className="text-sm font-semibold text-[#121417] dark:text-[#ececec]">Team & Role-Based Permissions</h3>
+            <p className="text-xs text-[#5b616b] dark:text-[#a1a1a6] mt-0.5">
               Manage institution administrators, department heads, and teaching faculty access on the dedicated Team page.
             </p>
           </div>
         </div>
         <Link
           to="/team"
-          className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md border border-[#e1e4e8] bg-[#f6f7f8] text-[#121417] hover:bg-[#eef0f2] hover:border-[#3b6fe0] transition-colors"
+          className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md border border-[#e1e4e8] dark:border-[#2a2a2d] bg-[#f6f7f8] dark:bg-[#232326] text-[#121417] dark:text-[#ececec] hover:bg-[#eef0f2] dark:hover:bg-[#2a2a2d] hover:border-[#3b6fe0] dark:hover:border-[#7aa2f7] transition-colors"
         >
           <span>Manage Team →</span>
         </Link>
@@ -364,7 +364,7 @@ export function SettingsPage() {
       <div className="grid items-start gap-4 lg:grid-cols-2">
         <Card title="Export / Import">
           <div className="flex flex-col gap-3">
-            <p className="text-xs text-[#5b616b] leading-relaxed">
+            <p className="text-xs text-[#5b616b] dark:text-[#a1a1a6] leading-relaxed">
               Download a full snapshot of your workspace as JSON, or restore one from a previous export.
             </p>
             <Button onClick={exportWorkspace} className="w-full sm:w-auto">Export workspace (JSON)</Button>
@@ -384,9 +384,9 @@ export function SettingsPage() {
               </Button>
             </div>
             {importSummary && (
-              <div className="rounded-md bg-amber-50 border border-amber-200 p-3 text-xs text-amber-900" role="alert">
+              <div className="rounded-md bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/40 p-3 text-xs text-amber-900 dark:text-amber-200" role="alert">
                 <p className="font-semibold">Import preview</p>
-                <p className="mt-1 text-[11px] text-amber-800">{importSummary}</p>
+                <p className="mt-1 text-[11px] text-amber-800 dark:text-amber-300">{importSummary}</p>
                 <div className="mt-2.5 flex gap-2">
                   <Button size="sm" onClick={confirmImport}>Confirm import</Button>
                   <Button size="sm" variant="secondary" onClick={() => { setPendingImport(null); setImportSummary(null); }}>
@@ -399,7 +399,7 @@ export function SettingsPage() {
         </Card>
         {isAdmin && (
           <Card title="Danger zone">
-            <p className="mb-4 text-xs text-[#5b616b] leading-relaxed">
+            <p className="mb-4 text-xs text-[#5b616b] dark:text-[#a1a1a6] leading-relaxed">
               Resetting clears all departments, timetables, and preferences stored in this browser. This cannot be undone.
             </p>
             <Button variant="danger" onClick={resetWorkspace} className="w-full sm:w-auto">

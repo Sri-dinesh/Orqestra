@@ -123,7 +123,7 @@ export function DepartmentHomePage() {
         }
       >
         {timetables.length === 0 ? (
-          <div className="rounded-md border border-dashed border-[#e1e4e8] bg-[#ffffff] px-6 py-12 text-center">
+          <div className="rounded-md border border-dashed border-[#e1e4e8] dark:border-[#2a2a2d] bg-[#ffffff] dark:bg-[#18181a] px-6 py-12 text-center">
             <CalendarDays className="mx-auto h-8 w-8 text-metric-blue" />
             <h2 className="mt-4 text-base font-bold text-ink">Create the first timetable for {department.code}</h2>
             <p className="mx-auto mt-2 max-w-md text-sm text-body-gray">
@@ -136,7 +136,7 @@ export function DepartmentHomePage() {
         ) : (
           <div className="grid gap-4 md:grid-cols-2">
             {timetables.map((timetable) => (
-              <div key={timetable.id} className="rounded-md border border-[#e1e4e8] bg-[#ffffff] p-4 transition hover:border-[#B8C8F5] hover:bg-white">
+              <div key={timetable.id} className="rounded-md border border-[#e1e4e8] dark:border-[#2a2a2d] bg-[#ffffff] dark:bg-[#18181a] p-4 transition hover:border-[#3b6fe0] dark:hover:border-[#7aa2f7]">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <h3 className="truncate text-base font-bold text-ink">{timetable.name ?? 'Untitled timetable'}</h3>
@@ -147,7 +147,7 @@ export function DepartmentHomePage() {
                 <p className="mt-3 min-h-10 text-sm leading-relaxed text-body-gray">
                   {timetable.description || 'No description added yet.'}
                 </p>
-                <div className="mt-4 flex items-center justify-between gap-2 border-t border-[#e1e4e8] pt-3">
+                <div className="mt-4 flex items-center justify-between gap-2 border-t border-[#e1e4e8] dark:border-[#2a2a2d] pt-3">
                   <span className="text-xs font-mono text-body-gray">Revision {timetable.revision}</span>
                   <div className="flex items-center gap-2">
                     {!isReadOnly && (

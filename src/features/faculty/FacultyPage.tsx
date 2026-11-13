@@ -209,11 +209,11 @@ export function FacultyPage() {
                           .map((s) => (
                             <label
                               key={s.id}
-                              className={`flex cursor-pointer items-center gap-1.5 rounded-full bg-white px-2.5 py-1 text-[11px] font-medium text-[#121417] ring-1 ring-inset ring-[#e1e4e8] transition-colors duration-150 has-checked:bg-blue-100 hover:bg-[#ffffff] ${isReadOnly ? 'opacity-60 cursor-not-allowed' : ''}`}
+                              className={`flex cursor-pointer items-center gap-1.5 rounded-full bg-white dark:bg-[#18181a] px-2.5 py-1 text-[11px] font-medium text-[#121417] dark:text-[#ececec] ring-1 ring-inset ring-[#e1e4e8] dark:ring-[#2a2a2d] transition-colors duration-150 has-checked:bg-[#e8effc] dark:has-checked:bg-[#18233a] hover:bg-[#f6f7f8] dark:hover:bg-[#232326] ${isReadOnly ? 'opacity-60 cursor-not-allowed' : ''}`}
                             >
                               <input
                                 type="checkbox"
-                                className="accent-metric-blue"
+                                className="accent-[#3b6fe0] dark:accent-[#7aa2f7]"
                                 checked={s.eligibleFacultyIds.includes(f.id)}
                                 disabled={isReadOnly}
                                 onChange={(e) => {

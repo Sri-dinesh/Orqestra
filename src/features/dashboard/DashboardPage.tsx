@@ -297,11 +297,11 @@ export function DashboardPage() {
                 {WORKING_DAYS.map((day) => (
                   <label
                     key={day}
-                    className="flex cursor-pointer items-center gap-1.5 rounded-lg bg-surface-1 border border-[#e1e4e8] px-3 py-1.5 text-xs font-medium text-ink transition-colors duration-150 hover:bg-surface-2"
+                    className="flex cursor-pointer items-center gap-1.5 rounded-lg bg-[#f6f7f8] dark:bg-[#232326] border border-[#e1e4e8] dark:border-[#2a2a2d] px-3 py-1.5 text-xs font-medium text-[#121417] dark:text-[#ececec] transition-colors duration-150 hover:bg-[#eef0f2] dark:hover:bg-[#2a2a2d]"
                   >
                     <input
                       type="checkbox"
-                      className="accent-metric-blue"
+                      className="accent-[#3b6fe0] dark:accent-[#7aa2f7]"
                       checked={days.includes(day)}
                       onChange={(e) =>
                         setDays((prev) =>
@@ -337,13 +337,13 @@ export function DashboardPage() {
 
       {/* Empty state for brand new users */}
       {isNewUser ? (
-        <div className="rounded-lg border border-[#e1e4e8] bg-white p-6 sm:p-10 shadow-none">
+        <div className="rounded-lg border border-[#e1e4e8] dark:border-[#2a2a2d] bg-white dark:bg-[#18181a] p-6 sm:p-10 shadow-none">
           <div className="text-center max-w-xl mx-auto mb-8">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#e8effc]">
-              <Sparkles className="h-6 w-6 text-[#3b6fe0]" />
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#e8effc] dark:bg-[#18233a]">
+              <Sparkles className="h-6 w-6 text-[#3b6fe0] dark:text-[#7aa2f7]" />
             </div>
-            <h2 className="text-xl font-bold text-[#121417]">Welcome to Orqestra</h2>
-            <p className="mt-2 text-sm text-[#5b616b]">
+            <h2 className="text-xl font-bold text-[#121417] dark:text-[#ececec]">Welcome to Orqestra</h2>
+            <p className="mt-2 text-sm text-[#5b616b] dark:text-[#a1a1a6]">
               Start with a fully predefined institutional blueprint where all sections, subjects, faculty, and conflict-free schedules are pre-configured, or create a custom department from scratch.
             </p>
           </div>
@@ -356,24 +356,24 @@ export function DashboardPage() {
                   key={preset.id}
                   className={`flex flex-col justify-between rounded-md border p-5 transition-all duration-200 ${
                     isEnterprise
-                      ? 'border-[#3b6fe0]/40 bg-[#e8effc]/30 ring-1 ring-[#3b6fe0]/30'
-                      : 'border-[#e1e4e8] bg-white hover:border-[#3b6fe0]/40'
+                      ? 'border-[#3b6fe0]/40 dark:border-[#7aa2f7]/40 bg-[#e8effc]/30 dark:bg-[#18233a]/30 ring-1 ring-[#3b6fe0]/30 dark:ring-[#7aa2f7]/30'
+                      : 'border-[#e1e4e8] dark:border-[#2a2a2d] bg-white dark:bg-[#111112] hover:border-[#3b6fe0]/40 dark:hover:border-[#7aa2f7]/40'
                   }`}
                 >
                   <div>
                     <div className="flex items-center justify-between gap-2 mb-2">
-                      <span className="text-xs font-mono font-bold text-[#3b6fe0] uppercase">
+                      <span className="text-xs font-mono font-bold text-[#3b6fe0] dark:text-[#7aa2f7] uppercase">
                         {preset.department.code}
                       </span>
                       {isEnterprise && (
-                        <span className="rounded-full bg-[#3b6fe0] px-2 py-0.5 text-[10px] font-bold text-white uppercase tracking-wider">
+                        <span className="rounded-full bg-[#3b6fe0] dark:bg-[#7aa2f7] px-2 py-0.5 text-[10px] font-bold text-white dark:text-[#111112] uppercase tracking-wider">
                           Recommended
                         </span>
                       )}
                     </div>
-                    <h3 className="text-sm font-bold text-[#121417] mb-1">{preset.label}</h3>
-                    <p className="text-xs leading-relaxed text-[#5b616b] mb-3">{preset.description}</p>
-                    <div className="text-[11px] font-mono text-[#5b616b] space-y-0.5 mb-4">
+                    <h3 className="text-sm font-bold text-[#121417] dark:text-[#ececec] mb-1">{preset.label}</h3>
+                    <p className="text-xs leading-relaxed text-[#5b616b] dark:text-[#a1a1a6] mb-3">{preset.description}</p>
+                    <div className="text-[11px] font-mono text-[#5b616b] dark:text-[#a1a1a6] space-y-0.5 mb-4">
                       <p>• {preset.sections.length} sections ({preset.sections.map((s) => s.name).slice(0, 3).join(', ')}{preset.sections.length > 3 ? ` ... ${preset.sections[preset.sections.length - 1].name}` : ''})</p>
                       <p>• {preset.subjects.length} subjects ({preset.subjects.filter((s) => s.type === 'THEORY').length} Theory + {preset.subjects.filter((s) => s.type === 'LAB').length} Lab)</p>
                       <p>• {preset.faculty.length} real faculty members</p>
@@ -394,7 +394,7 @@ export function DashboardPage() {
             })}
           </div>
 
-          <div className="border-t border-[#e1e4e8] pt-6 flex flex-wrap items-center justify-between gap-3 text-xs text-[#5b616b]">
+          <div className="border-t border-[#e1e4e8] dark:border-[#2a2a2d] pt-6 flex flex-wrap items-center justify-between gap-3 text-xs text-[#5b616b] dark:text-[#a1a1a6]">
             <span>Prefer starting with an empty department?</span>
             <Button variant="secondary" size="sm" onClick={() => setShowCreate(true)}>
               + Create Empty Department
@@ -475,22 +475,22 @@ export function DashboardPage() {
 
                   <div className="p-4 flex flex-col gap-3 flex-1">
                     {/* Stats row */}
-                    <dl className="grid grid-cols-4 gap-2 rounded bg-[#f6f7f8] border border-[#e1e4e8] px-3 py-2 text-center">
+                    <dl className="grid grid-cols-4 gap-2 rounded bg-[#f6f7f8] dark:bg-[#111112] border border-[#e1e4e8] dark:border-[#2a2a2d] px-3 py-2 text-center">
                       <div className="flex flex-col">
-                        <dt className="text-[10px] uppercase tracking-wider font-mono text-[#5b616b]">Sections</dt>
-                        <dd className="text-sm font-bold text-[#121417] font-mono tabular">{sections}</dd>
+                        <dt className="text-[10px] uppercase tracking-wider font-mono text-[#5b616b] dark:text-[#a1a1a6]">Sections</dt>
+                        <dd className="text-sm font-bold text-[#121417] dark:text-[#ececec] font-mono tabular">{sections}</dd>
                       </div>
                       <div className="flex flex-col">
-                        <dt className="text-[10px] uppercase tracking-wider font-mono text-[#5b616b]">Subjects</dt>
-                        <dd className="text-sm font-bold text-[#121417] font-mono tabular">{subjects}</dd>
+                        <dt className="text-[10px] uppercase tracking-wider font-mono text-[#5b616b] dark:text-[#a1a1a6]">Subjects</dt>
+                        <dd className="text-sm font-bold text-[#121417] dark:text-[#ececec] font-mono tabular">{subjects}</dd>
                       </div>
                       <div className="flex flex-col">
-                        <dt className="text-[10px] uppercase tracking-wider font-mono text-[#5b616b]">Faculty</dt>
-                        <dd className="text-sm font-bold text-[#121417] font-mono tabular">{faculty}</dd>
+                        <dt className="text-[10px] uppercase tracking-wider font-mono text-[#5b616b] dark:text-[#a1a1a6]">Faculty</dt>
+                        <dd className="text-sm font-bold text-[#121417] dark:text-[#ececec] font-mono tabular">{faculty}</dd>
                       </div>
                       <div className="flex flex-col">
-                        <dt className="text-[10px] uppercase tracking-wider font-mono text-[#5b616b]">Version</dt>
-                        <dd className="text-sm font-bold text-[#121417] font-mono tabular">{timetable ? `v${timetable.revision}` : "—"}</dd>
+                        <dt className="text-[10px] uppercase tracking-wider font-mono text-[#5b616b] dark:text-[#a1a1a6]">Version</dt>
+                        <dd className="text-sm font-bold text-[#121417] dark:text-[#ececec] font-mono tabular">{timetable ? `v${timetable.revision}` : "—"}</dd>
                       </div>
                     </dl>
 
@@ -500,18 +500,18 @@ export function DashboardPage() {
                         {setupSteps.map((step, i) => (
                           <div key={i} className="flex items-center gap-1 text-[11px]">
                             {step.done
-                              ? <CheckCircle2 className="w-3.5 h-3.5 text-[#2f9e44] shrink-0" />
-                              : <Circle className="w-3.5 h-3.5 text-[#d3d7dd] shrink-0" />
+                              ? <CheckCircle2 className="w-3.5 h-3.5 text-[#2f9e44] dark:text-[#51cf66] shrink-0" />
+                              : <Circle className="w-3.5 h-3.5 text-[#d3d7dd] dark:text-[#36363a] shrink-0" />
                             }
-                            <span className={step.done ? "text-[#121417]" : "text-[#5b616b]"}>{step.label}</span>
-                            {i < setupSteps.length - 1 && <span className="text-[#d3d7dd] mx-0.5">·</span>}
+                            <span className={step.done ? "text-[#121417] dark:text-[#ececec]" : "text-[#5b616b] dark:text-[#a1a1a6]"}>{step.label}</span>
+                            {i < setupSteps.length - 1 && <span className="text-[#d3d7dd] dark:text-[#36363a] mx-0.5">·</span>}
                           </div>
                         ))}
                       </div>
                     )}
 
                     {hasTimetable && (timetable!.versionHistory?.length ?? 0) > 0 && (
-                      <p className="text-[11px] font-mono text-[#5b616b] italic">
+                      <p className="text-[11px] font-mono text-[#5b616b] dark:text-[#a1a1a6] italic">
                         {timetable!.versionHistory!.length} versions saved · latest:{" "}
                         {timetable!.versionHistory![timetable!.versionHistory!.length - 1].label}
                       </p>
@@ -553,7 +553,7 @@ export function DashboardPage() {
                               deptCode: department.code,
                             })
                           }
-                          className="h-8 w-8 p-0 flex items-center justify-center text-[#5b616b] hover:text-[#c92a2a] hover:bg-rose-50"
+                          className="h-8 w-8 p-0 flex items-center justify-center text-[#5b616b] dark:text-[#a1a1a6] hover:text-[#c92a2a] dark:hover:text-[#ff6b6b] hover:bg-rose-50 dark:hover:bg-rose-950/30"
                           title="Delete timetable"
                           aria-label={`Delete timetable for ${department.code}`}
                         >
@@ -571,16 +571,16 @@ export function DashboardPage() {
 
       {/* Blueprints / Presets */}
       {isAdmin && (
-        <div className="rounded-md border border-[#e1e4e8] bg-white p-4">
+        <div className="rounded-md border border-[#e1e4e8] dark:border-[#2a2a2d] bg-white dark:bg-[#18181a] p-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-sm font-semibold text-[#121417]">Institutional Blueprints</h3>
-                <span className="rounded bg-[#f6f7f8] border border-[#e1e4e8] px-1.5 py-0.5 text-[10px] font-mono font-medium text-[#5b616b]">
+                <h3 className="text-sm font-semibold text-[#121417] dark:text-[#ececec]">Institutional Blueprints</h3>
+                <span className="rounded bg-[#f6f7f8] dark:bg-[#111112] border border-[#e1e4e8] dark:border-[#2a2a2d] px-1.5 py-0.5 text-[10px] font-mono font-medium text-[#5b616b] dark:text-[#a1a1a6]">
                   3 presets
                 </span>
               </div>
-              <p className="text-xs text-[#5b616b] mt-0.5">
+              <p className="text-xs text-[#5b616b] dark:text-[#a1a1a6] mt-0.5">
                 Bootstrap another department (B.Tech Enterprise, K-12 School, or Medical College) with conflict-free schedules in one click
               </p>
             </div>
@@ -590,33 +590,33 @@ export function DashboardPage() {
               onClick={() => setShowBlueprints((v) => !v)}
               className="shrink-0 flex items-center gap-1.5 text-xs h-8"
             >
-              <Sparkles className="w-3.5 h-3.5 text-[#3b6fe0]" />
+              <Sparkles className="w-3.5 h-3.5 text-[#3b6fe0] dark:text-[#7aa2f7]" />
               <span>{showBlueprints ? "Hide Blueprints" : "Browse Blueprints"}</span>
             </Button>
           </div>
 
           {showBlueprints && (
-            <div id="presets-section" className="mt-4 pt-4 border-t border-[#e1e4e8] grid gap-4 sm:grid-cols-3 animate-in fade-in duration-150">
+            <div id="presets-section" className="mt-4 pt-4 border-t border-[#e1e4e8] dark:border-[#2a2a2d] grid gap-4 sm:grid-cols-3 animate-in fade-in duration-150">
               {BUILT_IN_PRESETS.map((preset) => (
                 <div
                   key={preset.id}
                   className={`flex flex-col justify-between rounded-md border p-4 transition-all duration-200 ${
                     preset.id === 'enterprise'
-                      ? 'border-[#3b6fe0]/40 bg-[#e8effc]/30'
-                      : 'border-[#e1e4e8] bg-white hover:border-[#3b6fe0]/40'
+                      ? 'border-[#3b6fe0]/40 dark:border-[#7aa2f7]/40 bg-[#e8effc]/30 dark:bg-[#18233a]/30'
+                      : 'border-[#e1e4e8] dark:border-[#2a2a2d] bg-white dark:bg-[#111112] hover:border-[#d3d7dd] dark:hover:border-[#36363a]'
                   }`}
                 >
                   <div>
                     <div className="flex items-start justify-between gap-2">
-                      <h4 className="text-sm font-semibold text-[#121417]">{preset.label}</h4>
+                      <h4 className="text-sm font-semibold text-[#121417] dark:text-[#ececec]">{preset.label}</h4>
                       {preset.id === 'enterprise' && (
-                        <span className="shrink-0 rounded-full bg-[#e8effc] px-2 py-0.5 text-[10px] font-bold text-[#3b6fe0] uppercase">
+                        <span className="shrink-0 rounded-full bg-[#e8effc] dark:bg-[#18233a] px-2 py-0.5 text-[10px] font-bold text-[#3b6fe0] dark:text-[#7aa2f7] uppercase">
                           Recommended
                         </span>
                       )}
                     </div>
-                    <p className="mt-1.5 text-xs leading-relaxed text-[#5b616b] line-clamp-2">{preset.description}</p>
-                    <p className="mt-2 text-[11px] font-mono text-[#5b616b]">
+                    <p className="mt-1.5 text-xs leading-relaxed text-[#5b616b] dark:text-[#a1a1a6] line-clamp-2">{preset.description}</p>
+                    <p className="mt-2 text-[11px] font-mono text-[#5b616b] dark:text-[#a1a1a6]">
                       {preset.sections.length} sections · {preset.subjects.length} subjects · {preset.faculty.length} faculty
                     </p>
                   </div>
@@ -640,18 +640,18 @@ export function DashboardPage() {
 
       {deletingTimetable && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
-          <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl border border-[#e1e4e8] space-y-4 animate-in fade-in duration-150">
-            <div className="flex items-center gap-3 text-[#c92a2a]">
-              <div className="flex h-10 w-10 items-center justify-center rounded-md bg-rose-50 shrink-0">
-                <Trash2 className="h-5 w-5 text-[#c92a2a]" />
+          <div className="w-full max-w-md rounded-lg bg-white dark:bg-[#18181a] p-6 shadow-xl border border-[#e1e4e8] dark:border-[#2a2a2d] space-y-4 animate-in fade-in duration-150">
+            <div className="flex items-center gap-3 text-[#c92a2a] dark:text-[#ff6b6b]">
+              <div className="flex h-10 w-10 items-center justify-center rounded-md bg-rose-50 dark:bg-rose-950/30 shrink-0">
+                <Trash2 className="h-5 w-5 text-[#c92a2a] dark:text-[#ff6b6b]" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-[#121417]">Delete Timetable</h3>
-                <p className="text-xs text-[#5b616b]">This schedule will be permanently deleted</p>
+                <h3 className="text-base font-bold text-[#121417] dark:text-[#ececec]">Delete Timetable</h3>
+                <p className="text-xs text-[#5b616b] dark:text-[#a1a1a6]">This schedule will be permanently deleted</p>
               </div>
             </div>
 
-            <p className="text-sm text-[#121417] leading-relaxed">
+            <p className="text-sm text-[#121417] dark:text-[#ececec] leading-relaxed">
               Are you sure you want to delete the active timetable for{" "}
               <strong>
                 {deletingTimetable.deptName} ({deletingTimetable.deptCode})
@@ -659,7 +659,7 @@ export function DashboardPage() {
               ? The generated schedule and its revision history will be removed from your workspace and cloud storage.
             </p>
 
-            <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#e1e4e8]">
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#e1e4e8] dark:border-[#2a2a2d]">
               <Button
                 variant="secondary"
                 size="sm"

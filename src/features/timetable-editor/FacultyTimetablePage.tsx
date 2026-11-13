@@ -194,15 +194,15 @@ export function FacultyTimetablePage() {
       />
 
       {/* Mode Switcher */}
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-[#e1e4e8] bg-[#ffffff] p-2">
-        <div className="flex items-center gap-1 rounded-md bg-[#eef0f2] p-1">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-[#e1e4e8] dark:border-[#2a2a2d] bg-[#ffffff] dark:bg-[#18181a] p-2">
+        <div className="flex items-center gap-1 rounded-md bg-[#eef0f2] dark:bg-[#111112] border border-transparent dark:border-[#2a2a2d] p-1">
           <button
             type="button"
             onClick={() => setViewMode('INDIVIDUAL')}
-            className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
+            className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
               viewMode === 'INDIVIDUAL'
-                ? 'bg-white text-ink shadow-sm'
-                : 'text-[#5b616b] hover:text-ink'
+                ? 'bg-white dark:bg-[#18181a] text-ink shadow-sm'
+                : 'text-[#5b616b] dark:text-[#a1a1a6] hover:text-ink'
             }`}
           >
             Individual Schedule
@@ -210,10 +210,10 @@ export function FacultyTimetablePage() {
           <button
             type="button"
             onClick={() => setViewMode('MEETING_FINDER')}
-            className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
+            className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
               viewMode === 'MEETING_FINDER'
-                ? 'bg-white text-metric-blue shadow-sm'
-                : 'text-[#5b616b] hover:text-ink'
+                ? 'bg-white dark:bg-[#18181a] text-metric-blue shadow-sm'
+                : 'text-[#5b616b] dark:text-[#a1a1a6] hover:text-ink'
             }`}
           >
             <Users className="h-3.5 w-3.5" />

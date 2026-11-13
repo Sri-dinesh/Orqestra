@@ -1127,9 +1127,9 @@ export function TimetablePage() {
                       {!isFaculty && <th className="px-3 py-2.5 text-right font-semibold">Action</th>}
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#e1e4e8] bg-white">
+                  <tbody className="divide-y divide-[#e1e4e8] dark:divide-[#2a2a2d] bg-white dark:bg-[#18181a]">
                     {allocationSummary.items.map((item) => (
-                      <tr key={item.subjectId} className="hover:bg-[#ffffff] transition-colors">
+                      <tr key={item.subjectId} className="hover:bg-[#f6f7f8] dark:hover:bg-[#232326] transition-colors">
                         <td className="px-3 py-2.5">
                           <span className="font-mono font-bold text-ink">{item.subjectCode}</span>
                           <span className="ml-2 text-body-gray">{item.subjectName}</span>
@@ -1420,13 +1420,13 @@ export function TimetablePage() {
 
       {showDeleteConfirm && timetable && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-          <div className="w-full max-w-md rounded-md bg-white p-6 shadow-2xl border border-[#e1e4e8] space-y-4 animate-in fade-in zoom-in-95 duration-150">
-            <div className="flex items-center gap-3 text-red-600">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 shrink-0">
+          <div className="w-full max-w-md rounded-md bg-white dark:bg-[#18181a] p-6 shadow-2xl border border-[#e1e4e8] dark:border-[#2a2a2d] space-y-4 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center gap-3 text-red-600 dark:text-red-400">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 dark:bg-red-950/40 shrink-0">
                 <Trash2 className="h-5 w-5" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-[#121417]">Delete Timetable</h3>
+                <h3 className="text-base font-bold text-[#121417] dark:text-[#ececec]">Delete Timetable</h3>
                 <p className="text-xs text-body-gray">This schedule will be permanently deleted</p>
               </div>
             </div>
@@ -1436,7 +1436,7 @@ export function TimetablePage() {
               <strong>{department.name} ({department.code})</strong>? The generated schedule and its revision history will be removed.
             </p>
 
-            <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#e1e4e8]">
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#e1e4e8] dark:border-[#2a2a2d]">
               <Button
                 variant="secondary"
                 size="sm"
