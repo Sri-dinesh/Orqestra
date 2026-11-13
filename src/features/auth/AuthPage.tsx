@@ -224,25 +224,25 @@ export function AuthPage({ pathname }: AuthPageProps) {
         : 'Sign in to access your departments, faculty schedules, and solver workspace.';
 
   return (
-    <div className="min-h-screen bg-[#F7F8F5] text-[#111315]">
-      <div className="grid min-h-screen lg:grid-cols-12">
+    <div className="h-screen h-[100dvh] w-full overflow-hidden bg-[#f6f7f8] text-[#121417]">
+      <div className="grid h-full w-full lg:grid-cols-12 overflow-hidden">
         {/* Left Form Section */}
-        <div className="flex flex-col justify-between p-6 sm:p-10 lg:col-span-6 lg:p-14 xl:col-span-5 bg-white border-r border-[#E5E8E0]">
+        <div className="flex flex-col justify-between p-4 sm:p-6 lg:px-8 lg:py-5 xl:px-12 xl:py-6 lg:col-span-6 xl:col-span-5 bg-white border-r border-[#e1e4e8] h-full overflow-hidden">
           {/* Top Brand Nav */}
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between shrink-0">
             <Link
               to="/"
-              className="flex items-center gap-2.5 text-base font-bold tracking-tight text-[#111315] hover:opacity-90 transition-opacity"
+              className="flex items-center gap-2.5 text-base font-bold tracking-tight text-[#121417] hover:opacity-90 transition-opacity"
             >
-              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#111315] text-white text-xs font-bold shadow-xs">
+              <span className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-md bg-[#121417] text-white text-xs font-bold shadow-none">
                 O
               </span>
-              <span className="font-display text-xl font-bold tracking-tight">Orqestra</span>
+              <span className="font-['Geist',ui-sans-serif,sans-serif] text-lg sm:text-xl font-bold tracking-tight text-[#121417]">Orqestra</span>
             </Link>
 
             <Link
               to="/"
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#71767B] hover:text-[#111315] transition-colors"
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-[#5b616b] hover:text-[#121417] transition-colors"
             >
               <ArrowLeft className="h-3.5 w-3.5" />
               <span>Back to home</span>
@@ -250,17 +250,17 @@ export function AuthPage({ pathname }: AuthPageProps) {
           </div>
 
           {/* Center Form Container */}
-          <div className="my-auto mx-auto w-full max-w-md py-8">
+          <div className="my-auto mx-auto w-full max-w-md flex flex-col justify-center py-1 sm:py-2 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
             {/* Segmented Mode Switcher (Sign In vs Sign Up) */}
             {(isSignIn || isSignUp) && (
-              <div className="mb-8 p-1 bg-[#F1F3ED] rounded-xl flex items-center shadow-inner">
+              <div className="mb-2.5 sm:mb-3 p-1 bg-[#eef0f2] rounded-md flex items-center shrink-0">
                 <button
                   type="button"
                   onClick={() => navigate('/auth/sign-in')}
-                  className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all text-center ${
+                  className={`flex-1 py-1.5 sm:py-2 text-xs font-medium rounded-sm transition-all text-center cursor-pointer ${
                     isSignIn
-                      ? 'bg-white text-[#111315] shadow-xs'
-                      : 'text-[#71767B] hover:text-[#111315]'
+                      ? 'bg-white text-[#121417] shadow-none'
+                      : 'text-[#5b616b] hover:text-[#121417]'
                   }`}
                 >
                   Sign In
@@ -268,10 +268,10 @@ export function AuthPage({ pathname }: AuthPageProps) {
                 <button
                   type="button"
                   onClick={() => navigate('/auth/sign-up')}
-                  className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all text-center ${
+                  className={`flex-1 py-1.5 sm:py-2 text-xs font-medium rounded-sm transition-all text-center cursor-pointer ${
                     isSignUp
-                      ? 'bg-white text-[#111315] shadow-xs'
-                      : 'text-[#71767B] hover:text-[#111315]'
+                      ? 'bg-white text-[#121417] shadow-none'
+                      : 'text-[#5b616b] hover:text-[#121417]'
                   }`}
                 >
                   Create Account
@@ -280,11 +280,11 @@ export function AuthPage({ pathname }: AuthPageProps) {
             )}
 
             {/* Header Titles */}
-            <div className="text-left mb-6">
-              <h1 className="text-2xl font-bold tracking-tight text-[#111315] sm:text-3xl">
+            <div className="text-left mb-2.5 sm:mb-3 shrink-0">
+              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[#121417]">
                 {pageTitle}
               </h1>
-              <p className="mt-2 text-xs sm:text-sm text-[#71767B] leading-relaxed">
+              <p className="mt-0.5 sm:mt-1 text-xs text-[#5b616b] leading-normal line-clamp-2">
                 {pageSubtitle}
               </p>
             </div>
@@ -293,7 +293,7 @@ export function AuthPage({ pathname }: AuthPageProps) {
             {isResetPassword && !resetToken && (
               <div
                 role="alert"
-                className="mb-6 rounded-xl border border-amber-200 bg-amber-50/70 p-4 text-xs text-amber-900"
+                className="mb-3 rounded-md border border-amber-200 bg-amber-50/70 p-3 text-xs text-amber-900"
               >
                 <div className="flex items-start gap-2.5">
                   <AlertCircle className="h-4 w-4 shrink-0 text-amber-600 mt-0.5" />
@@ -304,7 +304,7 @@ export function AuthPage({ pathname }: AuthPageProps) {
                     </p>
                     <Link
                       to="/auth/forgot-password"
-                      className="mt-3 inline-flex items-center gap-1.5 font-semibold text-[#0047FF] hover:underline"
+                      className="mt-2.5 inline-flex items-center gap-1.5 font-medium text-[#3b6fe0] hover:underline"
                     >
                       <span>Request a new link</span>
                       <ArrowRight className="h-3 w-3" />
@@ -315,16 +315,16 @@ export function AuthPage({ pathname }: AuthPageProps) {
             )}
 
             {/* Form */}
-            <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+            <form onSubmit={handleSubmit} className="space-y-2 sm:space-y-2.5" noValidate>
               {/* Name Field (Sign Up only) */}
               {isSignUp && (
                 <div>
-                  <label htmlFor="name" className="block text-xs font-semibold text-[#111315]">
+                  <label htmlFor="name" className="block text-[11px] sm:text-xs font-medium text-[#121417]">
                     Full name
                   </label>
-                  <div className="relative mt-1.5">
-                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-[#71767B]">
-                      <UserIcon className="h-4 w-4" />
+                  <div className="relative mt-1">
+                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-2.5 text-[#5b616b]">
+                      <UserIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                     </div>
                     <input
                       id="name"
@@ -336,7 +336,7 @@ export function AuthPage({ pathname }: AuthPageProps) {
                       autoComplete="name"
                       enterKeyHint="next"
                       placeholder="Prof. Alan Turing"
-                      className="w-full rounded-xl border border-[#D0D5DD] bg-white py-2.5 pl-9 pr-3 text-sm text-[#111315] placeholder:text-[#71767B]/50 transition-all focus:border-[#0047FF] focus:outline-none focus:ring-2 focus:ring-[#0047FF]/15"
+                      className="w-full rounded-md border border-[#e1e4e8] bg-white py-1.5 sm:py-2 pl-8 sm:pl-9 pr-3 text-xs sm:text-sm text-[#121417] placeholder:text-[#5b616b]/50 transition-all focus:border-[#3b6fe0] focus:outline-none focus:ring-2 focus:ring-[#3b6fe0]/15"
                     />
                   </div>
                 </div>
@@ -345,12 +345,12 @@ export function AuthPage({ pathname }: AuthPageProps) {
               {/* Email Field */}
               {!isResetPassword && (
                 <div>
-                  <label htmlFor="email" className="block text-xs font-semibold text-[#111315]">
+                  <label htmlFor="email" className="block text-[11px] sm:text-xs font-medium text-[#121417]">
                     Institutional email address
                   </label>
-                  <div className="relative mt-1.5">
-                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-[#71767B]">
-                      <Mail className="h-4 w-4" />
+                  <div className="relative mt-1">
+                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-2.5 text-[#5b616b]">
+                      <Mail className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                     </div>
                     <input
                       id="email"
@@ -363,7 +363,7 @@ export function AuthPage({ pathname }: AuthPageProps) {
                       spellCheck={false}
                       enterKeyHint={isForgotPassword ? 'done' : 'next'}
                       placeholder="dean.scheduling@university.edu"
-                      className="w-full rounded-xl border border-[#D0D5DD] bg-white py-2.5 pl-9 pr-3 text-sm text-[#111315] placeholder:text-[#71767B]/50 transition-all focus:border-[#0047FF] focus:outline-none focus:ring-2 focus:ring-[#0047FF]/15"
+                      className="w-full rounded-md border border-[#e1e4e8] bg-white py-1.5 sm:py-2 pl-8 sm:pl-9 pr-3 text-xs sm:text-sm text-[#121417] placeholder:text-[#5b616b]/50 transition-all focus:border-[#3b6fe0] focus:outline-none focus:ring-2 focus:ring-[#3b6fe0]/15"
                     />
                   </div>
                 </div>
@@ -373,22 +373,22 @@ export function AuthPage({ pathname }: AuthPageProps) {
               {!isForgotPassword && (
                 <div>
                   <div className="flex items-center justify-between">
-                    <label htmlFor="password" className="block text-xs font-semibold text-[#111315]">
+                    <label htmlFor="password" className="block text-[11px] sm:text-xs font-medium text-[#121417]">
                       {isResetPassword ? 'New password' : 'Password'}
                     </label>
                     {isSignIn && (
                       <Link
                         to="/auth/forgot-password"
-                        className="text-xs font-semibold text-[#0047FF] hover:underline"
+                        className="text-[11px] font-medium text-[#3b6fe0] hover:underline"
                       >
                         Forgot password?
                       </Link>
                     )}
                   </div>
 
-                  <div className="relative mt-1.5">
-                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-[#71767B]">
-                      <Lock className="h-4 w-4" />
+                  <div className="relative mt-1">
+                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-2.5 text-[#5b616b]">
+                      <Lock className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                     </div>
                     <input
                       id="password"
@@ -403,15 +403,15 @@ export function AuthPage({ pathname }: AuthPageProps) {
                       autoComplete={isSignUp || isResetPassword ? 'new-password' : 'current-password'}
                       enterKeyHint={isSignUp || isResetPassword ? 'next' : 'done'}
                       placeholder={isSignUp || isResetPassword ? 'At least 8 characters' : 'Enter your password'}
-                      className="w-full rounded-xl border border-[#D0D5DD] bg-white py-2.5 pl-9 pr-10 text-sm text-[#111315] placeholder:text-[#71767B]/50 transition-all focus:border-[#0047FF] focus:outline-none focus:ring-2 focus:ring-[#0047FF]/15"
+                      className="w-full rounded-md border border-[#e1e4e8] bg-white py-1.5 sm:py-2 pl-8 sm:pl-9 pr-9 text-xs sm:text-sm text-[#121417] placeholder:text-[#5b616b]/50 transition-all focus:border-[#3b6fe0] focus:outline-none focus:ring-2 focus:ring-[#3b6fe0]/15"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword((prev) => !prev)}
                       aria-label={showPassword ? 'Hide password' : 'Show password'}
-                      className="absolute inset-y-0 right-0 flex items-center pr-3 text-[#71767B] hover:text-[#111315] transition-colors"
+                      className="absolute inset-y-0 right-0 flex items-center pr-2.5 text-[#5b616b] hover:text-[#121417] transition-colors"
                     >
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      {showPassword ? <EyeOff className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> : <Eye className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
                     </button>
                   </div>
                 </div>
@@ -420,12 +420,12 @@ export function AuthPage({ pathname }: AuthPageProps) {
               {/* Confirm Password Field (Sign Up & Reset) */}
               {(isSignUp || isResetPassword) && (
                 <div>
-                  <label htmlFor="confirm-password" className="block text-xs font-semibold text-[#111315]">
+                  <label htmlFor="confirm-password" className="block text-[11px] sm:text-xs font-semibold text-[#121417]">
                     Confirm password
                   </label>
-                  <div className="relative mt-1.5">
-                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-[#71767B]">
-                      <Lock className="h-4 w-4" />
+                  <div className="relative mt-1">
+                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-2.5 text-[#5b616b]">
+                      <Lock className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                     </div>
                     <input
                       id="confirm-password"
@@ -440,50 +440,50 @@ export function AuthPage({ pathname }: AuthPageProps) {
                       autoComplete="new-password"
                       enterKeyHint="done"
                       placeholder="Re-type your password"
-                      className="w-full rounded-xl border border-[#D0D5DD] bg-white py-2.5 pl-9 pr-10 text-sm text-[#111315] placeholder:text-[#71767B]/50 transition-all focus:border-[#0047FF] focus:outline-none focus:ring-2 focus:ring-[#0047FF]/15"
+                      className="w-full rounded-md border border-[#e1e4e8] bg-white py-1.5 sm:py-2 pl-8 sm:pl-9 pr-9 text-xs sm:text-sm text-[#121417] placeholder:text-[#5b616b]/50 transition-all focus:border-[#3b6fe0] focus:outline-none focus:ring-2 focus:ring-[#3b6fe0]/15"
                     />
                     <button
                       type="button"
                       onClick={() => setShowConfirmPassword((prev) => !prev)}
                       aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
-                      className="absolute inset-y-0 right-0 flex items-center pr-3 text-[#71767B] hover:text-[#111315] transition-colors"
+                      className="absolute inset-y-0 right-0 flex items-center pr-2.5 text-[#5b616b] hover:text-[#121417] transition-colors"
                     >
-                      {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      {showConfirmPassword ? <EyeOff className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> : <Eye className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
                     </button>
                   </div>
 
                   {/* Password Checklist Criteria */}
-                  <div className="mt-2.5 space-y-1.5 rounded-xl bg-[#F7F8F5] p-3 text-[11px] text-[#4B5259]">
-                    <div className="flex items-center gap-2">
+                  <div className="mt-1.5 rounded-md bg-[#f6f7f8] px-2.5 py-1.5 text-[10.5px] text-[#5b616b] grid grid-cols-1 sm:grid-cols-2 gap-1 sm:gap-1.5">
+                    <div className="flex items-center gap-1.5">
                       <span
-                        className={`flex h-4 w-4 items-center justify-center rounded-full text-[10px] ${
+                        className={`flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full text-[9px] ${
                           hasMinLength ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-200 text-gray-500'
                         }`}
                       >
-                        <Check className="h-3 w-3" />
+                        <Check className="h-2.5 w-2.5" />
                       </span>
-                      <span>At least 8 characters long</span>
+                      <span className="truncate">At least 8 characters long</span>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5">
                       <span
-                        className={`flex h-4 w-4 items-center justify-center rounded-full text-[10px] ${
+                        className={`flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full text-[9px] ${
                           hasNumberOrSymbol ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-200 text-gray-500'
                         }`}
                       >
-                        <Check className="h-3 w-3" />
+                        <Check className="h-2.5 w-2.5" />
                       </span>
-                      <span>Contains a number or special character</span>
+                      <span className="truncate">Contains a number or special character</span>
                     </div>
 
                     {confirmPassword.length > 0 && (
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1.5 sm:col-span-2">
                         <span
-                          className={`flex h-4 w-4 items-center justify-center rounded-full text-[10px] ${
+                          className={`flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full text-[9px] ${
                             passwordsMatch ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'
                           }`}
                         >
-                          <Check className="h-3 w-3" />
+                          <Check className="h-2.5 w-2.5" />
                         </span>
                         <span className={passwordsMatch ? 'text-emerald-700 font-medium' : 'text-rose-700'}>
                           {passwordsMatch ? 'Passwords match' : 'Passwords do not match'}
@@ -499,9 +499,9 @@ export function AuthPage({ pathname }: AuthPageProps) {
                 <div
                   role="status"
                   aria-live="polite"
-                  className="flex items-center gap-2 rounded-xl bg-amber-50 px-3 py-2 text-xs font-medium text-amber-800 border border-amber-200"
+                  className="flex items-center gap-1.5 rounded-md bg-amber-50 px-2.5 py-1 text-[11px] font-medium text-amber-800 border border-amber-200"
                 >
-                  <AlertCircle className="h-4 w-4 shrink-0 text-amber-600" />
+                  <AlertCircle className="h-3.5 w-3.5 shrink-0 text-amber-600" />
                   <span>Caps Lock is ON</span>
                 </div>
               )}
@@ -511,16 +511,16 @@ export function AuthPage({ pathname }: AuthPageProps) {
                 <div
                   role="alert"
                   aria-live="polite"
-                  className={`flex items-start gap-2.5 rounded-xl border p-3 text-xs leading-relaxed ${
+                  className={`flex items-start gap-2 rounded-md border p-2 text-[11px] leading-snug ${
                     status.kind === 'error'
                       ? 'border-rose-200 bg-rose-50 text-rose-800'
                       : 'border-emerald-200 bg-emerald-50 text-emerald-800'
                   }`}
                 >
                   {status.kind === 'error' ? (
-                    <AlertCircle className="h-4 w-4 shrink-0 text-rose-600 mt-0.5" />
+                    <AlertCircle className="h-3.5 w-3.5 shrink-0 text-rose-600 mt-0.5" />
                   ) : (
-                    <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600 mt-0.5" />
+                    <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-600 mt-0.5" />
                   )}
                   <span className="flex-1">{status.message}</span>
                 </div>
@@ -531,11 +531,11 @@ export function AuthPage({ pathname }: AuthPageProps) {
                 type="submit"
                 disabled={isSubmitting || (isResetPassword && !resetToken)}
                 aria-busy={isSubmitting}
-                className="group relative flex w-full items-center justify-center gap-2 rounded-xl bg-[#111315] px-4 py-3 text-xs font-semibold text-white shadow-sm transition hover:bg-[#0047FF] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50"
+                className="group relative flex w-full items-center justify-center gap-2 rounded-md bg-[#3b6fe0] hover:bg-[#2e5ccb] active:bg-[#3b6fe0] px-4 py-2 sm:py-2.5 text-xs font-medium text-white shadow-none transition cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isSubmitting ? (
                   <>
-                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                    <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white border-t-transparent" />
                     <span>Please wait…</span>
                   </>
                 ) : (
@@ -549,18 +549,18 @@ export function AuthPage({ pathname }: AuthPageProps) {
                             ? 'Create institutional account'
                             : 'Sign in to workspace'}
                     </span>
-                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                    <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
                   </>
                 )}
               </button>
             </form>
 
             {/* Sub-Actions / Alternate Links */}
-            <div className="mt-6 text-center text-xs text-[#71767B]">
+            <div className="mt-2.5 sm:mt-3 text-center text-xs text-[#5b616b]">
               {isForgotPassword && (
                 <Link
                   to="/auth/sign-in"
-                  className="inline-flex items-center gap-1.5 font-semibold text-[#0047FF] hover:underline"
+                  className="inline-flex items-center gap-1.5 font-medium text-[#3b6fe0] hover:underline"
                 >
                   <ArrowLeft className="h-3.5 w-3.5" />
                   <span>Back to Sign In</span>
@@ -570,7 +570,7 @@ export function AuthPage({ pathname }: AuthPageProps) {
               {isResetPassword && (
                 <Link
                   to="/auth/sign-in"
-                  className="inline-flex items-center gap-1.5 font-semibold text-[#0047FF] hover:underline"
+                  className="inline-flex items-center gap-1.5 font-medium text-[#3b6fe0] hover:underline"
                 >
                   <ArrowLeft className="h-3.5 w-3.5" />
                   <span>Return to Sign In</span>
@@ -583,7 +583,7 @@ export function AuthPage({ pathname }: AuthPageProps) {
                   <button
                     type="button"
                     onClick={() => navigate('/auth/sign-up')}
-                    className="font-semibold text-[#0047FF] hover:underline"
+                    className="font-medium text-[#3b6fe0] hover:underline cursor-pointer"
                   >
                     Create one
                   </button>
@@ -596,7 +596,7 @@ export function AuthPage({ pathname }: AuthPageProps) {
                   <button
                     type="button"
                     onClick={() => navigate('/auth/sign-in')}
-                    className="font-semibold text-[#0047FF] hover:underline"
+                    className="font-medium text-[#3b6fe0] hover:underline cursor-pointer"
                   >
                     Sign in
                   </button>
@@ -606,7 +606,7 @@ export function AuthPage({ pathname }: AuthPageProps) {
           </div>
 
           {/* Bottom Security Footer */}
-          <div className="pt-6 border-t border-[#E5E8E0] flex flex-wrap items-center justify-between gap-2 text-[11px] text-[#71767B]">
+          <div className="pt-2.5 sm:pt-3 border-t border-[#e1e4e8] flex flex-wrap items-center justify-between gap-2 text-[11px] text-[#5b616b] shrink-0">
             <div className="flex items-center gap-1.5">
               <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
               <span>256-bit TLS Encrypted</span>
@@ -616,103 +616,103 @@ export function AuthPage({ pathname }: AuthPageProps) {
         </div>
 
         {/* Right Institutional Showcase Panel (Desktop) */}
-        <div className="hidden lg:flex lg:col-span-6 xl:col-span-7 flex-col justify-between p-12 xl:p-16 bg-[#0E1013] text-white relative overflow-hidden">
+        <div className="hidden lg:flex lg:col-span-6 xl:col-span-7 flex-col justify-between p-6 lg:p-8 xl:p-10 bg-[#111112] text-[#ececec] border-l border-[#2a2a2d] relative overflow-hidden h-full">
           {/* Subtle background glow */}
-          <div className="pointer-events-none absolute -top-40 -right-40 h-96 w-96 rounded-full bg-[#0047FF]/20 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-blue-900/15 blur-3xl" />
+          <div className="pointer-events-none absolute -top-40 -right-40 h-96 w-96 rounded-full bg-[#3b6fe0]/10 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-[#3b6fe0]/5 blur-3xl" />
 
           {/* Top Badge */}
-          <div className="relative z-10 flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-blue-200 backdrop-blur-xs">
-              <Sparkles className="h-3.5 w-3.5 text-[#0047FF]" />
+          <div className="relative z-10 flex items-center gap-2 shrink-0">
+            <span className="inline-flex items-center gap-1.5 rounded-md border border-[#2a2a2d] bg-[#18181a] px-3 py-1 text-xs font-mono font-medium text-blue-300">
+              <Sparkles className="h-3.5 w-3.5 text-[#3b6fe0]" />
               <span>Academic Timetable Engine v2.4</span>
             </span>
           </div>
 
           {/* Center Showcase Card */}
-          <div className="relative z-10 my-auto max-w-lg space-y-6">
+          <div className="relative z-10 my-auto max-w-lg space-y-3 xl:space-y-4">
             <div>
-              <h2 className="text-2xl font-bold tracking-tight text-white xl:text-3xl">
-                Intelligent Academic Scheduling & Constraint Satisfaction.
+              <h2 className="text-xl font-bold tracking-tight text-white xl:text-2xl font-['Geist',ui-sans-serif,sans-serif]">
+                Intelligent Academic Scheduling &amp; Constraint Satisfaction.
               </h2>
-              <p className="mt-3 text-sm text-[#8B949E] leading-relaxed">
+              <p className="mt-1.5 text-xs xl:text-sm text-[#a1a1a6] leading-relaxed line-clamp-2">
                 Orqestra orchestrates complex departmental requirements, faculty teaching preferences, and physical room constraints into conflict-free institutional timetables.
               </p>
             </div>
 
             {/* Interactive Timetable Matrix Mockup */}
-            <div className="rounded-2xl border border-white/10 bg-[#161B22]/90 p-5 shadow-2xl backdrop-blur-md">
-              <div className="flex items-center justify-between border-b border-white/10 pb-3">
+            <div className="rounded-lg border border-[#2a2a2d] bg-[#18181a] p-3.5 xl:p-4 shadow-none">
+              <div className="flex items-center justify-between border-b border-[#2a2a2d] pb-2">
                 <div className="flex items-center gap-2">
-                  <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="h-2 w-2 rounded-full bg-[#2f9e44] animate-pulse" />
                   <span className="text-xs font-semibold text-white">
-                    Computer Science & Engineering — Fall Term
+                    Computer Science &amp; Engineering — Fall Term
                   </span>
                 </div>
-                <span className="rounded-md bg-emerald-950/60 px-2 py-0.5 text-[10px] font-semibold text-emerald-400 border border-emerald-500/20">
+                <span className="rounded-sm bg-emerald-950/60 px-2 py-0.5 text-[10px] font-mono font-semibold text-[#51cf66] border border-emerald-500/20">
                   0 Hard Conflicts
                 </span>
               </div>
 
               {/* Solver Key Metrics */}
-              <div className="mt-4 grid grid-cols-3 gap-2">
-                <div className="rounded-xl bg-white/5 p-2.5 text-center border border-white/5">
-                  <p className="text-[10px] text-[#8B949E]">Sections</p>
-                  <p className="mt-1 text-sm font-bold text-white">32</p>
+              <div className="mt-2.5 grid grid-cols-3 gap-2">
+                <div className="rounded-md bg-white/5 p-2 text-center border border-[#2a2a2d]">
+                  <p className="text-[10px] text-[#a1a1a6]">Sections</p>
+                  <p className="mt-0.5 text-xs xl:text-sm font-bold font-mono text-white tabular">32</p>
                 </div>
-                <div className="rounded-xl bg-white/5 p-2.5 text-center border border-white/5">
-                  <p className="text-[10px] text-[#8B949E]">Faculty</p>
-                  <p className="mt-1 text-sm font-bold text-white">48</p>
+                <div className="rounded-md bg-white/5 p-2 text-center border border-[#2a2a2d]">
+                  <p className="text-[10px] text-[#a1a1a6]">Faculty</p>
+                  <p className="mt-0.5 text-xs xl:text-sm font-bold font-mono text-white tabular">48</p>
                 </div>
-                <div className="rounded-xl bg-white/5 p-2.5 text-center border border-white/5">
-                  <p className="text-[10px] text-[#8B949E]">Preference Met</p>
-                  <p className="mt-1 text-sm font-bold text-emerald-400">99.4%</p>
+                <div className="rounded-md bg-white/5 p-2 text-center border border-[#2a2a2d]">
+                  <p className="text-[10px] text-[#a1a1a6]">Preference Met</p>
+                  <p className="mt-0.5 text-xs xl:text-sm font-bold font-mono text-[#51cf66] tabular">99.4%</p>
                 </div>
               </div>
 
               {/* Mock Schedule Rows */}
-              <div className="mt-4 space-y-2 font-mono text-[11px]">
-                <div className="flex items-center justify-between rounded-lg bg-white/5 px-3 py-2 border border-white/5">
-                  <span className="text-[#8B949E]">Mon 09:00</span>
+              <div className="mt-2.5 space-y-1.5 font-mono text-[10.5px]">
+                <div className="flex items-center justify-between rounded-md bg-white/5 px-2.5 py-1.5 border border-[#2a2a2d]">
+                  <span className="text-[#a1a1a6]">Mon 09:00</span>
                   <span className="font-semibold text-blue-300">CS101 Intro to Computing</span>
-                  <span className="text-xs text-[#8B949E]">Hall A (Turing)</span>
+                  <span className="text-xs text-[#a1a1a6]">Hall A (Turing)</span>
                 </div>
-                <div className="flex items-center justify-between rounded-lg bg-white/5 px-3 py-2 border border-white/5">
-                  <span className="text-[#8B949E]">Mon 10:00</span>
+                <div className="flex items-center justify-between rounded-md bg-white/5 px-2.5 py-1.5 border border-[#2a2a2d]">
+                  <span className="text-[#a1a1a6]">Mon 10:00</span>
                   <span className="font-semibold text-purple-300">CS102 Data Structures Lab</span>
-                  <span className="text-xs text-[#8B949E]">Lab 3 (Lovelace)</span>
+                  <span className="text-xs text-[#a1a1a6]">Lab 3 (Lovelace)</span>
                 </div>
-                <div className="flex items-center justify-between rounded-lg bg-white/5 px-3 py-2 border border-white/5">
-                  <span className="text-[#8B949E]">Tue 11:00</span>
+                <div className="flex items-center justify-between rounded-md bg-white/5 px-2.5 py-1.5 border border-[#2a2a2d]">
+                  <span className="text-[#a1a1a6]">Tue 11:00</span>
                   <span className="font-semibold text-emerald-300">CS201 Algorithm Design</span>
-                  <span className="text-xs text-[#8B949E]">Hall B (Knuth)</span>
+                  <span className="text-xs text-[#a1a1a6]">Hall B (Knuth)</span>
                 </div>
               </div>
             </div>
 
             {/* Testimonial Quote */}
-            <div className="rounded-xl border border-white/5 bg-white/5 p-4 text-xs text-[#C9D1D9] leading-relaxed">
+            <div className="rounded-md border border-[#2a2a2d] bg-[#18181a] p-2.5 xl:p-3 text-xs text-[#ececec] leading-relaxed">
               <p className="italic">
-                "Orqestra transformed our institutional scheduling from an agonizing two-week manual struggle into a verified 90-second automated run."
+                &ldquo;Orqestra transformed our institutional scheduling from an agonizing two-week manual struggle into a verified 90-second automated run.&rdquo;
               </p>
-              <p className="mt-2 text-[11px] font-semibold text-white">
-                — Head of Academic Administration & Timetabling
+              <p className="mt-1.5 text-[11px] font-semibold text-white">
+                — Head of Academic Administration &amp; Timetabling
               </p>
             </div>
           </div>
 
           {/* Bottom Reassurance Feature Badges */}
-          <div className="relative z-10 flex flex-wrap items-center gap-4 text-xs text-[#8B949E]">
+          <div className="relative z-10 flex flex-wrap items-center gap-3 xl:gap-4 text-xs text-[#a1a1a6] shrink-0 pt-2">
             <span className="flex items-center gap-1.5">
-              <Check className="h-3.5 w-3.5 text-[#0047FF]" />
+              <Check className="h-3.5 w-3.5 text-[#3b6fe0]" />
               <span>Independent Authoritative Validator</span>
             </span>
             <span className="flex items-center gap-1.5">
-              <Check className="h-3.5 w-3.5 text-[#0047FF]" />
+              <Check className="h-3.5 w-3.5 text-[#3b6fe0]" />
               <span>Isolated Local Persistence</span>
             </span>
             <span className="flex items-center gap-1.5">
-              <Check className="h-3.5 w-3.5 text-[#0047FF]" />
+              <Check className="h-3.5 w-3.5 text-[#3b6fe0]" />
               <span>Official Notice-board PDF Export</span>
             </span>
           </div>

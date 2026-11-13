@@ -5,7 +5,7 @@ import { AuthPage } from '@/features/auth/AuthPage';
 
 export default function SignUpPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#F7F8F5]" />}>
+    <Suspense fallback={<div className="h-screen h-[100dvh] bg-[#f6f7f8]" />}>
       <AuthPage pathname="SIGN_UP" />
     </Suspense>
   );

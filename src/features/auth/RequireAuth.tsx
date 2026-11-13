@@ -7,22 +7,22 @@ import { usePersistence } from '@/hooks/usePersistence';
 
 function AuthLoading() {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-[#F7F8F5] px-4">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-[#f6f7f8] px-4">
       <div className="flex flex-col items-center text-center">
-        {/* Animated Brand Monogram */}
-        <div className="relative mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#111315] text-xl font-bold text-white shadow-md">
+        {/* Brand Monogram */}
+        <div className="relative mb-5 flex h-12 w-12 items-center justify-center rounded-md bg-[#121417] text-xl font-bold text-white shadow-none">
           <span>O</span>
-          <span className="absolute -inset-1.5 -z-10 animate-ping rounded-2xl bg-[#0047FF]/20" />
+          <span className="absolute -inset-1 -z-10 animate-ping rounded-md bg-[#3b6fe0]/20" />
         </div>
 
-        <h2 className="text-base font-semibold text-[#111315]">Verifying secure session</h2>
-        <p className="mt-1.5 max-w-xs text-xs text-[#71767B]">
+        <h2 className="text-base font-semibold text-[#121417]">Verifying secure session</h2>
+        <p className="mt-1.5 max-w-xs text-xs text-[#5b616b]">
           Connecting to your institutional timetable workspace…
         </p>
 
         {/* Indeterminate loader bar */}
-        <div className="mt-5 h-1 w-48 overflow-hidden rounded-full bg-[#E5E8E0]">
-          <div className="h-full w-24 animate-[shimmer_1.5s_infinite] rounded-full bg-[#0047FF]" />
+        <div className="mt-5 h-1 w-48 overflow-hidden rounded-full bg-[#e1e4e8]">
+          <div className="h-full w-24 animate-[shimmer_1.5s_infinite] rounded-full bg-[#3b6fe0]" />
         </div>
       </div>
     </div>
@@ -70,17 +70,17 @@ function RequireAuthContent({ children }: { children: ReactNode }) {
       !(typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_NEON_AUTH_URL);
 
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#F7F8F5] px-4 py-12">
-        <div className="w-full max-w-md rounded-2xl border border-amber-200/80 bg-white p-6 sm:p-8 text-center shadow-lg shadow-amber-500/5">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 text-amber-600">
+      <div className="flex min-h-screen items-center justify-center bg-[#f6f7f8] px-4 py-12">
+        <div className="w-full max-w-md rounded-lg border border-[#e1e4e8] bg-white p-6 sm:p-8 text-center shadow-none">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-md bg-amber-50 text-amber-600">
             <ShieldAlert className="h-6 w-6" />
           </div>
 
-          <h1 className="mt-4 text-lg font-bold tracking-tight text-[#111315]">
+          <h1 className="mt-4 text-lg font-bold tracking-tight text-[#121417]">
             Authentication Service Unavailable
           </h1>
 
-          <p className="mt-2 text-xs leading-relaxed text-[#4B5259]">
+          <p className="mt-2 text-xs leading-relaxed text-[#5b616b]">
             {isMissingEnv
               ? 'VITE_NEON_AUTH_URL is not configured in your environment. Please ensure Neon Auth Base URL is configured in .env.local.'
               : error.message || 'We were unable to verify your active session with Neon Auth. Please check your network or try reconnecting.'}
@@ -90,7 +90,7 @@ function RequireAuthContent({ children }: { children: ReactNode }) {
             <button
               type="button"
               onClick={() => void refetch()}
-              className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#111315] px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-black focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0047FF]"
+              className="inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-md bg-[#3b6fe0] px-4 py-2 text-xs font-medium text-white transition hover:bg-[#2e5ccb] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#3b6fe0]"
             >
               <RefreshCw className="h-3.5 w-3.5" />
               <span>Retry Session</span>
@@ -98,9 +98,9 @@ function RequireAuthContent({ children }: { children: ReactNode }) {
 
             <Link
               to="/auth/sign-in"
-              className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-[#D0D5DD] bg-white px-4 py-2.5 text-xs font-semibold text-[#111315] transition hover:bg-black/5"
+              className="inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-md border border-[#e1e4e8] bg-[#f6f7f8] px-4 py-2 text-xs font-medium text-[#121417] transition hover:bg-[#eef0f2]"
             >
-              <LogIn className="h-3.5 w-3.5 text-[#71767B]" />
+              <LogIn className="h-3.5 w-3.5 text-[#5b616b]" />
               <span>Go to Sign In</span>
             </Link>
           </div>
