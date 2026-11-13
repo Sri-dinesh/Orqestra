@@ -40,32 +40,30 @@ export const FaqSection: React.FC = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   return (
-    <section id="faq" className="py-20 lg:py-28 bg-[#ffffff] dark:bg-[#111112] border-b border-[#e1e4e8] dark:border-[#2a2a2d]">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="faq" className="py-14 lg:py-20 bg-white dark:bg-[#111112] border-b border-[#e1e4e8] dark:border-[#2a2a2d]">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="mb-14 text-center">
-          <div className="inline-flex items-center justify-center gap-2 text-xs font-mono font-medium text-[#5b616b] dark:text-[#a1a1a6] uppercase tracking-widest mb-3">
-            <span>Frequently Asked Questions</span>
-            <span aria-hidden="true" className="text-[#d3d7dd] dark:text-[#36363a]">·</span>
-            <span className="text-[#3b6fe0] dark:text-[#7aa2f7]">Objection Resolution</span>
+        <div className="mb-10 text-center">
+          <div className="text-[11px] font-mono font-medium text-[#3b6fe0] dark:text-[#7aa2f7] uppercase tracking-wider mb-2">
+            Frequently Asked Questions
           </div>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-[#121417] dark:text-[#ececec] leading-tight text-balance">
-            Questions academic leaders ask before adopting Orqestra.
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-semibold tracking-tight text-[#121417] dark:text-[#ececec] leading-tight text-balance">
+            Questions before adopting Orqestra.
           </h2>
-          <p className="mt-4 text-base text-[#5b616b] dark:text-[#a1a1a6] leading-relaxed max-w-xl mx-auto text-pretty">
-            Clear, transparent answers regarding privacy, constraint satisfaction, laboratory handling, and institutional compliance.
+          <p className="mt-3 text-xs sm:text-sm text-[#5b616b] dark:text-[#a1a1a6] leading-relaxed max-w-lg mx-auto text-pretty">
+            Clear details regarding privacy, constraint satisfaction, laboratory handling, and institutional compliance.
           </p>
         </div>
 
         {/* Accordion List (Uniform hairline borders) */}
-        <div className="space-y-3">
+        <div className="space-y-2.5">
           {FAQS.map((faq, idx) => {
             const isOpen = openIndex === idx;
 
             return (
               <div
                 key={faq.q}
-                className={`rounded-md border transition-all duration-200 bg-white dark:bg-[#18181a] border-[#e1e4e8] dark:border-[#2a2a2d] hover:border-[#d3d7dd] dark:hover:border-[#36363a] ${
+                className={`rounded-md border transition-all duration-150 bg-white dark:bg-[#18181a] border-[#e1e4e8] dark:border-[#2a2a2d] hover:border-[#d3d7dd] dark:hover:border-[#36363a] ${
                   isOpen ? 'shadow-xs' : ''
                 }`}
               >
@@ -73,20 +71,20 @@ export const FaqSection: React.FC = () => {
                   type="button"
                   onClick={() => setOpenIndex(isOpen ? null : idx)}
                   aria-expanded={isOpen}
-                  className="w-full flex items-center justify-between gap-4 text-left px-5 py-4 cursor-pointer"
+                  className="w-full flex items-center justify-between gap-4 text-left px-4 py-3.5 cursor-pointer"
                 >
-                  <span className={`text-sm font-semibold ${isOpen ? 'text-[#3b6fe0] dark:text-[#7aa2f7]' : 'text-[#121417] dark:text-[#ececec]'}`}>
+                  <span className={`text-xs sm:text-sm font-semibold ${isOpen ? 'text-[#3b6fe0] dark:text-[#7aa2f7]' : 'text-[#121417] dark:text-[#ececec]'}`}>
                     {faq.q}
                   </span>
                   <ChevronDown
-                    className={`w-4 h-4 shrink-0 transition-transform duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                    className={`w-3.5 h-3.5 shrink-0 transition-transform duration-200 ${
                       isOpen ? 'rotate-180 text-[#3b6fe0] dark:text-[#7aa2f7]' : 'text-[#5b616b] dark:text-[#a1a1a6]'
                     }`}
                   />
                 </button>
 
                 {isOpen && (
-                  <div className="px-5 pb-5 pt-1 text-xs text-[#5b616b] dark:text-[#a1a1a6] leading-relaxed border-t border-[#e1e4e8]/60 dark:border-[#2a2a2d] text-pretty">
+                  <div className="px-4 pb-4 pt-1 text-xs text-[#5b616b] dark:text-[#a1a1a6] leading-relaxed border-t border-[#e1e4e8]/60 dark:border-[#2a2a2d] text-pretty">
                     {faq.a}
                   </div>
                 )}

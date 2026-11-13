@@ -66,17 +66,15 @@ export const TaglineRevealSection: React.FC = () => {
   return (
     <section
       ref={containerRef}
-      className="py-24 sm:py-32 bg-[#ffffff] dark:bg-[#111112] border-y border-[#e1e4e8] dark:border-[#2a2a2d] relative overflow-hidden"
+      className="py-12 sm:py-16 bg-white dark:bg-[#111112] border-y border-[#e1e4e8] dark:border-[#2a2a2d] relative overflow-hidden"
       aria-label="Core philosophy"
     >
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <div className="inline-flex items-center gap-2 text-xs font-mono font-medium tracking-widest text-[#5b616b] dark:text-[#a1a1a6] uppercase mb-8">
-          <span>Institutional Philosophy</span>
-          <span aria-hidden="true" className="text-[#d3d7dd] dark:text-[#36363a]">·</span>
-          <span className="text-[#3b6fe0] dark:text-[#7aa2f7]">Mathematical Certainty</span>
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div className="text-[11px] font-mono font-medium tracking-wider text-[#5b616b] dark:text-[#a1a1a6] uppercase mb-4">
+          Core Invariant
         </div>
 
-        <h2 className="text-3xl sm:text-5xl lg:text-6xl font-semibold tracking-tight leading-[1.2] max-w-4xl mx-auto text-balance">
+        <h2 className="text-2xl sm:text-3xl lg:text-4xl font-semibold tracking-tight leading-snug max-w-3xl mx-auto text-balance">
           {TAGLINE_WORDS.map((word, idx) => {
             const isRevealed = prefersReducedMotion || idx < revealedCount;
             const isLineBreak = idx === 4 || idx === 8;
@@ -84,7 +82,7 @@ export const TaglineRevealSection: React.FC = () => {
             return (
               <React.Fragment key={`${word}-${idx}`}>
                 <span
-                  className={`inline-block transition-colors duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                  className={`inline-block transition-colors duration-300 ease-out ${
                     isRevealed
                       ? 'text-[#121417] dark:text-[#ececec]'
                       : 'text-[#121417]/25 dark:text-[#ececec]/25'
@@ -98,8 +96,8 @@ export const TaglineRevealSection: React.FC = () => {
           })}
         </h2>
 
-        <p className="mt-8 text-base sm:text-lg text-[#5b616b] dark:text-[#a1a1a6] max-w-2xl mx-auto leading-relaxed text-pretty">
-          Built specifically for department heads, academic deans, and scheduling committees who require verifiable conflict prevention before term begins.
+        <p className="mt-4 text-xs sm:text-sm text-[#5b616b] dark:text-[#a1a1a6] max-w-xl mx-auto leading-relaxed text-pretty">
+          Mathematically verified conflict prevention for academic departments before term begins.
         </p>
       </div>
     </section>
