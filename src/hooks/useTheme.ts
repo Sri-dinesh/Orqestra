@@ -36,20 +36,9 @@ export function applyTheme(theme: Theme) {
 }
 
 export function useTheme() {
-  const [theme, setThemeState] = useState<Theme>(() => {
-    if (typeof window === 'undefined') return 'system';
-    try {
-      const stored = localStorage.getItem(THEME_STORAGE_KEY) as Theme | null;
-      if (stored === 'dark' || stored === 'light' || stored === 'system') {
-        return stored;
-      }
-    } catch {
-      // fallback
-    }
-    return 'system';
-  });
-
-  const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>(() => resolveTheme(theme));
+  const [theme, setThemeState] = useState<Theme>('system');
+  const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>('dark');
+  const [mounted, setMounted] = useState<boolean>(false);
 
   const setTheme = useCallback((newTheme: Theme) => {
     setThemeState(newTheme);
@@ -63,10 +52,23 @@ export function useTheme() {
     window.dispatchEvent(new CustomEvent('theme-change', { detail: newTheme }));
   }, []);
 
-  // Listen to external theme changes (across tabs or components)
+  // Sync client-side state on mount and subscribe to changes
   useEffect(() => {
-    applyTheme(theme);
-    setResolvedTheme(resolveTheme(theme));
+    setMounted(true);
+
+    let initialTheme: Theme = 'system';
+    try {
+      const stored = localStorage.getItem(THEME_STORAGE_KEY) as Theme | null;
+      if (stored === 'dark' || stored === 'light' || stored === 'system') {
+        initialTheme = stored;
+      }
+    } catch {
+      // fallback
+    }
+
+    setThemeState(initialTheme);
+    applyTheme(initialTheme);
+    setResolvedTheme(resolveTheme(initialTheme));
 
     const handleStorage = (e: StorageEvent) => {
       if (e.key === THEME_STORAGE_KEY && e.newValue) {
@@ -99,10 +101,13 @@ export function useTheme() {
       try {
         mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
         handleMedia = () => {
-          if (theme === 'system') {
-            applyTheme('system');
-            setResolvedTheme(getSystemTheme());
-          }
+          setThemeState((current) => {
+            if (current === 'system') {
+              applyTheme('system');
+              setResolvedTheme(getSystemTheme());
+            }
+            return current;
+          });
         };
         mediaQuery.addEventListener('change', handleMedia);
       } catch {
@@ -121,7 +126,7 @@ export function useTheme() {
         }
       }
     };
-  }, [theme]);
+  }, []);
 
-  return { theme, resolvedTheme, setTheme };
+  return { theme, resolvedTheme, setTheme, mounted };
 }

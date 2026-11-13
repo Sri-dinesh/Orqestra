@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Script from 'next/script';
 import './styles.css';
 import { AppShell } from './app-shell/AppShell';
 
@@ -37,11 +38,12 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('theme');var isDark=t==='dark'||((!t||t==='system')&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(isDark){document.documentElement.classList.add('dark');document.documentElement.style.colorScheme='dark';}else{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';}}catch(e){}})();`,
-          }}
-        />
+        <Script
+          id="theme-initializer"
+          strategy="beforeInteractive"
+        >
+          {`(function(){try{var t=localStorage.getItem('theme');var isDark=t==='dark'||((!t||t==='system')&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(isDark){document.documentElement.classList.add('dark');document.documentElement.style.colorScheme='dark';}else{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';}}catch(e){}})();`}
+        </Script>
       </head>
       <body className="min-h-screen antialiased selection:bg-[#3b6fe0] selection:text-white dark:selection:bg-[#7aa2f7] dark:selection:text-[#111112]">
         <AppShell>{children}</AppShell>
