@@ -41,7 +41,7 @@ export const FinalCTASection: React.FC<FinalCTASectionProps> = ({
   ];
 
   return (
-    <section className="gsap-section-reveal py-24 lg:py-32 bg-[#111315] text-white relative overflow-hidden">
+    <section className="gsap-section-reveal py-24 lg:py-32 bg-[#111112] text-white relative overflow-hidden">
       {/* Background architectural grid pattern */}
       <div className="absolute inset-0 bg-grid-pattern-dark opacity-20 pointer-events-none" />
 
@@ -49,11 +49,11 @@ export const FinalCTASection: React.FC<FinalCTASectionProps> = ({
       {floatingBlocks.map((b) => (
         <div
           key={b.code}
-          className={`absolute ${b.pos} p-3.5 rounded-xl bg-white/[0.04] border border-white/10 backdrop-blur-md pointer-events-none font-mono text-xs opacity-60`}
+          className={`absolute ${b.pos} p-3.5 rounded-md bg-white/[0.04] border border-white/10 backdrop-blur-md pointer-events-none font-mono text-xs opacity-60`}
         >
           <div className="flex items-center justify-between text-[10px] text-white/50 mb-1">
             <span>{b.time}</span>
-            <span className="text-emerald-400">IN THE APP</span>
+            <span className="text-[#51cf66]">IN THE APP</span>
           </div>
           <div className="font-bold text-white font-sans">
             {b.code} · {b.title}
@@ -64,12 +64,12 @@ export const FinalCTASection: React.FC<FinalCTASectionProps> = ({
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
         {/* Kicker */}
-        <div className="inline-flex items-center gap-2 text-xs font-mono text-blue-400 uppercase tracking-widest mb-6">
+        <div className="inline-flex items-center gap-2 text-xs font-mono text-[#7aa2f7] uppercase tracking-widest mb-6">
           <span>OFFLINE · PRIVATE · MIT LICENSED</span>
         </div>
 
         {/* Headline */}
-        <h2 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-[1.1] text-balance mb-6">
+        <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white leading-[1.1] text-balance mb-6">
           Your department&apos;s timetable is one preset away.
         </h2>
 
@@ -82,14 +82,14 @@ export const FinalCTASection: React.FC<FinalCTASectionProps> = ({
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <Link
             to="/dashboard"
-            className="w-full sm:w-auto px-8 py-4 text-sm font-semibold text-white bg-[#0047FF] hover:bg-[#0038CC] rounded-xl transition-all duration-200 shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2.5 group"
+            className="w-full sm:w-auto px-6 py-3.5 text-sm font-medium text-white bg-[#3b6fe0] hover:bg-[#2e5ccb] rounded-md transition-all duration-150 flex items-center justify-center gap-2.5 group shadow-none"
           >
             <span>Open the app</span>
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </Link>
           <button
             onClick={onScrollToDemo}
-            className="w-full sm:w-auto px-8 py-4 text-sm font-semibold text-white/90 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all duration-200"
+            className="w-full sm:w-auto px-6 py-3.5 text-sm font-medium text-white/90 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-md transition-all duration-150 shadow-none"
           >
             See how it works
           </button>
@@ -98,15 +98,15 @@ export const FinalCTASection: React.FC<FinalCTASectionProps> = ({
         {/* Bottom verification markers — real guarantees */}
         <div className="mt-12 flex flex-wrap items-center justify-center gap-6 text-xs text-white/50 font-mono">
           <span className="flex items-center gap-1.5">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+            <CheckCircle2 className="w-3.5 h-3.5 text-[#51cf66]" />
             <span>No account needed</span>
           </span>
           <span className="flex items-center gap-1.5">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+            <CheckCircle2 className="w-3.5 h-3.5 text-[#51cf66]" />
             <span>Works offline, data stays in your browser</span>
           </span>
           <span className="flex items-center gap-1.5">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+            <CheckCircle2 className="w-3.5 h-3.5 text-[#51cf66]" />
             <span>PDF + Excel export included</span>
           </span>
         </div>

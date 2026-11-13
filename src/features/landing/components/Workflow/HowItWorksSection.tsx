@@ -39,21 +39,21 @@ export const HowItWorksSection: React.FC = () => {
   return (
     <section
       id="how-it-works"
-      className="gsap-section-reveal py-20 lg:py-28 bg-[#F7F8F5]"
+      className="gsap-section-reveal py-20 lg:py-28 bg-[#f6f7f8]"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl mb-12">
-          <div className="flex items-center gap-2 text-xs font-mono font-medium text-[#4B5259] uppercase tracking-widest mb-3">
+          <div className="flex items-center gap-2 text-xs font-mono font-medium text-[#5b616b] uppercase tracking-widest mb-3">
             <span>Workflow</span>
             <span aria-hidden="true" className="text-black/30">
               ·
             </span>
-            <span className="text-[#0047FF]">How it works</span>
+            <span className="text-[#3b6fe0]">How it works</span>
           </div>
-          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-[#111315] leading-tight text-balance">
+          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-[#121417] leading-tight text-balance">
             From empty department to notice-board PDF in six steps.
           </h2>
-          <p className="mt-4 text-base sm:text-lg text-[#4B5259] leading-relaxed max-w-2xl text-balance">
+          <p className="mt-4 text-base sm:text-lg text-[#5b616b] leading-relaxed max-w-2xl text-balance">
             This is the actual workflow in the app — the same screens,
             services, and guarantees described here are what you get when you
             open the dashboard.
@@ -64,20 +64,20 @@ export const HowItWorksSection: React.FC = () => {
           {STEPS.map((s) => (
             <li
               key={s.n}
-              className="rounded-2xl bg-white border border-[#E5E8E0] p-6 flex flex-col"
+              className="rounded-md bg-white border border-[#e1e4e8] p-6 flex flex-col"
             >
-              <span className="text-xs font-mono font-bold text-[#0047FF] mb-3">
+              <span className="text-xs font-mono font-bold text-[#3b6fe0] mb-3">
                 {s.n}
               </span>
-              <h3 className="font-display text-lg font-bold text-[#111315] mb-2 leading-snug">
+              <h3 className="font-display text-lg font-bold text-[#121417] mb-2 leading-snug">
                 {s.title}
               </h3>
-              <p className="text-[13px] text-[#4B5259] leading-relaxed">{s.text}</p>
+              <p className="text-[13px] text-[#5b616b] leading-relaxed">{s.text}</p>
             </li>
           ))}
         </ol>
 
-        <div className="mt-6 rounded-2xl bg-[#111315] text-white p-6 lg:p-8 flex flex-col lg:flex-row lg:items-center gap-5">
+        <div className="mt-6 rounded-md bg-[#121417] text-white p-6 lg:p-8 flex flex-col lg:flex-row lg:items-center gap-5">
           <div className="flex-1">
             <p className="text-xs font-mono uppercase tracking-widest text-blue-300 mb-2">
               The full-packing rule
@@ -95,7 +95,7 @@ export const HowItWorksSection: React.FC = () => {
           </div>
           <Link
             to="/dashboard"
-            className="shrink-0 inline-flex items-center gap-2 px-5 py-3 text-sm font-semibold text-[#111315] bg-white hover:bg-blue-50 rounded-xl transition-colors"
+            className="shrink-0 inline-flex items-center gap-2 px-5 py-3 text-sm font-semibold text-[#121417] bg-white hover:bg-blue-50 rounded-md transition-colors"
           >
             <span>Try it on the dashboard</span>
             <ArrowRight className="w-4 h-4" />

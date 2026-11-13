@@ -34,20 +34,20 @@ const CARDS = [
 
 export const DataSection: React.FC = () => {
   return (
-    <section className="gsap-section-reveal py-20 lg:py-28 bg-[#F7F8F5]">
+    <section className="gsap-section-reveal py-20 lg:py-28 bg-[#f6f7f8]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl mb-12">
-          <div className="flex items-center gap-2 text-xs font-mono font-medium text-[#4B5259] uppercase tracking-widest mb-3">
+          <div className="flex items-center gap-2 text-xs font-mono font-medium text-[#5b616b] uppercase tracking-widest mb-3">
             <span>Export · Versions · Privacy</span>
             <span aria-hidden="true" className="text-black/30">
               ·
             </span>
-            <span className="text-[#0047FF]">Ship it and keep it</span>
+            <span className="text-[#3b6fe0]">Ship it and keep it</span>
           </div>
-          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-[#111315] leading-tight text-balance">
+          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-[#121417] leading-tight text-balance">
             The output is official. The data stays yours.
           </h2>
-          <p className="mt-4 text-base sm:text-lg text-[#4B5259] leading-relaxed max-w-2xl text-balance">
+          <p className="mt-4 text-base sm:text-lg text-[#5b616b] leading-relaxed max-w-2xl text-balance">
             Timetables are only useful pinned to a board or filed in a record —
             and department data is only safe when it never leaves the
             department.
@@ -58,21 +58,21 @@ export const DataSection: React.FC = () => {
           {CARDS.map((c) => (
             <article
               key={c.title}
-              className="rounded-2xl bg-white border border-[#E5E8E0] p-6 flex flex-col"
+              className="rounded-md bg-white border border-[#e1e4e8] p-6 flex flex-col"
             >
-              <div className="w-9 h-9 rounded-lg bg-[#111315] text-white flex items-center justify-center mb-4">
+              <div className="w-9 h-9 rounded-lg bg-[#121417] text-white flex items-center justify-center mb-4">
                 <c.icon size={18} />
               </div>
-              <h3 className="font-display text-lg font-bold text-[#111315] mb-3">
+              <h3 className="font-display text-lg font-bold text-[#121417] mb-3">
                 {c.title}
               </h3>
               <ul className="space-y-2.5">
                 {c.points.map((pt) => (
                   <li
                     key={pt.slice(0, 24)}
-                    className="text-[13px] text-[#4B5259] leading-relaxed flex gap-2"
+                    className="text-[13px] text-[#5b616b] leading-relaxed flex gap-2"
                   >
-                    <span aria-hidden="true" className="text-[#0047FF] font-bold">
+                    <span aria-hidden="true" className="text-[#3b6fe0] font-bold">
                       ·
                     </span>
                     <span>{pt}</span>
@@ -83,7 +83,7 @@ export const DataSection: React.FC = () => {
           ))}
         </div>
 
-        <div className="mt-6 rounded-2xl bg-[#111315] text-white p-6 lg:p-8 flex flex-col lg:flex-row lg:items-center gap-5">
+        <div className="mt-6 rounded-md bg-[#121417] text-white p-6 lg:p-8 flex flex-col lg:flex-row lg:items-center gap-5">
           <p className="text-sm text-white/80 leading-relaxed flex-1 max-w-3xl">
             Strict TypeScript throughout, a pure side-effect-free domain core,
             and 51 automated tests — including enterprise-scale end-to-end runs
@@ -92,7 +92,7 @@ export const DataSection: React.FC = () => {
           </p>
           <Link
             to="/dashboard"
-            className="shrink-0 inline-flex items-center gap-2 px-5 py-3 text-sm font-semibold text-[#111315] bg-white hover:bg-blue-50 rounded-xl transition-colors"
+            className="shrink-0 inline-flex items-center gap-2 px-5 py-3 text-sm font-semibold text-[#121417] bg-white hover:bg-blue-50 rounded-md transition-colors"
           >
             <span>Open the app</span>
             <ArrowRight className="w-4 h-4" />

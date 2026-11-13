@@ -64,24 +64,24 @@ export const EngineArchitectureSection: React.FC = () => {
   return (
     <section
       id="engine"
-      className="gsap-section-reveal py-20 lg:py-28 bg-[#F7F8F5] relative"
+      className="gsap-section-reveal py-20 lg:py-28 bg-[#f6f7f8] relative"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="max-w-3xl mb-14">
-          <div className="flex items-center gap-2 text-xs font-mono font-medium text-[#4B5259] uppercase tracking-widest mb-3">
+          <div className="flex items-center gap-2 text-xs font-mono font-medium text-[#5b616b] uppercase tracking-widest mb-3">
             <span>Scheduling engine</span>
             <span aria-hidden="true" className="text-black/30">
               ·
             </span>
-            <span className="text-[#0047FF]">
+            <span className="text-[#3b6fe0]">
               Constraint backtracking, honestly explained
             </span>
           </div>
-          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-[#111315] leading-tight text-balance">
+          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-[#121417] leading-tight text-balance">
             A solver you can reason about, not a black box.
           </h2>
-          <p className="mt-4 text-base sm:text-lg text-[#4B5259] leading-relaxed max-w-2xl text-balance">
+          <p className="mt-4 text-base sm:text-lg text-[#5b616b] leading-relaxed max-w-2xl text-balance">
             Generation is a constraint-satisfaction backtracking search with
             heuristic guidance — pure, side-effect-free TypeScript running
             entirely in your browser. Select a stage to see what it actually
@@ -90,11 +90,11 @@ export const EngineArchitectureSection: React.FC = () => {
         </div>
 
         {/* Pipeline */}
-        <div className="rounded-2xl bg-white border border-[#E5E8E0] p-6 lg:p-10 shadow-sm">
+        <div className="rounded-md bg-white border border-[#e1e4e8] p-6 lg:p-10 shadow-sm">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             {/* Stage list */}
             <div className="lg:col-span-5 space-y-2.5">
-              <div className="text-xs font-mono text-[#71767B] uppercase tracking-wider mb-3 px-1">
+              <div className="text-xs font-mono text-[#5b616b] uppercase tracking-wider mb-3 px-1">
                 Generation pipeline
               </div>
               {STAGES.map((s, i) => {
@@ -103,10 +103,10 @@ export const EngineArchitectureSection: React.FC = () => {
                   <button
                     key={s.id}
                     onClick={() => setActiveId(s.id)}
-                    className={`w-full text-left p-3.5 rounded-xl border transition-all text-xs ${
+                    className={`w-full text-left p-3.5 rounded-md border transition-all text-xs ${
                       isActive
-                        ? "bg-[#111315] text-white border-[#111315] shadow-sm"
-                        : "bg-[#FAFBF9] text-[#30363D] border-[#E5E8E0] hover:border-[#0047FF] hover:bg-white"
+                        ? "bg-[#121417] text-white border-[#121417] shadow-sm"
+                        : "bg-[#ffffff] text-[#30363D] border-[#e1e4e8] hover:border-[#3b6fe0] hover:bg-white"
                     }`}
                   >
                     <div className="flex items-center justify-between mb-1">
@@ -114,13 +114,13 @@ export const EngineArchitectureSection: React.FC = () => {
                         {i + 1}. {s.title}
                       </span>
                       <span
-                        className={`text-[10px] font-mono ${isActive ? "text-blue-300" : "text-[#71767B]"}`}
+                        className={`text-[10px] font-mono ${isActive ? "text-blue-300" : "text-[#5b616b]"}`}
                       >
                         {s.step.toUpperCase()}
                       </span>
                     </div>
                     <p
-                      className={`line-clamp-2 text-[11px] ${isActive ? "text-white/70" : "text-[#71767B]"}`}
+                      className={`line-clamp-2 text-[11px] ${isActive ? "text-white/70" : "text-[#5b616b]"}`}
                     >
                       {s.description}
                     </p>
@@ -131,9 +131,9 @@ export const EngineArchitectureSection: React.FC = () => {
 
             {/* Core + inspector */}
             <div className="lg:col-span-7 space-y-4">
-              <div className="flex flex-col p-6 rounded-2xl bg-[#111315] text-white border border-black/10 relative overflow-hidden min-h-[220px]">
+              <div className="flex flex-col p-6 rounded-md bg-[#121417] text-white border border-black/10 relative overflow-hidden min-h-[220px]">
                 <div className="absolute inset-0 bg-radial-gradient from-blue-500/10 via-transparent to-transparent pointer-events-none" />
-                <div className="w-12 h-12 rounded-xl bg-blue-600 text-white flex items-center justify-center mb-4 shadow-lg shadow-blue-500/20">
+                <div className="w-12 h-12 rounded-md bg-blue-600 text-white flex items-center justify-center mb-4 shadow-lg shadow-blue-500/20">
                   <Cpu className="w-6 h-6" />
                 </div>
                 <div className="text-xs font-mono text-blue-400 uppercase tracking-widest mb-1">
@@ -147,30 +147,30 @@ export const EngineArchitectureSection: React.FC = () => {
                 </p>
               </div>
 
-              <div className="rounded-xl bg-[#FAFBF9] border border-[#E5E8E0] p-5">
-                <p className="text-xs font-mono font-bold text-[#0047FF] uppercase mb-3">
+              <div className="rounded-md bg-[#ffffff] border border-[#e1e4e8] p-5">
+                <p className="text-xs font-mono font-bold text-[#3b6fe0] uppercase mb-3">
                   Determinism & budgets
                 </p>
-                <ul className="grid sm:grid-cols-2 gap-3 text-xs text-[#4B5259] leading-relaxed">
-                  <li className="rounded-lg bg-white border border-[#E5E8E0] p-3">
-                    <strong className="text-[#111315]">Seeded runs.</strong>{" "}
+                <ul className="grid sm:grid-cols-2 gap-3 text-xs text-[#5b616b] leading-relaxed">
+                  <li className="rounded-lg bg-white border border-[#e1e4e8] p-3">
+                    <strong className="text-[#121417]">Seeded runs.</strong>{" "}
                     A seeded PRNG drives ordering — identical input + identical
                     seed = bit-identical timetable. The seed is stored in the
                     generation metadata.
                   </li>
-                  <li className="rounded-lg bg-white border border-[#E5E8E0] p-3">
-                    <strong className="text-[#111315]">Cancellable.</strong>{" "}
+                  <li className="rounded-lg bg-white border border-[#e1e4e8] p-3">
+                    <strong className="text-[#121417]">Cancellable.</strong>{" "}
                     The Cancel button stops the search via a cancellation token
                     checked on every node.
                   </li>
-                  <li className="rounded-lg bg-white border border-[#E5E8E0] p-3">
-                    <strong className="text-[#111315]">Node + time budgets.</strong>{" "}
+                  <li className="rounded-lg bg-white border border-[#e1e4e8] p-3">
+                    <strong className="text-[#121417]">Node + time budgets.</strong>{" "}
                     Configurable per department (defaults: 20M nodes, 60s).
                     Exhaustion reports SEARCH_NODE_LIMIT or SEARCH_TIMEOUT with
                     actionable diagnostics.
                   </li>
-                  <li className="rounded-lg bg-white border border-[#E5E8E0] p-3">
-                    <strong className="text-[#111315]">Faculty fairness.</strong>{" "}
+                  <li className="rounded-lg bg-white border border-[#e1e4e8] p-3">
+                    <strong className="text-[#121417]">Faculty fairness.</strong>{" "}
                     Placement steers toward the least-loaded eligible teacher,
                     so balanced pools stay within a 1–2 period spread.
                   </li>

@@ -57,21 +57,21 @@ export const FeatureStorytelling: React.FC = () => {
   return (
     <section
       id="features"
-      className="gsap-section-reveal py-20 lg:py-28 bg-white border-y border-[#E5E8E0]"
+      className="gsap-section-reveal py-20 lg:py-28 bg-white border-y border-[#e1e4e8]"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl mb-12">
-          <div className="flex items-center gap-2 text-xs font-mono font-medium text-[#4B5259] uppercase tracking-widest mb-3">
+          <div className="flex items-center gap-2 text-xs font-mono font-medium text-[#5b616b] uppercase tracking-widest mb-3">
             <span>Features</span>
             <span aria-hidden="true" className="text-black/30">
               ·
             </span>
-            <span className="text-[#0047FF]">What the app does</span>
+            <span className="text-[#3b6fe0]">What the app does</span>
           </div>
-          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-[#111315] leading-tight text-balance">
+          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-[#121417] leading-tight text-balance">
             Everything a department needs to ship a timetable.
           </h2>
-          <p className="mt-4 text-base sm:text-lg text-[#4B5259] leading-relaxed max-w-2xl text-balance">
+          <p className="mt-4 text-base sm:text-lg text-[#5b616b] leading-relaxed max-w-2xl text-balance">
             No backend, no accounts, no sales calls. Configure, generate, edit,
             version, and export — all offline in your browser.
           </p>
@@ -81,15 +81,15 @@ export const FeatureStorytelling: React.FC = () => {
           {FEATURES.map((f) => (
             <article
               key={f.title}
-              className="rounded-2xl bg-[#FAFBF9] border border-[#E5E8E0] p-5 flex flex-col hover:border-[#0047FF]/40 hover:bg-white transition-colors"
+              className="rounded-md bg-[#ffffff] border border-[#e1e4e8] p-5 flex flex-col hover:border-[#3b6fe0]/40 hover:bg-white transition-colors"
             >
-              <div className="w-9 h-9 rounded-lg bg-[#111315] text-white flex items-center justify-center mb-4">
+              <div className="w-9 h-9 rounded-lg bg-[#121417] text-white flex items-center justify-center mb-4">
                 <f.icon className="w-4.5 h-4.5" size={18} />
               </div>
-              <h3 className="font-display text-base font-bold text-[#111315] mb-1.5">
+              <h3 className="font-display text-base font-bold text-[#121417] mb-1.5">
                 {f.title}
               </h3>
-              <p className="text-[13px] text-[#4B5259] leading-relaxed">{f.text}</p>
+              <p className="text-[13px] text-[#5b616b] leading-relaxed">{f.text}</p>
             </article>
           ))}
         </div>

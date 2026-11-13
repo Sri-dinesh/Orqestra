@@ -27,21 +27,21 @@ export const PresetsSection: React.FC = () => {
   return (
     <section
       id="presets"
-      className="gsap-section-reveal py-20 lg:py-28 bg-white border-y border-[#E5E8E0]"
+      className="gsap-section-reveal py-20 lg:py-28 bg-white border-y border-[#e1e4e8]"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl mb-12">
-          <div className="flex items-center gap-2 text-xs font-mono font-medium text-[#4B5259] uppercase tracking-widest mb-3">
+          <div className="flex items-center gap-2 text-xs font-mono font-medium text-[#5b616b] uppercase tracking-widest mb-3">
             <span>Built-in presets</span>
             <span aria-hidden="true" className="text-black/30">
               ·
             </span>
-            <span className="text-[#0047FF]">One click sets up everything</span>
+            <span className="text-[#3b6fe0]">One click sets up everything</span>
           </div>
-          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-[#111315] leading-tight text-balance">
+          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-[#121417] leading-tight text-balance">
             Start from a real department, not a blank form.
           </h2>
-          <p className="mt-4 text-base sm:text-lg text-[#4B5259] leading-relaxed max-w-2xl text-balance">
+          <p className="mt-4 text-base sm:text-lg text-[#5b616b] leading-relaxed max-w-2xl text-balance">
             Three production-grade institutional blueprints ship with the app:
             Standard School, B.Tech Enterprise (9 Sections), and Medical College.
             Applying one pre-configures all sections, subjects, faculty, rooms,
@@ -53,10 +53,10 @@ export const PresetsSection: React.FC = () => {
           {PRESETS.map((p) => (
             <article
               key={p.name}
-              className={`rounded-2xl border p-5 flex flex-col ${
+              className={`rounded-md border p-5 flex flex-col ${
                 p.featured
-                  ? "bg-[#111315] text-white border-[#111315]"
-                  : "bg-[#FAFBF9] border-[#E5E8E0]"
+                  ? "bg-[#121417] text-white border-[#121417]"
+                  : "bg-[#ffffff] border-[#e1e4e8]"
               }`}
             >
               <div className="flex items-start justify-between gap-2 mb-2">
@@ -70,12 +70,12 @@ export const PresetsSection: React.FC = () => {
                 )}
               </div>
               <p
-                className={`text-[11px] font-mono mb-2.5 ${p.featured ? "text-white/60" : "text-[#71767B]"}`}
+                className={`text-[11px] font-mono mb-2.5 ${p.featured ? "text-white/60" : "text-[#5b616b]"}`}
               >
                 {p.spec}
               </p>
               <p
-                className={`text-[13px] leading-relaxed flex-1 ${p.featured ? "text-white/80" : "text-[#4B5259]"}`}
+                className={`text-[13px] leading-relaxed flex-1 ${p.featured ? "text-white/80" : "text-[#5b616b]"}`}
               >
                 {p.text}
               </p>
@@ -83,15 +83,15 @@ export const PresetsSection: React.FC = () => {
           ))}
         </div>
 
-        <div className="mt-6 rounded-2xl bg-[#FAFBF9] border border-[#E5E8E0] p-6 flex flex-col sm:flex-row sm:items-center gap-4">
-          <p className="text-sm text-[#4B5259] leading-relaxed flex-1">
+        <div className="mt-6 rounded-md bg-[#ffffff] border border-[#e1e4e8] p-6 flex flex-col sm:flex-row sm:items-center gap-4">
+          <p className="text-sm text-[#5b616b] leading-relaxed flex-1">
             Presets live on the dashboard under “Institutional Blueprints” —
             apply one, inspect the generated configuration, then head to the
             Generate page.
           </p>
           <Link
             to="/dashboard"
-            className="shrink-0 inline-flex items-center gap-2 px-5 py-3 text-sm font-semibold text-white bg-[#111315] hover:bg-[#0047FF] rounded-xl transition-colors"
+            className="shrink-0 inline-flex items-center gap-2 px-5 py-3 text-sm font-semibold text-white bg-[#121417] hover:bg-[#3b6fe0] rounded-md transition-colors"
           >
             <span>Browse presets</span>
             <ArrowRight className="w-4 h-4" />

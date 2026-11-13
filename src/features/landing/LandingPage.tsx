@@ -33,7 +33,7 @@ export function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F7F8F5] text-[#111315] font-sans selection:bg-[#0047FF] selection:text-white flex flex-col">
+    <div className="landing-theme min-h-screen bg-[#f6f7f8] text-[#121417] font-sans selection:bg-[#3b6fe0] selection:text-white flex flex-col">
       <Navbar onScrollToDemo={scrollToDemo} />
 
       {/* Main Content Sections Flow */}

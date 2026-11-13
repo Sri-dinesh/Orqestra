@@ -14,38 +14,35 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   onSelectClass,
 }) => {
   return (
-    <section className="relative pt-28 pb-16 lg:pt-36 lg:pb-24 overflow-hidden bg-[#F7F8F5]">
-      {/* Subtle architectural grid backdrop */}
-      <div className="absolute inset-0 bg-grid-pattern opacity-60 pointer-events-none" />
-
+    <section className="relative pt-28 pb-16 lg:pt-36 lg:pb-24 overflow-hidden bg-[#f6f7f8]">
       {/* Subtle radial ambient light */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-gradient-to-b from-blue-50/50 via-transparent to-transparent pointer-events-none blur-3xl -z-10" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-gradient-to-b from-[#e8effc]/40 via-transparent to-transparent pointer-events-none blur-3xl -z-10" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Top Eyebrow & Headline Container */}
         <div className="max-w-4xl mx-auto text-center mb-10 lg:mb-14">
           {/* Eyebrow */}
-          <div className="flex items-center justify-center gap-2 text-xs font-mono font-medium tracking-widest text-[#4B5259] uppercase mb-4">
+          <div className="flex items-center justify-center gap-2 text-xs font-mono font-medium tracking-widest text-[#5b616b] uppercase mb-4">
             <span>Department Timetable Generator</span>
-            <span aria-hidden="true" className="text-black/30">
+            <span aria-hidden="true" className="text-[#d3d7dd]">
               ·
             </span>
-            <span className="text-[#0047FF] font-semibold">
+            <span className="text-[#3b6fe0] font-semibold">
               100% Offline · No Account
             </span>
           </div>
 
           {/* Primary Editorial Headline */}
-          <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-[#111315] leading-[1.08] text-balance mb-6">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-[#121417] leading-[1.08] text-balance mb-6">
             Conflict-free department timetables,{" "}
             <span className="relative inline-block">
               generated in your browser.
-              <span className="absolute bottom-1 left-0 w-full h-[3px] bg-[#0047FF]/25 -z-10 rounded-full" />
+              <span className="absolute bottom-1 left-0 w-full h-[3px] bg-[#3b6fe0]/25 -z-10 rounded-full" />
             </span>
           </h1>
 
           {/* Value Proposition Subtitle */}
-          <p className="text-base sm:text-lg lg:text-xl text-[#4B5259] max-w-2xl mx-auto leading-relaxed text-balance mb-8">
+          <p className="text-base sm:text-lg lg:text-xl text-[#5b616b] max-w-2xl mx-auto leading-relaxed text-balance mb-8">
             Configure departments, sections, subjects, and faculty — then let a
             backtracking scheduler fill every teaching period. Edit anything by
             hand with full validation, keep every version, and export official
@@ -56,31 +53,31 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
             <Link
               to="/dashboard"
-              className="w-full sm:w-auto px-6 py-3.5 text-sm font-semibold text-white bg-[#111315] hover:bg-[#0047FF] rounded-xl transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2 group"
+              className="w-full sm:w-auto px-6 py-3 text-sm font-medium text-white bg-[#3b6fe0] hover:bg-[#2e5ccb] rounded-md transition-all duration-150 flex items-center justify-center gap-2 group shadow-none"
             >
               <span>Open the app</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
             <button
               onClick={onScrollToDemo}
-              className="w-full sm:w-auto px-6 py-3.5 text-sm font-semibold text-[#111315] bg-white hover:bg-[#FAFBF9] border border-[#E5E8E0] hover:border-[#111315] rounded-xl transition-all duration-200 flex items-center justify-center gap-2"
+              className="w-full sm:w-auto px-6 py-3 text-sm font-medium text-[#121417] bg-white hover:bg-[#eef0f2] border border-[#e1e4e8] rounded-md transition-all duration-150 flex items-center justify-center gap-2 shadow-none"
             >
               <span>See how it works</span>
             </button>
           </div>
 
           {/* Trust markers — real product facts */}
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs font-medium text-[#71767B]">
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs font-medium text-[#5b616b]">
             <span className="flex items-center gap-1.5">
-              <Check className="w-3.5 h-3.5 text-emerald-600" />
+              <Check className="w-3.5 h-3.5 text-[#2f9e44]" />
               Runs fully offline in local storage
             </span>
             <span className="flex items-center gap-1.5">
-              <Check className="w-3.5 h-3.5 text-emerald-600" />
+              <Check className="w-3.5 h-3.5 text-[#2f9e44]" />
               No backend, no account, nothing leaves your machine
             </span>
             <span className="flex items-center gap-1.5">
-              <Check className="w-3.5 h-3.5 text-emerald-600" />
+              <Check className="w-3.5 h-3.5 text-[#2f9e44]" />
               Notice-board PDF + Excel export
             </span>
           </div>
@@ -88,7 +85,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
         {/* Hero Visual — honest product preview */}
         <div className="max-w-5xl mx-auto">
-          <div className="mb-2 flex items-center justify-between text-xs text-[#71767B] px-1 font-mono">
+          <div className="mb-2 flex items-center justify-between text-xs text-[#5b616b] px-1 font-mono">
             <span>APP PREVIEW · SECTION WEEKLY GRID</span>
             <span className="tabular">
               SEEDED SOLVER · DRAFT → VALIDATE → COMMIT
@@ -98,36 +95,36 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         </div>
 
         {/* Honest proof band — real, verifiable product facts */}
-        <div className="mt-14 max-w-5xl mx-auto pt-8 border-t border-[#E5E8E0] grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+        <div className="mt-14 max-w-5xl mx-auto pt-8 border-t border-[#e1e4e8] grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
           <div>
-            <div className="font-display text-2xl lg:text-3xl font-bold text-[#111315] tabular">
+            <div className="text-2xl lg:text-3xl font-bold text-[#121417] font-mono tabular">
               378
             </div>
-            <div className="text-xs font-medium text-[#71767B] mt-1">
+            <div className="text-xs font-medium text-[#5b616b] mt-1">
               Sessions in the Enterprise preset (9 sections × 6 days × 7 periods)
             </div>
           </div>
           <div>
-            <div className="font-display text-2xl lg:text-3xl font-bold text-[#111315] tabular">
+            <div className="text-2xl lg:text-3xl font-bold text-[#121417] font-mono tabular">
               ~2–5s
             </div>
-            <div className="text-xs font-medium text-[#71767B] mt-1">
+            <div className="text-xs font-medium text-[#5b616b] mt-1">
               Typical solve time for a fully-packed department
             </div>
           </div>
           <div>
-            <div className="font-display text-2xl lg:text-3xl font-bold text-[#111315] tabular">
+            <div className="text-2xl lg:text-3xl font-bold text-[#121417] font-mono tabular">
               100%
             </div>
-            <div className="text-xs font-medium text-[#71767B] mt-1">
+            <div className="text-xs font-medium text-[#5b616b] mt-1">
               Client-side — works offline, data stays in your browser
             </div>
           </div>
           <div>
-            <div className="font-display text-2xl lg:text-3xl font-bold text-[#111315] tabular">
+            <div className="text-2xl lg:text-3xl font-bold text-[#121417] font-mono tabular">
               20
             </div>
-            <div className="text-xs font-medium text-[#71767B] mt-1">
+            <div className="text-xs font-medium text-[#5b616b] mt-1">
               Restorable versions kept per timetable, newest last
             </div>
           </div>

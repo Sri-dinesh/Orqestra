@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 export const Footer: React.FC = () => {
   return (
-    <footer className="bg-[#0B0D0F] text-white pt-16 pb-12 border-t border-white/10 relative overflow-hidden">
+    <footer className="bg-[#111112] text-white pt-16 pb-12 border-t border-white/10 relative overflow-hidden">
       {/* Architectural subtle dark pattern */}
       <div className="absolute inset-0 bg-grid-pattern-dark opacity-20 pointer-events-none" />
 
@@ -12,10 +12,10 @@ export const Footer: React.FC = () => {
           {/* Brand Column */}
           <div className="lg:col-span-2 space-y-4">
             <div className="flex items-center gap-2.5">
-              <span className="w-7 h-7 rounded-lg bg-white text-[#111315] flex items-center justify-center font-mono text-xs font-bold">
+              <span className="w-7 h-7 rounded-md bg-white text-[#121417] flex items-center justify-center font-mono text-xs font-bold">
                 O
               </span>
-              <span className="font-display text-xl font-bold tracking-tight text-white">
+              <span className="text-xl font-bold tracking-tight text-white">
                 Orqestra
               </span>
             </div>
@@ -27,7 +27,7 @@ export const Footer: React.FC = () => {
               machine.
             </p>
             <div className="pt-2 flex items-center gap-2 font-mono text-[11px] text-white/40">
-              <span className="w-2 h-2 rounded-full bg-emerald-400" />
+              <span className="w-2 h-2 rounded-full bg-[#51cf66]" />
               <span>100% CLIENT-SIDE · NO BACKEND · NO ACCOUNT</span>
             </div>
           </div>

@@ -42,18 +42,18 @@ export const FaqSection: React.FC = () => {
   return (
     <section
       id="faq"
-      className="gsap-section-reveal py-20 lg:py-28 bg-white border-y border-[#E5E8E0]"
+      className="gsap-section-reveal py-20 lg:py-28 bg-white border-y border-[#e1e4e8]"
     >
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-10 text-center">
-          <div className="flex items-center justify-center gap-2 text-xs font-mono font-medium text-[#4B5259] uppercase tracking-widest mb-3">
+          <div className="flex items-center justify-center gap-2 text-xs font-mono font-medium text-[#5b616b] uppercase tracking-widest mb-3">
             <span>FAQ</span>
             <span aria-hidden="true" className="text-black/30">
               ·
             </span>
-            <span className="text-[#0047FF]">Honest answers</span>
+            <span className="text-[#3b6fe0]">Honest answers</span>
           </div>
-          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-[#111315] leading-tight text-balance">
+          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-[#121417] leading-tight text-balance">
             Questions departments actually ask.
           </h2>
         </div>
@@ -64,10 +64,10 @@ export const FaqSection: React.FC = () => {
             return (
               <div
                 key={f.q}
-                className={`rounded-xl border transition-colors ${
+                className={`rounded-md border transition-colors ${
                   isOpen
-                    ? "bg-[#FAFBF9] border-[#0047FF]/40"
-                    : "bg-white border-[#E5E8E0] hover:border-[#111315]/40"
+                    ? "bg-[#ffffff] border-[#3b6fe0]/40"
+                    : "bg-white border-[#e1e4e8] hover:border-[#121417]/40"
                 }`}
               >
                 <button
@@ -76,15 +76,15 @@ export const FaqSection: React.FC = () => {
                   aria-expanded={isOpen}
                   className="w-full flex items-center justify-between gap-4 text-left px-5 py-4"
                 >
-                  <span className="text-sm font-semibold text-[#111315]">
+                  <span className="text-sm font-semibold text-[#121417]">
                     {f.q}
                   </span>
                   <ChevronDown
-                    className={`w-4 h-4 shrink-0 text-[#71767B] transition-transform ${isOpen ? "rotate-180" : ""}`}
+                    className={`w-4 h-4 shrink-0 text-[#5b616b] transition-transform ${isOpen ? "rotate-180" : ""}`}
                   />
                 </button>
                 {isOpen && (
-                  <p className="px-5 pb-5 text-[13px] text-[#4B5259] leading-relaxed">
+                  <p className="px-5 pb-5 text-[13px] text-[#5b616b] leading-relaxed">
                     {f.a}
                   </p>
                 )}
