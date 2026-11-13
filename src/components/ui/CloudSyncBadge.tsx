@@ -8,10 +8,10 @@ export const CloudSyncBadge: React.FC = () => {
   if (status === 'SAVING') {
     return (
       <div
-        className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-[#0047FF] bg-blue-50/80 border border-blue-200/60 rounded-xl shadow-2xs transition-all"
+        className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-[#3b6fe0] bg-[#e8effc] border border-blue-200/60 rounded-md transition-all"
         title="Syncing workspace changes to Neon Postgres cloud database"
       >
-        <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#0047FF]" />
+        <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#3b6fe0]" />
         <span className="hidden sm:inline">Saving…</span>
       </div>
     );
@@ -20,10 +20,10 @@ export const CloudSyncBadge: React.FC = () => {
   if (status === 'SAVED') {
     return (
       <div
-        className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-emerald-700 bg-emerald-50/70 border border-emerald-200/60 rounded-xl shadow-2xs transition-all"
+        className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-[#2f9e44] bg-emerald-50 border border-emerald-200/60 rounded-md transition-all"
         title="All workspace configurations and timetables are securely saved in Neon Postgres"
       >
-        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+        <CheckCircle2 className="w-3.5 h-3.5 text-[#2f9e44]" />
         <span className="hidden sm:inline">Cloud Synced</span>
       </div>
     );
@@ -32,10 +32,10 @@ export const CloudSyncBadge: React.FC = () => {
   if (status === 'OFFLINE') {
     return (
       <div
-        className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-amber-800 bg-amber-50/80 border border-amber-200/80 rounded-xl shadow-2xs transition-all"
+        className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-[#b7791f] bg-amber-50 border border-amber-200/80 rounded-md transition-all"
         title="Offline mode: Workspace changes are securely cached in local storage and will sync to Neon Cloud when connection is restored"
       >
-        <CloudOff className="w-3.5 h-3.5 text-amber-600" />
+        <CloudOff className="w-3.5 h-3.5 text-[#b7791f]" />
         <span className="hidden sm:inline">Local Cache</span>
       </div>
     );
@@ -44,10 +44,10 @@ export const CloudSyncBadge: React.FC = () => {
   if (status === 'ERROR') {
     return (
       <div
-        className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-red-700 bg-red-50/80 border border-red-200/80 rounded-xl shadow-2xs transition-all"
+        className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-[#c92a2a] bg-rose-50 border border-rose-200/80 rounded-md transition-all"
         title="Unable to sync to cloud database. Changes remain safe in your local browser storage."
       >
-        <AlertCircle className="w-3.5 h-3.5 text-red-600" />
+        <AlertCircle className="w-3.5 h-3.5 text-[#c92a2a]" />
         <span className="hidden sm:inline">Sync Error</span>
       </div>
     );
@@ -55,10 +55,10 @@ export const CloudSyncBadge: React.FC = () => {
 
   return (
     <div
-      className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-[#71767B] bg-white border border-[#E5E8E0] rounded-xl shadow-2xs"
+      className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-[#5b616b] bg-white border border-[#e1e4e8] rounded-md"
       title="Connected to Neon Cloud"
     >
-      <Cloud className="w-3.5 h-3.5 text-[#71767B]" />
+      <Cloud className="w-3.5 h-3.5 text-[#5b616b]" />
       <span className="hidden sm:inline">Ready</span>
     </div>
   );

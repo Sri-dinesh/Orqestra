@@ -36,10 +36,10 @@ import { RequireAuth } from "@/features/auth/RequireAuth";
 import { AccountMenu } from "@/features/auth/AccountMenu";
 
 const navLinkCls = ({ isActive }: { isActive: boolean }) =>
-  `px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0047FF] ${
+  `px-3 py-1.5 text-xs font-medium rounded-lg transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#3b6fe0] ${
     isActive
-      ? "bg-[#111315] text-white"
-      : "text-[#4B5259] hover:text-[#111315] hover:bg-black/5"
+      ? "bg-[#e8effc] text-[#3b6fe0]"
+      : "text-[#5b616b] hover:text-[#121417] hover:bg-[#eef0f2]"
   }`;
 
 export default function App() {
@@ -102,32 +102,42 @@ export default function App() {
   }, [location.pathname]);
 
   const isLanding = location.pathname === "/";
-  const isPublicRoute = isLanding || location.pathname.startsWith("/auth/") || location.pathname.startsWith("/invite/");
+  const isAuthRoute = location.pathname.startsWith("/auth/");
+  const isInviteRoute = location.pathname.startsWith("/invite/");
+  const isPublicRoute = isLanding || isAuthRoute || isInviteRoute;
 
   return (
-    <div className="min-h-screen bg-[#F7F8F5] text-[#111315] font-sans">
+    <div
+      className={
+        isLanding
+          ? "landing-theme min-h-screen bg-[#f6f7f8] text-[#121417] font-sans"
+          : isAuthRoute
+            ? "app-internal h-screen h-[100dvh] overflow-hidden bg-[#f6f7f8] text-[#121417]"
+            : "app-internal min-h-screen bg-[#f6f7f8] text-[#121417]"
+      }
+    >
       {!isPublicRoute && (
-        <header className="sticky top-0 z-50 bg-[#F7F8F5]/98 backdrop-blur-md border-b border-[#E5E8E0] shadow-2xs transition-all">
+        <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-[#e1e4e8] transition-all">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
                 {/* Logo */}
                 <Link
                   to="/dashboard"
-                  className="group flex items-center gap-2.5 text-base font-bold tracking-tight text-[#111315] hover:opacity-90 transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0047FF] shrink-0"
+                  className="group flex items-center gap-2.5 text-base font-bold tracking-tight text-[#121417] hover:opacity-90 transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#3b6fe0] shrink-0"
                 >
                   <span
-                    className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#111315] text-white text-[11px] font-bold shadow-xs transition-transform group-hover:scale-105"
+                    className="flex h-7 w-7 items-center justify-center rounded-md bg-[#121417] text-white text-[11px] font-bold shadow-xs transition-transform group-hover:scale-105"
                     aria-hidden="true"
                   >
                     O
                   </span>
-                  <span className="font-display text-lg font-bold tracking-tight text-[#111315]">
+                  <span className="font-['Geist',ui-sans-serif,sans-serif] text-lg font-bold tracking-tight text-[#121417]">
                     Orqestra
                   </span>
                   {collegeName && (
                     <span
-                      className="hidden md:inline border-l border-[#E5E8E0] pl-2.5 text-xs font-normal text-[#71767B] truncate max-w-[140px] lg:max-w-[240px]"
+                      className="hidden xl:inline border-l border-[#e1e4e8] pl-2.5 text-xs font-normal text-[#5b616b] truncate max-w-[160px]"
                       title={collegeName}
                     >
                       {collegeName}
@@ -139,21 +149,21 @@ export default function App() {
                 <button
                   type="button"
                   onClick={() => setSemesterModalOpen(true)}
-                  className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold text-[#111315] bg-white border border-[#D0D5DD] hover:border-[#0047FF] hover:bg-blue-50/40 rounded-xl transition-all shadow-xs cursor-pointer shrink-0"
-                  title="Switch or duplicate academic semester"
+                  className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-[#121417] bg-[#f6f7f8] border border-[#e1e4e8] hover:border-[#3b6fe0] hover:bg-[#eef0f2] rounded-md transition-all cursor-pointer min-w-0 max-w-[130px] sm:max-w-[170px] lg:max-w-[210px] shrink"
+                  title={`Academic Semester: ${activeTerm.name}`}
                 >
-                  <Calendar className="w-3.5 h-3.5 text-[#0047FF] shrink-0" />
-                  <span className="truncate max-w-[100px] sm:max-w-[150px] lg:max-w-[200px]">
+                  <Calendar className="w-3.5 h-3.5 text-[#3b6fe0] shrink-0" />
+                  <span className="truncate">
                     {activeTerm.name}
                   </span>
-                  <ChevronDown className="w-3 h-3 text-[#71767B] shrink-0" />
+                  <ChevronDown className="w-3 h-3 text-[#5b616b] shrink-0" />
                 </button>
               </div>
 
               {/* Navigation */}
               <nav
                 aria-label="Main navigation"
-                className="flex items-center gap-1 shrink-0"
+                className="flex items-center gap-0.5 lg:gap-1 shrink-0"
               >
                 <NavLink className={navLinkCls} to="/dashboard">
                   Dashboard
@@ -178,7 +188,7 @@ export default function App() {
       )}
 
       <main
-        className={`w-full ${isPublicRoute ? "" : "mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8"}`}
+        className={`w-full ${isAuthRoute ? 'h-full overflow-hidden' : isPublicRoute ? "" : "mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8"}`}
         aria-live="polite"
       >
         <ErrorBoundary area="application">

@@ -111,17 +111,17 @@ export const DepartmentNav: React.FC = () => {
   ];
 
   return (
-    <div className="mb-6 rounded-2xl bg-white border border-[#E5E8E0] shadow-xs p-1.5 flex flex-wrap items-center justify-between gap-2">
+    <div className="mb-6 rounded-lg bg-white border border-[#e1e4e8] shadow-none p-1.5 flex flex-wrap items-center justify-between gap-2">
       <div className="flex items-center gap-1 overflow-x-auto py-0.5 px-1 scrollbar-none">
         <Link
           to="/dashboard"
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-[#71767B] hover:text-[#111315] hover:bg-black/5 rounded-xl transition-all mr-1"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#5b616b] hover:text-[#121417] hover:bg-[#eef0f2] rounded-md transition-all mr-1"
           title="Back to Dashboard"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           <span className="hidden sm:inline">Dashboard</span>
         </Link>
-        <span className="h-4 w-px bg-[#E5E8E0] mr-1 hidden sm:inline" />
+        <span className="h-4 w-px bg-[#e1e4e8] mr-1 hidden sm:inline" />
 
         {/* Step-by-Step Setup Tabs */}
         {setupSteps.map((tab) => {
@@ -132,23 +132,23 @@ export const DepartmentNav: React.FC = () => {
               to={tab.to}
               end={tab.stepNum === 0}
               className={({ isActive }) =>
-                `flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl transition-all whitespace-nowrap ${
+                `flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-all whitespace-nowrap ${
                   isActive
-                    ? 'bg-[#111315] text-white shadow-xs'
-                    : 'text-[#4B5259] hover:text-[#111315] hover:bg-black/5'
+                    ? 'bg-[#e8effc] text-[#3b6fe0] shadow-none'
+                    : 'text-[#5b616b] hover:text-[#121417] hover:bg-[#eef0f2]'
                 }`
               }
             >
               <div className="flex items-center justify-center">
                 {tab.done ? (
-                  <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                  <Check className="w-3.5 h-3.5 text-[#2f9e44] shrink-0" />
                 ) : (
                   <Icon className="w-3.5 h-3.5 opacity-70" />
                 )}
               </div>
               <span>{tab.label}</span>
               {tab.count !== undefined && (
-                <span className="ml-0.5 px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-black/10 dark:bg-white/20">
+                <span className="ml-0.5 px-1.5 py-0.2 rounded-sm text-[10px] font-mono font-medium bg-[#eef0f2] text-[#5b616b]">
                   {tab.count}
                 </span>
               )}
@@ -159,14 +159,14 @@ export const DepartmentNav: React.FC = () => {
         {/* Action: Generate */}
         {!isReadOnly && (
           <>
-            <span className="h-4 w-px bg-[#E5E8E0] mx-0.5" />
+            <span className="h-4 w-px bg-[#e1e4e8] mx-0.5" />
             <NavLink
               to={`/departments/${departmentId}/generate`}
               className={({ isActive }) =>
-                `flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold rounded-xl transition-all whitespace-nowrap ${
+                `flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium rounded-md transition-all whitespace-nowrap ${
                   isActive
-                    ? 'bg-[#0047FF] text-white shadow-xs'
-                    : 'text-[#0047FF] bg-[#EBF1FF]/70 hover:bg-[#EBF1FF]'
+                    ? 'bg-[#3b6fe0] text-white shadow-none'
+                    : 'text-[#3b6fe0] bg-[#e8effc] hover:bg-[#dbe7fa]'
                 }`
               }
             >
@@ -177,7 +177,7 @@ export const DepartmentNav: React.FC = () => {
         )}
 
         {/* Output Views */}
-        <span className="h-4 w-px bg-[#E5E8E0] mx-0.5" />
+        <span className="h-4 w-px bg-[#e1e4e8] mx-0.5" />
         {viewTabs.map((tab) => {
           const Icon = tab.icon;
           return (
@@ -185,17 +185,17 @@ export const DepartmentNav: React.FC = () => {
               key={tab.to}
               to={tab.to}
               className={({ isActive }) =>
-                `flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl transition-all whitespace-nowrap ${
+                `flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-all whitespace-nowrap ${
                   isActive
-                    ? 'bg-[#111315] text-white shadow-xs'
-                    : 'text-[#4B5259] hover:text-[#111315] hover:bg-black/5'
+                    ? 'bg-[#e8effc] text-[#3b6fe0] shadow-none'
+                    : 'text-[#5b616b] hover:text-[#121417] hover:bg-[#eef0f2]'
                 }`
               }
             >
               <Icon className="w-3.5 h-3.5" />
               <span>{tab.label}</span>
               {tab.badge && (
-                <span className="ml-0.5 px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-700">
+                <span className="ml-0.5 px-1.5 py-0.2 rounded-sm text-[10px] font-mono font-semibold bg-emerald-50 text-[#2f9e44] border border-emerald-200/60">
                   {tab.badge}
                 </span>
               )}
@@ -204,25 +204,25 @@ export const DepartmentNav: React.FC = () => {
         })}
       </div>
 
-      <div className="hidden lg:flex items-center gap-2 pr-3 text-xs text-[#71767B]">
+      <div className="hidden lg:flex items-center gap-2 pr-3 text-xs text-[#5b616b]">
         {/* Progress indicator */}
         <span
-          className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-semibold ${
+          className={`inline-flex items-center gap-1 rounded-sm px-2 py-0.5 text-[10px] font-medium ${
             coreSetupDone
-              ? 'bg-emerald-500/10 text-emerald-700 border border-emerald-500/20'
-              : 'bg-amber-500/10 text-amber-700 border border-amber-500/20'
+              ? 'bg-emerald-50 text-[#2f9e44] border border-emerald-200/60'
+              : 'bg-amber-50 text-[#b7791f] border border-amber-200/60'
           }`}
         >
           {coreSetupDone ? 'Setup Complete' : `${completedStepsCount}/4 Steps`}
         </span>
 
         {isReadOnly && (
-          <span className="inline-flex items-center gap-1 rounded-md bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold text-amber-700 border border-amber-500/20">
+          <span className="inline-flex items-center gap-1 rounded-sm bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-[#b7791f] border border-amber-200/60">
             <Lock className="w-2.5 h-2.5" />
             <span>Read-Only View</span>
           </span>
         )}
-        <span className="font-bold text-[#111315]">{department.code}</span>
+        <span className="font-mono font-semibold text-[#121417]">{department.code}</span>
         <span>•</span>
         <span className="truncate max-w-[180px]">{department.name}</span>
       </div>

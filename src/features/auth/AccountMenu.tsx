@@ -5,6 +5,7 @@ import { authClient } from '@/auth/client';
 import { useAuthSession, notifyAuthChange } from '@/auth/session';
 import { clearInMemoryWorkspace } from '@/hooks/usePersistence';
 import { useWorkspaceStore } from '@/state/stores/workspace-store';
+import { ThemeSwitcher } from '@/components/ui/ThemeSwitcher';
 
 export function AccountMenu() {
   const navigate = useNavigate();
@@ -78,7 +79,7 @@ export function AccountMenu() {
     return (
       <Link
         to="/auth/sign-in"
-        className="inline-flex items-center gap-1.5 rounded-xl bg-[#111315] px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-black focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0047FF]"
+        className="inline-flex cursor-pointer items-center gap-1.5 rounded-md bg-[#3b6fe0] px-3 py-1.5 text-xs font-medium text-white transition hover:bg-[#2e5ccb] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#3b6fe0]"
       >
         <span>Sign In</span>
       </Link>
@@ -95,32 +96,32 @@ export function AccountMenu() {
         aria-expanded={isOpen}
         aria-haspopup="true"
         onClick={() => setIsOpen((prev) => !prev)}
-        className="group flex items-center gap-2 rounded-xl border border-[#D0D5DD] bg-white px-2.5 py-1.5 text-xs font-semibold text-[#111315] shadow-xs transition hover:border-[#0047FF] hover:bg-blue-50/30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0047FF]"
+        className="group flex items-center gap-2 rounded-md border border-[#e1e4e8] bg-white px-2.5 py-1.5 text-xs font-medium text-[#121417] shadow-none transition hover:border-[#3b6fe0] hover:bg-[#eef0f2] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#3b6fe0]"
       >
         <span
-          className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-[#111315] to-[#30363D] text-[11px] font-bold text-white shadow-xs"
+          className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#121417] text-[11px] font-mono font-medium text-white shadow-none"
           aria-hidden="true"
         >
           {initials}
         </span>
-        <span className="hidden max-w-[130px] truncate text-left text-xs font-medium text-[#111315] sm:inline">
+        <span className="hidden max-w-[130px] truncate text-left text-xs font-medium text-[#121417] sm:inline">
           {displayName}
         </span>
         {role === 'ADMIN' ? (
-          <span className="hidden rounded-md bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-semibold text-amber-700 border border-amber-500/20 sm:inline">
+          <span className="hidden rounded-sm bg-amber-50 px-1.5 py-0.5 text-[10px] font-medium text-[#b7791f] border border-amber-200/60 sm:inline">
             Admin
           </span>
         ) : role === 'HOD' ? (
-          <span className="hidden rounded-md bg-blue-500/10 px-1.5 py-0.5 text-[10px] font-semibold text-blue-700 border border-blue-500/20 sm:inline">
+          <span className="hidden rounded-sm bg-[#e8effc] px-1.5 py-0.5 text-[10px] font-medium text-[#3b6fe0] border border-blue-200/60 sm:inline">
             HOD {deptLabel ? `· ${deptLabel}` : ''}
           </span>
         ) : (
-          <span className="hidden rounded-md bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-700 border border-emerald-500/20 sm:inline">
+          <span className="hidden rounded-sm bg-emerald-50 px-1.5 py-0.5 text-[10px] font-medium text-[#2f9e44] border border-emerald-200/60 sm:inline">
             Faculty
           </span>
         )}
         <ChevronDown
-          className={`h-3.5 w-3.5 text-[#71767B] transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+          className={`h-3.5 w-3.5 text-[#5b616b] transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
           aria-hidden="true"
         />
       </button>
@@ -131,29 +132,29 @@ export function AccountMenu() {
           role="menu"
           aria-orientation="vertical"
           aria-labelledby="account-menu-button"
-          className="absolute right-0 mt-2 w-64 origin-top-right rounded-2xl border border-[#E5E8E0] bg-white p-2 shadow-xl ring-1 ring-black/5 focus:outline-none z-50 animate-in fade-in zoom-in-95 duration-100"
+          className="absolute right-0 mt-2 w-64 origin-top-right rounded-lg border border-[#e1e4e8] bg-white p-1.5 shadow-xl ring-1 ring-black/5 focus:outline-none z-50 animate-in fade-in zoom-in-95 duration-100"
         >
           {/* User Identity Card */}
-          <div className="rounded-xl bg-[#F7F8F5] p-3 text-left">
+          <div className="rounded-md bg-[#f6f7f8] p-2.5 text-left border border-[#e1e4e8]">
             <div className="flex items-center gap-2.5">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#111315] text-xs font-bold text-white shadow-xs">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#121417] text-xs font-mono font-medium text-white">
                 {initials}
               </span>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-xs font-semibold text-[#111315]" title={displayName}>
+                <p className="truncate text-xs font-semibold text-[#121417]" title={displayName}>
                   {displayName}
                 </p>
                 {userEmail && (
-                  <p className="truncate text-[11px] text-[#71767B]" title={userEmail}>
+                  <p className="truncate text-[11px] font-mono text-[#5b616b]" title={userEmail}>
                     {userEmail}
                   </p>
                 )}
               </div>
             </div>
-            <div className="mt-2.5 flex items-center justify-between border-t border-[#E5E8E0] pt-2 text-[10px] font-medium text-[#71767B]">
+            <div className="mt-2 flex items-center justify-between border-t border-[#e1e4e8] pt-2 text-[10px] font-medium text-[#5b616b]">
               <div className="flex items-center gap-1.5">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="font-semibold text-emerald-800">
+                <span className="font-medium text-[#2f9e44]">
                   {role === 'ADMIN'
                     ? 'Institution Admin'
                     : role === 'HOD'
@@ -162,7 +163,7 @@ export function AccountMenu() {
                 </span>
                 <span className="hidden sm:inline">· Institutional Workspace Active</span>
               </div>
-              <span className="text-[10px] uppercase tracking-wide text-[#71767B]">{role}</span>
+              <span className="text-[10px] uppercase font-mono tracking-wider text-[#5b616b]">{role}</span>
             </div>
           </div>
 
@@ -172,9 +173,9 @@ export function AccountMenu() {
               to="/profile"
               onClick={() => setIsOpen(false)}
               role="menuitem"
-              className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-medium text-[#30363D] hover:bg-black/5 hover:text-[#111315] transition-colors"
+              className="flex items-center gap-2.5 rounded-md px-2.5 py-2 text-xs font-medium text-[#121417] hover:bg-[#eef0f2] transition-colors"
             >
-              <User className="h-4 w-4 text-[#71767B]" />
+              <User className="h-4 w-4 text-[#5b616b]" />
               <span>Profile & Role Settings</span>
             </Link>
 
@@ -182,9 +183,9 @@ export function AccountMenu() {
               to="/team"
               onClick={() => setIsOpen(false)}
               role="menuitem"
-              className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-medium text-[#30363D] hover:bg-black/5 hover:text-[#111315] transition-colors"
+              className="flex items-center gap-2.5 rounded-md px-2.5 py-2 text-xs font-medium text-[#121417] hover:bg-[#eef0f2] transition-colors"
             >
-              <Users className="h-4 w-4 text-[#0047FF]" />
+              <Users className="h-4 w-4 text-[#3b6fe0]" />
               <span>Team & Access Control</span>
             </Link>
 
@@ -192,9 +193,9 @@ export function AccountMenu() {
               to="/settings"
               onClick={() => setIsOpen(false)}
               role="menuitem"
-              className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-medium text-[#30363D] hover:bg-black/5 hover:text-[#111315] transition-colors"
+              className="flex items-center gap-2.5 rounded-md px-2.5 py-2 text-xs font-medium text-[#121417] hover:bg-[#eef0f2] transition-colors"
             >
-              <Settings className="h-4 w-4 text-[#71767B]" />
+              <Settings className="h-4 w-4 text-[#5b616b]" />
               <span>Workspace Settings</span>
             </Link>
 
@@ -202,21 +203,28 @@ export function AccountMenu() {
               to="/schedule-portal"
               onClick={() => setIsOpen(false)}
               role="menuitem"
-              className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-medium text-[#30363D] hover:bg-black/5 hover:text-[#111315] transition-colors"
+              className="flex items-center gap-2.5 rounded-md px-2.5 py-2 text-xs font-medium text-[#121417] hover:bg-[#eef0f2] transition-colors"
             >
-              <Calendar className="h-4 w-4 text-[#71767B]" />
+              <Calendar className="h-4 w-4 text-[#5b616b]" />
               <span>My Schedule Portal</span>
             </Link>
           </div>
 
+          {/* Theme Switcher */}
+          <div className="my-1 border-t border-[#e1e4e8] dark:border-[#2a2a2d]" />
+          <div className="px-2 py-1.5">
+            <span className="text-[10px] font-mono uppercase tracking-wider text-[#5b616b] dark:text-[#a1a1a6] block mb-1.5 px-0.5">Theme Mode</span>
+            <ThemeSwitcher size="sm" className="w-full flex justify-between" />
+          </div>
+
           {/* Security & Neon Info */}
-          <div className="my-1 border-t border-[#E5E8E0]" />
-          <div className="px-2.5 py-1 text-[11px] text-[#71767B] flex items-center gap-1.5">
+          <div className="my-1 border-t border-[#e1e4e8]" />
+          <div className="px-2.5 py-1 text-[11px] text-[#5b616b] flex items-center gap-1.5">
             <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
             <span>Neon Auth Protected</span>
           </div>
 
-          <div className="my-1 border-t border-[#E5E8E0]" />
+          <div className="my-1 border-t border-[#e1e4e8]" />
 
           {/* Sign Out Action */}
           <button

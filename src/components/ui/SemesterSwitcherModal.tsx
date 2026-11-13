@@ -208,19 +208,19 @@ export const SemesterSwitcherModal: React.FC<SemesterSwitcherModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-150">
-      <div className="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl border border-black/10 overflow-hidden flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 animate-in fade-in duration-150">
+      <div className="relative w-full max-w-2xl bg-white rounded-lg shadow-xl border border-[#e1e4e8] overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#E5E8E0] bg-[#FAFBF9]">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#e1e4e8] bg-[#f6f7f8]">
           <div className="flex items-center gap-2.5">
-            <span className="p-2 rounded-xl bg-blue-50 text-[#0047FF]">
+            <span className="p-2 rounded-md bg-[#e8effc] text-[#3b6fe0]">
               <Calendar className="w-5 h-5" />
             </span>
             <div>
-              <h3 className="text-base font-bold text-[#111315]">
+              <h3 className="text-base font-bold text-[#121417]">
                 Academic Semesters &amp; Workspaces
               </h3>
-              <p className="text-xs text-[#71767B]">
+              <p className="text-xs text-[#5b616b]">
                 Switch between terms, or clone campus directories for upcoming semesters
               </p>
             </div>
@@ -228,21 +228,21 @@ export const SemesterSwitcherModal: React.FC<SemesterSwitcherModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-lg text-[#71767B] hover:text-[#111315] hover:bg-black/5"
+            className="p-1.5 rounded-md text-[#5b616b] hover:text-[#121417] hover:bg-[#eef0f2] cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Subnav Tabs */}
-        <div className="flex items-center px-6 pt-3 border-b border-[#E5E8E0] gap-4 text-xs font-semibold">
+        <div className="flex items-center px-6 pt-3 border-b border-[#e1e4e8] gap-4 text-xs font-semibold">
           <button
             type="button"
             onClick={() => setActiveTab('LIST')}
             className={`pb-3 border-b-2 transition-all cursor-pointer ${
               activeTab === 'LIST'
-                ? 'border-[#0047FF] text-[#0047FF]'
-                : 'border-transparent text-[#71767B] hover:text-[#111315]'
+                ? 'border-[#3b6fe0] text-[#3b6fe0]'
+                : 'border-transparent text-[#5b616b] hover:text-[#121417]'
             }`}
           >
             All Semesters ({terms.length})
@@ -259,8 +259,8 @@ export const SemesterSwitcherModal: React.FC<SemesterSwitcherModalProps> = ({
             }}
             className={`pb-3 border-b-2 transition-all cursor-pointer flex items-center gap-1.5 ${
               activeTab === 'CLONE'
-                ? 'border-[#0047FF] text-[#0047FF]'
-                : 'border-transparent text-[#71767B] hover:text-[#111315]'
+                ? 'border-[#3b6fe0] text-[#3b6fe0]'
+                : 'border-transparent text-[#5b616b] hover:text-[#121417]'
             }`}
           >
             <Copy className="w-3.5 h-3.5" />
@@ -271,8 +271,8 @@ export const SemesterSwitcherModal: React.FC<SemesterSwitcherModalProps> = ({
             onClick={() => setActiveTab('CREATE')}
             className={`pb-3 border-b-2 transition-all cursor-pointer flex items-center gap-1.5 ${
               activeTab === 'CREATE'
-                ? 'border-[#0047FF] text-[#0047FF]'
-                : 'border-transparent text-[#71767B] hover:text-[#111315]'
+                ? 'border-[#3b6fe0] text-[#3b6fe0]'
+                : 'border-transparent text-[#5b616b] hover:text-[#121417]'
             }`}
           >
             <Plus className="w-3.5 h-3.5" />
@@ -289,26 +289,26 @@ export const SemesterSwitcherModal: React.FC<SemesterSwitcherModalProps> = ({
                 return (
                   <div
                     key={term.id}
-                    className={`p-4 rounded-xl border transition-all ${
+                    className={`p-4 rounded-md border transition-all ${
                       isActive
-                        ? 'bg-blue-50/40 border-[#0047FF]/40 shadow-xs'
-                        : 'bg-white border-[#E5E8E0] hover:border-black/20'
+                        ? 'bg-[#e8effc]/30 border-[#3b6fe0]/40 shadow-none'
+                        : 'bg-white border-[#e1e4e8] hover:border-[#3b6fe0]/40'
                     }`}
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <div className="flex items-center gap-2">
-                          <h4 className="text-sm font-bold text-[#111315]">
+                          <h4 className="text-sm font-semibold text-[#121417]">
                             {term.name}
                           </h4>
                           {isActive && (
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#0047FF] text-white flex items-center gap-1">
+                            <span className="px-2 py-0.5 rounded-sm text-[10px] font-mono font-bold bg-[#3b6fe0] text-white flex items-center gap-1">
                               <CheckCircle2 className="w-3 h-3" />
                               <span>Active</span>
                             </span>
                           )}
                         </div>
-                        <p className="text-xs text-[#71767B] mt-0.5">
+                        <p className="text-xs text-[#5b616b] mt-0.5">
                           Academic Year: <strong>{term.academicYear || '2026-27'}</strong> · Updated {new Date(term.updatedAt).toLocaleDateString()}
                         </p>
                       </div>
@@ -318,13 +318,13 @@ export const SemesterSwitcherModal: React.FC<SemesterSwitcherModalProps> = ({
                           <button
                             type="button"
                             onClick={() => handleSwitchTerm(term)}
-                            className="px-3 py-1.5 text-xs font-semibold text-[#0047FF] bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors flex items-center gap-1"
+                            className="px-3 py-1.5 text-xs font-medium text-[#3b6fe0] bg-[#e8effc] hover:bg-[#3b6fe0]/15 rounded-md transition-colors flex items-center gap-1 cursor-pointer"
                           >
                             <span>Switch</span>
                             <ArrowRight className="w-3.5 h-3.5" />
                           </button>
                         ) : (
-                          <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg">
+                          <span className="text-xs font-medium text-[#2f9e44] bg-emerald-50 border border-emerald-200/60 px-2.5 py-1 rounded-sm">
                             Current
                           </span>
                         )}
@@ -333,7 +333,7 @@ export const SemesterSwitcherModal: React.FC<SemesterSwitcherModalProps> = ({
                           <button
                             type="button"
                             onClick={() => handleDeleteTerm(term.id, term.name)}
-                            className="p-1.5 rounded-lg text-[#71767B] hover:text-red-600 hover:bg-red-50"
+                            className="p-1.5 rounded-md text-[#5b616b] hover:text-[#c92a2a] hover:bg-rose-50 cursor-pointer"
                             title="Delete semester"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -343,7 +343,7 @@ export const SemesterSwitcherModal: React.FC<SemesterSwitcherModalProps> = ({
                     </div>
 
                     {term.stats && (
-                      <div className="mt-3 pt-3 border-t border-black/5 flex items-center gap-4 text-xs text-[#71767B]">
+                      <div className="mt-3 pt-3 border-t border-[#e1e4e8] flex items-center gap-4 text-xs text-[#5b616b]">
                         <span className="flex items-center gap-1">
                           <Building className="w-3.5 h-3.5" />
                           {term.stats.departments} depts
@@ -366,7 +366,7 @@ export const SemesterSwitcherModal: React.FC<SemesterSwitcherModalProps> = ({
 
           {activeTab === 'CLONE' && (
             <form onSubmit={handleCloneTerm} className="space-y-4">
-              <div className="p-3.5 bg-blue-50/70 border border-blue-200 rounded-xl flex items-start gap-2 text-xs text-[#0047FF]">
+              <div className="p-3.5 bg-[#e8effc]/60 border border-[#3b6fe0]/20 rounded-md flex items-start gap-2 text-xs text-[#3b6fe0]">
                 <Sparkles className="w-4 h-4 shrink-0 mt-0.5" />
                 <span>
                   <strong>Instant Semester Onboarding:</strong> Copy your faculty roster, room infrastructure, and department structures to start a new academic period in seconds without re-entering data.
@@ -375,13 +375,13 @@ export const SemesterSwitcherModal: React.FC<SemesterSwitcherModalProps> = ({
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="block text-xs font-semibold text-[#4B5259] mb-1">
+                  <label className="block text-xs font-medium text-[#121417] mb-1">
                     Source Semester to Clone From
                   </label>
                   <select
                     value={sourceTermId}
                     onChange={(e) => setSourceTermId(e.target.value)}
-                    className="w-full rounded-xl border border-[#D0D5DD] bg-white px-3 py-2 text-sm text-[#111315] focus:outline-none focus:ring-2 focus:ring-[#0047FF]"
+                    className="w-full rounded-md border border-[#e1e4e8] bg-white px-3 py-2 text-sm text-[#121417] focus:outline-none focus:border-[#3b6fe0] focus:ring-2 focus:ring-[#3b6fe0]/15"
                   >
                     {terms.map((t) => (
                       <option key={t.id} value={t.id}>
@@ -392,7 +392,7 @@ export const SemesterSwitcherModal: React.FC<SemesterSwitcherModalProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-[#4B5259] mb-1">
+                  <label className="block text-xs font-medium text-[#121417] mb-1">
                     Academic Year
                   </label>
                   <input
@@ -401,12 +401,12 @@ export const SemesterSwitcherModal: React.FC<SemesterSwitcherModalProps> = ({
                     value={cloneForm.academicYear}
                     onChange={(e) => setCloneForm({ ...cloneForm, academicYear: e.target.value })}
                     placeholder="2026-27"
-                    className="w-full rounded-xl border border-[#D0D5DD] bg-white px-3 py-2 text-sm text-[#111315] focus:outline-none focus:ring-2 focus:ring-[#0047FF]"
+                    className="w-full rounded-md border border-[#e1e4e8] bg-white px-3 py-2 text-sm text-[#121417] focus:outline-none focus:border-[#3b6fe0] focus:ring-2 focus:ring-[#3b6fe0]/15"
                   />
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="block text-xs font-semibold text-[#4B5259] mb-1">
+                  <label className="block text-xs font-medium text-[#121417] mb-1">
                     New Semester / Term Name
                   </label>
                   <input
@@ -415,55 +415,55 @@ export const SemesterSwitcherModal: React.FC<SemesterSwitcherModalProps> = ({
                     value={cloneForm.name}
                     onChange={(e) => setCloneForm({ ...cloneForm, name: e.target.value })}
                     placeholder="E.g., Spring 2027 (Even Semester)"
-                    className="w-full rounded-xl border border-[#D0D5DD] bg-white px-3 py-2 text-sm text-[#111315] focus:outline-none focus:ring-2 focus:ring-[#0047FF]"
+                    className="w-full rounded-md border border-[#e1e4e8] bg-white px-3 py-2 text-sm text-[#121417] focus:outline-none focus:border-[#3b6fe0] focus:ring-2 focus:ring-[#3b6fe0]/15"
                   />
                 </div>
               </div>
 
-              <div className="border border-[#E5E8E0] rounded-xl p-4 bg-[#FAFBF9] space-y-2.5">
-                <p className="text-xs font-bold text-[#111315]">Choose What to Carry Over:</p>
-                <label className="flex items-center gap-2 text-xs font-medium text-[#333] cursor-pointer">
+              <div className="border border-[#e1e4e8] rounded-md p-4 bg-[#f6f7f8] space-y-2.5">
+                <p className="text-xs font-semibold text-[#121417]">Choose What to Carry Over:</p>
+                <label className="flex items-center gap-2 text-xs font-medium text-[#121417] cursor-pointer">
                   <input
                     type="checkbox"
                     checked={cloneForm.includeFaculty}
                     onChange={(e) => setCloneForm({ ...cloneForm, includeFaculty: e.target.checked })}
-                    className="rounded text-[#0047FF] focus:ring-[#0047FF]"
+                    className="rounded-sm accent-[#3b6fe0]"
                   />
                   <span>Faculty Directory &amp; Workload Policies (Leaves, limits, preferences)</span>
                 </label>
-                <label className="flex items-center gap-2 text-xs font-medium text-[#333] cursor-pointer">
+                <label className="flex items-center gap-2 text-xs font-medium text-[#121417] cursor-pointer">
                   <input
                     type="checkbox"
                     checked={cloneForm.includeRooms}
                     onChange={(e) => setCloneForm({ ...cloneForm, includeRooms: e.target.checked })}
-                    className="rounded text-[#0047FF] focus:ring-[#0047FF]"
+                    className="rounded-sm accent-[#3b6fe0]"
                   />
                   <span>Physical Classrooms &amp; Laboratories</span>
                 </label>
-                <label className="flex items-center gap-2 text-xs font-medium text-[#333] cursor-pointer">
+                <label className="flex items-center gap-2 text-xs font-medium text-[#121417] cursor-pointer">
                   <input
                     type="checkbox"
                     checked={cloneForm.includeDepartments}
                     onChange={(e) => setCloneForm({ ...cloneForm, includeDepartments: e.target.checked })}
-                    className="rounded text-[#0047FF] focus:ring-[#0047FF]"
+                    className="rounded-sm accent-[#3b6fe0]"
                   />
                   <span>Department Configuration &amp; Sections</span>
                 </label>
-                <label className="flex items-center gap-2 text-xs font-medium text-[#333] cursor-pointer">
+                <label className="flex items-center gap-2 text-xs font-medium text-[#121417] cursor-pointer">
                   <input
                     type="checkbox"
                     checked={cloneForm.includeSubjects}
                     onChange={(e) => setCloneForm({ ...cloneForm, includeSubjects: e.target.checked })}
-                    className="rounded text-[#0047FF] focus:ring-[#0047FF]"
+                    className="rounded-sm accent-[#3b6fe0]"
                   />
                   <span>Course Catalogue (Subjects &amp; Lab requirements)</span>
                 </label>
-                <label className="flex items-center gap-2 text-xs font-medium text-[#333] cursor-pointer">
+                <label className="flex items-center gap-2 text-xs font-medium text-[#121417] cursor-pointer">
                   <input
                     type="checkbox"
                     checked={cloneForm.includeTimetables}
                     onChange={(e) => setCloneForm({ ...cloneForm, includeTimetables: e.target.checked })}
-                    className="rounded text-[#0047FF] focus:ring-[#0047FF]"
+                    className="rounded-sm accent-[#3b6fe0]"
                   />
                   <span>Generated Timetable Schedules (Unchecked = start fresh with clean grid)</span>
                 </label>
@@ -473,13 +473,13 @@ export const SemesterSwitcherModal: React.FC<SemesterSwitcherModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setActiveTab('LIST')}
-                  className="px-4 py-2 text-xs font-semibold text-[#4B5259] hover:bg-black/5 rounded-xl transition-colors"
+                  className="px-4 py-2 text-xs font-medium text-[#5b616b] hover:bg-[#eef0f2] rounded-md transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 text-xs font-semibold text-white bg-[#0047FF] hover:bg-[#0038CC] rounded-xl shadow-sm transition-all"
+                  className="px-5 py-2 text-xs font-medium text-white bg-[#3b6fe0] hover:bg-[#2e5ccb] rounded-md shadow-none transition-all cursor-pointer"
                 >
                   Create &amp; Switch to Cloned Term
                 </button>
@@ -491,7 +491,7 @@ export const SemesterSwitcherModal: React.FC<SemesterSwitcherModalProps> = ({
             <form onSubmit={handleCreateNewTerm} className="space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="sm:col-span-2">
-                  <label className="block text-xs font-semibold text-[#4B5259] mb-1">
+                  <label className="block text-xs font-medium text-[#121417] mb-1">
                     Semester Name
                   </label>
                   <input
@@ -500,11 +500,11 @@ export const SemesterSwitcherModal: React.FC<SemesterSwitcherModalProps> = ({
                     value={newTermName}
                     onChange={(e) => setNewTermName(e.target.value)}
                     placeholder="E.g., Summer Term 2027"
-                    className="w-full rounded-xl border border-[#D0D5DD] bg-white px-3 py-2 text-sm text-[#111315] focus:outline-none focus:ring-2 focus:ring-[#0047FF]"
+                    className="w-full rounded-md border border-[#e1e4e8] bg-white px-3 py-2 text-sm text-[#121417] focus:outline-none focus:border-[#3b6fe0] focus:ring-2 focus:ring-[#3b6fe0]/15"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-[#4B5259] mb-1">
+                  <label className="block text-xs font-medium text-[#121417] mb-1">
                     Academic Year
                   </label>
                   <input
@@ -513,7 +513,7 @@ export const SemesterSwitcherModal: React.FC<SemesterSwitcherModalProps> = ({
                     value={newAcademicYear}
                     onChange={(e) => setNewAcademicYear(e.target.value)}
                     placeholder="2026-27"
-                    className="w-full rounded-xl border border-[#D0D5DD] bg-white px-3 py-2 text-sm text-[#111315] focus:outline-none focus:ring-2 focus:ring-[#0047FF]"
+                    className="w-full rounded-md border border-[#e1e4e8] bg-white px-3 py-2 text-sm text-[#121417] focus:outline-none focus:border-[#3b6fe0] focus:ring-2 focus:ring-[#3b6fe0]/15"
                   />
                 </div>
               </div>
@@ -522,13 +522,13 @@ export const SemesterSwitcherModal: React.FC<SemesterSwitcherModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setActiveTab('LIST')}
-                  className="px-4 py-2 text-xs font-semibold text-[#4B5259] hover:bg-black/5 rounded-xl transition-colors"
+                  className="px-4 py-2 text-xs font-medium text-[#5b616b] hover:bg-[#eef0f2] rounded-md transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 text-xs font-semibold text-white bg-[#111315] hover:bg-[#0047FF] rounded-xl shadow-sm transition-all"
+                  className="px-5 py-2 text-xs font-medium text-white bg-[#3b6fe0] hover:bg-[#2e5ccb] rounded-md shadow-none transition-all cursor-pointer"
                 >
                   Create Blank Workspace
                 </button>
