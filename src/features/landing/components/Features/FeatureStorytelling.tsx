@@ -63,19 +63,19 @@ const CAPABILITY_TILES = [
 
 export const FeatureStorytelling: React.FC = () => {
   return (
-    <section id="features" className="py-20 lg:py-28 bg-[#ffffff] border-b border-[#e1e4e8]">
+    <section id="features" className="py-20 lg:py-28 bg-[#ffffff] dark:bg-[#111112] border-b border-[#e1e4e8] dark:border-[#2a2a2d]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="max-w-3xl mb-14">
-          <div className="flex items-center gap-2 text-xs font-mono font-medium text-[#5b616b] uppercase tracking-widest mb-3">
+          <div className="flex items-center gap-2 text-xs font-mono font-medium text-[#5b616b] dark:text-[#a1a1a6] uppercase tracking-widest mb-3">
             <span>Core Capabilities</span>
-            <span aria-hidden="true" className="text-[#d3d7dd]">·</span>
-            <span className="text-[#3b6fe0]">Engineered for Higher Education</span>
+            <span aria-hidden="true" className="text-[#d3d7dd] dark:text-[#36363a]">·</span>
+            <span className="text-[#3b6fe0] dark:text-[#7aa2f7]">Engineered for Higher Education</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-[#121417] leading-tight text-balance">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-[#121417] dark:text-[#ececec] leading-tight text-balance">
             Everything an academic institution requires to generate verifiable timetables.
           </h2>
-          <p className="mt-4 text-base sm:text-lg text-[#5b616b] leading-relaxed max-w-2xl text-pretty">
+          <p className="mt-4 text-base sm:text-lg text-[#5b616b] dark:text-[#a1a1a6] leading-relaxed max-w-2xl text-pretty">
             Designed specifically for engineering colleges, universities, and academic departments balancing complex faculty pools, multi period laboratories, and physical room constraints.
           </p>
         </div>
@@ -85,19 +85,19 @@ export const FeatureStorytelling: React.FC = () => {
           {CORE_BENEFITS.map((b) => (
             <div
               key={b.title}
-              className="rounded-md bg-white border border-[#e1e4e8] p-6 flex flex-col justify-between hover:border-[#3b6fe0]/50 transition-colors"
+              className="rounded-md bg-white dark:bg-[#18181a] border border-[#e1e4e8] dark:border-[#2a2a2d] p-6 flex flex-col justify-between hover:border-[#3b6fe0]/50 dark:hover:border-[#7aa2f7]/50 transition-colors"
             >
               <div>
-                <div className="w-10 h-10 rounded-md bg-[#e8effc] text-[#3b6fe0] flex items-center justify-center mb-4 border border-[#3b6fe0]/20">
+                <div className="w-10 h-10 rounded-md bg-[#e8effc] dark:bg-[#18233a] text-[#3b6fe0] dark:text-[#7aa2f7] flex items-center justify-center mb-4 border border-[#3b6fe0]/20 dark:border-[#7aa2f7]/20">
                   <b.icon className="w-5 h-5" />
                 </div>
-                <h3 className="text-base font-semibold text-[#121417] mb-1">
+                <h3 className="text-base font-semibold text-[#121417] dark:text-[#ececec] mb-1">
                   {b.title}
                 </h3>
-                <p className="text-xs font-mono text-[#3b6fe0] mb-3">
+                <p className="text-xs font-mono text-[#3b6fe0] dark:text-[#7aa2f7] mb-3">
                   {b.headline}
                 </p>
-                <p className="text-xs text-[#5b616b] leading-relaxed text-pretty">
+                <p className="text-xs text-[#5b616b] dark:text-[#a1a1a6] leading-relaxed text-pretty">
                   {b.text}
                 </p>
               </div>
@@ -105,7 +105,7 @@ export const FeatureStorytelling: React.FC = () => {
           ))}
 
           {/* Special Bento Architecture Card */}
-          <div className="rounded-md bg-[#121417] text-white p-6 flex flex-col justify-between border border-[#121417]">
+          <div className="rounded-md bg-[#121417] dark:bg-[#18181a] text-white p-6 flex flex-col justify-between border border-[#121417] dark:border-[#2a2a2d]">
             <div>
               <div className="w-10 h-10 rounded-md bg-white/10 text-[#7aa2f7] flex items-center justify-center mb-4 border border-white/10">
                 <Cpu className="w-5 h-5" />
@@ -131,16 +131,16 @@ export const FeatureStorytelling: React.FC = () => {
           {CAPABILITY_TILES.map((t) => (
             <div
               key={t.title}
-              className="p-5 rounded-md bg-[#f6f7f8] border border-[#e1e4e8] flex flex-col justify-between"
+              className="p-5 rounded-md bg-[#f6f7f8] dark:bg-[#18181a] border border-[#e1e4e8] dark:border-[#2a2a2d] flex flex-col justify-between"
             >
               <div>
                 <div className="flex items-center gap-2 mb-2">
-                  <t.icon className="w-4 h-4 text-[#3b6fe0]" />
-                  <h4 className="text-sm font-semibold text-[#121417]">
+                  <t.icon className="w-4 h-4 text-[#3b6fe0] dark:text-[#7aa2f7]" />
+                  <h4 className="text-sm font-semibold text-[#121417] dark:text-[#ececec]">
                     {t.title}
                   </h4>
                 </div>
-                <p className="text-xs text-[#5b616b] leading-relaxed text-pretty">
+                <p className="text-xs text-[#5b616b] dark:text-[#a1a1a6] leading-relaxed text-pretty">
                   {t.text}
                 </p>
               </div>

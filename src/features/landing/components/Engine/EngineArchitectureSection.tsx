@@ -52,29 +52,29 @@ export const EngineArchitectureSection: React.FC = () => {
   const active = STAGES.find((s) => s.id === activeId) ?? STAGES[0];
 
   return (
-    <section id="engine" className="py-20 lg:py-28 bg-[#ffffff] border-b border-[#e1e4e8]">
+    <section id="engine" className="py-20 lg:py-28 bg-[#ffffff] dark:bg-[#111112] border-b border-[#e1e4e8] dark:border-[#2a2a2d]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="max-w-3xl mb-14">
-          <div className="flex items-center gap-2 text-xs font-mono font-medium text-[#5b616b] uppercase tracking-widest mb-3">
+          <div className="flex items-center gap-2 text-xs font-mono font-medium text-[#5b616b] dark:text-[#a1a1a6] uppercase tracking-widest mb-3">
             <span>Scheduling Engine</span>
-            <span aria-hidden="true" className="text-[#d3d7dd]">·</span>
-            <span className="text-[#3b6fe0]">Transparent Constraint Architecture</span>
+            <span aria-hidden="true" className="text-[#d3d7dd] dark:text-[#36363a]">·</span>
+            <span className="text-[#3b6fe0] dark:text-[#7aa2f7]">Transparent Constraint Architecture</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-[#121417] leading-tight text-balance">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-[#121417] dark:text-[#ececec] leading-tight text-balance">
             A deterministic constraint solver, not an opaque black box.
           </h2>
-          <p className="mt-4 text-base sm:text-lg text-[#5b616b] leading-relaxed max-w-2xl text-pretty">
+          <p className="mt-4 text-base sm:text-lg text-[#5b616b] dark:text-[#a1a1a6] leading-relaxed max-w-2xl text-pretty">
             Orqestra executes a constraint satisfaction backtracking search with heuristic guidance. Pure, side effect free TypeScript running entirely in your browser without external server calls.
           </p>
         </div>
 
         {/* Interactive Pipeline Showcase */}
-        <div className="rounded-md bg-[#f6f7f8] border border-[#e1e4e8] p-6 lg:p-8">
+        <div className="rounded-md bg-[#f6f7f8] dark:bg-[#18181a] border border-[#e1e4e8] dark:border-[#2a2a2d] p-6 lg:p-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             {/* Stage Selector Column */}
             <div className="lg:col-span-5 space-y-2">
-              <div className="text-xs font-mono font-semibold text-[#5b616b] uppercase tracking-wider mb-3 px-1">
+              <div className="text-xs font-mono font-semibold text-[#5b616b] dark:text-[#a1a1a6] uppercase tracking-wider mb-3 px-1">
                 Execution Pipeline
               </div>
 
@@ -87,22 +87,22 @@ export const EngineArchitectureSection: React.FC = () => {
                     onClick={() => setActiveId(s.id)}
                     className={`w-full text-left p-3.5 rounded-md border transition-all flex items-center justify-between ${
                       isCurrent
-                        ? 'bg-white border-[#3b6fe0] shadow-xs'
-                        : 'bg-white/60 border-[#e1e4e8] hover:bg-white hover:border-[#d3d7dd]'
+                        ? 'bg-white dark:bg-[#232326] border-[#3b6fe0] dark:border-[#7aa2f7] shadow-xs'
+                        : 'bg-white/60 dark:bg-[#18181a]/60 border-[#e1e4e8] dark:border-[#2a2a2d] hover:bg-white dark:hover:bg-[#232326] hover:border-[#d3d7dd] dark:hover:border-[#36363a]'
                     }`}
                   >
                     <div>
                       <span className={`text-[11px] font-mono font-semibold uppercase ${
-                        isCurrent ? 'text-[#3b6fe0]' : 'text-[#5b616b]'
+                        isCurrent ? 'text-[#3b6fe0] dark:text-[#7aa2f7]' : 'text-[#5b616b] dark:text-[#a1a1a6]'
                       }`}>
                         {s.step}
                       </span>
-                      <h3 className="text-sm font-semibold text-[#121417] mt-0.5">
+                      <h3 className="text-sm font-semibold text-[#121417] dark:text-[#ececec] mt-0.5">
                         {s.title}
                       </h3>
                     </div>
                     <ChevronRight className={`w-4 h-4 transition-transform ${
-                      isCurrent ? 'text-[#3b6fe0] translate-x-0.5' : 'text-[#d3d7dd]'
+                      isCurrent ? 'text-[#3b6fe0] dark:text-[#7aa2f7] translate-x-0.5' : 'text-[#d3d7dd] dark:text-[#36363a]'
                     }`} />
                   </button>
                 );
@@ -110,34 +110,34 @@ export const EngineArchitectureSection: React.FC = () => {
             </div>
 
             {/* Stage Deep Dive Detail Box */}
-            <div className="lg:col-span-7 rounded-md bg-white border border-[#e1e4e8] p-6 sm:p-8 flex flex-col justify-between h-full">
+            <div className="lg:col-span-7 rounded-md bg-white dark:bg-[#111112] border border-[#e1e4e8] dark:border-[#2a2a2d] p-6 sm:p-8 flex flex-col justify-between h-full">
               <div>
-                <div className="flex items-center justify-between pb-4 border-b border-[#e1e4e8] mb-6">
+                <div className="flex items-center justify-between pb-4 border-b border-[#e1e4e8] dark:border-[#2a2a2d] mb-6">
                   <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-[#3b6fe0]" />
-                    <span className="text-xs font-mono font-semibold text-[#3b6fe0] uppercase">
+                    <span className="w-2 h-2 rounded-full bg-[#3b6fe0] dark:bg-[#7aa2f7]" />
+                    <span className="text-xs font-mono font-semibold text-[#3b6fe0] dark:text-[#7aa2f7] uppercase">
                       {active.step} In Depth
                     </span>
                   </div>
-                  <span className="px-2 py-0.5 text-[10px] font-mono font-semibold uppercase bg-emerald-50 text-[#2f9e44] rounded border border-emerald-200/60">
+                  <span className="px-2 py-0.5 text-[10px] font-mono font-semibold uppercase bg-emerald-50 dark:bg-emerald-950/30 text-[#2f9e44] dark:text-[#51cf66] rounded border border-emerald-200/60 dark:border-emerald-900/40">
                     O(1) Verification
                   </span>
                 </div>
 
-                <h3 className="text-xl font-semibold text-[#121417] mb-2">
+                <h3 className="text-xl font-semibold text-[#121417] dark:text-[#ececec] mb-2">
                   {active.title}
                 </h3>
-                <p className="text-sm font-medium text-[#3b6fe0] mb-4">
+                <p className="text-sm font-medium text-[#3b6fe0] dark:text-[#7aa2f7] mb-4">
                   {active.description}
                 </p>
-                <p className="text-xs text-[#5b616b] leading-relaxed text-pretty">
+                <p className="text-xs text-[#5b616b] dark:text-[#a1a1a6] leading-relaxed text-pretty">
                   {active.details}
                 </p>
               </div>
 
-              <div className="mt-8 pt-6 border-t border-[#e1e4e8] flex items-center justify-between text-xs font-mono text-[#5b616b]">
+              <div className="mt-8 pt-6 border-t border-[#e1e4e8] dark:border-[#2a2a2d] flex items-center justify-between text-xs font-mono text-[#5b616b] dark:text-[#a1a1a6]">
                 <span className="flex items-center gap-1.5">
-                  <ShieldCheck className="w-4 h-4 text-[#2f9e44]" />
+                  <ShieldCheck className="w-4 h-4 text-[#2f9e44] dark:text-[#51cf66]" />
                   <span>Dual validation verified</span>
                 </span>
                 <span>Deterministic reproducibility</span>

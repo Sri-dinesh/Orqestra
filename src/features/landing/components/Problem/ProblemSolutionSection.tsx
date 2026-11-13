@@ -41,37 +41,37 @@ export const ProblemSolutionSection: React.FC = () => {
   ];
 
   return (
-    <section className="py-20 lg:py-28 bg-[#f6f7f8] border-b border-[#e1e4e8]" id="solution">
+    <section className="py-20 lg:py-28 bg-[#f6f7f8] dark:bg-[#111112] border-b border-[#e1e4e8] dark:border-[#2a2a2d]" id="solution">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl mb-14">
-          <div className="flex items-center gap-2 text-xs font-mono font-medium text-[#5b616b] uppercase tracking-widest mb-3">
+          <div className="flex items-center gap-2 text-xs font-mono font-medium text-[#5b616b] dark:text-[#a1a1a6] uppercase tracking-widest mb-3">
             <span>The Academic Bottleneck</span>
-            <span aria-hidden="true" className="text-[#d3d7dd]">·</span>
-            <span className="text-[#3b6fe0]">From Manual Chaos to Solver Precision</span>
+            <span aria-hidden="true" className="text-[#d3d7dd] dark:text-[#36363a]">·</span>
+            <span className="text-[#3b6fe0] dark:text-[#7aa2f7]">From Manual Chaos to Solver Precision</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-[#121417] leading-tight text-balance">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-[#121417] dark:text-[#ececec] leading-tight text-balance">
             Academic timetabling is too complex for human memory and spreadsheets.
           </h2>
-          <p className="mt-4 text-base sm:text-lg text-[#5b616b] leading-relaxed max-w-2xl text-pretty">
+          <p className="mt-4 text-base sm:text-lg text-[#5b616b] dark:text-[#a1a1a6] leading-relaxed max-w-2xl text-pretty">
             Universities spend weeks every semester manually reconciling rooms, laboratory blocks, and faculty availability. Orqestra replaces that fragile manual grind with automated constraint solving.
           </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
           {/* Legacy Spreadsheets Card */}
-          <div className="rounded-md bg-white border border-[#e1e4e8] p-6 sm:p-8 flex flex-col justify-between">
+          <div className="rounded-md bg-white dark:bg-[#18181a] border border-[#e1e4e8] dark:border-[#2a2a2d] p-6 sm:p-8 flex flex-col justify-between">
             <div>
-              <div className="flex items-center justify-between pb-5 border-b border-[#e1e4e8] mb-6">
+              <div className="flex items-center justify-between pb-5 border-b border-[#e1e4e8] dark:border-[#2a2a2d] mb-6">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-md bg-red-50 border border-red-200/60 flex items-center justify-center text-[#c92a2a]">
+                  <div className="w-8 h-8 rounded-md bg-red-50 dark:bg-red-950/30 border border-red-200/60 dark:border-red-900/40 flex items-center justify-center text-[#c92a2a] dark:text-[#ff6b6b]">
                     <ShieldAlert className="w-4 h-4" />
                   </div>
                   <div>
-                    <h3 className="text-base font-semibold text-[#121417]">The Spreadsheet Reality</h3>
-                    <p className="text-xs text-[#5b616b]">Fragile, error prone manual coordination</p>
+                    <h3 className="text-base font-semibold text-[#121417] dark:text-[#ececec]">The Spreadsheet Reality</h3>
+                    <p className="text-xs text-[#5b616b] dark:text-[#a1a1a6]">Fragile, error prone manual coordination</p>
                   </div>
                 </div>
-                <span className="px-2 py-0.5 text-[11px] font-mono font-semibold uppercase bg-red-50 text-[#c92a2a] rounded border border-red-200/60">
+                <span className="px-2 py-0.5 text-[11px] font-mono font-semibold uppercase bg-red-50 dark:bg-red-950/30 text-[#c92a2a] dark:text-[#ff6b6b] rounded border border-red-200/60 dark:border-red-900/40">
                   High Risk
                 </span>
               </div>
@@ -79,10 +79,10 @@ export const ProblemSolutionSection: React.FC = () => {
               <div className="space-y-4">
                 {PAIN_POINTS.map((item) => (
                   <div key={item.title} className="flex items-start gap-3">
-                    <AlertCircle className="w-4 h-4 text-[#c92a2a] shrink-0 mt-0.5" />
+                    <AlertCircle className="w-4 h-4 text-[#c92a2a] dark:text-[#ff6b6b] shrink-0 mt-0.5" />
                     <div>
-                      <p className="text-sm font-semibold text-[#121417]">{item.title}</p>
-                      <p className="text-xs text-[#5b616b] mt-0.5 leading-relaxed text-pretty">
+                      <p className="text-sm font-semibold text-[#121417] dark:text-[#ececec]">{item.title}</p>
+                      <p className="text-xs text-[#5b616b] dark:text-[#a1a1a6] mt-0.5 leading-relaxed text-pretty">
                         {item.description}
                       </p>
                     </div>
@@ -91,25 +91,25 @@ export const ProblemSolutionSection: React.FC = () => {
               </div>
             </div>
 
-            <div className="mt-8 pt-5 border-t border-[#e1e4e8] text-xs font-mono text-[#5b616b]">
+            <div className="mt-8 pt-5 border-t border-[#e1e4e8] dark:border-[#2a2a2d] text-xs font-mono text-[#5b616b] dark:text-[#a1a1a6]">
               Outcome: 40+ hours wasted per department with inevitable opening day clashes.
             </div>
           </div>
 
-          {/* Orqestra Solver Card */}
-          <div className="rounded-md bg-white border border-[#3b6fe0]/40 p-6 sm:p-8 flex flex-col justify-between">
+          {/* Orqestra Solver Card (Uniform hairline border) */}
+          <div className="rounded-md bg-white dark:bg-[#18181a] border border-[#e1e4e8] dark:border-[#2a2a2d] p-6 sm:p-8 flex flex-col justify-between">
             <div>
-              <div className="flex items-center justify-between pb-5 border-b border-[#e1e4e8] mb-6">
+              <div className="flex items-center justify-between pb-5 border-b border-[#e1e4e8] dark:border-[#2a2a2d] mb-6">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-md bg-[#e8effc] border border-[#3b6fe0]/30 flex items-center justify-center text-[#3b6fe0]">
+                  <div className="w-8 h-8 rounded-md bg-[#e8effc] dark:bg-[#18233a] border border-[#3b6fe0]/30 dark:border-[#7aa2f7]/30 flex items-center justify-center text-[#3b6fe0] dark:text-[#7aa2f7]">
                     <Cpu className="w-4 h-4" />
                   </div>
                   <div>
-                    <h3 className="text-base font-semibold text-[#121417]">The Orqestra Solver</h3>
-                    <p className="text-xs text-[#5b616b]">Mathematical constraint satisfaction in seconds</p>
+                    <h3 className="text-base font-semibold text-[#121417] dark:text-[#ececec]">The Orqestra Solver</h3>
+                    <p className="text-xs text-[#5b616b] dark:text-[#a1a1a6]">Mathematical constraint satisfaction in seconds</p>
                   </div>
                 </div>
-                <span className="px-2 py-0.5 text-[11px] font-mono font-semibold uppercase bg-[#e8effc] text-[#3b6fe0] rounded border border-[#3b6fe0]/30">
+                <span className="px-2 py-0.5 text-[11px] font-mono font-semibold uppercase bg-[#e8effc] dark:bg-[#18233a] text-[#3b6fe0] dark:text-[#7aa2f7] rounded border border-[#3b6fe0]/30 dark:border-[#7aa2f7]/30">
                   Zero Conflicts
                 </span>
               </div>
@@ -117,10 +117,10 @@ export const ProblemSolutionSection: React.FC = () => {
               <div className="space-y-4">
                 {SOLVED_POINTS.map((item) => (
                   <div key={item.title} className="flex items-start gap-3">
-                    <CheckCircle2 className="w-4 h-4 text-[#2f9e44] shrink-0 mt-0.5" />
+                    <CheckCircle2 className="w-4 h-4 text-[#2f9e44] dark:text-[#51cf66] shrink-0 mt-0.5" />
                     <div>
-                      <p className="text-sm font-semibold text-[#121417]">{item.title}</p>
-                      <p className="text-xs text-[#5b616b] mt-0.5 leading-relaxed text-pretty">
+                      <p className="text-sm font-semibold text-[#121417] dark:text-[#ececec]">{item.title}</p>
+                      <p className="text-xs text-[#5b616b] dark:text-[#a1a1a6] mt-0.5 leading-relaxed text-pretty">
                         {item.description}
                       </p>
                     </div>
@@ -129,7 +129,7 @@ export const ProblemSolutionSection: React.FC = () => {
               </div>
             </div>
 
-            <div className="mt-8 pt-5 border-t border-[#e1e4e8] text-xs font-mono text-[#2f9e44] flex items-center gap-1.5 font-semibold">
+            <div className="mt-8 pt-5 border-t border-[#e1e4e8] dark:border-[#2a2a2d] text-xs font-mono text-[#2f9e44] dark:text-[#51cf66] flex items-center gap-1.5 font-semibold">
               <Sparkles className="w-3.5 h-3.5" />
               Outcome: 100% verified collision free schedule ready for notice board publication in seconds.
             </div>

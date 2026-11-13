@@ -24,7 +24,7 @@ export function LandingPage() {
   };
 
   return (
-    <div className="landing-theme min-h-screen bg-[#f6f7f8] text-[#121417] font-sans selection:bg-[#3b6fe0] selection:text-white flex flex-col">
+    <div className="landing-theme min-h-screen bg-[#f6f7f8] dark:bg-[#111112] text-[#121417] dark:text-[#ececec] font-sans selection:bg-[#3b6fe0] selection:text-white flex flex-col transition-colors duration-150">
       {/* Floating Modern Header */}
       <Navbar onScrollToDemo={scrollToWorkflow} />
 

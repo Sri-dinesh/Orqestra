@@ -40,24 +40,24 @@ export const FaqSection: React.FC = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   return (
-    <section id="faq" className="py-20 lg:py-28 bg-[#ffffff] border-b border-[#e1e4e8]">
+    <section id="faq" className="py-20 lg:py-28 bg-[#ffffff] dark:bg-[#111112] border-b border-[#e1e4e8] dark:border-[#2a2a2d]">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="mb-14 text-center">
-          <div className="inline-flex items-center justify-center gap-2 text-xs font-mono font-medium text-[#5b616b] uppercase tracking-widest mb-3">
+          <div className="inline-flex items-center justify-center gap-2 text-xs font-mono font-medium text-[#5b616b] dark:text-[#a1a1a6] uppercase tracking-widest mb-3">
             <span>Frequently Asked Questions</span>
-            <span aria-hidden="true" className="text-[#d3d7dd]">·</span>
-            <span className="text-[#3b6fe0]">Objection Resolution</span>
+            <span aria-hidden="true" className="text-[#d3d7dd] dark:text-[#36363a]">·</span>
+            <span className="text-[#3b6fe0] dark:text-[#7aa2f7]">Objection Resolution</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-[#121417] leading-tight text-balance">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-[#121417] dark:text-[#ececec] leading-tight text-balance">
             Questions academic leaders ask before adopting Orqestra.
           </h2>
-          <p className="mt-4 text-base text-[#5b616b] leading-relaxed max-w-xl mx-auto text-pretty">
+          <p className="mt-4 text-base text-[#5b616b] dark:text-[#a1a1a6] leading-relaxed max-w-xl mx-auto text-pretty">
             Clear, transparent answers regarding privacy, constraint satisfaction, laboratory handling, and institutional compliance.
           </p>
         </div>
 
-        {/* Accordion List */}
+        {/* Accordion List (Uniform hairline borders) */}
         <div className="space-y-3">
           {FAQS.map((faq, idx) => {
             const isOpen = openIndex === idx;
@@ -65,30 +65,28 @@ export const FaqSection: React.FC = () => {
             return (
               <div
                 key={faq.q}
-                className={`rounded-md border transition-all duration-200 ${
-                  isOpen
-                    ? 'bg-white border-[#3b6fe0]/40 shadow-xs'
-                    : 'bg-white border-[#e1e4e8] hover:border-[#d3d7dd]'
+                className={`rounded-md border transition-all duration-200 bg-white dark:bg-[#18181a] border-[#e1e4e8] dark:border-[#2a2a2d] hover:border-[#d3d7dd] dark:hover:border-[#36363a] ${
+                  isOpen ? 'shadow-xs' : ''
                 }`}
               >
                 <button
                   type="button"
                   onClick={() => setOpenIndex(isOpen ? null : idx)}
                   aria-expanded={isOpen}
-                  className="w-full flex items-center justify-between gap-4 text-left px-5 py-4"
+                  className="w-full flex items-center justify-between gap-4 text-left px-5 py-4 cursor-pointer"
                 >
-                  <span className="text-sm font-semibold text-[#121417]">
+                  <span className={`text-sm font-semibold ${isOpen ? 'text-[#3b6fe0] dark:text-[#7aa2f7]' : 'text-[#121417] dark:text-[#ececec]'}`}>
                     {faq.q}
                   </span>
                   <ChevronDown
-                    className={`w-4 h-4 shrink-0 text-[#5b616b] transition-transform duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-                      isOpen ? 'rotate-180 text-[#3b6fe0]' : ''
+                    className={`w-4 h-4 shrink-0 transition-transform duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                      isOpen ? 'rotate-180 text-[#3b6fe0] dark:text-[#7aa2f7]' : 'text-[#5b616b] dark:text-[#a1a1a6]'
                     }`}
                   />
                 </button>
 
                 {isOpen && (
-                  <div className="px-5 pb-5 pt-1 text-xs text-[#5b616b] leading-relaxed border-t border-[#e1e4e8]/60 text-pretty">
+                  <div className="px-5 pb-5 pt-1 text-xs text-[#5b616b] dark:text-[#a1a1a6] leading-relaxed border-t border-[#e1e4e8]/60 dark:border-[#2a2a2d] text-pretty">
                     {faq.a}
                   </div>
                 )}
