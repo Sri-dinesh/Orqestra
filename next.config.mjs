@@ -24,6 +24,9 @@ const cspDirectives = [
 const nextConfig = {
   reactStrictMode: true,
   transpilePackages: ['lucide-react'],
+  experimental: {
+    agentUpgrade: 'security',
+  },
   async headers() {
     return [
       {
