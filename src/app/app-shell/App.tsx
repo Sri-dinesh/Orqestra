@@ -7,7 +7,7 @@ import {
   useLocation,
   useNavigate,
 } from "react-router-dom";
-import { Calendar, ChevronDown } from "lucide-react";
+import { Calendar, ChevronDown, Search } from "lucide-react";
 import { BrandLogo } from "@/components/ui/BrandLogo";
 import { ErrorBoundary } from "./ErrorBoundary";
 import { LandingPage } from "@/features/landing/LandingPage";
@@ -31,6 +31,7 @@ import { useWorkspaceStore } from "@/state/stores/workspace-store";
 import { Toast } from "@/components/ui/Toast";
 import { DashboardPage } from "@/features/dashboard/DashboardPage";
 import { SemesterSwitcherModal } from "@/components/ui/SemesterSwitcherModal";
+import { CommandPalette } from "@/components/ui/CommandPalette";
 import { getActiveTerm } from "@/storage/term-manager";
 import { AuthPage } from "@/features/auth/AuthPage";
 import { RequireAuth } from "@/features/auth/RequireAuth";
@@ -48,7 +49,20 @@ export default function App() {
   const navigate = useNavigate();
   const collegeName = useWorkspaceStore((s) => s.collegeDetails.name);
   const [semesterModalOpen, setSemesterModalOpen] = useState(false);
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const activeTerm = getActiveTerm();
+
+  // Register global Cmd+K / Ctrl+K keyboard shortcut
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setCommandPaletteOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // Restore SPA redirects from 404.html (for static hosting environments like GitHub Pages)
   useEffect(() => {
@@ -157,6 +171,21 @@ export default function App() {
                   </span>
                   <ChevronDown className="w-3 h-3 text-[#5b616b] shrink-0" />
                 </button>
+
+                {/* Command Palette Trigger */}
+                <button
+                  type="button"
+                  onClick={() => setCommandPaletteOpen(true)}
+                  className="hidden sm:flex items-center gap-2 px-2.5 py-1 text-xs text-[#5b616b] bg-[#f6f7f8] border border-[#e1e4e8] hover:border-[#3b6fe0] hover:bg-[#eef0f2] rounded-md transition-all cursor-pointer shrink-0"
+                  title="Search & Commands (Ctrl+K / ⌘K)"
+                  aria-label="Open Command Palette"
+                >
+                  <Search className="w-3.5 h-3.5 text-[#3b6fe0]" />
+                  <span className="hidden lg:inline text-[11px]">Search...</span>
+                  <kbd className="inline-flex items-center rounded border border-[#e1e4e8] bg-white px-1 py-0.2 text-[9px] font-mono text-[#5b616b]">
+                    ⌘K
+                  </kbd>
+                </button>
               </div>
 
               {/* Navigation */}
@@ -252,6 +281,14 @@ export default function App() {
       <SemesterSwitcherModal
         isOpen={semesterModalOpen}
         onClose={() => setSemesterModalOpen(false)}
+      />
+      <CommandPalette
+        isOpen={commandPaletteOpen}
+        onClose={() => setCommandPaletteOpen(false)}
+        onOpenSemesterModal={() => {
+          setCommandPaletteOpen(false);
+          setSemesterModalOpen(true);
+        }}
       />
       <Toast />
     </div>

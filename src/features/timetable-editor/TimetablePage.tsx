@@ -30,6 +30,11 @@ import { publishTimetableToCloud } from '@/storage/cloud-sync';
 import { getActiveTermId } from '@/storage/term-manager';
 import { flushPersistence } from '@/hooks/usePersistence';
 import { TimetableDetailsModal } from '@/features/timetables/TimetableDetailsModal';
+import {
+  TimetableFilterToolbar,
+  matchTimetableSlot,
+  type SlotTypeFilter,
+} from '@/components/ui/TimetableFilterToolbar';
 
 interface CellVm {
   dayIndex: number;
@@ -98,6 +103,26 @@ export function TimetablePage() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [detailsModalOpen, setDetailsModalOpen] = useState(false);
+
+  // In-grid search and filter state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [typeFilter, setTypeFilter] = useState<SlotTypeFilter>('ALL');
+  const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(null);
+  const [selectedFacultyId, setSelectedFacultyId] = useState<string | null>(null);
+
+  const handleClearFilters = () => {
+    setSearchQuery('');
+    setTypeFilter('ALL');
+    setSelectedSubjectId(null);
+    setSelectedFacultyId(null);
+  };
+
+  const isFilterActive = Boolean(
+    searchQuery.trim() ||
+      typeFilter !== 'ALL' ||
+      selectedSubjectId ||
+      selectedFacultyId,
+  );
 
   const handleDuplicate = async () => {
     if (!timetable) return;
@@ -262,6 +287,45 @@ export function TimetablePage() {
       };
     }),
   );
+
+  const isCellMatchingFilter = (cell: CellVm): boolean => {
+    if (!isFilterActive) return true;
+    if (!cell.entryId) return false;
+    const entry = entryById.get(cell.entryId);
+    return matchTimetableSlot(
+      cell,
+      { searchQuery, typeFilter, selectedSubjectId, selectedFacultyId },
+      entry ? { subjectId: entry.subjectId, facultyId: entry.facultyId } : undefined,
+    );
+  };
+
+  const matchStats = useMemo(() => {
+    let matchingSlots = 0;
+    let matchingHours = 0;
+    let theorySlots = 0;
+    let labSlots = 0;
+
+    if (isFilterActive) {
+      for (const row of cells) {
+        for (const cell of row) {
+          if (!cell.breakName && cell.entryId && isCellMatchingFilter(cell)) {
+            matchingSlots++;
+            matchingHours++;
+            if (cell.type === 'LAB') labSlots++;
+            else theorySlots++;
+          }
+        }
+      }
+    }
+
+    return {
+      matchingSlots,
+      matchingHours,
+      theorySlots,
+      labSlots,
+      isFilterActive,
+    };
+  }, [cells, isFilterActive, searchQuery, typeFilter, selectedSubjectId, selectedFacultyId, entryById]);
 
   const conflictsForSection = (timetable.validationSummary?.conflicts ?? []).filter((c) =>
     activeSectionId ? c.sectionIds.length === 0 || c.sectionIds.includes(activeSectionId) : true,
@@ -876,6 +940,21 @@ export function TimetablePage() {
         )}
       </div>
 
+      <TimetableFilterToolbar
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        typeFilter={typeFilter}
+        onTypeFilterChange={setTypeFilter}
+        selectedSubjectId={selectedSubjectId}
+        onSubjectSelect={setSelectedSubjectId}
+        selectedFacultyId={selectedFacultyId}
+        onFacultySelect={setSelectedFacultyId}
+        subjects={subjects}
+        faculty={faculty}
+        matchStats={matchStats}
+        onClearFilters={handleClearFilters}
+      />
+
       <Card title={`${activeSection?.name ?? 'Section'} — weekly grid`}>
         <div className="overflow-x-auto pb-1">
           <table className="min-w-full border-separate border-spacing-1 text-sm">
@@ -917,6 +996,9 @@ export function TimetablePage() {
                     const slotKey = `${cell.dayIndex}:${cell.periodIndex}`;
                     const preview = slotConflicts.get(slotKey);
                     const isOwnSlot = occupied && cell.entryId === editor.selectedEntryId;
+                    const isMatch = isCellMatchingFilter(cell);
+                    const filterDimming = isFilterActive && !isMatch ? 'opacity-25 hover:opacity-80 transition-opacity' : '';
+                    const filterRing = isFilterActive && isMatch && occupied ? 'ring-2 ring-[#3b6fe0] dark:ring-[#7aa2f7] shadow-sm z-10' : '';
                     const bg = !occupied
                       ? preview
                         ? 'bg-danger-bg/60 hover:bg-danger-bg'
@@ -939,7 +1021,7 @@ export function TimetablePage() {
                     return (
                       <td
                         key={cell.periodIndex}
-                        className={`rounded-lg p-1 align-top transition-shadow duration-150 ${bg} ${isSelected ? 'ring-2 ring-metric-blue' : ''} ${previewRing} ${dragRing}`}
+                        className={`rounded-lg p-1 align-top transition-all duration-150 ${bg} ${isSelected ? 'ring-2 ring-metric-blue' : ''} ${previewRing} ${dragRing} ${filterRing} ${filterDimming}`}
                         title={
                           preview && !isOwnSlot
                             ? `${preview.kind === 'MOVE' ? 'Move' : 'Swap'} blocked: ${preview.reason.replace(/_/g, ' ').toLowerCase()}`
@@ -1003,7 +1085,14 @@ export function TimetablePage() {
                             onDoubleClick={!isFaculty ? () => setEditingEntryId(cell.entryId) : undefined}
                             aria-label={`${cell.subjectCode} ${cell.facultyName} day ${cell.dayIndex + 1} ${gridColumnLabel(layout, cell.periodIndex)}`}
                           >
-                            <span className="block text-xs font-semibold text-ink">{cell.subjectCode}</span>
+                            <div className="flex items-center justify-between gap-1">
+                              <span className="block text-xs font-semibold text-ink">{cell.subjectCode}</span>
+                              {isFilterActive && isMatch && (
+                                <span className="text-[9px] font-bold px-1 rounded bg-[#3b6fe0] text-white dark:bg-[#7aa2f7] dark:text-[#111112]">
+                                  MATCH
+                                </span>
+                              )}
+                            </div>
                             <span className="block truncate text-[10px] text-[#5b616b]">{cell.facultyName}</span>
                             {cell.type === 'LAB' && <span className="block text-[10px] font-medium text-[#5b3fb8]">LAB (2p)</span>}
                           </button>

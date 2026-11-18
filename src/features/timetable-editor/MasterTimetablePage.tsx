@@ -7,15 +7,23 @@ import { TimetableGridHeader } from '@/components/ui/TimetableGridHeader';
 import { ExportPreviewModal } from '@/components/ui/ExportPreviewModal';
 import { DepartmentNav } from '@/components/ui/DepartmentNav';
 import { DepartmentNotFound } from '@/components/ui/DepartmentNotFound';
+import {
+  TimetableFilterToolbar,
+  matchTimetableSlot,
+  type SlotTypeFilter,
+} from '@/components/ui/TimetableFilterToolbar';
 
 interface MasterCell {
   entryId: string;
   sectionId: string;
+  subjectId: string;
+  facultyId: string;
   subjectCode: string;
   subjectName: string;
   facultyName: string;
   durationPeriods: number;
   isStart: boolean;
+  type: 'THEORY' | 'LAB';
 }
 
 /** Section accent colors (same palette family as the faculty view). */
@@ -69,6 +77,26 @@ export function MasterTimetablePage() {
   const [focusSectionId, setFocusSectionId] = useState<string | null>(null);
   const [previewModalOpen, setPreviewModalOpen] = useState(false);
 
+  // In-grid filter state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [typeFilter, setTypeFilter] = useState<SlotTypeFilter>('ALL');
+  const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(null);
+  const [selectedFacultyId, setSelectedFacultyId] = useState<string | null>(null);
+
+  const handleClearFilters = () => {
+    setSearchQuery('');
+    setTypeFilter('ALL');
+    setSelectedSubjectId(null);
+    setSelectedFacultyId(null);
+  };
+
+  const isFilterActive = Boolean(
+    searchQuery.trim() ||
+      typeFilter !== 'ALL' ||
+      selectedSubjectId ||
+      selectedFacultyId,
+  );
+
   /**
    * All sessions indexed by `dayIndex:periodIndex`, each slot holding a chip
    * per section-entry covering that period. Labs occupy every period they
@@ -91,11 +119,14 @@ export function MasterTimetablePage() {
           cell: {
             entryId: e.id,
             sectionId: e.sectionId,
+            subjectId: e.subjectId,
+            facultyId: e.facultyId,
             subjectCode: subject?.code ?? '?',
             subjectName: subject?.name ?? 'Unknown subject',
             facultyName: member?.name ?? 'Unknown faculty',
             durationPeriods: e.durationPeriods,
             isStart: p === e.startPeriod,
+            type: subject?.type ?? 'THEORY',
           },
         });
       }
@@ -111,6 +142,49 @@ export function MasterTimetablePage() {
     }
     return map;
   }, [timetable, sections, subjects, faculty]);
+
+  const isChipMatching = (chip: MasterCell) => {
+    if (!isFilterActive) return true;
+    return matchTimetableSlot(
+      {
+        entryId: chip.entryId,
+        subjectCode: chip.subjectCode,
+        subjectName: chip.subjectName,
+        facultyName: chip.facultyName,
+        type: chip.type,
+      },
+      { searchQuery, typeFilter, selectedSubjectId, selectedFacultyId },
+      { subjectId: chip.subjectId, facultyId: chip.facultyId },
+    );
+  };
+
+  const matchStats = useMemo(() => {
+    let matchingSlots = 0;
+    let matchingHours = 0;
+    let theorySlots = 0;
+    let labSlots = 0;
+
+    if (isFilterActive) {
+      for (const [, chips] of cellBySlot.entries()) {
+        for (const chip of chips) {
+          if (chip.isStart && isChipMatching(chip)) {
+            matchingSlots++;
+            matchingHours += chip.durationPeriods;
+            if (chip.type === 'LAB') labSlots++;
+            else theorySlots++;
+          }
+        }
+      }
+    }
+
+    return {
+      matchingSlots,
+      matchingHours,
+      theorySlots,
+      labSlots,
+      isFilterActive,
+    };
+  }, [cellBySlot, isFilterActive, searchQuery, typeFilter, selectedSubjectId, selectedFacultyId]);
 
   if (!department) {
     return <DepartmentNotFound requestedId={departmentId} targetPage="master-timetable" />;
@@ -227,6 +301,21 @@ export function MasterTimetablePage() {
         </Card>
       </div>
 
+      <TimetableFilterToolbar
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        typeFilter={typeFilter}
+        onTypeFilterChange={setTypeFilter}
+        selectedSubjectId={selectedSubjectId}
+        onSubjectSelect={setSelectedSubjectId}
+        selectedFacultyId={selectedFacultyId}
+        onFacultySelect={setSelectedFacultyId}
+        subjects={subjects}
+        faculty={faculty}
+        matchStats={matchStats}
+        onClearFilters={handleClearFilters}
+      />
+
       <Card
         title={
           focusSectionId
@@ -275,29 +364,41 @@ export function MasterTimetablePage() {
                     return (
                       <td key={periodIndex} className="rounded-lg bg-surface-1 p-0.5 align-top">
                         <div className="flex flex-col gap-0.5">
-                          {chips.map((chip) => (
-                            <div
-                              key={`${chip.sectionId}-${chip.entryId}-${periodIndex}`}
-                              className={`rounded-md px-1.5 py-1 ${sectionTone(chip.sectionId)}`}
-                              title={`${sectionName(chip.sectionId)} · ${chip.subjectName} — ${chip.facultyName}`}
-                            >
-                              {chip.isStart ? (
-                                <>
-                                  <span className="block truncate text-[11px] font-semibold text-ink">
-                                    {chip.subjectCode}
-                                  </span>
-                                  <span className="block truncate text-[10px] text-[#5b616b]">
-                                    {focusSectionId ? chip.facultyName : `${sectionName(chip.sectionId)} · ${chip.facultyName}`}
-                                  </span>
-                                  {chip.durationPeriods >= 2 && (
-                                    <span className="block text-[10px] font-medium text-[#5b3fb8]">LAB (2p)</span>
-                                  )}
-                                </>
-                              ) : (
-                                <span className="block text-[10px] text-[#5b616b]">↳ {chip.subjectCode}</span>
-                              )}
-                            </div>
-                          ))}
+                          {chips.map((chip) => {
+                            const isMatch = isChipMatching(chip);
+                            const chipDimming = isFilterActive && !isMatch ? 'opacity-25 hover:opacity-80 transition-opacity' : '';
+                            const chipHighlight = isFilterActive && isMatch ? 'ring-2 ring-[#3b6fe0] dark:ring-[#7aa2f7] shadow-sm z-10' : '';
+                            return (
+                              <div
+                                key={`${chip.sectionId}-${chip.entryId}-${periodIndex}`}
+                                className={`rounded-md px-1.5 py-1 transition-all duration-150 ${sectionTone(chip.sectionId)} ${chipHighlight} ${chipDimming}`}
+                                title={`${sectionName(chip.sectionId)} · ${chip.subjectName} — ${chip.facultyName}`}
+                              >
+                                {chip.isStart ? (
+                                  <>
+                                    <div className="flex items-center justify-between gap-1">
+                                      <span className="block truncate text-[11px] font-semibold text-ink">
+                                        {chip.subjectCode}
+                                      </span>
+                                      {isFilterActive && isMatch && (
+                                        <span className="text-[9px] font-bold px-1 rounded bg-[#3b6fe0] text-white dark:bg-[#7aa2f7] dark:text-[#111112]">
+                                          MATCH
+                                        </span>
+                                      )}
+                                    </div>
+                                    <span className="block truncate text-[10px] text-[#5b616b]">
+                                      {focusSectionId ? chip.facultyName : `${sectionName(chip.sectionId)} · ${chip.facultyName}`}
+                                    </span>
+                                    {chip.durationPeriods >= 2 && (
+                                      <span className="block text-[10px] font-medium text-[#5b3fb8]">LAB (2p)</span>
+                                    )}
+                                  </>
+                                ) : (
+                                  <span className="block text-[10px] text-[#5b616b]">↳ {chip.subjectCode}</span>
+                                )}
+                              </div>
+                            );
+                          })}
                         </div>
                       </td>
                     );

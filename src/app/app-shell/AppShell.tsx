@@ -1,14 +1,15 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { Calendar, ChevronDown, Menu, X } from 'lucide-react';
+import { Calendar, ChevronDown, Menu, Search, X } from 'lucide-react';
 import { useWorkspaceStore } from '@/state/stores/workspace-store';
 import { getActiveTerm } from '@/storage/term-manager';
 import { AccountMenu } from '@/features/auth/AccountMenu';
 import { SemesterSwitcherModal } from '@/components/ui/SemesterSwitcherModal';
 import { ThemeToggleCompact, ThemeSwitcher } from '@/components/ui/ThemeSwitcher';
+import { CommandPalette } from '@/components/ui/CommandPalette';
 import { Toast } from '@/components/ui/Toast';
 import { ErrorBoundary } from './ErrorBoundary';
 
@@ -16,8 +17,21 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname() ?? '/';
   const collegeName = useWorkspaceStore((s) => s.collegeDetails.name);
   const [semesterModalOpen, setSemesterModalOpen] = useState(false);
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const activeTerm = getActiveTerm();
+
+  // Register global Cmd+K / Ctrl+K keyboard shortcut
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setCommandPaletteOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const isLanding = pathname === '/';
   const isAuthRoute = pathname.startsWith('/auth/');
@@ -85,6 +99,21 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   </span>
                   <ChevronDown className="w-3 h-3 text-[#5b616b] dark:text-[#a1a1a6] shrink-0" />
                 </button>
+
+                {/* Command Palette Trigger */}
+                <button
+                  type="button"
+                  onClick={() => setCommandPaletteOpen(true)}
+                  className="hidden sm:flex items-center gap-2 px-2.5 py-1 text-xs text-[#5b616b] dark:text-[#a1a1a6] bg-[#f6f7f8] dark:bg-[#111112] border border-[#e1e4e8] dark:border-[#2a2a2d] hover:border-[#3b6fe0] dark:hover:border-[#7aa2f7] hover:bg-[#eef0f2] dark:hover:bg-[#232326] rounded-md transition-all cursor-pointer shrink-0"
+                  title="Search & Commands (Ctrl+K / ⌘K)"
+                  aria-label="Open Command Palette"
+                >
+                  <Search className="w-3.5 h-3.5 text-[#3b6fe0] dark:text-[#7aa2f7]" />
+                  <span className="hidden lg:inline text-[11px]">Search...</span>
+                  <kbd className="inline-flex items-center rounded border border-[#e1e4e8] dark:border-[#2a2a2d] bg-white dark:bg-[#18181a] px-1 py-0.2 text-[9px] font-mono text-[#5b616b] dark:text-[#a1a1a6]">
+                    ⌘K
+                  </kbd>
+                </button>
               </div>
 
               {/* Desktop Navigation */}
@@ -111,7 +140,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               </nav>
 
               {/* Mobile Right Controls */}
-              <div className="flex md:hidden items-center gap-2 shrink-0">
+              <div className="flex md:hidden items-center gap-1.5 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setCommandPaletteOpen(true)}
+                  className="p-1.5 rounded-md border border-[#e1e4e8] dark:border-[#2a2a2d] bg-white dark:bg-[#18181a] text-[#5b616b] dark:text-[#a1a1a6] hover:bg-[#eef0f2] dark:hover:bg-[#232326]"
+                  title="Search & Commands (⌘K)"
+                  aria-label="Open Command Palette"
+                >
+                  <Search className="w-4 h-4 text-[#3b6fe0] dark:text-[#7aa2f7]" />
+                </button>
                 <ThemeToggleCompact />
                 <AccountMenu />
                 <button
@@ -183,6 +221,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <SemesterSwitcherModal
         isOpen={semesterModalOpen}
         onClose={() => setSemesterModalOpen(false)}
+      />
+      <CommandPalette
+        isOpen={commandPaletteOpen}
+        onClose={() => setCommandPaletteOpen(false)}
+        onOpenSemesterModal={() => {
+          setCommandPaletteOpen(false);
+          setSemesterModalOpen(true);
+        }}
       />
       <Toast />
     </div>

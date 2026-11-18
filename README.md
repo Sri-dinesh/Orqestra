@@ -10,7 +10,7 @@
 [![TypeScript: Strict](https://img.shields.io/badge/TypeScript-Strict-3178C6?logo=typescript&logoColor=white)](tsconfig.json)
 [![Next.js 16](https://img.shields.io/badge/Next.js-16-black?logo=next.js&logoColor=white)](https://nextjs.org/)
 [![Tailwind CSS v4](https://img.shields.io/badge/Tailwind_CSS-v4-38B2AC?logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
-[![Tests: 186 Passed](https://img.shields.io/badge/Tests-186_Passing-success?logo=vitest&logoColor=white)](tests/)
+[![Tests: 200 Passed](https://img.shields.io/badge/Tests-200_Passing-success?logo=vitest&logoColor=white)](tests/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 <p align="center">
@@ -40,6 +40,8 @@ Orqestra features a **hybrid local-first and cloud architecture**:
 
 ## Key Features
 
+- **Global Command Palette & Quick Switcher (`Ctrl+K` / `⌘K`)**: Instant power-navigation across all departments, section views, operational actions, semester cloning, and color theme toggles.
+- **Interactive Timetable Filter & Highlighting Toolbar**: Multi-entity slot search by faculty name, subject code, or theory/lab type with live in-grid glowing highlights and match statistics (accessible via `/` shortcut).
 - **Backtracking Constraint Solver**: Solves massive institutional allocations (e.g. 9 sections × 6 days × 7 periods = 378 sessions, 100% full-packed) in **~2–5 seconds** with Minimum Remaining Values (MRV) heuristics and seeded determinism.
 - **Preflight Feasibility Engine**: Discovers teacher overloading, room bottlenecks, and capacity shortfalls before the search even begins.
 - **Interactive Timetable Workstation**: Move, swap, and reallocate class periods with sub-millisecond authoritative collision checks.
