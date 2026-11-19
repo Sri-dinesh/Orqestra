@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Copy, Edit3, Plus, Share2, Trash2 } from 'lucide-react';
+import { BarChart3, Copy, Edit3, Keyboard, Plus, Share2, Trash2 } from 'lucide-react';
 import { Badge, Button, Card, EditModal, Field, PageHeader, Select } from '@/components/ui/primitives';
 import { ConflictModal } from '@/components/ui/ConflictModal';
 import { ExportPreviewModal } from '@/components/ui/ExportPreviewModal';
@@ -30,6 +30,8 @@ import { publishTimetableToCloud } from '@/storage/cloud-sync';
 import { getActiveTermId } from '@/storage/term-manager';
 import { flushPersistence } from '@/hooks/usePersistence';
 import { TimetableDetailsModal } from '@/features/timetables/TimetableDetailsModal';
+import { ScheduleInsightsModal } from '@/components/ui/ScheduleInsightsModal';
+import { KeyboardShortcutsModal } from '@/components/ui/KeyboardShortcutsModal';
 import {
   TimetableFilterToolbar,
   matchTimetableSlot,
@@ -103,6 +105,8 @@ export function TimetablePage() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [detailsModalOpen, setDetailsModalOpen] = useState(false);
+  const [insightsModalOpen, setInsightsModalOpen] = useState(false);
+  const [shortcutsModalOpen, setShortcutsModalOpen] = useState(false);
 
   // In-grid search and filter state
   const [searchQuery, setSearchQuery] = useState('');
@@ -450,48 +454,6 @@ export function TimetablePage() {
     }
   };
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      const target = e.target as HTMLElement | null;
-      if (
-        target &&
-        (target.tagName === 'INPUT' ||
-          target.tagName === 'TEXTAREA' ||
-          target.tagName === 'SELECT' ||
-          target.isContentEditable)
-      ) {
-        return;
-      }
-
-      if (e.key === 'Escape') {
-        if (editor.selectedEntryId) {
-          editor.selectEntry(null);
-        }
-        return;
-      }
-
-      const isMac = typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.platform);
-      const modifier = isMac ? e.metaKey : e.ctrlKey;
-
-      if (modifier && !e.altKey) {
-        if (e.key.toLowerCase() === 'z') {
-          e.preventDefault();
-          if (e.shiftKey) {
-            handleRedo();
-          } else {
-            handleUndo();
-          }
-        } else if (e.key.toLowerCase() === 'y') {
-          e.preventDefault();
-          handleRedo();
-        }
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [editor, handleUndo, handleRedo]);
-
   const doExportPdf = () => {
     if (!activeSectionId) return;
     try {
@@ -596,6 +558,76 @@ export function TimetablePage() {
       timestamp: new Date().toISOString(),
     });
   };
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (
+        target &&
+        (target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.tagName === 'SELECT' ||
+          target.isContentEditable)
+      ) {
+        return;
+      }
+
+      if (e.key === 'Escape') {
+        if (editor.selectedEntryId) {
+          editor.selectEntry(null);
+        }
+        return;
+      }
+
+      if (e.key === '?') {
+        e.preventDefault();
+        setShortcutsModalOpen((prev) => !prev);
+        return;
+      }
+
+      const isMac = typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.platform);
+      const modifier = isMac ? e.metaKey : e.ctrlKey;
+
+      if (modifier && !e.altKey) {
+        if (e.key.toLowerCase() === 'z') {
+          e.preventDefault();
+          if (e.shiftKey) {
+            handleRedo();
+          } else {
+            handleUndo();
+          }
+          return;
+        } else if (e.key.toLowerCase() === 'y') {
+          e.preventDefault();
+          handleRedo();
+          return;
+        }
+      }
+
+      // Hotkeys for selected slot
+      if (editor.selectedEntryId && !modifier && !e.altKey) {
+        if (e.key.toLowerCase() === 'e') {
+          e.preventDefault();
+          setEditingEntryId(editor.selectedEntryId);
+          return;
+        }
+        if (e.key.toLowerCase() === 's') {
+          e.preventDefault();
+          setSubstituteTargetEntryId(editor.selectedEntryId);
+          setSubstituteModalOpen(true);
+          return;
+        }
+        if (e.key === 'Delete' || e.key === 'Backspace') {
+          e.preventDefault();
+          clearSelected();
+          return;
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [editor, handleUndo, handleRedo, clearSelected]);
 
   const openAddSession = (dayIndex: number, periodIndex: number) => {
     setAddSlot({ dayIndex, periodIndex });
@@ -795,6 +827,27 @@ export function TimetablePage() {
             <Button variant="secondary" size="sm" onClick={doExportPdf}>PDF</Button>
             <Button variant="secondary" size="sm" onClick={doExportExcel}>Excel</Button>
             <Button variant="secondary" size="sm" onClick={() => window.print()}>Print</Button>
+
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => setInsightsModalOpen(true)}
+              title="View Schedule Analytics & Workload Insights"
+              className="inline-flex items-center gap-1.5"
+            >
+              <BarChart3 className="w-3.5 h-3.5 text-[#3b6fe0] dark:text-[#7aa2f7]" />
+              <span>Insights</span>
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => setShortcutsModalOpen(true)}
+              title="View Keyboard Shortcuts & Gestures (?)"
+              className="inline-flex items-center gap-1.5"
+            >
+              <Keyboard className="w-3.5 h-3.5 text-[#5b616b] dark:text-[#8c9199]" />
+              <span className="hidden sm:inline">Shortcuts</span>
+            </Button>
 
             <Link to={`/departments/${departmentId}/faculty-timetable`}>
               <Button variant="secondary" size="sm">Faculty view</Button>
@@ -1576,6 +1629,21 @@ export function TimetablePage() {
           </ul>
         )}
       </Card>
+      <ScheduleInsightsModal
+        isOpen={insightsModalOpen}
+        onClose={() => setInsightsModalOpen(false)}
+        timetable={timetable}
+        department={department}
+        subjects={subjects}
+        faculty={faculty}
+        sections={sections}
+        activeSectionId={activeSectionId}
+      />
+
+      <KeyboardShortcutsModal
+        isOpen={shortcutsModalOpen}
+        onClose={() => setShortcutsModalOpen(false)}
+      />
     </div>
   );
 }

@@ -3,13 +3,14 @@
 import React, { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { Calendar, ChevronDown, Menu, Search, X } from 'lucide-react';
+import { Calendar, ChevronDown, Keyboard, Menu, Search, X } from 'lucide-react';
 import { useWorkspaceStore } from '@/state/stores/workspace-store';
 import { getActiveTerm } from '@/storage/term-manager';
 import { AccountMenu } from '@/features/auth/AccountMenu';
 import { SemesterSwitcherModal } from '@/components/ui/SemesterSwitcherModal';
 import { ThemeToggleCompact, ThemeSwitcher } from '@/components/ui/ThemeSwitcher';
 import { CommandPalette } from '@/components/ui/CommandPalette';
+import { KeyboardShortcutsModal } from '@/components/ui/KeyboardShortcutsModal';
 import { Toast } from '@/components/ui/Toast';
 import { ErrorBoundary } from './ErrorBoundary';
 
@@ -18,15 +19,31 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const collegeName = useWorkspaceStore((s) => s.collegeDetails.name);
   const [semesterModalOpen, setSemesterModalOpen] = useState(false);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+  const [shortcutsModalOpen, setShortcutsModalOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const activeTerm = getActiveTerm();
 
-  // Register global Cmd+K / Ctrl+K keyboard shortcut
+  // Register global Cmd+K / Ctrl+K and ? keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         setCommandPaletteOpen((prev) => !prev);
+        return;
+      }
+
+      if (e.key === '?' && !e.metaKey && !e.ctrlKey) {
+        const target = e.target as HTMLElement | null;
+        if (
+          !target ||
+          (target.tagName !== 'INPUT' &&
+            target.tagName !== 'TEXTAREA' &&
+            target.tagName !== 'SELECT' &&
+            !target.isContentEditable)
+        ) {
+          e.preventDefault();
+          setShortcutsModalOpen((prev) => !prev);
+        }
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -112,6 +129,20 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   <span className="hidden lg:inline text-[11px]">Search...</span>
                   <kbd className="inline-flex items-center rounded border border-[#e1e4e8] dark:border-[#2a2a2d] bg-white dark:bg-[#18181a] px-1 py-0.2 text-[9px] font-mono text-[#5b616b] dark:text-[#a1a1a6]">
                     ⌘K
+                  </kbd>
+                </button>
+
+                {/* Keyboard Shortcuts Trigger */}
+                <button
+                  type="button"
+                  onClick={() => setShortcutsModalOpen(true)}
+                  className="hidden sm:flex items-center gap-1.5 px-2 py-1 text-xs text-[#5b616b] dark:text-[#a1a1a6] bg-[#f6f7f8] dark:bg-[#111112] border border-[#e1e4e8] dark:border-[#2a2a2d] hover:border-[#3b6fe0] dark:hover:border-[#7aa2f7] hover:bg-[#eef0f2] dark:hover:bg-[#232326] rounded-md transition-all cursor-pointer shrink-0"
+                  title="Keyboard Shortcuts (?)"
+                  aria-label="Open Keyboard Shortcuts Guide"
+                >
+                  <Keyboard className="w-3.5 h-3.5 text-[#5b616b] dark:text-[#a1a1a6]" />
+                  <kbd className="inline-flex items-center rounded border border-[#e1e4e8] dark:border-[#2a2a2d] bg-white dark:bg-[#18181a] px-1 py-0.2 text-[9px] font-mono text-[#5b616b] dark:text-[#a1a1a6]">
+                    ?
                   </kbd>
                 </button>
               </div>
@@ -229,6 +260,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           setCommandPaletteOpen(false);
           setSemesterModalOpen(true);
         }}
+      />
+      <KeyboardShortcutsModal
+        isOpen={shortcutsModalOpen}
+        onClose={() => setShortcutsModalOpen(false)}
       />
       <Toast />
     </div>
