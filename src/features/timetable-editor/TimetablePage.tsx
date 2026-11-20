@@ -1,6 +1,19 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { BarChart3, Copy, Edit3, Keyboard, Plus, Share2, Trash2 } from 'lucide-react';
+import {
+  BarChart3,
+  Clock,
+  Edit3,
+  Keyboard,
+  Plus,
+  Redo2,
+  Share2,
+  Sparkles,
+  Trash2,
+  Undo2,
+  UserCheck,
+  Users,
+} from 'lucide-react';
 import { Badge, Button, Card, EditModal, Field, PageHeader, Select } from '@/components/ui/primitives';
 import { ConflictModal } from '@/components/ui/ConflictModal';
 import { ExportPreviewModal } from '@/components/ui/ExportPreviewModal';
@@ -32,6 +45,9 @@ import { flushPersistence } from '@/hooks/usePersistence';
 import { TimetableDetailsModal } from '@/features/timetables/TimetableDetailsModal';
 import { ScheduleInsightsModal } from '@/components/ui/ScheduleInsightsModal';
 import { KeyboardShortcutsModal } from '@/components/ui/KeyboardShortcutsModal';
+import { TimetableSegmentedTabs } from './components/TimetableSegmentedTabs';
+import { ExportDropdown } from './components/ExportDropdown';
+import { MoreActionsDropdown } from './components/MoreActionsDropdown';
 import {
   TimetableFilterToolbar,
   matchTimetableSlot,
@@ -748,86 +764,101 @@ export function TimetablePage() {
         eyebrow="Weekly schedule"
         title={timetable.name ? `${timetable.name} — ${department.code}` : `Timetable — ${department.code}`}
         actions={
-          <>
+          <div className="flex flex-wrap items-center gap-2.5">
             <Badge tone={isStale ? 'amber' : timetable.validationSummary?.isValid ? 'green' : 'red'}>
               {isStale ? 'STALE' : timetable.status}
             </Badge>
 
-            {isFaculty ? (
+            {isFaculty && (
               <span className="inline-flex items-center gap-1 rounded-md bg-emerald-500/10 px-2 py-1 text-xs font-bold text-emerald-800 border border-emerald-500/20">
                 Faculty Read-Only
               </span>
-            ) : (
-              <>
-                <Button variant="secondary" size="sm" onClick={() => setDetailsModalOpen(true)} className="inline-flex items-center gap-1.5">
-                  <Edit3 className="h-3.5 w-3.5" />
-                  Edit details
-                </Button>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={handleDuplicate}
-                  className="inline-flex items-center gap-1.5"
-                  title="Create a copy of this timetable"
-                >
-                  <Copy className="h-3.5 w-3.5" />
-                  Duplicate
-                </Button>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={handleUndo}
-                  disabled={editor.undoStack.length === 0}
-                  title="Undo (Ctrl+Z)"
-                >
-                  Undo
-                </Button>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={handleRedo}
-                  disabled={editor.redoStack.length === 0}
-                  title="Redo (Ctrl+Y)"
-                >
-                  Redo
-                </Button>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => {
-                    setSubstituteTargetEntryId(editor.selectedEntryId);
-                    setSubstituteModalOpen(true);
+            )}
+
+            <TimetableSegmentedTabs departmentId={departmentId!} activeView="section" />
+          </div>
+        }
+      />
+
+      {isStale && (
+        <div role="status" className="rounded-card bg-warning-bg p-3 text-sm text-warning">
+          The configuration has changed since this timetable was generated. Regenerate to reconcile.
+        </div>
+      )}
+
+      {/* Workstation Control Toolbar */}
+      <div className="rounded-xl border border-[#e1e4e8] dark:border-[#2a2a2d] bg-white dark:bg-[#18181a] p-3 shadow-xs space-y-3">
+        {/* Row 1: Context, Section Picker & Health Metrics */}
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#e1e4e8]/60 dark:border-[#2a2a2d]/60 pb-2.5">
+          <div className="flex flex-wrap items-center gap-3">
+            {deptTimetables.length > 1 && (
+              <label className="flex items-center gap-1.5 text-xs font-medium text-[#5b616b] dark:text-[#8c9199]">
+                <span>Schedule:</span>
+                <Select
+                  value={timetable.id}
+                  onChange={(e) => {
+                    state.setActiveTimetable(e.target.value);
+                    if (editor.selectedEntryId) editor.selectEntry(null);
                   }}
+                  className="w-48 text-xs font-semibold"
+                  aria-label="Select schedule"
                 >
-                  Substitute Assistant
-                </Button>
-                <Button variant="secondary" size="sm" onClick={() => setTimingsModalOpen(true)}>
-                  Adjust Timings
-                </Button>
-              </>
+                  {deptTimetables.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.name || 'Untitled timetable'}
+                    </option>
+                  ))}
+                </Select>
+              </label>
             )}
 
-            <Button variant="secondary" size="sm" onClick={() => setPreviewModalOpen(true)}>
-              Preview & Export
-            </Button>
-
-            {!isFaculty && (
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={handlePublish}
-                disabled={publishing}
-                className="inline-flex items-center gap-1.5"
+            <label className="flex items-center gap-1.5 text-xs font-medium text-[#5b616b] dark:text-[#8c9199]">
+              <Users className="w-3.5 h-3.5 text-[#3b6fe0] dark:text-[#7aa2f7]" />
+              <span className="font-semibold text-[#121417] dark:text-[#ececec]">Section:</span>
+              <Select
+                value={activeSectionId ?? ''}
+                onChange={(e) => {
+                  setSelectedSectionId(e.target.value);
+                  if (editor.selectedEntryId) editor.selectEntry(null);
+                }}
+                className="w-44 text-xs font-bold"
+                aria-label="Select section"
               >
-                <Share2 className="w-3.5 h-3.5 text-[#3b6fe0]" />
-                <span>{publishing ? 'Publishing…' : 'Share Portal Link'}</span>
-              </Button>
-            )}
+                {sections.map((s) => (
+                  <option key={s.id} value={s.id}>{s.name}</option>
+                ))}
+              </Select>
+            </label>
 
-            <Button variant="secondary" size="sm" onClick={doExportPdf}>PDF</Button>
-            <Button variant="secondary" size="sm" onClick={doExportExcel}>Excel</Button>
-            <Button variant="secondary" size="sm" onClick={() => window.print()}>Print</Button>
+            {/* Fill-rate stats */}
+            {(() => {
+              const totalTeachingSlots = department.workingDays.length * department.periodsPerDay;
+              const assignedPeriods = entries.reduce((sum, e) => sum + e.durationPeriods, 0);
+              const fillPct = totalTeachingSlots > 0 ? Math.round((assignedPeriods / totalTeachingSlots) * 100) : 0;
+              const tone =
+                fillPct === 100 ? 'text-emerald-700 bg-emerald-50 dark:bg-emerald-950/40 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800/60' :
+                fillPct >= 75 ? 'text-blue-700 bg-blue-50 dark:bg-blue-950/40 dark:text-blue-400 border-blue-200 dark:border-blue-800/60' :
+                fillPct >= 40 ? 'text-amber-700 bg-amber-50 dark:bg-amber-950/40 dark:text-amber-400 border-amber-200 dark:border-amber-800/60' :
+                'text-red-700 bg-red-50 dark:bg-red-950/40 dark:text-red-400 border-red-200 dark:border-red-800/60';
+              const barColor =
+                fillPct === 100 ? 'bg-emerald-500' :
+                fillPct >= 75 ? 'bg-blue-500' :
+                fillPct >= 40 ? 'bg-amber-400' :
+                'bg-red-400';
+              return (
+                <div className={`flex items-center gap-2.5 rounded-md border px-2.5 py-1 text-xs ${tone}`} title={`${assignedPeriods} of ${totalTeachingSlots} teaching slots filled`}>
+                  <span className="font-semibold tabular-nums">{assignedPeriods}/{totalTeachingSlots} slots</span>
+                  <div className="h-1.5 w-16 overflow-hidden rounded-full bg-current/20">
+                    <div className={`h-full rounded-full transition-all duration-300 ${barColor}`} style={{ width: `${fillPct}%` }} />
+                  </div>
+                  <span className="font-bold tabular-nums">{fillPct}%</span>
+                </div>
+              );
+            })()}
+          </div>
 
+          {/* Quick Insights & Shortcuts triggers on the right of Row 1 */}
+          <div className="flex items-center gap-2">
             <Button
               variant="secondary"
               size="sm"
@@ -847,113 +878,124 @@ export function TimetablePage() {
             >
               <Keyboard className="w-3.5 h-3.5 text-[#5b616b] dark:text-[#8c9199]" />
               <span className="hidden sm:inline">Shortcuts</span>
+              <kbd className="hidden sm:inline-flex items-center px-1 py-0.2 rounded text-[9px] font-mono bg-black/5 dark:bg-white/10 text-[#5b616b] dark:text-[#8c9199]">?</kbd>
             </Button>
+          </div>
+        </div>
 
-            <Link to={`/departments/${departmentId}/faculty-timetable`}>
-              <Button variant="secondary" size="sm">Faculty view</Button>
-            </Link>
-            <Link to={`/departments/${departmentId}/master-timetable`}>
-              <Button variant="secondary" size="sm">Master view</Button>
-            </Link>
+        {/* Row 2: Editing tools, History, Share/Export, and Lifecycle */}
+        <div className="flex flex-wrap items-center justify-between gap-2.5">
+          {/* Left: History & Edit Tools */}
+          <div className="flex flex-wrap items-center gap-2">
+            {!isFaculty && (
+              <>
+                {/* Undo / Redo Group */}
+                <div className="inline-flex items-center rounded-md border border-[#e1e4e8] dark:border-[#2a2a2d] bg-[#f6f7f8] dark:bg-[#111112] p-0.5 shadow-xs">
+                  <button
+                    type="button"
+                    onClick={handleUndo}
+                    disabled={editor.undoStack.length === 0}
+                    className="p-1.5 rounded text-[#121417] dark:text-[#ececec] hover:bg-white dark:hover:bg-[#18181a] disabled:opacity-35 disabled:hover:bg-transparent cursor-pointer transition-colors"
+                    title="Undo (Ctrl+Z)"
+                    aria-label="Undo"
+                  >
+                    <Undo2 className="w-3.5 h-3.5" />
+                  </button>
+                  <span className="h-3.5 w-px bg-[#e1e4e8] dark:bg-[#2a2a2d] mx-0.5" />
+                  <button
+                    type="button"
+                    onClick={handleRedo}
+                    disabled={editor.redoStack.length === 0}
+                    className="p-1.5 rounded text-[#121417] dark:text-[#ececec] hover:bg-white dark:hover:bg-[#18181a] disabled:opacity-35 disabled:hover:bg-transparent cursor-pointer transition-colors"
+                    title="Redo (Ctrl+Y)"
+                    aria-label="Redo"
+                  >
+                    <Redo2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setDetailsModalOpen(true)}
+                  className="inline-flex items-center gap-1.5"
+                  title="Edit timetable metadata"
+                >
+                  <Edit3 className="h-3.5 w-3.5 text-[#5b616b] dark:text-[#8c9199]" />
+                  <span>Edit details</span>
+                </Button>
+
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => {
+                    setSubstituteTargetEntryId(editor.selectedEntryId);
+                    setSubstituteModalOpen(true);
+                  }}
+                  className="inline-flex items-center gap-1.5"
+                  title="Find substitute faculty for selected slot"
+                >
+                  <UserCheck className="h-3.5 w-3.5 text-[#5b616b] dark:text-[#8c9199]" />
+                  <span>Substitute Assistant</span>
+                </Button>
+
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setTimingsModalOpen(true)}
+                  className="inline-flex items-center gap-1.5"
+                  title="Customize bell schedule and break intervals"
+                >
+                  <Clock className="h-3.5 w-3.5 text-[#5b616b] dark:text-[#8c9199]" />
+                  <span>Adjust Timings</span>
+                </Button>
+              </>
+            )}
+          </div>
+
+          {/* Right: Export, Share, Regenerate, and More Actions */}
+          <div className="flex flex-wrap items-center gap-2">
+            {!isFaculty && (
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={handlePublish}
+                disabled={publishing}
+                className="inline-flex items-center gap-1.5"
+                title="Publish timetable to public view portal"
+              >
+                <Share2 className="w-3.5 h-3.5 text-[#3b6fe0] dark:text-[#7aa2f7]" />
+                <span>{publishing ? 'Publishing…' : 'Share Portal'}</span>
+              </Button>
+            )}
+
+            <ExportDropdown
+              onPreview={() => setPreviewModalOpen(true)}
+              onExportPdf={doExportPdf}
+              onExportExcel={doExportExcel}
+              onPrint={() => window.print()}
+            />
 
             {!isFaculty && (
               <>
                 <Link to={`/departments/${departmentId}/generate`}>
-                  <Button size="sm">Regenerate</Button>
+                  <Button size="sm" className="inline-flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>Regenerate</span>
+                  </Button>
                 </Link>
-                <Button
-                  variant="danger"
-                  size="sm"
-                  onClick={() => setShowDeleteConfirm(true)}
-                  className="inline-flex items-center gap-1.5"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                  <span>Delete timetable</span>
-                </Button>
+
+                <MoreActionsDropdown
+                  onDuplicate={handleDuplicate}
+                  onDelete={() => setShowDeleteConfirm(true)}
+                />
               </>
             )}
-          </>
-        }
-      />
-
-      {isStale && (
-        <div role="status" className="rounded-card bg-warning-bg p-3 text-sm text-warning">
-          The configuration has changed since this timetable was generated. Regenerate to reconcile.
+          </div>
         </div>
-      )}
+      </div>
 
       <div className="flex flex-col gap-3">
-        <div className="flex flex-wrap items-center gap-3">
-          {deptTimetables.length > 1 && (
-            <label className="flex items-center gap-2 text-sm font-medium text-ink">
-              Schedule:
-              <Select
-                value={timetable.id}
-                onChange={(e) => {
-                  state.setActiveTimetable(e.target.value);
-                  if (editor.selectedEntryId) editor.selectEntry(null);
-                }}
-                className="w-52"
-                aria-label="Select schedule"
-              >
-                {deptTimetables.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.name || 'Untitled timetable'}
-                  </option>
-                ))}
-              </Select>
-            </label>
-          )}
-
-          <label className="flex items-center gap-2 text-sm font-medium text-ink">
-            Section:
-            <Select
-              value={activeSectionId ?? ''}
-              onChange={(e) => {
-                setSelectedSectionId(e.target.value);
-                // Drop any selection: previews/swaps target the previously
-                // displayed section's entries, which would mislead here.
-                if (editor.selectedEntryId) editor.selectEntry(null);
-              }}
-              className="w-48"
-              aria-label="Select section"
-            >
-              {sections.map((s) => (
-                <option key={s.id} value={s.id}>{s.name}</option>
-              ))}
-            </Select>
-          </label>
-          {(() => {
-            // Fill-rate stats: teaching slots vs assigned sessions for active section
-            const totalTeachingSlots = department.workingDays.length * department.periodsPerDay;
-            const assignedPeriods = entries.reduce((sum, e) => sum + e.durationPeriods, 0);
-            const fillPct = totalTeachingSlots > 0 ? Math.round((assignedPeriods / totalTeachingSlots) * 100) : 0;
-            const tone =
-              fillPct === 100 ? 'text-emerald-700 bg-emerald-50 border-emerald-200' :
-              fillPct >= 75 ? 'text-blue-700 bg-blue-50 border-blue-200' :
-              fillPct >= 40 ? 'text-amber-700 bg-amber-50 border-amber-200' :
-              'text-red-700 bg-red-50 border-red-200';
-            const barColor =
-              fillPct === 100 ? 'bg-emerald-500' :
-              fillPct >= 75 ? 'bg-blue-500' :
-              fillPct >= 40 ? 'bg-amber-400' :
-              'bg-red-400';
-            return (
-              <div className={`flex items-center gap-3 rounded-md border px-3 py-1.5 ${tone}`} title={`${assignedPeriods} of ${totalTeachingSlots} teaching slots filled`}>
-                <div className="flex items-center gap-1.5">
-                  <span className="text-xs font-semibold tabular-nums">{assignedPeriods}/{totalTeachingSlots}</span>
-                  <span className="text-xs opacity-70">slots filled</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <div className="h-1.5 w-20 overflow-hidden rounded-full bg-current/20">
-                    <div className={`h-full rounded-full transition-all duration-300 ${barColor}`} style={{ width: `${fillPct}%` }} />
-                  </div>
-                  <span className="text-xs font-bold tabular-nums">{fillPct}%</span>
-                </div>
-              </div>
-            );
-          })()}
-        </div>
         {editor.selectedEntryId && (
           <div className="flex flex-wrap items-center gap-2 rounded-md bg-info-bg px-3 py-2">
             <span className="text-xs font-medium text-info">

@@ -249,7 +249,7 @@ export function AuthPage({ pathname }: AuthPageProps) {
           </div>
 
           {/* Center Form Container */}
-          <div className="my-auto mx-auto w-full max-w-md flex flex-col justify-center py-1 sm:py-2 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+          <div className="my-auto mx-auto w-full max-w-md flex flex-col justify-center px-2 sm:px-3 py-1 sm:py-2 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
             {/* Segmented Mode Switcher (Sign In vs Sign Up) */}
             {(isSignIn || isSignUp) && (
               <div className="mb-2.5 sm:mb-3 p-1 bg-[#eef0f2] rounded-md flex items-center shrink-0">

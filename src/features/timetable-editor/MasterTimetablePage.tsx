@@ -7,6 +7,8 @@ import { TimetableGridHeader } from '@/components/ui/TimetableGridHeader';
 import { ExportPreviewModal } from '@/components/ui/ExportPreviewModal';
 import { DepartmentNav } from '@/components/ui/DepartmentNav';
 import { DepartmentNotFound } from '@/components/ui/DepartmentNotFound';
+import { TimetableSegmentedTabs } from './components/TimetableSegmentedTabs';
+import { ExportDropdown } from './components/ExportDropdown';
 import {
   TimetableFilterToolbar,
   matchTimetableSlot,
@@ -238,20 +240,37 @@ export function MasterTimetablePage() {
         eyebrow="Institution view"
         title={`Master timetable — ${department.code}`}
         actions={
-          <>
+          <div className="flex flex-wrap items-center gap-2.5">
             <Badge tone={timetable.validationSummary?.isValid ? 'green' : 'red'}>
               {sections.length} sections · {totalSessions} periods
             </Badge>
-            <Button variant="secondary" size="sm" onClick={() => setPreviewModalOpen(true)}>
-              Preview & Export
-            </Button>
-            <Button variant="secondary" size="sm" onClick={() => window.print()}>Print</Button>
-            <Link to={`/departments/${departmentId}/timetable`}>
-              <Button variant="secondary" size="sm">Section view →</Button>
-            </Link>
-          </>
+            <TimetableSegmentedTabs departmentId={departmentId!} activeView="master" />
+          </div>
         }
       />
+
+      {/* Workstation Control Toolbar */}
+      <div className="rounded-xl border border-[#e1e4e8] dark:border-[#2a2a2d] bg-white dark:bg-[#18181a] p-3 shadow-xs flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-2.5 text-xs text-[#5b616b] dark:text-[#8c9199]">
+          <span className="font-semibold text-[#121417] dark:text-[#ececec]">Master Grid Scope:</span>
+          <span className="px-2 py-0.5 rounded-md bg-[#f6f7f8] dark:bg-[#111112] border border-[#e1e4e8] dark:border-[#2a2a2d]">
+            {sections.length} Sections
+          </span>
+          <span className="px-2 py-0.5 rounded-md bg-[#f6f7f8] dark:bg-[#111112] border border-[#e1e4e8] dark:border-[#2a2a2d]">
+            {activeFacultyIds.size} Active Faculty
+          </span>
+          <span className="px-2 py-0.5 rounded-md bg-[#f6f7f8] dark:bg-[#111112] border border-[#e1e4e8] dark:border-[#2a2a2d]">
+            Busiest: {department.workingDays[busiestDay] ?? 'N/A'}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <ExportDropdown
+            onPreview={() => setPreviewModalOpen(true)}
+            onPrint={() => window.print()}
+          />
+        </div>
+      </div>
 
       {/* Section filter + per-day load */}
       <div className="flex flex-wrap items-center gap-2">

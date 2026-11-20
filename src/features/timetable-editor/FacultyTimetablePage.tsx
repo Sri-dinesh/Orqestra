@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { Calendar, CheckCircle2, Clock, Users } from 'lucide-react';
+import { Calendar, CheckCircle2, Clock, UserCheck, Users } from 'lucide-react';
 import { Badge, Button, Card, PageHeader, Select } from '@/components/ui/primitives';
 import { selectTimetableForDepartment, useWorkspaceStore } from '@/state/stores/workspace-store';
 import { buildGridLayout, getDepartmentBreaks, gridColumnLabel } from '@/domain/scheduler/grid-layout';
@@ -10,6 +10,8 @@ import { SubstituteModal } from '@/components/ui/SubstituteModal';
 import { DepartmentNav } from '@/components/ui/DepartmentNav';
 import { DepartmentNotFound } from '@/components/ui/DepartmentNotFound';
 import { computeCommonFreeSlots } from '@/application/common-free-slot-service';
+import { TimetableSegmentedTabs } from './components/TimetableSegmentedTabs';
+import { ExportDropdown } from './components/ExportDropdown';
 
 interface FacultyCell {
   sectionId: string;
@@ -166,7 +168,7 @@ export function FacultyTimetablePage() {
         eyebrow="Faculty workload"
         title={`Faculty timetable — ${department.code}`}
         actions={
-          <>
+          <div className="flex flex-wrap items-center gap-2.5">
             {viewMode === 'INDIVIDUAL' ? (
               <Badge tone={weeklyLoad > 0 ? 'blue' : 'slate'}>
                 {weeklyLoad} periods / week
@@ -176,68 +178,79 @@ export function FacultyTimetablePage() {
                 {commonFreeSummary?.totalCommonFreeSlots ?? 0} mutual free periods
               </Badge>
             )}
-            <Button variant="secondary" size="sm" onClick={() => setPreviewModalOpen(true)}>
-              Preview & Export
-            </Button>
-            <Button variant="secondary" size="sm" onClick={() => setSubstituteModalOpen(true)}>
-              Substitute Assistant
-            </Button>
-            <Button variant="secondary" size="sm" onClick={() => window.print()}>Print</Button>
-            <Link to={`/departments/${departmentId}/master-timetable`}>
-              <Button variant="secondary" size="sm">Master view</Button>
-            </Link>
-            <Link to={`/departments/${departmentId}/timetable`}>
-              <Button variant="secondary" size="sm">Section view →</Button>
-            </Link>
-          </>
+            <TimetableSegmentedTabs departmentId={departmentId!} activeView="faculty" />
+          </div>
         }
       />
 
-      {/* Mode Switcher */}
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border border-[#e1e4e8] dark:border-[#2a2a2d] bg-[#ffffff] dark:bg-[#18181a] p-2">
-        <div className="flex items-center gap-1 rounded-md bg-[#eef0f2] dark:bg-[#111112] border border-transparent dark:border-[#2a2a2d] p-1">
-          <button
-            type="button"
-            onClick={() => setViewMode('INDIVIDUAL')}
-            className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
-              viewMode === 'INDIVIDUAL'
-                ? 'bg-white dark:bg-[#18181a] text-ink shadow-sm'
-                : 'text-[#5b616b] dark:text-[#a1a1a6] hover:text-ink'
-            }`}
-          >
-            Individual Schedule
-          </button>
-          <button
-            type="button"
-            onClick={() => setViewMode('MEETING_FINDER')}
-            className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
-              viewMode === 'MEETING_FINDER'
-                ? 'bg-white dark:bg-[#18181a] text-metric-blue shadow-sm'
-                : 'text-[#5b616b] dark:text-[#a1a1a6] hover:text-ink'
-            }`}
-          >
-            <Users className="h-3.5 w-3.5" />
-            <span>Common Free Periods (Meeting Finder)</span>
-          </button>
+      {/* Workstation Control Toolbar */}
+      <div className="rounded-xl border border-[#e1e4e8] dark:border-[#2a2a2d] bg-white dark:bg-[#18181a] p-3 shadow-xs flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Mode Switcher */}
+          <div className="inline-flex items-center gap-1 rounded-md bg-[#eef0f2] dark:bg-[#111112] border border-transparent dark:border-[#2a2a2d] p-1">
+            <button
+              type="button"
+              onClick={() => setViewMode('INDIVIDUAL')}
+              className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
+                viewMode === 'INDIVIDUAL'
+                  ? 'bg-white dark:bg-[#18181a] text-ink shadow-xs'
+                  : 'text-[#5b616b] dark:text-[#a1a1a6] hover:text-ink'
+              }`}
+            >
+              Individual Schedule
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode('MEETING_FINDER')}
+              className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
+                viewMode === 'MEETING_FINDER'
+                  ? 'bg-white dark:bg-[#18181a] text-[#3b6fe0] dark:text-[#7aa2f7] shadow-xs'
+                  : 'text-[#5b616b] dark:text-[#a1a1a6] hover:text-ink'
+              }`}
+            >
+              <Users className="h-3.5 w-3.5" />
+              <span>Common Free Periods (Meeting Finder)</span>
+            </button>
+          </div>
+
+          {viewMode === 'INDIVIDUAL' && (
+            <label className="flex items-center gap-1.5 text-xs font-medium text-[#5b616b] dark:text-[#8c9199]">
+              <UserCheck className="w-3.5 h-3.5 text-[#3b6fe0] dark:text-[#7aa2f7]" />
+              <span className="font-semibold text-[#121417] dark:text-[#ececec]">Faculty:</span>
+              <Select
+                value={activeFacultyId ?? ''}
+                onChange={(e) => setSelectedFacultyId(e.target.value)}
+                className="w-56 text-xs font-bold"
+                aria-label="Select faculty member"
+              >
+                {faculty.map((f) => (
+                  <option key={f.id} value={f.id}>
+                    {f.name}{f.active ? '' : ' (inactive)'}
+                  </option>
+                ))}
+              </Select>
+            </label>
+          )}
         </div>
 
-        {viewMode === 'INDIVIDUAL' && (
-          <label className="flex items-center gap-2 text-xs font-medium text-ink">
-            Faculty:
-            <Select
-              value={activeFacultyId ?? ''}
-              onChange={(e) => setSelectedFacultyId(e.target.value)}
-              className="w-56 text-xs"
-              aria-label="Select faculty member"
-            >
-              {faculty.map((f) => (
-                <option key={f.id} value={f.id}>
-                  {f.name}{f.active ? '' : ' (inactive)'}
-                </option>
-              ))}
-            </Select>
-          </label>
-        )}
+        {/* Action Group */}
+        <div className="flex items-center gap-2">
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => setSubstituteModalOpen(true)}
+            className="inline-flex items-center gap-1.5"
+            title="Find qualified substitute teacher"
+          >
+            <UserCheck className="w-3.5 h-3.5 text-[#5b616b] dark:text-[#8c9199]" />
+            <span>Substitute Assistant</span>
+          </Button>
+
+          <ExportDropdown
+            onPreview={() => setPreviewModalOpen(true)}
+            onPrint={() => window.print()}
+          />
+        </div>
       </div>
 
       {viewMode === 'INDIVIDUAL' && (

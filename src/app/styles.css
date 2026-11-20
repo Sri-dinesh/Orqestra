@@ -366,6 +366,24 @@ html.dark :focus-visible,
   outline-offset: 2px !important;
 }
 
+/* Form inputs: keep focus outline tightly aligned and prevent clipping */
+input:not([type='checkbox']):not([type='radio']):focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid #3b6fe0 !important;
+  outline-offset: 1px !important;
+}
+
+html.dark input:not([type='checkbox']):not([type='radio']):focus-visible,
+.dark input:not([type='checkbox']):not([type='radio']):focus-visible,
+html.dark textarea:focus-visible,
+.dark textarea:focus-visible,
+html.dark select:focus-visible,
+.dark select:focus-visible {
+  outline: 2px solid #7aa2f7 !important;
+  outline-offset: 1px !important;
+}
+
 ::selection {
   background-color: #e8effc !important;
   color: #3b6fe0 !important;
