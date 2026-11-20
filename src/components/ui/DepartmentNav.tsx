@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useEffect } from 'react';
 import { NavLink, Link, useParams } from 'react-router-dom';
 import {
@@ -12,9 +14,13 @@ import {
   LayoutDashboard,
   ArrowLeft,
   Lock,
-  Check,
+  CheckCircle2,
 } from 'lucide-react';
-import { selectTimetableForDepartment, selectTimetablesForDepartment, useWorkspaceStore } from '@/state/stores/workspace-store';
+import {
+  selectTimetableForDepartment,
+  selectTimetablesForDepartment,
+  useWorkspaceStore,
+} from '@/state/stores/workspace-store';
 
 export const DepartmentNav: React.FC = () => {
   const { departmentId } = useParams();
@@ -46,16 +52,16 @@ export const DepartmentNav: React.FC = () => {
   const timetableCount = selectTimetablesForDepartment(state, departmentId).length;
 
   const setupSteps = [
-      {
-        to: `/departments/${departmentId}`,
-        label: 'Overview',
-        stepNum: 0,
-        icon: LayoutDashboard,
-        done: timetableCount > 0,
-        count: timetableCount > 0 ? timetableCount : undefined,
-      },
-      {
-        to: `/departments/${departmentId}/configuration`,
+    {
+      to: `/departments/${departmentId}`,
+      label: 'Overview',
+      stepNum: 0,
+      icon: LayoutDashboard,
+      done: timetableCount > 0,
+      count: timetableCount > 0 ? timetableCount : undefined,
+    },
+    {
+      to: `/departments/${departmentId}/configuration`,
       label: 'Configuration',
       stepNum: 1,
       icon: Settings,
@@ -111,19 +117,61 @@ export const DepartmentNav: React.FC = () => {
   ];
 
   return (
-    <div className="mb-6 rounded-lg bg-white border border-[#e1e4e8] shadow-none p-1.5 flex flex-wrap items-center justify-between gap-2">
-      <div className="flex items-center gap-1 overflow-x-auto py-0.5 px-1 scrollbar-none">
-        <Link
-          to="/dashboard"
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#5b616b] hover:text-[#121417] hover:bg-[#eef0f2] rounded-md transition-all mr-1"
-          title="Back to Dashboard"
-        >
-          <ArrowLeft className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">Dashboard</span>
-        </Link>
-        <span className="h-4 w-px bg-[#e1e4e8] mr-1 hidden sm:inline" />
+    <div className="mb-6 space-y-2.5">
+      {/* Tier 1: Department Breadcrumb, Identity & Setup Status */}
+      <div className="flex flex-wrap items-center justify-between gap-3 px-1">
+        <div className="flex items-center gap-2 min-w-0">
+          <Link
+            to="/dashboard"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#5b616b] dark:text-[#8c9199] hover:text-[#121417] dark:hover:text-[#ececec] transition-colors shrink-0"
+            title="Return to Dashboard"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
+            <span>Dashboard</span>
+          </Link>
 
-        {/* Step-by-Step Setup Tabs */}
+          <span className="text-[#d1d5db] dark:text-[#3b3b40]">/</span>
+
+          <span className="font-mono font-bold text-xs px-2 py-0.5 rounded-md bg-[#eef0f2] dark:bg-[#1f1f23] text-[#121417] dark:text-[#ececec] border border-[#e1e4e8] dark:border-[#2a2a2d] shrink-0">
+            {department.code}
+          </span>
+
+          <span className="text-xs font-semibold text-[#121417] dark:text-[#ececec] truncate">
+            {department.name}
+          </span>
+        </div>
+
+        {/* Right side status indicators */}
+        <div className="flex items-center gap-2 shrink-0">
+          <span
+            className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-semibold border ${
+              coreSetupDone
+                ? 'bg-emerald-50 dark:bg-emerald-950/40 text-[#2f9e44] dark:text-emerald-400 border-emerald-200/70 dark:border-emerald-800/60'
+                : 'bg-amber-50 dark:bg-amber-950/40 text-[#b7791f] dark:text-amber-400 border-amber-200/70 dark:border-amber-800/60'
+            }`}
+          >
+            {coreSetupDone ? (
+              <>
+                <CheckCircle2 className="w-3 h-3 text-[#2f9e44] dark:text-emerald-400" />
+                <span>Setup Complete</span>
+              </>
+            ) : (
+              <span>{completedStepsCount}/4 Configured</span>
+            )}
+          </span>
+
+          {isReadOnly && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 dark:bg-amber-950/40 px-2.5 py-0.5 text-[11px] font-semibold text-[#b7791f] dark:text-amber-400 border border-amber-200/70 dark:border-amber-800/60">
+              <Lock className="w-3 h-3" />
+              <span>Read-Only View</span>
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Tier 2: Dedicated Horizontal Navigation Bar */}
+      <div className="rounded-xl bg-white dark:bg-[#18181a] border border-[#e1e4e8] dark:border-[#2a2a2d] p-1.5 shadow-xs flex items-center gap-1 overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        {/* Step-by-Step Configuration Tabs */}
         {setupSteps.map((tab) => {
           const Icon = tab.icon;
           return (
@@ -132,52 +180,51 @@ export const DepartmentNav: React.FC = () => {
               to={tab.to}
               end={tab.stepNum === 0}
               className={({ isActive }) =>
-                `flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-all whitespace-nowrap ${
+                `inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all whitespace-nowrap shrink-0 ${
                   isActive
-                    ? 'bg-[#e8effc] text-[#3b6fe0] shadow-none'
-                    : 'text-[#5b616b] hover:text-[#121417] hover:bg-[#eef0f2]'
+                    ? 'bg-[#e8effc] dark:bg-[#18233a] text-[#3b6fe0] dark:text-[#7aa2f7] border border-blue-200/70 dark:border-blue-900/60 shadow-2xs'
+                    : 'text-[#5b616b] dark:text-[#8c9199] hover:text-[#121417] dark:hover:text-[#ececec] hover:bg-[#f6f7f8] dark:hover:bg-[#232326]'
                 }`
               }
             >
-              <div className="flex items-center justify-center">
-                {tab.done ? (
-                  <Check className="w-3.5 h-3.5 text-[#2f9e44] shrink-0" />
-                ) : (
-                  <Icon className="w-3.5 h-3.5 opacity-70" />
-                )}
-              </div>
+              <Icon className="w-3.5 h-3.5 opacity-80" />
               <span>{tab.label}</span>
               {tab.count !== undefined && (
-                <span className="ml-0.5 px-1.5 py-0.2 rounded-sm text-[10px] font-mono font-medium bg-[#eef0f2] text-[#5b616b]">
+                <span className="ml-0.5 px-1.5 py-0.2 rounded text-[10px] font-mono font-medium bg-black/5 dark:bg-white/10 text-[#5b616b] dark:text-[#8c9199]">
                   {tab.count}
                 </span>
+              )}
+              {tab.done && tab.stepNum > 0 && (
+                <span className="w-1.5 h-1.5 rounded-full bg-[#2f9e44] dark:bg-emerald-400 ml-0.5" />
               )}
             </NavLink>
           );
         })}
 
+        {/* Separator before Actions */}
+        {!isReadOnly && <span className="h-4 w-px bg-[#e1e4e8] dark:bg-[#2a2a2d] mx-1 shrink-0" />}
+
         {/* Action: Generate */}
         {!isReadOnly && (
-          <>
-            <span className="h-4 w-px bg-[#e1e4e8] mx-0.5" />
-            <NavLink
-              to={`/departments/${departmentId}/generate`}
-              className={({ isActive }) =>
-                `flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium rounded-md transition-all whitespace-nowrap ${
-                  isActive
-                    ? 'bg-[#3b6fe0] text-white shadow-none'
-                    : 'text-[#3b6fe0] bg-[#e8effc] hover:bg-[#dbe7fa]'
-                }`
-              }
-            >
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Generate</span>
-            </NavLink>
-          </>
+          <NavLink
+            to={`/departments/${departmentId}/generate`}
+            className={({ isActive }) =>
+              `inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all whitespace-nowrap shrink-0 ${
+                isActive
+                  ? 'bg-[#3b6fe0] text-white shadow-xs'
+                  : 'text-[#3b6fe0] dark:text-[#7aa2f7] bg-[#e8effc] dark:bg-[#18233a] hover:bg-[#dbe7fa] dark:hover:bg-[#212f4d] border border-blue-200/60 dark:border-blue-900/60'
+              }`
+            }
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>Generate</span>
+          </NavLink>
         )}
 
-        {/* Output Views */}
-        <span className="h-4 w-px bg-[#e1e4e8] mx-0.5" />
+        {/* Separator before Output Views */}
+        <span className="h-4 w-px bg-[#e1e4e8] dark:bg-[#2a2a2d] mx-1 shrink-0" />
+
+        {/* Output Timetable Views */}
         {viewTabs.map((tab) => {
           const Icon = tab.icon;
           return (
@@ -185,46 +232,23 @@ export const DepartmentNav: React.FC = () => {
               key={tab.to}
               to={tab.to}
               className={({ isActive }) =>
-                `flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-all whitespace-nowrap ${
+                `inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all whitespace-nowrap shrink-0 ${
                   isActive
-                    ? 'bg-[#e8effc] text-[#3b6fe0] shadow-none'
-                    : 'text-[#5b616b] hover:text-[#121417] hover:bg-[#eef0f2]'
+                    ? 'bg-[#e8effc] dark:bg-[#18233a] text-[#3b6fe0] dark:text-[#7aa2f7] border border-blue-200/70 dark:border-blue-900/60 shadow-2xs'
+                    : 'text-[#5b616b] dark:text-[#8c9199] hover:text-[#121417] dark:hover:text-[#ececec] hover:bg-[#f6f7f8] dark:hover:bg-[#232326]'
                 }`
               }
             >
               <Icon className="w-3.5 h-3.5" />
               <span>{tab.label}</span>
               {tab.badge && (
-                <span className="ml-0.5 px-1.5 py-0.2 rounded-sm text-[10px] font-mono font-semibold bg-emerald-50 text-[#2f9e44] border border-emerald-200/60">
+                <span className="ml-0.5 px-1.5 py-0.2 rounded text-[10px] font-mono font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-[#2f9e44] dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-800/60">
                   {tab.badge}
                 </span>
               )}
             </NavLink>
           );
         })}
-      </div>
-
-      <div className="hidden lg:flex items-center gap-2 pr-3 text-xs text-[#5b616b]">
-        {/* Progress indicator */}
-        <span
-          className={`inline-flex items-center gap-1 rounded-sm px-2 py-0.5 text-[10px] font-medium ${
-            coreSetupDone
-              ? 'bg-emerald-50 text-[#2f9e44] border border-emerald-200/60'
-              : 'bg-amber-50 text-[#b7791f] border border-amber-200/60'
-          }`}
-        >
-          {coreSetupDone ? 'Setup Complete' : `${completedStepsCount}/4 Steps`}
-        </span>
-
-        {isReadOnly && (
-          <span className="inline-flex items-center gap-1 rounded-sm bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-[#b7791f] border border-amber-200/60">
-            <Lock className="w-2.5 h-2.5" />
-            <span>Read-Only View</span>
-          </span>
-        )}
-        <span className="font-mono font-semibold text-[#121417]">{department.code}</span>
-        <span>•</span>
-        <span className="truncate max-w-[180px]">{department.name}</span>
       </div>
     </div>
   );

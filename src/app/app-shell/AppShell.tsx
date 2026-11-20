@@ -7,6 +7,7 @@ import { Calendar, ChevronDown, Keyboard, Menu, Search, X } from 'lucide-react';
 import { useWorkspaceStore } from '@/state/stores/workspace-store';
 import { getActiveTerm } from '@/storage/term-manager';
 import { AccountMenu } from '@/features/auth/AccountMenu';
+import { BrandLogo } from '@/components/ui/BrandLogo';
 import { SemesterSwitcherModal } from '@/components/ui/SemesterSwitcherModal';
 import { ThemeToggleCompact, ThemeSwitcher } from '@/components/ui/ThemeSwitcher';
 import { CommandPalette } from '@/components/ui/CommandPalette';
@@ -82,14 +83,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 {/* Logo Brand */}
                 <Link
                   href="/dashboard"
-                  className="group flex items-center gap-2 text-base font-bold tracking-tight text-[#121417] dark:text-[#ececec] hover:opacity-90 transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#3b6fe0] dark:focus-visible:outline-[#7aa2f7] shrink-0"
+                  className="group flex items-center gap-2.5 text-base font-bold tracking-tight text-[#121417] dark:text-[#ececec] hover:opacity-90 transition-opacity focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#3b6fe0] dark:focus-visible:outline-[#7aa2f7] shrink-0"
                 >
-                  <span
-                    className="flex h-7 w-7 items-center justify-center rounded-md bg-[#121417] dark:bg-[#ececec] text-white dark:text-[#111112] text-[11px] font-bold shadow-xs transition-transform group-hover:scale-105"
-                    aria-hidden="true"
-                  >
-                    O
-                  </span>
+                  <BrandLogo
+                    size={28}
+                    className="w-7 h-7 rounded-md transition-transform group-hover:scale-105"
+                  />
                   <span className="font-['Geist',ui-sans-serif,sans-serif] text-lg font-bold tracking-tight text-[#121417] dark:text-[#ececec]">
                     Orqestra
                   </span>
